@@ -5,8 +5,8 @@ using Spectre.Console;
 
 namespace NemesisEuchre.Console;
 
-internal sealed class NemesisEuchreApplication(
-    ILogger<NemesisEuchreApplication> logger,
+public sealed class EuchreGameServiceHost(
+    ILogger<EuchreGameServiceHost> logger,
     IHostApplicationLifetime applicationLifetime) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
@@ -16,7 +16,7 @@ internal sealed class NemesisEuchreApplication(
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        NemesisEuchreApplicationLogMessages.LogApplicationShuttingDown(logger);
+        LoggerMessages.LogApplicationShuttingDown(logger);
         return Task.CompletedTask;
     }
 
@@ -24,7 +24,7 @@ internal sealed class NemesisEuchreApplication(
     {
         try
         {
-            NemesisEuchreApplicationLogMessages.LogStartingUp(logger);
+            LoggerMessages.LogStartingUp(logger);
 
             AnsiConsole.Write(
                 new FigletText("NemesisEuchre")
@@ -35,7 +35,7 @@ internal sealed class NemesisEuchreApplication(
             AnsiConsole.MarkupLine("[green]Welcome to NemesisEuchre - AI-Powered Euchre Strategy[/]");
             AnsiConsole.WriteLine();
 
-            NemesisEuchreApplicationLogMessages.LogConfigurationLoaded(logger);
+            LoggerMessages.LogConfigurationLoaded(logger);
 
             AnsiConsole.MarkupLine("[yellow]Application infrastructure is ready.[/]");
             AnsiConsole.MarkupLine("[dim]Press Ctrl+C to exit[/]");
@@ -44,11 +44,10 @@ internal sealed class NemesisEuchreApplication(
         }
         catch (Exception ex)
         {
-            NemesisEuchreApplicationLogMessages.LogApplicationError(logger, ex);
+            LoggerMessages.LogApplicationError(logger, ex);
         }
         finally
         {
-            // Stop the application
             applicationLifetime.StopApplication();
         }
     }

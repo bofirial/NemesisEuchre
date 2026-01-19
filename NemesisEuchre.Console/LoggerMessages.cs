@@ -2,7 +2,7 @@
 
 namespace NemesisEuchre.Console;
 
-internal static partial class NemesisEuchreApplicationLogMessages
+public static partial class LoggerMessages
 {
     [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Application shutting down")]
     public static partial void LogApplicationShuttingDown(ILogger logger);

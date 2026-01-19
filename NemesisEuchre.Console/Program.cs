@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace NemesisEuchre.Console;
 
-internal static class Program
+public static class Program
 {
     private static Task Main(string[] args)
     {
@@ -14,7 +14,7 @@ internal static class Program
                     .AddEnvironmentVariables()
                     .AddCommandLine(args))
             .ConfigureServices((_, services) =>
-                services.AddHostedService<NemesisEuchreApplication>())
+                services.AddHostedService<EuchreGameServiceHost>())
             .Build();
 
         return host.RunAsync();
