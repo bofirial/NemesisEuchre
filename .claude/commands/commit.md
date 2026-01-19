@@ -17,7 +17,7 @@ Or with options:
 ## What This Command Does
 
 1. Unless specified with `--no-verify`, automatically runs pre-commit checks:
-   - `dotnet lint` to ensure code quality
+   - `dotnet format --verify-no-changes` to ensure code quality
    - `dotnet build` to verify the build succeeds
    - `dotnet test` to verify tests pass
 2. Checks which files are staged with `git status`
@@ -29,7 +29,7 @@ Or with options:
 
 ## Best Practices for Commits
 
-- **Verify before committing**: Ensure code is linted, builds correctly, and all tests pass
+- **Verify before committing**: Ensure code is formatted properly, builds correctly, and all tests pass
 - **Atomic commits**: Each commit should contain related changes that serve a single purpose
 - **Split large changes**: If changes touch multiple concerns, split them into separate commits
 - **Conventional commit format**: Use the format `<type>: <description>` where type is one of:
@@ -55,7 +55,7 @@ Or with options:
   - 🚀 `ci`: CI/CD improvements
   - 🗑️ `revert`: Reverting changes
   - 🧪 `test`: Add a failing test
-  - 🚨 `fix`: Fix compiler/linter warnings
+  - 🚨 `fix`: Fix compiler/format warnings
   - 🔒️ `fix`: Fix security issues
   - 👥 `chore`: Add or update contributors
   - 🚚 `refactor`: Move or rename resources
@@ -125,7 +125,7 @@ Good commit messages:
 - 🐛 fix: resolve memory leak in rendering process
 - 📝 docs: update API documentation with new endpoints
 - ♻️ refactor: simplify error handling logic in parser
-- 🚨 fix: resolve linter warnings in component files
+- 🚨 fix: resolve format warnings in component files
 - 🧑‍💻 chore: improve developer tooling setup process
 - 👔 feat: implement business logic for transaction validation
 - 🩹 fix: address minor styling inconsistency in header
@@ -144,17 +144,17 @@ Example of splitting commits:
 - Third commit: 🔧 chore: update package.json dependencies
 - Fourth commit: 🏷️ feat: add type definitions for new API endpoints
 - Fifth commit: 🧵 feat: improve concurrency handling in worker threads
-- Sixth commit: 🚨 fix: resolve linting issues in new code
+- Sixth commit: 🚨 fix: resolve format issues in new code
 - Seventh commit: ✅ test: add unit tests for new solc version features
 - Eighth commit: 🔒️ fix: update dependencies with security vulnerabilities
 
 ## Command Options
 
-- `--no-verify`: Skip running the pre-commit checks (lint, build, generate:docs)
+- `--no-verify`: Skip running the pre-commit checks (format, build, generate:docs)
 
 ## Important Notes
 
-- By default, pre-commit checks (`dotnet lint`, `dotnet build`, `dotnet test`) will run to ensure code quality
+- By default, pre-commit checks (`dotnet format --verify-no-changes`, `dotnet build`, `dotnet test`) will run to ensure code quality
 - If these checks fail, you'll be asked if you want to proceed with the commit anyway or fix the issues first
 - If specific files are already staged, the command will only commit those files
 - If no files are staged, it will automatically stage all modified and new files
