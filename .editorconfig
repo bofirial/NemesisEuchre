@@ -409,6 +409,16 @@ dotnet_diagnostic.S3358.severity = suggestion  # Ternary operators should not be
 dotnet_diagnostic.RCS1018.severity = suggestion  # Add accessibility modifiers (sometimes obvious from context)
 
 # Test Files - Relax documentation and test requirements
+
+# IDE0210: Convert to top-level statements
+dotnet_diagnostic.IDE0210.severity = none
+
+# IDE0008: Use explicit type
+dotnet_diagnostic.IDE0008.severity = none
+
+# MA0038: Make method static (deprecated, use CA1822 instead)
+dotnet_diagnostic.MA0038.severity = none
+
 [**/*Tests.cs,**/*Test.cs,**/UnitTest*.cs]
 dotnet_diagnostic.CS1591.severity = none  # Missing XML comment for publicly visible type or member
 
