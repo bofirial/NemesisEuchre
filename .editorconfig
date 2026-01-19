@@ -372,7 +372,43 @@ dotnet_naming_style.camelcase.word_separator =
 dotnet_naming_style.camelcase.capitalization = camel_case
 
 dotnet_naming_style.s_camelcase.required_prefix = s_
-dotnet_naming_style.s_camelcase.required_suffix = 
-dotnet_naming_style.s_camelcase.word_separator = 
+dotnet_naming_style.s_camelcase.required_suffix =
+dotnet_naming_style.s_camelcase.word_separator =
 dotnet_naming_style.s_camelcase.capitalization = camel_case
+
+#### Analyzer Configuration ####
+[*.cs]
+
+# Default severity for all analyzers
+dotnet_analyzer_diagnostic.severity = warning
+
+# XML Documentation - Disabled per user preference
+dotnet_diagnostic.CS1591.severity = none  # Missing XML comment for publicly visible type or member
+dotnet_diagnostic.SA0001.severity = none  # XML comment analysis disabled
+dotnet_diagnostic.EnableGenerateDocumentationFile.severity = none  # Generate documentation file suggestion
+
+# StyleCop Analyzers - Disable overly strict rules
+dotnet_diagnostic.SA1633.severity = none  # File must have header
+dotnet_diagnostic.SA1101.severity = none  # Prefix local calls with this
+dotnet_diagnostic.SA1309.severity = none  # Field names must not begin with underscore (conflicts with our naming convention)
+dotnet_diagnostic.SA1600.severity = none  # Elements must be documented (we configure this in stylecop.json for public only)
+dotnet_diagnostic.SA1601.severity = none  # Partial elements must be documented
+dotnet_diagnostic.SA1602.severity = none  # Enumeration items must be documented
+
+# StyleCop Analyzers - Adjust for file-scoped namespaces
+dotnet_diagnostic.SA1200.severity = none  # Using directives must be placed correctly (handled by IDE)
+
+# Meziantou Analyzer - Adjust specific rules
+dotnet_diagnostic.MA0048.severity = suggestion  # File name must match type name (can be too strict)
+dotnet_diagnostic.MA0165.severity = none  # Make interpolated string (conflicts with RCS1214, only useful with variables)
+
+# SonarAnalyzer - Adjust for modern C# patterns
+dotnet_diagnostic.S3358.severity = suggestion  # Ternary operators should not be nested (sometimes useful)
+
+# Roslynator - Performance and style
+dotnet_diagnostic.RCS1018.severity = suggestion  # Add accessibility modifiers (sometimes obvious from context)
+
+# Test Files - Relax documentation and test requirements
+[**/*Tests.cs,**/*Test.cs,**/UnitTest*.cs]
+dotnet_diagnostic.CS1591.severity = none  # Missing XML comment for publicly visible type or member
 

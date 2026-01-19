@@ -1,11 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NemesisEuchre.Console", "NemesisEuchre.Console\NemesisEuchre.Console.csproj", "{EE3B6D0E-A8DC-4BCB-88D0-F0B883D00142}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NemesisEuchre.Console.Tests", "NemesisEuchre.Console.Tests\NemesisEuchre.Console.Tests.csproj", "{47C408C3-0CF4-48AE-A86C-50F5E6CD8C1D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Files", "Solution Files", "{D574D9B0-48CA-4593-9B26-D0F2D1BF2E8D}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		Directory.Packages.props = Directory.Packages.props
+		LICENSE = LICENSE
+		NuGet.Config = NuGet.Config
+		README.md = README.md
+		stylecop.json = stylecop.json
+		version.json = version.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
