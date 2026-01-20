@@ -8,6 +8,14 @@ public static class Program
 {
     private static Task Main(string[] args)
     {
+        if (args.Length > 0 && args[0].Equals("version", StringComparison.OrdinalIgnoreCase))
+        {
+            var versionProvider = new GitVersionProvider();
+            var versionCommand = new VersionCommand(versionProvider);
+            versionCommand.Execute();
+            return Task.CompletedTask;
+        }
+
         var host = Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration((_, config) =>
                 config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
