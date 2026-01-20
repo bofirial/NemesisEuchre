@@ -23,7 +23,7 @@ public static class Program
             services.AddSingleton<IConfiguration>(config);
 
             services.AddLogging(builder => builder
-                .AddConfiguration(config)
+                .AddConfiguration(config.GetSection("Logging"))
                 .AddConsole());
 
             services.AddScoped(_ => AnsiConsole.Console);
