@@ -21,7 +21,7 @@ public class DefaultCommandTests
         var mockBanner = new Mock<IApplicationBanner>();
         var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object);
 
-        await command.RunAsync(null!);
+        await command.RunAsync();
 
         mockBanner.Verify(b => b.Display(), Times.Once);
     }
@@ -34,7 +34,7 @@ public class DefaultCommandTests
         var mockBanner = new Mock<IApplicationBanner>();
         var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object);
 
-        await command.RunAsync(null!);
+        await command.RunAsync();
 
         testConsole.Output.Should().Contain("Welcome to NemesisEuchre - AI-Powered Euchre Strategy");
     }
@@ -47,7 +47,7 @@ public class DefaultCommandTests
         var mockBanner = Mock.Of<IApplicationBanner>();
         var command = new DefaultCommand(mockLogger, testConsole, mockBanner);
 
-        var result = await command.RunAsync(null!);
+        var result = await command.RunAsync();
 
         result.Should().Be(0);
     }

@@ -9,9 +9,9 @@ using Spectre.Console;
 namespace NemesisEuchre.Console.Commands;
 
 [CliCommand(Description = "Nemesis Euchre")]
-public class DefaultCommand(ILogger<DefaultCommand> logger, IAnsiConsole ansiConsole, IApplicationBanner applicationBanner) : ICliRunAsyncWithContextAndReturn
+public class DefaultCommand(ILogger<DefaultCommand> logger, IAnsiConsole ansiConsole, IApplicationBanner applicationBanner) : ICliRunAsyncWithReturn
 {
-    public async Task<int> RunAsync(CliContext cliContext)
+    public async Task<int> RunAsync()
     {
         LoggerMessages.LogStartingUp(logger);
 
