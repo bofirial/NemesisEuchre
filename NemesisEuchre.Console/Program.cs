@@ -27,8 +27,6 @@ public static class Program
                 .AddConsole());
 
             services.AddScoped(_ => AnsiConsole.Console);
-
-            services.AddScoped<DefaultCommand>();
         });
 
         return Cli.RunAsync<DefaultCommand>(args, new CliSettings { EnableDefaultExceptionHandler = true });
