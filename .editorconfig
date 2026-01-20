@@ -408,8 +408,6 @@ dotnet_diagnostic.S3358.severity = suggestion  # Ternary operators should not be
 # Roslynator - Performance and style
 dotnet_diagnostic.RCS1018.severity = suggestion  # Add accessibility modifiers (sometimes obvious from context)
 
-# Test Files - Relax documentation and test requirements
-
 # IDE0210: Convert to top-level statements
 dotnet_diagnostic.IDE0210.severity = none
 
