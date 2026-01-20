@@ -1,0 +1,15 @@
+{
+  "tasks": [
+    {
+      "name": "Format check",
+      "command": "dotnet",
+      "args": ["format", "--verify-no-changes"],
+      "include": ["**/*.cs"]
+    },
+    {
+      "name": "Build and Test",
+      "command": "dotnet",
+      "args": ["test", "--configuration", "Release", "--no-restore"]
+    }
+  ]
+}
