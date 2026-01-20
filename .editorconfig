@@ -419,6 +419,9 @@ dotnet_diagnostic.IDE0008.severity = none
 # MA0038: Make method static (deprecated, use CA1822 instead)
 dotnet_diagnostic.MA0038.severity = none
 
+# IDE0058: Expression value is never used
+dotnet_diagnostic.IDE0058.severity = none
+
 [**/*Tests.cs,**/*Test.cs,**/UnitTest*.cs]
 dotnet_diagnostic.CS1591.severity = none  # Missing XML comment for publicly visible type or member
 

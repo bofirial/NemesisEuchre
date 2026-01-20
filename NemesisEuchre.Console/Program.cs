@@ -1,30 +1,55 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.CommandLine;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+using NemesisEuchre.Console.CommandActions;
 
 namespace NemesisEuchre.Console;
 
 public static class Program
 {
-    private static Task Main(string[] args)
+    private static Task<int> Main(string[] args)
     {
-        if (args.Length > 0 && args[0].Equals("version", StringComparison.OrdinalIgnoreCase))
-        {
-            var versionProvider = new GitVersionProvider();
-            var versionCommand = new VersionCommand(versionProvider);
-            versionCommand.Execute();
-            return Task.CompletedTask;
-        }
+        var serviceProvider = BuildServiceProvider(args);
 
-        var host = Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration((_, config) =>
-                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                    .AddEnvironmentVariables()
-                    .AddCommandLine(args))
-            .ConfigureServices((_, services) =>
-                services.AddHostedService<EuchreGameServiceHost>())
+        var rootCommand = BuildRootCommand(serviceProvider);
+
+        return rootCommand.Parse(args).InvokeAsync();
+    }
+
+    private static RootCommand BuildRootCommand(ServiceProvider serviceProvider)
+    {
+        var rootCommand = new RootCommand("Nemesis Euchre")
+        {
+            Action = serviceProvider.GetService<DefaultCommandAction>(),
+        };
+
+        var versionOption = rootCommand.Options.FirstOrDefault(o => o is VersionOption);
+
+        versionOption!.Action = serviceProvider.GetService<VersionCommandAction>();
+
+        return rootCommand;
+    }
+
+    private static ServiceProvider BuildServiceProvider(string[] args)
+    {
+        var services = new ServiceCollection();
+
+        IConfigurationRoot config = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddEnvironmentVariables()
+            .AddCommandLine(args)
             .Build();
 
-        return host.RunAsync();
+        services.AddLogging(builder => builder.AddConfiguration(config));
+
+        services.AddSingleton<IConfiguration>(config);
+
+        services.AddScoped<DefaultCommandAction>();
+        services.AddScoped<VersionCommandAction>();
+
+        return services.BuildServiceProvider();
     }
 }

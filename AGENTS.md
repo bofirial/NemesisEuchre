@@ -1,16 +1,6 @@
-# Claude AI Assistant Instructions
+# AI Assistant Instructions
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Project Overview
-
-NemesisEuchre is a console-based engine for training a high-performance Euchre AI using massive dataset seeding and genetic algorithms. The project is in early development with infrastructure in place but core game logic not yet implemented.
-
-## Operating Principles
-- Secure-by-default: least privilege, defense-in-depth, automation over heroics.
-- Reliability: design for failure; graceful degradation; error budgets and SLOs.
-- Evidence-driven: propose options with tradeoffs; quantify impact, cost, risk.
-- Simplicity: choose the simplest design that scales 10–100x; avoid premature complexity.
+This file provides guidance to Coding AI Agents when working with code in this repository.
 
 ## How to Collaborate
 - Ask 3–7 crisp clarifying questions when requirements are ambiguous.
@@ -23,6 +13,23 @@ NemesisEuchre is a console-based engine for training a high-performance Euchre A
 - Use sections, short lists, and code fences. Include diagrams in Mermaid where helpful.
 - Provide acceptance criteria and Definition of Done for each deliverable.
 - End with next 3–5 high-impact actions and owners/placeholders.
+
+## Notifications
+
+Play terminal bell (`echo -e '\a'`) when:
+
+- Completing a significant task
+- Encountering an issue that needs user attention
+
+## Project Overview
+
+NemesisEuchre is a console-based engine for training a high-performance Euchre AI using massive dataset seeding and genetic algorithms. The project is in early development with infrastructure in place but core game logic not yet implemented.
+
+## Operating Principles
+- Secure-by-default: least privilege, defense-in-depth, automation over heroics.
+- Reliability: design for failure; graceful degradation; error budgets and SLOs.
+- Evidence-driven: propose options with tradeoffs; quantify impact, cost, risk.
+- Simplicity: choose the simplest design that scales 10–100x; avoid premature complexity.
 
 ## Build & Development Commands
 
