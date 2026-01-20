@@ -428,6 +428,6 @@ dotnet_diagnostic.SA1009.severity = none
 # VSTHRD111: Use ConfigureAwait(bool)
 dotnet_diagnostic.VSTHRD111.severity = none
 
-[**/*Tests.cs,**/*Test.cs,**/UnitTest*.cs]
-dotnet_diagnostic.CS1591.severity = none  # Missing XML comment for publicly visible type or member
-
+# VSTHRD200 : Use Async suffix for async methods
+[**/*Tests.cs]
+dotnet_diagnostic.VSTHRD200.severity = none

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Commands;
+using NemesisEuchre.Console.Services;
 
 using Spectre.Console;
 
@@ -27,6 +28,8 @@ public static class Program
                 .AddConsole());
 
             services.AddScoped(_ => AnsiConsole.Console);
+
+            services.AddScoped<IApplicationBanner, ApplicationBanner>();
         });
 
         return Cli.RunAsync<DefaultCommand>(args, new CliSettings { EnableDefaultExceptionHandler = true });
