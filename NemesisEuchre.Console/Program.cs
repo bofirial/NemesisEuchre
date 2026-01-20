@@ -1,10 +1,12 @@
-﻿using System.CommandLine;
+﻿using DotMake.CommandLine;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using NemesisEuchre.Console.CommandActions;
+using NemesisEuchre.Console.Commands;
+
+using Spectre.Console;
 
 namespace NemesisEuchre.Console;
 
@@ -12,44 +14,23 @@ public static class Program
 {
     private static Task<int> Main(string[] args)
     {
-        var serviceProvider = BuildServiceProvider(args);
-
-        var rootCommand = BuildRootCommand(serviceProvider);
-
-        return rootCommand.Parse(args).InvokeAsync();
-    }
-
-    private static RootCommand BuildRootCommand(ServiceProvider serviceProvider)
-    {
-        var rootCommand = new RootCommand("Nemesis Euchre")
+        Cli.Ext.ConfigureServices(services =>
         {
-            Action = serviceProvider.GetService<DefaultCommandAction>(),
-        };
+            IConfigurationRoot config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
 
-        var versionOption = rootCommand.Options.FirstOrDefault(o => o is VersionOption);
+            services.AddSingleton<IConfiguration>(config);
 
-        versionOption!.Action = serviceProvider.GetService<VersionCommandAction>();
+            services.AddLogging(builder => builder
+                .AddConfiguration(config)
+                .AddConsole());
 
-        return rootCommand;
-    }
+            services.AddScoped(_ => AnsiConsole.Console);
 
-    private static ServiceProvider BuildServiceProvider(string[] args)
-    {
-        var services = new ServiceCollection();
+            services.AddScoped<DefaultCommand>();
+        });
 
-        IConfigurationRoot config = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddEnvironmentVariables()
-            .AddCommandLine(args)
-            .Build();
-
-        services.AddLogging(builder => builder.AddConfiguration(config));
-
-        services.AddSingleton<IConfiguration>(config);
-
-        services.AddScoped<DefaultCommandAction>();
-        services.AddScoped<VersionCommandAction>();
-
-        return services.BuildServiceProvider();
+        return Cli.RunAsync<DefaultCommand>(args, new CliSettings { EnableDefaultExceptionHandler = true });
     }
 }

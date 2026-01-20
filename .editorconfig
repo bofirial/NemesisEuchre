@@ -422,6 +422,9 @@ dotnet_diagnostic.MA0038.severity = none
 # IDE0058: Expression value is never used
 dotnet_diagnostic.IDE0058.severity = none
 
+# SA1009: Closing parenthesis should be spaced correctly
+dotnet_diagnostic.SA1009.severity = none
+
 [**/*Tests.cs,**/*Test.cs,**/UnitTest*.cs]
 dotnet_diagnostic.CS1591.severity = none  # Missing XML comment for publicly visible type or member
 
