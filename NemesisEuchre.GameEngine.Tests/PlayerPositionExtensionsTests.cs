@@ -47,4 +47,26 @@ public class PlayerPositionExtensionsTests
         current = current.GetNextPosition();
         current.Should().Be(PlayerPosition.North);
     }
+
+    [Theory]
+    [InlineData(PlayerPosition.North, PlayerPosition.South)]
+    [InlineData(PlayerPosition.South, PlayerPosition.North)]
+    [InlineData(PlayerPosition.East, PlayerPosition.West)]
+    [InlineData(PlayerPosition.West, PlayerPosition.East)]
+    public void GetPartnerPositionShouldReturnOppositePositionOnSameTeam(PlayerPosition position, PlayerPosition expected)
+    {
+        var result = position.GetPartnerPosition();
+
+        result.Should().Be(expected);
+    }
+
+    [Fact]
+    public void GetPartnerPositionShouldReturnPlayerOnSameTeam()
+    {
+        foreach (var position in new[] { PlayerPosition.North, PlayerPosition.South, PlayerPosition.East, PlayerPosition.West })
+        {
+            var partner = position.GetPartnerPosition();
+            position.GetTeam().Should().Be(partner.GetTeam());
+        }
+    }
 }
