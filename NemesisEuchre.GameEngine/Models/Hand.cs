@@ -12,7 +12,7 @@ public class Hand
 
     public Suit? Trump { get; set; }
 
-    public Player? CallingPlayer { get; set; }
+    public PlayerPosition? CallingPlayer { get; set; }
 
     public bool CallingPlayerIsGoingAlone { get; set; }
 
