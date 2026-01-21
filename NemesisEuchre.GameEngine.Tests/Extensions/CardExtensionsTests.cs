@@ -4,7 +4,7 @@ using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 
-namespace NemesisEuchre.GameEngine.Tests;
+namespace NemesisEuchre.GameEngine.Tests.Extensions;
 
 public class CardExtensionsTests
 {
@@ -156,5 +156,31 @@ public class CardExtensionsTests
         var results = suits.Select(s => new Card { Suit = s, Rank = Rank.Ace }.ToDisplayString()).ToList();
 
         results.Should().BeEquivalentTo("A♠", "A♥", "A♣", "A♦");
+    }
+
+    [Fact]
+    public void CardToRelativeShouldConvertSuitAndKeepRank()
+    {
+        var card = new Card { Suit = Suit.Clubs, Rank = Rank.Ace };
+
+        var handCard = card.ToRelative(Suit.Spades);
+
+        handCard.Rank.Should().Be(Rank.Ace);
+        handCard.Suit.Should().Be(RelativeSuit.NonTrumpSameColor);
+    }
+
+    [Theory]
+    [InlineData(Suit.Spades, Suit.Hearts, Rank.Jack)]
+    [InlineData(Suit.Hearts, Suit.Diamonds, Rank.Queen)]
+    [InlineData(Suit.Clubs, Suit.Spades, Rank.King)]
+    [InlineData(Suit.Diamonds, Suit.Clubs, Rank.Nine)]
+    public void CardToRelativeShouldWorkForAllTrumpAndRanks(Suit trump, Suit cardSuit, Rank rank)
+    {
+        var card = new Card { Suit = cardSuit, Rank = rank };
+
+        var handCard = card.ToRelative(trump);
+
+        handCard.Rank.Should().Be(rank);
+        handCard.Suit.Should().Be(cardSuit.ToRelativeSuit(trump));
     }
 }

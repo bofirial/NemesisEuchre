@@ -4,7 +4,7 @@ using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 
-namespace NemesisEuchre.GameEngine.Tests;
+namespace NemesisEuchre.GameEngine.Tests.Extensions;
 
 public class PlayerPositionExtensionsTests
 {

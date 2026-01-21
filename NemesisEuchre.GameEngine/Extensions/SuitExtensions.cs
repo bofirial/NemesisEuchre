@@ -4,7 +4,7 @@ namespace NemesisEuchre.GameEngine.Extensions;
 
 public static class SuitExtensions
 {
-    public static Suit GetSameSuitColor(this Suit suit)
+    public static Suit GetSameColorSuit(this Suit suit)
     {
         return suit switch
         {
@@ -24,5 +24,28 @@ public static class SuitExtensions
     public static bool IsBlack(this Suit suit)
     {
         return suit is Suit.Spades or Suit.Clubs;
+    }
+
+    public static RelativeSuit ToRelativeSuit(this Suit suit, Suit trump)
+    {
+        if (suit == trump)
+        {
+            return RelativeSuit.Trump;
+        }
+
+        var sameColorSuit = trump.GetSameColorSuit();
+        if (suit == sameColorSuit)
+        {
+            return RelativeSuit.NonTrumpSameColor;
+        }
+
+        var oppositeColors = new[] { Suit.Spades, Suit.Hearts, Suit.Clubs, Suit.Diamonds }
+            .Where(s => s != trump && s != sameColorSuit)
+            .OrderBy(s => (int)s)
+            .ToArray();
+
+        return suit == oppositeColors[0]
+            ? RelativeSuit.NonTrumpOppositeColor1
+            : RelativeSuit.NonTrumpOppositeColor2;
     }
 }

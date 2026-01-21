@@ -8,5 +8,5 @@ public class RelativeTrick
 
     public List<RelativePlayedCard> CardsPlayed { get; } = [];
 
-    public Suit? LeadSuit { get; set; }
+    public RelativeSuit? LeadSuit { get; set; }
 }

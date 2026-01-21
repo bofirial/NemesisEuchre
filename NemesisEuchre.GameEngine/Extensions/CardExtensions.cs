@@ -1,5 +1,6 @@
 ﻿using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.Extensions;
 
@@ -12,7 +13,7 @@ public static class CardExtensions
 
     public static bool IsLeftBower(this Card card, Suit trump)
     {
-        return card.Rank == Rank.Jack && card.Suit == trump.GetSameSuitColor() && card.Suit != trump;
+        return card.Rank == Rank.Jack && card.Suit == trump.GetSameColorSuit() && card.Suit != trump;
     }
 
     public static Suit GetEffectiveSuit(this Card card, Suit trump)
@@ -66,5 +67,14 @@ public static class CardExtensions
         };
 
         return rankSymbol + suitSymbol;
+    }
+
+    public static RelativeCard ToRelative(this Card card, Suit trump)
+    {
+        return new RelativeCard
+        {
+            Rank = card.Rank,
+            Suit = card.Suit.ToRelativeSuit(trump),
+        };
     }
 }

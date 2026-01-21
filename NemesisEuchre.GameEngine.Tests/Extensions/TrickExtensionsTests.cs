@@ -4,12 +4,12 @@ using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 
-namespace NemesisEuchre.GameEngine.Tests.PlayerDecisionEngine;
+namespace NemesisEuchre.GameEngine.Tests.Extensions;
 
 public class TrickExtensionsTests
 {
     [Fact]
-    public void TrickToRelativeShouldConvertLeadPositionAndCards()
+    public void TrickToRelativeShouldConvertLeadSuitAndCards()
     {
         var trick = new Trick
         {
@@ -23,16 +23,16 @@ public class TrickExtensionsTests
         });
         trick.CardsPlayed.Add(new PlayedCard
         {
-            Card = new Card { Suit = Suit.Spades, Rank = Rank.Queen },
+            Card = new Card { Suit = Suit.Clubs, Rank = Rank.Queen },
             PlayerPosition = PlayerPosition.South,
         });
 
-        var relative = trick.ToRelative(PlayerPosition.North);
+        var relative = trick.ToRelative(PlayerPosition.North, Suit.Hearts);
 
         relative.LeadPosition.Should().Be(RelativePlayerPosition.LeftHandOpponent);
-        relative.LeadSuit.Should().Be(Suit.Spades);
+        relative.LeadSuit.Should().Be(RelativeSuit.NonTrumpOppositeColor1);
         relative.CardsPlayed.Should().HaveCount(2);
-        relative.CardsPlayed[0].PlayerPosition.Should().Be(RelativePlayerPosition.LeftHandOpponent);
-        relative.CardsPlayed[1].PlayerPosition.Should().Be(RelativePlayerPosition.Partner);
+        relative.CardsPlayed[0].RelativeCard.Suit.Should().Be(RelativeSuit.NonTrumpOppositeColor1);
+        relative.CardsPlayed[1].RelativeCard.Suit.Should().Be(RelativeSuit.NonTrumpOppositeColor2);
     }
 }

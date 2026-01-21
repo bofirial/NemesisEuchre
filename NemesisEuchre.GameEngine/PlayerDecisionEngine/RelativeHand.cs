@@ -1,5 +1,4 @@
 using NemesisEuchre.GameEngine.Constants;
-using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
@@ -9,9 +8,7 @@ public class RelativeHand
 
     public RelativePlayerPosition? DealerPosition { get; set; }
 
-    public Card? UpCard { get; set; }
-
-    public Suit? Trump { get; set; }
+    public RelativeCard? UpCard { get; set; }
 
     public RelativePlayerPosition? CallingPlayer { get; set; }
 

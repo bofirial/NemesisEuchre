@@ -6,11 +6,11 @@ namespace NemesisEuchre.GameEngine.Extensions;
 
 public static class PlayedCardExtensions
 {
-    public static RelativePlayedCard ToRelative(this PlayedCard playedCard, PlayerPosition self)
+    public static RelativePlayedCard ToRelative(this PlayedCard playedCard, PlayerPosition self, Suit trump)
     {
         return new RelativePlayedCard
         {
-            Card = playedCard.Card,
+            RelativeCard = playedCard.Card.ToRelative(trump),
             PlayerPosition = playedCard.PlayerPosition.ToRelativePosition(self),
         };
     }

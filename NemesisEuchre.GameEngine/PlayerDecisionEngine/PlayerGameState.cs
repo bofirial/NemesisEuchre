@@ -1,10 +1,8 @@
-﻿using NemesisEuchre.GameEngine.Models;
-
-namespace NemesisEuchre.GameEngine.PlayerDecisionEngine;
+﻿namespace NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 public class PlayerGameState
 {
-    public required Player Player { get; set; }
+    public List<RelativeCard> Hand { get; set; } = [];
 
     public int TeamScore { get; set; }
 
