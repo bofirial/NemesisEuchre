@@ -12,7 +12,7 @@ public class Game
 
     public int Team2Score { get; set; }
 
-    public Hand? CurrentHand { get; set; }
+    public Deal? CurrentDeal { get; set; }
 
-    public List<Hand> CompletedHands { get; } = [];
+    public List<Deal> CompletedDeals { get; } = [];
 }

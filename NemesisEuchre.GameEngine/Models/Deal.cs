@@ -2,9 +2,9 @@
 
 namespace NemesisEuchre.GameEngine.Models;
 
-public class Hand
+public class Deal
 {
-    public HandStatus HandStatus { get; set; } = HandStatus.NotStarted;
+    public DealStatus DealStatus { get; set; } = DealStatus.NotStarted;
 
     public PlayerPosition? DealerPosition { get; set; }
 

@@ -2,9 +2,9 @@ using NemesisEuchre.GameEngine.Constants;
 
 namespace NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
-public class RelativeHand
+public class RelativeDeal
 {
-    public HandStatus HandStatus { get; set; } = HandStatus.NotStarted;
+    public DealStatus DealStatus { get; set; } = DealStatus.NotStarted;
 
     public RelativePlayerPosition? DealerPosition { get; set; }
 

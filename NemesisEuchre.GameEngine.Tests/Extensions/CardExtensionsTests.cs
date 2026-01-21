@@ -163,10 +163,10 @@ public class CardExtensionsTests
     {
         var card = new Card { Suit = Suit.Clubs, Rank = Rank.Ace };
 
-        var handCard = card.ToRelative(Suit.Spades);
+        var relativeCard = card.ToRelative(Suit.Spades);
 
-        handCard.Rank.Should().Be(Rank.Ace);
-        handCard.Suit.Should().Be(RelativeSuit.NonTrumpSameColor);
+        relativeCard.Rank.Should().Be(Rank.Ace);
+        relativeCard.Suit.Should().Be(RelativeSuit.NonTrumpSameColor);
     }
 
     [Theory]
@@ -178,9 +178,9 @@ public class CardExtensionsTests
     {
         var card = new Card { Suit = cardSuit, Rank = rank };
 
-        var handCard = card.ToRelative(trump);
+        var relativeCard = card.ToRelative(trump);
 
-        handCard.Rank.Should().Be(rank);
-        handCard.Suit.Should().Be(cardSuit.ToRelativeSuit(trump));
+        relativeCard.Rank.Should().Be(rank);
+        relativeCard.Suit.Should().Be(cardSuit.ToRelativeSuit(trump));
     }
 }

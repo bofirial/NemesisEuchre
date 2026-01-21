@@ -1,6 +1,6 @@
 ﻿namespace NemesisEuchre.GameEngine.Constants;
 
-public enum HandStatus
+public enum DealStatus
 {
     NotStarted = 0,
     SelectingTrump = 1,

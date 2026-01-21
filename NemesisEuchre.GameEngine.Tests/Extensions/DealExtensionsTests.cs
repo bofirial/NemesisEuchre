@@ -6,14 +6,14 @@ using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine.Tests.Extensions;
 
-public class HandExtensionsTests
+public class DealExtensionsTests
 {
     [Fact]
-    public void HandToRelativeShouldConvertUpCardToRelative()
+    public void DealToRelativeShouldConvertUpCardToRelative()
     {
-        var hand = new Hand
+        var deal = new Deal
         {
-            HandStatus = HandStatus.Playing,
+            DealStatus = DealStatus.Playing,
             DealerPosition = PlayerPosition.West,
             UpCard = new Card { Suit = Suit.Diamonds, Rank = Rank.Nine },
             Trump = Suit.Diamonds,
@@ -21,9 +21,9 @@ public class HandExtensionsTests
             CallingPlayerIsGoingAlone = false,
         };
 
-        var relative = hand.ToRelative(PlayerPosition.North);
+        var relative = deal.ToRelative(PlayerPosition.North);
 
-        relative.HandStatus.Should().Be(HandStatus.Playing);
+        relative.DealStatus.Should().Be(DealStatus.Playing);
         relative.DealerPosition.Should().Be(RelativePlayerPosition.RightHandOpponent);
         relative.UpCard.Should().NotBeNull();
         relative.UpCard!.Rank.Should().Be(Rank.Nine);
@@ -32,9 +32,9 @@ public class HandExtensionsTests
     }
 
     [Fact]
-    public void HandToRelativeShouldConvertTricksWithTrumpContext()
+    public void DealToRelativeShouldConvertTricksWithTrumpContext()
     {
-        var hand = new Hand
+        var deal = new Deal
         {
             Trump = Suit.Hearts,
             CurrentTrick = new Trick
@@ -43,13 +43,13 @@ public class HandExtensionsTests
                 LeadSuit = Suit.Clubs,
             },
         };
-        hand.CurrentTrick.CardsPlayed.Add(new PlayedCard
+        deal.CurrentTrick.CardsPlayed.Add(new PlayedCard
         {
             Card = new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
             PlayerPosition = PlayerPosition.South,
         });
 
-        var relative = hand.ToRelative(PlayerPosition.North);
+        var relative = deal.ToRelative(PlayerPosition.North);
 
         relative.CurrentTrick.Should().NotBeNull();
         relative.CurrentTrick!.LeadSuit.Should().Be(RelativeSuit.NonTrumpOppositeColor2);
@@ -57,11 +57,11 @@ public class HandExtensionsTests
     }
 
     [Fact]
-    public void HandToRelativeShouldThrowWhenTrumpNotSet()
+    public void DealToRelativeShouldThrowWhenTrumpNotSet()
     {
-        var hand = new Hand
+        var deal = new Deal
         {
-            HandStatus = HandStatus.SelectingTrump,
+            DealStatus = DealStatus.SelectingTrump,
             Trump = null,
             CurrentTrick = new Trick
             {
@@ -70,26 +70,26 @@ public class HandExtensionsTests
             },
         };
 
-        var act = () => hand.ToRelative(PlayerPosition.North);
+        var act = () => deal.ToRelative(PlayerPosition.North);
 
         act.Should().Throw<ArgumentException>()
-            .WithMessage("Cannot create a relative hand until trump has been called");
+            .WithMessage("Cannot create a relative deal until trump has been called");
     }
 
     [Fact]
-    public void HandToRelativeShouldConvertAllTricksWhenTrumpSet()
+    public void DealToRelativeShouldConvertAllTricksWhenTrumpSet()
     {
-        var hand = new Hand
+        var deal = new Deal
         {
             Trump = Suit.Spades,
         };
-        hand.CompletedTricks.Add(new Trick
+        deal.CompletedTricks.Add(new Trick
         {
             LeadPosition = PlayerPosition.East,
             LeadSuit = Suit.Hearts,
         });
 
-        var relative = hand.ToRelative(PlayerPosition.North);
+        var relative = deal.ToRelative(PlayerPosition.North);
 
         relative.CompletedTricks.Should().HaveCount(1);
         relative.CompletedTricks[0].LeadSuit.Should().Be(RelativeSuit.NonTrumpOppositeColor1);
@@ -100,16 +100,16 @@ public class HandExtensionsTests
     [InlineData(PlayerPosition.East)]
     [InlineData(PlayerPosition.South)]
     [InlineData(PlayerPosition.West)]
-    public void HandToRelativeShouldWorkFromAnyPerspective(PlayerPosition self)
+    public void DealToRelativeShouldWorkFromAnyPerspective(PlayerPosition self)
     {
-        var hand = new Hand
+        var deal = new Deal
         {
             Trump = Suit.Hearts,
             DealerPosition = PlayerPosition.North,
             CallingPlayer = PlayerPosition.South,
         };
 
-        var relative = hand.ToRelative(self);
+        var relative = deal.ToRelative(self);
 
         relative.DealerPosition.Should().Be(PlayerPosition.North.ToRelativePosition(self));
         relative.CallingPlayer.Should().Be(PlayerPosition.South.ToRelativePosition(self));
