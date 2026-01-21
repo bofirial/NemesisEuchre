@@ -427,5 +427,12 @@ dotnet_diagnostic.SA1009.severity = none
 dotnet_diagnostic.VSTHRD111.severity = none
 
 # VSTHRD200 : Use Async suffix for async methods
+
+# SA1010: Opening square brackets should be spaced correctly
+dotnet_diagnostic.SA1010.severity = none
+
+# SA1206: Declaration keywords should follow order
+dotnet_diagnostic.SA1206.severity = none
+
 [**/*Tests.cs]
 dotnet_diagnostic.VSTHRD200.severity = none

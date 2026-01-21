@@ -1,4 +1,6 @@
-﻿namespace NemesisEuchre.GameEngine;
+﻿using NemesisEuchre.GameEngine.Models;
+
+namespace NemesisEuchre.GameEngine;
 
 public interface IGameFactory
 {

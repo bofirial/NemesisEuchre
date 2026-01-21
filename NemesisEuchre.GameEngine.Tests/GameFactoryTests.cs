@@ -1,5 +1,7 @@
 using FluentAssertions;
 
+using NemesisEuchre.GameEngine.Models;
+
 namespace NemesisEuchre.GameEngine.Tests;
 
 public class GameFactoryTests
@@ -13,5 +15,6 @@ public class GameFactoryTests
         var game = await gameInitializer.CreateGameAsync(gameOptions);
 
         game.Should().NotBeNull();
+        game.Players.Should().HaveCount(4);
     }
 }
