@@ -21,6 +21,7 @@ Play terminal bell (powershell -NoProfile -Command "[Console]::Beep()") when:
 
 - Completing a significant task
 - Encountering an issue that needs user attention
+- Asking the user a question
 
 ## Project Overview
 
