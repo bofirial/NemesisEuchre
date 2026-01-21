@@ -17,7 +17,7 @@ This file provides guidance to Coding AI Agents when working with code in this r
 
 ## Notifications
 
-Play terminal bell (`echo -e '\a'`) when:
+Play terminal bell (powershell -NoProfile -Command "[Console]::Beep()") when:
 
 - Completing a significant task
 - Encountering an issue that needs user attention
