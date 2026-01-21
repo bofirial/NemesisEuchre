@@ -1,7 +1,7 @@
 ﻿using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
 
-namespace NemesisEuchre.GameEngine;
+namespace NemesisEuchre.GameEngine.Extensions;
 
 public static class CardExtensions
 {

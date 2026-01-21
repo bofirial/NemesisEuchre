@@ -10,5 +10,5 @@ public class PlayerGameState
 
     public int OpponentScore { get; set; }
 
-    public Hand? CurrentHand { get; set; }
+    public RelativeHand? CurrentHand { get; set; }
 }

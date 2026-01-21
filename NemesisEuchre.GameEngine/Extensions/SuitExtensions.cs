@@ -1,6 +1,6 @@
 using NemesisEuchre.GameEngine.Constants;
 
-namespace NemesisEuchre.GameEngine;
+namespace NemesisEuchre.GameEngine.Extensions;
 
 public static class SuitExtensions
 {

@@ -1,6 +1,8 @@
 using FluentAssertions;
 
 using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.GameEngine.Extensions;
+using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine.Tests;
 
@@ -68,5 +70,125 @@ public class PlayerPositionExtensionsTests
             var partner = position.GetPartnerPosition();
             position.GetTeam().Should().Be(partner.GetTeam());
         }
+    }
+
+    [Theory]
+    [InlineData(PlayerPosition.North, PlayerPosition.North, RelativePlayerPosition.Self)]
+    [InlineData(PlayerPosition.North, PlayerPosition.East, RelativePlayerPosition.LeftHandOpponent)]
+    [InlineData(PlayerPosition.North, PlayerPosition.South, RelativePlayerPosition.Partner)]
+    [InlineData(PlayerPosition.North, PlayerPosition.West, RelativePlayerPosition.RightHandOpponent)]
+    [InlineData(PlayerPosition.East, PlayerPosition.East, RelativePlayerPosition.Self)]
+    [InlineData(PlayerPosition.East, PlayerPosition.South, RelativePlayerPosition.LeftHandOpponent)]
+    [InlineData(PlayerPosition.East, PlayerPosition.West, RelativePlayerPosition.Partner)]
+    [InlineData(PlayerPosition.East, PlayerPosition.North, RelativePlayerPosition.RightHandOpponent)]
+    [InlineData(PlayerPosition.South, PlayerPosition.South, RelativePlayerPosition.Self)]
+    [InlineData(PlayerPosition.South, PlayerPosition.West, RelativePlayerPosition.LeftHandOpponent)]
+    [InlineData(PlayerPosition.South, PlayerPosition.North, RelativePlayerPosition.Partner)]
+    [InlineData(PlayerPosition.South, PlayerPosition.East, RelativePlayerPosition.RightHandOpponent)]
+    [InlineData(PlayerPosition.West, PlayerPosition.West, RelativePlayerPosition.Self)]
+    [InlineData(PlayerPosition.West, PlayerPosition.North, RelativePlayerPosition.LeftHandOpponent)]
+    [InlineData(PlayerPosition.West, PlayerPosition.East, RelativePlayerPosition.Partner)]
+    [InlineData(PlayerPosition.West, PlayerPosition.South, RelativePlayerPosition.RightHandOpponent)]
+    public void ToRelativePositionShouldConvertCorrectly(
+        PlayerPosition self,
+        PlayerPosition absolute,
+        RelativePlayerPosition expected)
+    {
+        var result = absolute.ToRelativePosition(self);
+        result.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(PlayerPosition.North, RelativePlayerPosition.Self, PlayerPosition.North)]
+    [InlineData(PlayerPosition.North, RelativePlayerPosition.LeftHandOpponent, PlayerPosition.East)]
+    [InlineData(PlayerPosition.North, RelativePlayerPosition.Partner, PlayerPosition.South)]
+    [InlineData(PlayerPosition.North, RelativePlayerPosition.RightHandOpponent, PlayerPosition.West)]
+    [InlineData(PlayerPosition.East, RelativePlayerPosition.Self, PlayerPosition.East)]
+    [InlineData(PlayerPosition.East, RelativePlayerPosition.LeftHandOpponent, PlayerPosition.South)]
+    [InlineData(PlayerPosition.East, RelativePlayerPosition.Partner, PlayerPosition.West)]
+    [InlineData(PlayerPosition.East, RelativePlayerPosition.RightHandOpponent, PlayerPosition.North)]
+    [InlineData(PlayerPosition.South, RelativePlayerPosition.Self, PlayerPosition.South)]
+    [InlineData(PlayerPosition.South, RelativePlayerPosition.LeftHandOpponent, PlayerPosition.West)]
+    [InlineData(PlayerPosition.South, RelativePlayerPosition.Partner, PlayerPosition.North)]
+    [InlineData(PlayerPosition.South, RelativePlayerPosition.RightHandOpponent, PlayerPosition.East)]
+    [InlineData(PlayerPosition.West, RelativePlayerPosition.Self, PlayerPosition.West)]
+    [InlineData(PlayerPosition.West, RelativePlayerPosition.LeftHandOpponent, PlayerPosition.North)]
+    [InlineData(PlayerPosition.West, RelativePlayerPosition.Partner, PlayerPosition.East)]
+    [InlineData(PlayerPosition.West, RelativePlayerPosition.RightHandOpponent, PlayerPosition.South)]
+    public void ToAbsolutePositionShouldConvertCorrectly(
+        PlayerPosition self,
+        RelativePlayerPosition relative,
+        PlayerPosition expected)
+    {
+        var result = relative.ToAbsolutePosition(self);
+        result.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(PlayerPosition.North)]
+    [InlineData(PlayerPosition.East)]
+    [InlineData(PlayerPosition.South)]
+    [InlineData(PlayerPosition.West)]
+    public void ConversionShouldBeReversible(PlayerPosition self)
+    {
+        foreach (var absolute in new[]
+        {
+            PlayerPosition.North, PlayerPosition.East,
+            PlayerPosition.South, PlayerPosition.West,
+        })
+        {
+            var relative = absolute.ToRelativePosition(self);
+            var backToAbsolute = relative.ToAbsolutePosition(self);
+            backToAbsolute.Should().Be(absolute);
+        }
+    }
+
+    [Fact]
+    public void GetPlayerAtRelativePositionShouldReturnCorrectPlayer()
+    {
+        var players = new Dictionary<PlayerPosition, Player>
+        {
+            [PlayerPosition.North] = new Player { Position = PlayerPosition.North },
+            [PlayerPosition.East] = new Player { Position = PlayerPosition.East },
+            [PlayerPosition.South] = new Player { Position = PlayerPosition.South },
+            [PlayerPosition.West] = new Player { Position = PlayerPosition.West },
+        };
+
+        var partner = players.GetPlayerAtRelativePosition(
+            PlayerPosition.North,
+            RelativePlayerPosition.Partner);
+
+        partner.Position.Should().Be(PlayerPosition.South);
+
+        var leftOpponent = players.GetPlayerAtRelativePosition(
+            PlayerPosition.South,
+            RelativePlayerPosition.LeftHandOpponent);
+
+        leftOpponent.Position.Should().Be(PlayerPosition.West);
+    }
+
+    [Theory]
+    [InlineData(PlayerPosition.North)]
+    [InlineData(PlayerPosition.East)]
+    [InlineData(PlayerPosition.South)]
+    [InlineData(PlayerPosition.West)]
+    public void PartnerShouldAlwaysBeOnSameTeam(PlayerPosition self)
+    {
+        var partnerAbsolute = RelativePlayerPosition.Partner.ToAbsolutePosition(self);
+        self.GetTeam().Should().Be(partnerAbsolute.GetTeam());
+    }
+
+    [Theory]
+    [InlineData(PlayerPosition.North)]
+    [InlineData(PlayerPosition.East)]
+    [InlineData(PlayerPosition.South)]
+    [InlineData(PlayerPosition.West)]
+    public void OpponentsShouldBeOnDifferentTeam(PlayerPosition self)
+    {
+        var leftAbsolute = RelativePlayerPosition.LeftHandOpponent.ToAbsolutePosition(self);
+        var rightAbsolute = RelativePlayerPosition.RightHandOpponent.ToAbsolutePosition(self);
+
+        self.GetTeam().Should().NotBe(leftAbsolute.GetTeam());
+        self.GetTeam().Should().NotBe(rightAbsolute.GetTeam());
     }
 }

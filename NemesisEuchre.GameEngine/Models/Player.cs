@@ -1,4 +1,5 @@
 using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.GameEngine.Extensions;
 
 namespace NemesisEuchre.GameEngine.Models;
 
