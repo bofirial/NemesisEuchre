@@ -23,7 +23,6 @@ public static class DealExtensions
             UpCard = deal.UpCard?.ToRelative(deal.Trump.Value),
             CallingPlayer = deal.CallingPlayer?.ToRelativePosition(self),
             CallingPlayerIsGoingAlone = deal.CallingPlayerIsGoingAlone,
-            CurrentTrick = deal.CurrentTrick?.ToRelative(self, deal.Trump.Value),
             CompletedTricks = [.. deal.CompletedTricks.Select(trick => trick.ToRelative(self, deal.Trump.Value))],
         };
     }

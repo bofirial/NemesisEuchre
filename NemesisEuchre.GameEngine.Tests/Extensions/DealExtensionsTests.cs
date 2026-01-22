@@ -32,42 +32,12 @@ public class DealExtensionsTests
     }
 
     [Fact]
-    public void ToRelative_WithTricks_ConvertsTricksWithTrumpContext()
-    {
-        var deal = new Deal
-        {
-            Trump = Suit.Hearts,
-            CurrentTrick = new Trick
-            {
-                LeadPosition = PlayerPosition.South,
-                LeadSuit = Suit.Clubs,
-            },
-        };
-        deal.CurrentTrick.CardsPlayed.Add(new PlayedCard
-        {
-            Card = new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
-            PlayerPosition = PlayerPosition.South,
-        });
-
-        var relative = deal.ToRelative(PlayerPosition.North);
-
-        relative.CurrentTrick.Should().NotBeNull();
-        relative.CurrentTrick!.LeadSuit.Should().Be(RelativeSuit.NonTrumpOppositeColor2);
-        relative.CurrentTrick.CardsPlayed[0].RelativeCard.Suit.Should().Be(RelativeSuit.NonTrumpOppositeColor2);
-    }
-
-    [Fact]
     public void ToRelative_WhenTrumpNotSet_ThrowsArgumentException()
     {
         var deal = new Deal
         {
             DealStatus = DealStatus.SelectingTrump,
             Trump = null,
-            CurrentTrick = new Trick
-            {
-                LeadPosition = PlayerPosition.South,
-                LeadSuit = Suit.Clubs,
-            },
         };
 
         var act = () => deal.ToRelative(PlayerPosition.North);

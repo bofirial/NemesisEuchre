@@ -14,7 +14,5 @@ public class RelativeDeal
 
     public bool CallingPlayerIsGoingAlone { get; set; }
 
-    public RelativeTrick? CurrentTrick { get; set; }
-
     public required RelativeTrick[] CompletedTricks { get; set; }
 }

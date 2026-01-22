@@ -18,13 +18,15 @@ public class Deal
 
     public bool CallingPlayerIsGoingAlone { get; set; }
 
-    public Trick? CurrentTrick { get; set; }
-
     public List<Trick> CompletedTricks { get; set; } = [];
 
     public DealResult? DealResult { get; set; }
 
     public Team? WinningTeam { get; set; }
+
+    public short Team1Score { get; set; }
+
+    public short Team2Score { get; set; }
 
     public Dictionary<PlayerPosition, DealPlayer> Players { get; set; } = [];
 }

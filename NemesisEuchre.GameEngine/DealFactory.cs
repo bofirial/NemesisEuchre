@@ -18,6 +18,9 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
 
         var deal = BuildDeal(dealerPosition, deck, players);
 
+        deal.Team1Score = game.Team1Score;
+        deal.Team2Score = game.Team2Score;
+
         return Task.FromResult(deal);
     }
 

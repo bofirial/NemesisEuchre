@@ -239,7 +239,6 @@ public class DealFactoryTests
 
         deal.Trump.Should().BeNull();
         deal.CallingPlayer.Should().BeNull();
-        deal.CurrentTrick.Should().BeNull();
         deal.DealResult.Should().BeNull();
         deal.WinningTeam.Should().BeNull();
     }
