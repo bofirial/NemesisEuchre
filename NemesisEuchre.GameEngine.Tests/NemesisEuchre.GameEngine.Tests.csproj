@@ -26,8 +26,4 @@
         <ProjectReference Include="..\NemesisEuchre.GameEngine\NemesisEuchre.GameEngine.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
-    </ItemGroup>
-
 </Project>
