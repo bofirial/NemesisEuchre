@@ -8,6 +8,8 @@ public class Deal
 
     public PlayerPosition? DealerPosition { get; set; }
 
+    public Card[] Deck { get; set; } = [];
+
     public Card? UpCard { get; set; }
 
     public Suit? Trump { get; set; }
@@ -18,7 +20,7 @@ public class Deal
 
     public Trick? CurrentTrick { get; set; }
 
-    public List<Trick> CompletedTricks { get; } = [];
+    public Trick[] CompletedTricks { get; set; } = [];
 
     public DealResult? DealResult { get; set; }
 

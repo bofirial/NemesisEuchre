@@ -82,12 +82,15 @@ public class DealExtensionsTests
         var deal = new Deal
         {
             Trump = Suit.Spades,
+            CompletedTricks =
+            [
+                new Trick
+                {
+                    LeadPosition = PlayerPosition.East,
+                    LeadSuit = Suit.Hearts,
+                },
+            ],
         };
-        deal.CompletedTricks.Add(new Trick
-        {
-            LeadPosition = PlayerPosition.East,
-            LeadSuit = Suit.Hearts,
-        });
 
         var relative = deal.ToRelative(PlayerPosition.North);
 
