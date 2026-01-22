@@ -5,9 +5,9 @@ namespace NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 public interface IPlayerActor
 {
-    CallTrumpDecision CallTrump(List<Card> cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions);
+    Task<CallTrumpDecision> CallTrumpAsync(List<Card> cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions);
 
-    RelativeCard DiscardCard(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard);
+    Task<RelativeCard> DiscardCardAsync(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard);
 
-    RelativeCard PlayCard(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay);
+    Task<RelativeCard> PlayCardAsync(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay);
 }

@@ -10,25 +10,25 @@ public class ChaosBot : IPlayerBot
 
     public BotType BotType => BotType.Chaos;
 
-    public CallTrumpDecision CallTrump(List<Card> cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
+    public Task<CallTrumpDecision> CallTrumpAsync(List<Card> cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
     {
-        return SelectRandom(validCallTrumpDecisions);
+        return SelectRandomAsync(validCallTrumpDecisions);
     }
 
-    public RelativeCard DiscardCard(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard)
+    public Task<RelativeCard> DiscardCardAsync(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard)
     {
-        return SelectRandom(validCardsToDiscard);
+        return SelectRandomAsync(validCardsToDiscard);
     }
 
-    public RelativeCard PlayCard(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay)
+    public Task<RelativeCard> PlayCardAsync(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay)
     {
-        return SelectRandom(validCardsToPlay);
+        return SelectRandomAsync(validCardsToPlay);
     }
 
-    private T SelectRandom<T>(T[] options)
+    private Task<T> SelectRandomAsync<T>(T[] options)
     {
         return options.Length == 0
             ? throw new ArgumentException("Cannot select from empty array", nameof(options))
-            : options[_random.Next(options.Length)];
+            : Task.FromResult(options[_random.Next(options.Length)]);
     }
 }

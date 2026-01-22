@@ -10,39 +10,39 @@ public class BetaBot : IPlayerBot
 
     public BotType BotType => BotType.Chad;
 
-    public CallTrumpDecision CallTrump(List<Card> cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
+    public Task<CallTrumpDecision> CallTrumpAsync(List<Card> cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
     {
         return validCallTrumpDecisions.Contains(CallTrumpDecision.Pass)
-            ? CallTrumpDecision.OrderItUpAndGoAlone
-            : SelectRandom(validCallTrumpDecisions);
+            ? Task.FromResult(CallTrumpDecision.OrderItUpAndGoAlone)
+            : SelectRandomAsync(validCallTrumpDecisions);
     }
 
-    public RelativeCard DiscardCard(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard)
+    public Task<RelativeCard> DiscardCardAsync(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard)
     {
         var nonTrumpCards = validCardsToDiscard
             .Where(card => card.Suit != RelativeSuit.Trump)
             .ToArray();
 
         return nonTrumpCards.Length > 0
-            ? nonTrumpCards.OrderBy(card => card.Rank).First()
-            : validCardsToDiscard.OrderBy(card => card.Rank).First();
+            ? Task.FromResult(nonTrumpCards.OrderBy(card => card.Rank).First())
+            : Task.FromResult(validCardsToDiscard.OrderBy(card => card.Rank).First());
     }
 
-    public RelativeCard PlayCard(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay)
+    public Task<RelativeCard> PlayCardAsync(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay)
     {
         var nonTrumpCards = validCardsToPlay
             .Where(card => card.Suit != RelativeSuit.Trump)
             .ToArray();
 
         return nonTrumpCards.Length > 0
-            ? nonTrumpCards.OrderBy(card => card.Rank).First()
-            : validCardsToPlay.OrderBy(card => card.Rank).First();
+            ? Task.FromResult(nonTrumpCards.OrderBy(card => card.Rank).First())
+            : Task.FromResult(validCardsToPlay.OrderBy(card => card.Rank).First());
     }
 
-    private T SelectRandom<T>(T[] options)
+    private Task<T> SelectRandomAsync<T>(T[] options)
     {
         return options.Length == 0
             ? throw new ArgumentException("Cannot select from empty array", nameof(options))
-            : options[_random.Next(options.Length)];
+            : Task.FromResult(options[_random.Next(options.Length)]);
     }
 }
