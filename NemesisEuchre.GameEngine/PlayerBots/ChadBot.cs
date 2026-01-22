@@ -10,14 +10,14 @@ public class ChadBot : IPlayerBot
 
     public BotType BotType => BotType.Chad;
 
-    public CallTrumpDecision CallTrump(List<Card> cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, int teamScore, int opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
+    public CallTrumpDecision CallTrump(List<Card> cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
     {
         return validCallTrumpDecisions.Contains(CallTrumpDecision.OrderItUpAndGoAlone)
             ? CallTrumpDecision.OrderItUpAndGoAlone
             : SelectRandom(validCallTrumpDecisions);
     }
 
-    public RelativeCard DiscardCard(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, int teamScore, int opponentScore, RelativeCard[] validCardsToDiscard)
+    public RelativeCard DiscardCard(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard)
     {
         var nonTrumpCards = validCardsToDiscard
             .Where(card => card.Suit != RelativeSuit.Trump)
@@ -28,7 +28,7 @@ public class ChadBot : IPlayerBot
             : validCardsToDiscard.OrderBy(card => card.Rank).First();
     }
 
-    public RelativeCard PlayCard(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, int teamScore, int opponentScore, RelativeCard[] validCardsToPlay)
+    public RelativeCard PlayCard(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay)
     {
         var trumpCards = validCardsToPlay
             .Where(card => card.Suit == RelativeSuit.Trump)

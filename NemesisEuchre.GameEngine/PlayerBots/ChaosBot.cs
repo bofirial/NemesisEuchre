@@ -10,33 +10,17 @@ public class ChaosBot : IPlayerBot
 
     public BotType BotType => BotType.Chaos;
 
-    public CallTrumpDecision CallTrump(
-        List<Card> cardsInHand,
-        Card upCard,
-        RelativePlayerPosition dealerPosition,
-        int teamScore,
-        int opponentScore,
-        CallTrumpDecision[] validCallTrumpDecisions)
+    public CallTrumpDecision CallTrump(List<Card> cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
     {
         return SelectRandom(validCallTrumpDecisions);
     }
 
-    public RelativeCard DiscardCard(
-        List<RelativeCard> cardsInHand,
-        RelativeDeal? currentDeal,
-        int teamScore,
-        int opponentScore,
-        RelativeCard[] validCardsToDiscard)
+    public RelativeCard DiscardCard(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard)
     {
         return SelectRandom(validCardsToDiscard);
     }
 
-    public RelativeCard PlayCard(
-        List<RelativeCard> cardsInHand,
-        RelativeDeal? currentDeal,
-        int teamScore,
-        int opponentScore,
-        RelativeCard[] validCardsToPlay)
+    public RelativeCard PlayCard(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay)
     {
         return SelectRandom(validCardsToPlay);
     }
