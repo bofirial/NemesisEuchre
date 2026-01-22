@@ -8,17 +8,11 @@ public static class TrickExtensions
 {
     public static RelativeTrick ToRelative(this Trick trick, PlayerPosition self, Suit trump)
     {
-        var relativeTrick = new RelativeTrick
+        return new RelativeTrick
         {
             LeadPosition = trick.LeadPosition.ToRelativePosition(self),
             LeadSuit = trick.LeadSuit?.ToRelativeSuit(trump),
+            CardsPlayed = [.. trick.CardsPlayed.Select(cardPlayed => cardPlayed.ToRelative(self, trump))],
         };
-
-        foreach (var playedCard in trick.CardsPlayed)
-        {
-            relativeTrick.CardsPlayed.Add(playedCard.ToRelative(self, trump));
-        }
-
-        return relativeTrick;
     }
 }
