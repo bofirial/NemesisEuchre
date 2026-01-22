@@ -10,6 +10,21 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
 
     public Task<Deal> CreateDealAsync(Game game, Deal? previousDeal = null)
     {
+        ValidateInputs(game, previousDeal);
+
+        var dealerPosition = CalculateDealerPosition(previousDeal);
+
+        var deck = PrepareShuffledDeck();
+
+        var players = DistributeCardsToPlayers(deck, dealerPosition, game.Players);
+
+        var deal = BuildDeal(dealerPosition, deck, players);
+
+        return Task.FromResult(deal);
+    }
+
+    private static void ValidateInputs(Game game, Deal? previousDeal)
+    {
         ArgumentNullException.ThrowIfNull(game);
 
         if (game.Players.Count != 4)
@@ -21,15 +36,21 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
         {
             throw new InvalidOperationException("Previous deal must have a dealer position.");
         }
+    }
 
-        var dealerPosition = previousDeal?.DealerPosition!.Value.GetNextPosition() ?? PlayerPosition.North;
+    private static PlayerPosition CalculateDealerPosition(Deal? previousDeal)
+    {
+        return previousDeal?.DealerPosition!.Value.GetNextPosition() ?? PlayerPosition.North;
+    }
 
-        var deck = CreateEuchreDeck();
-        _cardShuffler.Shuffle(deck);
-
+    private static Dictionary<PlayerPosition, DealPlayer> DistributeCardsToPlayers(
+        Card[] deck,
+        PlayerPosition dealerPosition,
+        Dictionary<PlayerPosition, Player> gamePlayers)
+    {
         var dealPlayers = new Dictionary<PlayerPosition, DealPlayer>();
-
         var currentPosition = dealerPosition.GetNextPosition();
+
         for (int i = 0; i < 4; i++)
         {
             var cardsForPlayer = new Card[5];
@@ -43,22 +64,28 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
                 Position = currentPosition,
                 StartingHand = cardsForPlayer,
                 CurrentHand = [.. cardsForPlayer],
-                BotType = game.Players[currentPosition].BotType,
+                BotType = gamePlayers[currentPosition].BotType,
             };
 
             currentPosition = currentPosition.GetNextPosition();
         }
 
-        var deal = new Deal
+        return dealPlayers;
+    }
+
+    private static Deal BuildDeal(
+        PlayerPosition dealerPosition,
+        Card[] deck,
+        Dictionary<PlayerPosition, DealPlayer> players)
+    {
+        return new Deal
         {
             DealStatus = DealStatus.NotStarted,
             DealerPosition = dealerPosition,
             Deck = [.. deck[21..24]],
             UpCard = deck[20],
-            Players = dealPlayers,
+            Players = players,
         };
-
-        return Task.FromResult(deal);
     }
 
     private static Card[] CreateEuchreDeck()
@@ -76,6 +103,13 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
             deck[index++] = new Card { Suit = suit, Rank = Rank.Ace };
         }
 
+        return deck;
+    }
+
+    private Card[] PrepareShuffledDeck()
+    {
+        var deck = CreateEuchreDeck();
+        _cardShuffler.Shuffle(deck);
         return deck;
     }
 }
