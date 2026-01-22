@@ -4,5 +4,5 @@ namespace NemesisEuchre.GameEngine;
 
 public interface IDealOrchestrator
 {
-    Task OrchestrateDealAsync(Deal deal);
+    Task OrchestrateDealAsync(Deal deal, Player[] players);
 }

@@ -22,7 +22,7 @@ public class GameOrchestratorTests
         _dealOrchestratorMock = new Mock<IDealOrchestrator>();
         _gameScoreUpdaterMock = new Mock<IGameScoreUpdater>();
 
-        _dealOrchestratorMock.Setup(x => x.OrchestrateDealAsync(It.IsAny<Deal>()))
+        _dealOrchestratorMock.Setup(x => x.OrchestrateDealAsync(It.IsAny<Deal>(), It.IsAny<Player[]>()))
             .Returns(Task.CompletedTask);
 
         _sut = new GameOrchestrator(
@@ -173,7 +173,7 @@ public class GameOrchestratorTests
 
         result.CompletedDeals.Should().HaveCount(4);
         result.CompletedDeals.Should().BeEquivalentTo(deals);
-        _dealOrchestratorMock.Verify(x => x.OrchestrateDealAsync(It.IsAny<Deal>()), Times.Exactly(4));
+        _dealOrchestratorMock.Verify(x => x.OrchestrateDealAsync(It.IsAny<Deal>(), It.IsAny<Player[]>()), Times.Exactly(4));
     }
 
     [Fact]
@@ -239,7 +239,7 @@ public class GameOrchestratorTests
 
         await _sut.OrchestrateGameAsync(gameOptions);
 
-        _dealOrchestratorMock.Verify(x => x.OrchestrateDealAsync(deal), Times.Once);
+        _dealOrchestratorMock.Verify(x => x.OrchestrateDealAsync(deal, It.IsAny<Player[]>()), Times.Once);
     }
 
     [Fact]

@@ -2,9 +2,9 @@
 
 namespace NemesisEuchre.GameEngine;
 
-public class DealOrchestrator : IDealOrchestrator
+public class DealOrchestrator() : IDealOrchestrator
 {
-    public Task OrchestrateDealAsync(Deal deal)
+    public Task OrchestrateDealAsync(Deal deal, Player[] players)
     {
         throw new NotImplementedException();
     }
