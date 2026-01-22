@@ -6,7 +6,7 @@ public class RelativeTrick
 {
     public RelativePlayerPosition LeadPosition { get; set; }
 
-    public List<RelativePlayedCard> CardsPlayed { get; } = [];
+    public RelativePlayedCard[] CardsPlayed { get; set; } = [];
 
     public RelativeSuit? LeadSuit { get; set; }
 }

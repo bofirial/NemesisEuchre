@@ -20,7 +20,7 @@ public class Deal
 
     public Trick? CurrentTrick { get; set; }
 
-    public Trick[] CompletedTricks { get; set; } = [];
+    public List<Trick> CompletedTricks { get; set; } = [];
 
     public DealResult? DealResult { get; set; }
 

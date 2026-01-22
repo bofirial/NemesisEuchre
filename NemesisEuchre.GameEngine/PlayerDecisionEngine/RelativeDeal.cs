@@ -16,5 +16,5 @@ public class RelativeDeal
 
     public RelativeTrick? CurrentTrick { get; set; }
 
-    public List<RelativeTrick> CompletedTricks { get; } = [];
+    public required RelativeTrick[] CompletedTricks { get; set; }
 }
