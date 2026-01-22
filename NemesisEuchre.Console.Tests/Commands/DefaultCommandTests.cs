@@ -14,7 +14,7 @@ namespace NemesisEuchre.Console.Tests.Commands;
 public class DefaultCommandTests
 {
     [Fact]
-    public async Task RunAsyncShouldDisplayApplicationBanner()
+    public async Task RunAsync_WhenExecuted_DisplaysApplicationBanner()
     {
         var testConsole = new TestConsole();
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
@@ -27,7 +27,7 @@ public class DefaultCommandTests
     }
 
     [Fact]
-    public async Task RunAsyncShouldOutputWelcomeMessage()
+    public async Task RunAsync_WhenExecuted_OutputsWelcomeMessage()
     {
         var testConsole = new TestConsole();
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
@@ -40,7 +40,7 @@ public class DefaultCommandTests
     }
 
     [Fact]
-    public async Task RunAsyncShouldReturnZero()
+    public async Task RunAsync_WhenExecuted_ReturnsZero()
     {
         var testConsole = new TestConsole();
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();

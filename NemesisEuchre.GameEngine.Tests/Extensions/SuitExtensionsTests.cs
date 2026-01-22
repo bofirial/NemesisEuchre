@@ -12,7 +12,7 @@ public class SuitExtensionsTests
     [InlineData(Suit.Clubs, Suit.Spades)]
     [InlineData(Suit.Hearts, Suit.Diamonds)]
     [InlineData(Suit.Diamonds, Suit.Hearts)]
-    public void GetSameSuitColorShouldReturnMatchingColorSuit(Suit input, Suit expected)
+    public void GetSameColorSuit_WithAnySuit_ReturnsMatchingColorSuit(Suit input, Suit expected)
     {
         var result = input.GetSameColorSuit();
 
@@ -24,7 +24,7 @@ public class SuitExtensionsTests
     [InlineData(Suit.Diamonds, true)]
     [InlineData(Suit.Spades, false)]
     [InlineData(Suit.Clubs, false)]
-    public void IsRedShouldReturnTrueForRedSuits(Suit suit, bool expected)
+    public void IsRed_WithAnySuit_ReturnsTrueForRedSuits(Suit suit, bool expected)
     {
         var result = suit.IsRed();
 
@@ -36,7 +36,7 @@ public class SuitExtensionsTests
     [InlineData(Suit.Clubs, true)]
     [InlineData(Suit.Hearts, false)]
     [InlineData(Suit.Diamonds, false)]
-    public void IsBlackShouldReturnTrueForBlackSuits(Suit suit, bool expected)
+    public void IsBlack_WithAnySuit_ReturnsTrueForBlackSuits(Suit suit, bool expected)
     {
         var result = suit.IsBlack();
 
@@ -60,7 +60,7 @@ public class SuitExtensionsTests
     [InlineData(Suit.Diamonds, Suit.Hearts, RelativeSuit.NonTrumpSameColor)]
     [InlineData(Suit.Diamonds, Suit.Spades, RelativeSuit.NonTrumpOppositeColor1)]
     [InlineData(Suit.Diamonds, Suit.Clubs, RelativeSuit.NonTrumpOppositeColor2)]
-    public void ToRelativeSuitShouldConvertCorrectly(Suit trump, Suit suit, RelativeSuit expected)
+    public void ToRelativeSuit_WithTrumpAndSuit_ConvertsCorrectly(Suit trump, Suit suit, RelativeSuit expected)
     {
         var result = suit.ToRelativeSuit(trump);
 
@@ -72,7 +72,7 @@ public class SuitExtensionsTests
     [InlineData(Suit.Hearts)]
     [InlineData(Suit.Clubs)]
     [InlineData(Suit.Diamonds)]
-    public void ToRelativeSuitShouldHaveOneOfEachRelativeSuit(Suit trump)
+    public void ToRelativeSuit_WithAnyTrump_ProducesOneOfEachRelativeSuit(Suit trump)
     {
         var allSuits = new[] { Suit.Spades, Suit.Hearts, Suit.Clubs, Suit.Diamonds };
         var relativeSuits = allSuits.Select(s => s.ToRelativeSuit(trump)).ToList();

@@ -9,7 +9,7 @@ namespace NemesisEuchre.GameEngine.Tests.Extensions;
 public class TrickExtensionsTests
 {
     [Fact]
-    public void TrickToRelativeShouldConvertLeadSuitAndCards()
+    public void ToRelative_WithTrick_ConvertsLeadSuitAndCards()
     {
         var trick = new Trick
         {

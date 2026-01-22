@@ -15,7 +15,7 @@ public class ApplicationBannerTests
         "RCS1192:Unnecessary usage of verbatim string literal",
         Justification = "Verbatim string is not necessary for each line but removing it ruins the ascii art and makes the source code less readable")]
     [Fact]
-    public void DisplayShouldOutputNemesisEuchreLogo()
+    public void Display_WhenCalled_OutputsNemesisEuchreLogo()
     {
         var testConsole = new TestConsole();
         var banner = new ApplicationBanner(testConsole);

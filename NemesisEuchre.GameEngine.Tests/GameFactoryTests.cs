@@ -7,7 +7,7 @@ namespace NemesisEuchre.GameEngine.Tests;
 public class GameFactoryTests
 {
     [Fact]
-    public async Task CreateGameAsyncShouldReturnAGame()
+    public async Task CreateGameAsync_WithValidOptions_ReturnsGameWithFourPlayers()
     {
         var gameInitializer = new GameFactory();
 
@@ -19,7 +19,7 @@ public class GameFactoryTests
     }
 
     [Fact]
-    public async Task CreateGameAsyncShouldSetDefaultWinningScore()
+    public async Task CreateGameAsync_WithDefaultOptions_SetsWinningScoreToDefaultValue()
     {
         var gameInitializer = new GameFactory();
 
@@ -30,7 +30,7 @@ public class GameFactoryTests
     }
 
     [Fact]
-    public async Task CreateGameAsyncShouldSetCustomWinningScore()
+    public async Task CreateGameAsync_WithCustomWinningScore_SetsWinningScoreToSpecifiedValue()
     {
         var gameInitializer = new GameFactory();
 

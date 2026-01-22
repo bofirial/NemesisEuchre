@@ -9,7 +9,7 @@ namespace NemesisEuchre.GameEngine.Tests.Extensions;
 public class PlayedCardExtensionsTests
 {
     [Fact]
-    public void PlayedCardToRelativeShouldConvertPositionAndCard()
+    public void ToRelative_WithPlayedCard_ConvertsPositionAndCardToRelative()
     {
         var playedCard = new PlayedCard
         {

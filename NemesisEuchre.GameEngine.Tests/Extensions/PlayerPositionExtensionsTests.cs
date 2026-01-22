@@ -13,7 +13,7 @@ public class PlayerPositionExtensionsTests
     [InlineData(PlayerPosition.South, Team.Team1)]
     [InlineData(PlayerPosition.East, Team.Team2)]
     [InlineData(PlayerPosition.West, Team.Team2)]
-    public void GetTeamShouldReturnCorrectTeamForPosition(PlayerPosition position, Team expected)
+    public void GetTeam_WithAnyPosition_ReturnsCorrectTeam(PlayerPosition position, Team expected)
     {
         var result = position.GetTeam();
 
@@ -25,7 +25,7 @@ public class PlayerPositionExtensionsTests
     [InlineData(PlayerPosition.East, PlayerPosition.South)]
     [InlineData(PlayerPosition.South, PlayerPosition.West)]
     [InlineData(PlayerPosition.West, PlayerPosition.North)]
-    public void GetNextPositionShouldReturnNextPositionClockwise(PlayerPosition position, PlayerPosition expected)
+    public void GetNextPosition_WithAnyPosition_ReturnsNextPositionClockwise(PlayerPosition position, PlayerPosition expected)
     {
         var result = position.GetNextPosition();
 
@@ -33,7 +33,7 @@ public class PlayerPositionExtensionsTests
     }
 
     [Fact]
-    public void GetNextPositionShouldCompleteFullCycle()
+    public void GetNextPosition_CalledMultipleTimes_CompletesFullCycle()
     {
         var current = PlayerPosition.North;
 
@@ -55,7 +55,7 @@ public class PlayerPositionExtensionsTests
     [InlineData(PlayerPosition.South, PlayerPosition.North)]
     [InlineData(PlayerPosition.East, PlayerPosition.West)]
     [InlineData(PlayerPosition.West, PlayerPosition.East)]
-    public void GetPartnerPositionShouldReturnOppositePositionOnSameTeam(PlayerPosition position, PlayerPosition expected)
+    public void GetPartnerPosition_WithAnyPosition_ReturnsOppositePositionOnSameTeam(PlayerPosition position, PlayerPosition expected)
     {
         var result = position.GetPartnerPosition();
 
@@ -63,7 +63,7 @@ public class PlayerPositionExtensionsTests
     }
 
     [Fact]
-    public void GetPartnerPositionShouldReturnPlayerOnSameTeam()
+    public void GetPartnerPosition_WithAnyPosition_ReturnsPlayerOnSameTeam()
     {
         foreach (var position in new[] { PlayerPosition.North, PlayerPosition.South, PlayerPosition.East, PlayerPosition.West })
         {
@@ -89,7 +89,7 @@ public class PlayerPositionExtensionsTests
     [InlineData(PlayerPosition.West, PlayerPosition.North, RelativePlayerPosition.LeftHandOpponent)]
     [InlineData(PlayerPosition.West, PlayerPosition.East, RelativePlayerPosition.Partner)]
     [InlineData(PlayerPosition.West, PlayerPosition.South, RelativePlayerPosition.RightHandOpponent)]
-    public void ToRelativePositionShouldConvertCorrectly(
+    public void ToRelativePosition_WithAbsolutePosition_ConvertsCorrectly(
         PlayerPosition self,
         PlayerPosition absolute,
         RelativePlayerPosition expected)
@@ -115,7 +115,7 @@ public class PlayerPositionExtensionsTests
     [InlineData(PlayerPosition.West, RelativePlayerPosition.LeftHandOpponent, PlayerPosition.North)]
     [InlineData(PlayerPosition.West, RelativePlayerPosition.Partner, PlayerPosition.East)]
     [InlineData(PlayerPosition.West, RelativePlayerPosition.RightHandOpponent, PlayerPosition.South)]
-    public void ToAbsolutePositionShouldConvertCorrectly(
+    public void ToAbsolutePosition_WithRelativePosition_ConvertsCorrectly(
         PlayerPosition self,
         RelativePlayerPosition relative,
         PlayerPosition expected)
@@ -129,7 +129,7 @@ public class PlayerPositionExtensionsTests
     [InlineData(PlayerPosition.East)]
     [InlineData(PlayerPosition.South)]
     [InlineData(PlayerPosition.West)]
-    public void ConversionShouldBeReversible(PlayerPosition self)
+    public void ToRelativePosition_WhenConvertedBackToAbsolute_IsReversible(PlayerPosition self)
     {
         foreach (var absolute in new[]
         {
@@ -144,7 +144,7 @@ public class PlayerPositionExtensionsTests
     }
 
     [Fact]
-    public void GetPlayerAtRelativePositionShouldReturnCorrectPlayer()
+    public void GetPlayerAtRelativePosition_WithRelativePosition_ReturnsCorrectPlayer()
     {
         var players = new Dictionary<PlayerPosition, Player>
         {
@@ -172,7 +172,7 @@ public class PlayerPositionExtensionsTests
     [InlineData(PlayerPosition.East)]
     [InlineData(PlayerPosition.South)]
     [InlineData(PlayerPosition.West)]
-    public void PartnerShouldAlwaysBeOnSameTeam(PlayerPosition self)
+    public void ToAbsolutePosition_ForPartner_ReturnsPlayerOnSameTeam(PlayerPosition self)
     {
         var partnerAbsolute = RelativePlayerPosition.Partner.ToAbsolutePosition(self);
         self.GetTeam().Should().Be(partnerAbsolute.GetTeam());
@@ -183,7 +183,7 @@ public class PlayerPositionExtensionsTests
     [InlineData(PlayerPosition.East)]
     [InlineData(PlayerPosition.South)]
     [InlineData(PlayerPosition.West)]
-    public void OpponentsShouldBeOnDifferentTeam(PlayerPosition self)
+    public void ToAbsolutePosition_ForOpponents_ReturnsPlayersOnDifferentTeam(PlayerPosition self)
     {
         var leftAbsolute = RelativePlayerPosition.LeftHandOpponent.ToAbsolutePosition(self);
         var rightAbsolute = RelativePlayerPosition.RightHandOpponent.ToAbsolutePosition(self);

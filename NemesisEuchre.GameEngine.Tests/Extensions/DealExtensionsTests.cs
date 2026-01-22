@@ -9,7 +9,7 @@ namespace NemesisEuchre.GameEngine.Tests.Extensions;
 public class DealExtensionsTests
 {
     [Fact]
-    public void DealToRelativeShouldConvertUpCardToRelative()
+    public void ToRelative_WithDeal_ConvertsUpCardToRelative()
     {
         var deal = new Deal
         {
@@ -32,7 +32,7 @@ public class DealExtensionsTests
     }
 
     [Fact]
-    public void DealToRelativeShouldConvertTricksWithTrumpContext()
+    public void ToRelative_WithTricks_ConvertsTricksWithTrumpContext()
     {
         var deal = new Deal
         {
@@ -57,7 +57,7 @@ public class DealExtensionsTests
     }
 
     [Fact]
-    public void DealToRelativeShouldThrowWhenTrumpNotSet()
+    public void ToRelative_WhenTrumpNotSet_ThrowsArgumentException()
     {
         var deal = new Deal
         {
@@ -77,7 +77,7 @@ public class DealExtensionsTests
     }
 
     [Fact]
-    public void DealToRelativeShouldConvertAllTricksWhenTrumpSet()
+    public void ToRelative_WithTrumpSet_ConvertsAllTricks()
     {
         var deal = new Deal
         {
@@ -100,7 +100,7 @@ public class DealExtensionsTests
     [InlineData(PlayerPosition.East)]
     [InlineData(PlayerPosition.South)]
     [InlineData(PlayerPosition.West)]
-    public void DealToRelativeShouldWorkFromAnyPerspective(PlayerPosition self)
+    public void ToRelative_FromAnyPerspective_WorksCorrectly(PlayerPosition self)
     {
         var deal = new Deal
         {
