@@ -6,8 +6,6 @@ namespace NemesisEuchre.GameEngine;
 
 public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
 {
-    private readonly ICardShuffler _cardShuffler = cardShuffler;
-
     public Task<Deal> CreateDealAsync(Game game, Deal? previousDeal = null)
     {
         ValidateInputs(game, previousDeal);
@@ -109,7 +107,9 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
     private Card[] PrepareShuffledDeck()
     {
         var deck = CreateEuchreDeck();
-        _cardShuffler.Shuffle(deck);
+
+        cardShuffler.Shuffle(deck);
+
         return deck;
     }
 }
