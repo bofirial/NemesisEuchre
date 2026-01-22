@@ -6,7 +6,8 @@
       "Bash(git add:*)",
       "Bash(dotnet format:*)",
       "Bash(dotnet restore:*)",
-      "Bash(powershell -NoProfile -Command \"[Console]::Beep\\(\\)\")"
+      "Bash(powershell -NoProfile -Command \"[Console]::Beep\\(\\)\")",
+      "Bash(Select-String -Pattern \"Passed|Failed|Total\")"
     ]
   }
 }
