@@ -19,4 +19,8 @@ public class Deal
     public Trick? CurrentTrick { get; set; }
 
     public List<Trick> CompletedTricks { get; } = [];
+
+    public DealResult? DealResult { get; set; }
+
+    public Team? WinningTeam { get; set; }
 }
