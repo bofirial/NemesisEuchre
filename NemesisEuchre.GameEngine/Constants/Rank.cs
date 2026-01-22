@@ -8,4 +8,6 @@ public enum Rank
     Queen = 12,
     King = 13,
     Ace = 14,
+    LeftBower = 15,
+    RightBower = 16,
 }

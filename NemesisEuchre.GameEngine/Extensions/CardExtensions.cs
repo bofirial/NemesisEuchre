@@ -54,6 +54,8 @@ public static class CardExtensions
             Rank.Queen => "Q",
             Rank.King => "K",
             Rank.Ace => "A",
+            Rank.LeftBower => "J",
+            Rank.RightBower => "J",
             _ => "?"
         };
 
@@ -71,9 +73,21 @@ public static class CardExtensions
 
     public static RelativeCard ToRelative(this Card card, Suit trump)
     {
+        var rank = card.Rank;
+
+        if (card.IsRightBower(trump))
+        {
+            rank = Rank.RightBower;
+        }
+
+        if (card.IsLeftBower(trump))
+        {
+            rank = Rank.LeftBower;
+        }
+
         return new RelativeCard
         {
-            Rank = card.Rank,
+            Rank = rank,
             Suit = card.Suit.ToRelativeSuit(trump),
         };
     }

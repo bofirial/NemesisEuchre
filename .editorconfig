@@ -434,5 +434,8 @@ dotnet_diagnostic.SA1010.severity = none
 # SA1206: Declaration keywords should follow order
 dotnet_diagnostic.SA1206.severity = none
 
+# SA1000: Keywords should be spaced correctly
+dotnet_diagnostic.SA1000.severity = none
+
 [**/*Tests.cs]
 dotnet_diagnostic.VSTHRD200.severity = none
