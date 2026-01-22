@@ -10,7 +10,10 @@ public class GameFactory : IGameFactory
         ArgumentNullException.ThrowIfNull(gameOptions);
         ArgumentOutOfRangeException.ThrowIfLessThan(gameOptions.WinningScore, 1);
 
-        var game = new Game();
+        var game = new Game
+        {
+            WinningScore = gameOptions.WinningScore,
+        };
 
         game.Players.Add(PlayerPosition.North, new Player { Position = PlayerPosition.North });
         game.Players.Add(PlayerPosition.East, new Player { Position = PlayerPosition.East });

@@ -17,4 +17,26 @@ public class GameFactoryTests
         game.Should().NotBeNull();
         game.Players.Should().HaveCount(4);
     }
+
+    [Fact]
+    public async Task CreateGameAsyncShouldSetDefaultWinningScore()
+    {
+        var gameInitializer = new GameFactory();
+
+        var gameOptions = new GameOptions();
+        var game = await gameInitializer.CreateGameAsync(gameOptions);
+
+        game.WinningScore.Should().Be(10);
+    }
+
+    [Fact]
+    public async Task CreateGameAsyncShouldSetCustomWinningScore()
+    {
+        var gameInitializer = new GameFactory();
+
+        var gameOptions = new GameOptions { WinningScore = 15 };
+        var game = await gameInitializer.CreateGameAsync(gameOptions);
+
+        game.WinningScore.Should().Be(15);
+    }
 }
