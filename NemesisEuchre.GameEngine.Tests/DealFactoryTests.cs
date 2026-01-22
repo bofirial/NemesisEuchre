@@ -125,27 +125,31 @@ public class DealFactoryTests
         var factory = new DealFactory(new NoOpShuffler());
         var game = CreateTestGame();
 
-        await factory.CreateDealAsync(game);
+        var deal = await factory.CreateDealAsync(game);
 
-        game.Players[PlayerPosition.North].Hand.Should().HaveCount(5);
-        game.Players[PlayerPosition.East].Hand.Should().HaveCount(5);
-        game.Players[PlayerPosition.South].Hand.Should().HaveCount(5);
-        game.Players[PlayerPosition.West].Hand.Should().HaveCount(5);
+        deal.Players[PlayerPosition.North].StartingHand.Should().HaveCount(5);
+        deal.Players[PlayerPosition.East].StartingHand.Should().HaveCount(5);
+        deal.Players[PlayerPosition.South].StartingHand.Should().HaveCount(5);
+        deal.Players[PlayerPosition.West].StartingHand.Should().HaveCount(5);
+
+        deal.Players[PlayerPosition.North].CurrentHand.Should().HaveCount(5);
+        deal.Players[PlayerPosition.East].CurrentHand.Should().HaveCount(5);
+        deal.Players[PlayerPosition.South].CurrentHand.Should().HaveCount(5);
+        deal.Players[PlayerPosition.West].CurrentHand.Should().HaveCount(5);
     }
 
     [Fact]
-    public async Task CreateDealAsync_ClearsExistingPlayerHandsBeforeDealing()
+    public async Task CreateDealAsync_InitializesStartingHandsAndCurrentHandsWithSameCards()
     {
         var factory = new DealFactory(new NoOpShuffler());
         var game = CreateTestGame();
 
-        game.Players[PlayerPosition.North].Hand.Add(new Card { Suit = Suit.Spades, Rank = Rank.Ace });
-        game.Players[PlayerPosition.East].Hand.Add(new Card { Suit = Suit.Hearts, Rank = Rank.King });
+        var deal = await factory.CreateDealAsync(game);
 
-        await factory.CreateDealAsync(game);
-
-        game.Players[PlayerPosition.North].Hand.Should().HaveCount(5);
-        game.Players[PlayerPosition.East].Hand.Should().HaveCount(5);
+        foreach (var position in Enum.GetValues<PlayerPosition>())
+        {
+            deal.Players[position].StartingHand.Should().BeEquivalentTo(deal.Players[position].CurrentHand);
+        }
     }
 
     [Fact]
@@ -154,10 +158,10 @@ public class DealFactoryTests
         var factory = new DealFactory(new NoOpShuffler());
         var game = CreateTestGame();
 
-        await factory.CreateDealAsync(game);
+        var deal = await factory.CreateDealAsync(game);
 
-        var allPlayerCards = game.Players.Values
-            .SelectMany(p => p.Hand)
+        var allPlayerCards = deal.Players.Values
+            .SelectMany(p => p.StartingHand)
             .ToList();
 
         allPlayerCards.Should().OnlyHaveUniqueItems(card => $"{card.Suit}-{card.Rank}");
@@ -193,8 +197,8 @@ public class DealFactoryTests
 
         var deal = await factory.CreateDealAsync(game);
 
-        var allCards = game.Players.Values
-            .SelectMany(p => p.Hand)
+        var allCards = deal.Players.Values
+            .SelectMany(p => p.StartingHand)
             .Concat(deal.Deck)
             .Append(deal.UpCard!)
             .ToList();
@@ -259,11 +263,69 @@ public class DealFactoryTests
 
         var deal = await factory.CreateDealAsync(game);
 
-        var totalCards = game.Players.Values.Sum(p => p.Hand.Count)
-            + deal.Deck.Length
+        var totalCards = deal.Players.Values.Sum(p => p.StartingHand.Length)
+            + deal.Deck.Count
             + 1;
 
         totalCards.Should().Be(24);
+    }
+
+    [Fact]
+    public async Task CreateDealAsync_StartingHandsAreImmutableArrays()
+    {
+        var factory = new DealFactory(new NoOpShuffler());
+        var game = CreateTestGame();
+
+        var deal = await factory.CreateDealAsync(game);
+
+        foreach (var position in Enum.GetValues<PlayerPosition>())
+        {
+            deal.Players[position].StartingHand.Should().BeOfType<Card[]>();
+        }
+    }
+
+    [Fact]
+    public async Task CreateDealAsync_CurrentHandsAreMutableLists()
+    {
+        var factory = new DealFactory(new NoOpShuffler());
+        var game = CreateTestGame();
+
+        var deal = await factory.CreateDealAsync(game);
+
+        foreach (var position in Enum.GetValues<PlayerPosition>())
+        {
+            deal.Players[position].CurrentHand.Should().BeOfType<List<Card>>();
+        }
+    }
+
+    [Fact]
+    public async Task CreateDealAsync_DealPlayerPositionsAreSetCorrectly()
+    {
+        var factory = new DealFactory(new NoOpShuffler());
+        var game = CreateTestGame();
+
+        var deal = await factory.CreateDealAsync(game);
+
+        foreach (var position in Enum.GetValues<PlayerPosition>())
+        {
+            deal.Players[position].Position.Should().Be(position);
+        }
+    }
+
+    [Fact]
+    public async Task CreateDealAsync_CopiesBotTypeFromGamePlayer()
+    {
+        var factory = new DealFactory(new NoOpShuffler());
+        var game = CreateTestGame();
+        game.Players[PlayerPosition.North].BotType = PlayerBots.BotType.Chaos;
+        game.Players[PlayerPosition.South].BotType = PlayerBots.BotType.Chad;
+
+        var deal = await factory.CreateDealAsync(game);
+
+        deal.Players[PlayerPosition.North].BotType.Should().Be(PlayerBots.BotType.Chaos);
+        deal.Players[PlayerPosition.East].BotType.Should().BeNull();
+        deal.Players[PlayerPosition.South].BotType.Should().Be(PlayerBots.BotType.Chad);
+        deal.Players[PlayerPosition.West].BotType.Should().BeNull();
     }
 
     private static Game CreateTestGame()

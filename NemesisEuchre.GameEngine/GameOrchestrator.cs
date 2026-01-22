@@ -17,7 +17,7 @@ public class GameOrchestrator(IGameFactory gameFactory, IDealFactory dealFactory
         {
             game.CurrentDeal = await dealFactory.CreateDealAsync(game, game.CompletedDeals.LastOrDefault());
 
-            await dealOrchestrator.OrchestrateDealAsync(game.CurrentDeal, game.Players);
+            await dealOrchestrator.OrchestrateDealAsync(game.CurrentDeal);
 
             await gameScoreUpdater.UpdateGameScoreAsync(game, game.CurrentDeal);
 

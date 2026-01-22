@@ -27,19 +27,24 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
         var deck = CreateEuchreDeck();
         _cardShuffler.Shuffle(deck);
 
-        foreach (var player in game.Players.Values)
-        {
-            player.Hand.Clear();
-        }
+        var dealPlayers = new Dictionary<PlayerPosition, DealPlayer>();
 
         var currentPosition = dealerPosition.GetNextPosition();
         for (int i = 0; i < 4; i++)
         {
-            var player = game.Players[currentPosition];
+            var cardsForPlayer = new Card[5];
             for (int cardIndex = 0; cardIndex < 5; cardIndex++)
             {
-                player.Hand.Add(deck[(i * 5) + cardIndex]);
+                cardsForPlayer[cardIndex] = deck[(i * 5) + cardIndex];
             }
+
+            dealPlayers[currentPosition] = new DealPlayer
+            {
+                Position = currentPosition,
+                StartingHand = cardsForPlayer,
+                CurrentHand = [.. cardsForPlayer],
+                BotType = game.Players[currentPosition].BotType,
+            };
 
             currentPosition = currentPosition.GetNextPosition();
         }
@@ -48,8 +53,9 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
         {
             DealStatus = DealStatus.NotStarted,
             DealerPosition = dealerPosition,
-            Deck = deck[21..24],
+            Deck = [.. deck[21..24]],
             UpCard = deck[20],
+            Players = dealPlayers,
         };
 
         return Task.FromResult(deal);

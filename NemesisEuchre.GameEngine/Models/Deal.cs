@@ -8,7 +8,7 @@ public class Deal
 
     public PlayerPosition? DealerPosition { get; set; }
 
-    public Card[] Deck { get; set; } = [];
+    public List<Card> Deck { get; set; } = [];
 
     public Card? UpCard { get; set; }
 
@@ -25,4 +25,6 @@ public class Deal
     public DealResult? DealResult { get; set; }
 
     public Team? WinningTeam { get; set; }
+
+    public Dictionary<PlayerPosition, DealPlayer> Players { get; set; } = [];
 }
