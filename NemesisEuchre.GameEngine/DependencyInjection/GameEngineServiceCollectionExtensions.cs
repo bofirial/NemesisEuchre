@@ -8,6 +8,7 @@ public static class GameEngineServiceCollectionExtensions
     {
         serviceCollection.AddScoped<IGameFactory, GameFactory>();
         serviceCollection.AddScoped<IDealFactory, DealFactory>();
+        serviceCollection.AddScoped<IGameScoreUpdater, GameScoreUpdater>();
         serviceCollection.AddScoped<ICardShuffler, CardShuffler>();
     }
 }
