@@ -10,14 +10,14 @@ public class BetaBot : IPlayerBot
 
     public BotType BotType => BotType.Chad;
 
-    public Task<CallTrumpDecision> CallTrumpAsync(List<Card> cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
+    public Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
     {
         return validCallTrumpDecisions.Contains(CallTrumpDecision.Pass)
             ? Task.FromResult(CallTrumpDecision.OrderItUpAndGoAlone)
             : SelectRandomAsync(validCallTrumpDecisions);
     }
 
-    public Task<RelativeCard> DiscardCardAsync(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard)
+    public Task<RelativeCard> DiscardCardAsync(RelativeCard[] cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard)
     {
         var nonTrumpCards = validCardsToDiscard
             .Where(card => card.Suit != RelativeSuit.Trump)
@@ -28,7 +28,7 @@ public class BetaBot : IPlayerBot
             : Task.FromResult(validCardsToDiscard.OrderBy(card => card.Rank).First());
     }
 
-    public Task<RelativeCard> PlayCardAsync(List<RelativeCard> cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay)
+    public Task<RelativeCard> PlayCardAsync(RelativeCard[] cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay)
     {
         var nonTrumpCards = validCardsToPlay
             .Where(card => card.Suit != RelativeSuit.Trump)
