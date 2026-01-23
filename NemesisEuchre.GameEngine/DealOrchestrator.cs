@@ -14,17 +14,11 @@ public class DealOrchestrator(
     {
         ValidateDealPreconditions(deal);
 
-        deal.DealStatus = DealStatus.SelectingTrump;
-        await trumpSelectionOrchestrator.SelectTrumpAsync(deal);
-        ValidateTrumpSelected(deal);
+        await ExecuteTrumpSelectionPhaseAsync(deal);
 
-        deal.DealStatus = DealStatus.Playing;
-        await PlayAllTricksAsync(deal);
-        ValidateAllTricksPlayed(deal);
+        await ExecuteTrickPlayingPhaseAsync(deal);
 
-        deal.DealStatus = DealStatus.Scoring;
-        (deal.DealResult, deal.WinningTeam) = dealResultCalculator.CalculateDealResult(deal);
-        ValidateDealCompleted(deal);
+        ExecuteScoringPhase(deal);
 
         deal.DealStatus = DealStatus.Complete;
     }
@@ -88,18 +82,51 @@ public class DealOrchestrator(
         }
     }
 
+    private async Task ExecuteTrumpSelectionPhaseAsync(Deal deal)
+    {
+        deal.DealStatus = DealStatus.SelectingTrump;
+
+        await trumpSelectionOrchestrator.SelectTrumpAsync(deal);
+
+        ValidateTrumpSelected(deal);
+    }
+
+    private async Task ExecuteTrickPlayingPhaseAsync(Deal deal)
+    {
+        deal.DealStatus = DealStatus.Playing;
+
+        await PlayAllTricksAsync(deal);
+
+        ValidateAllTricksPlayed(deal);
+    }
+
+    private void ExecuteScoringPhase(Deal deal)
+    {
+        deal.DealStatus = DealStatus.Scoring;
+
+        (deal.DealResult, deal.WinningTeam) = dealResultCalculator.CalculateDealResult(deal);
+
+        ValidateDealCompleted(deal);
+    }
+
     private async Task PlayAllTricksAsync(Deal deal)
     {
         var leadPosition = deal.DealerPosition!.Value.GetNextPosition();
 
         for (int trickNumber = 0; trickNumber < 5; trickNumber++)
         {
-            var trick = await trickPlayingOrchestrator.PlayTrickAsync(deal, leadPosition);
-
-            var winningPosition = trickWinnerCalculator.CalculateWinner(trick, deal.Trump!.Value);
-
-            deal.CompletedTricks.Add(trick);
-            leadPosition = winningPosition;
+            leadPosition = await PlaySingleTrickAsync(deal, leadPosition);
         }
+    }
+
+    private async Task<PlayerPosition> PlaySingleTrickAsync(Deal deal, PlayerPosition leadPosition)
+    {
+        var trick = await trickPlayingOrchestrator.PlayTrickAsync(deal, leadPosition);
+
+        var winningPosition = trickWinnerCalculator.CalculateWinner(trick, deal.Trump!.Value);
+
+        deal.CompletedTricks.Add(trick);
+
+        return winningPosition;
     }
 }
