@@ -8,6 +8,7 @@ namespace NemesisEuchre.GameEngine;
 
 public class TrumpSelectionOrchestrator(IEnumerable<IPlayerBot> playerBots) : ITrumpSelectionOrchestrator
 {
+    private const int PlayersPerDeal = 4;
     private readonly Dictionary<BotType, IPlayerBot> _playerBots = playerBots.ToDictionary(playerBot => playerBot.BotType, playerBot => playerBot);
 
     public async Task SelectTrumpAsync(Deal deal)
@@ -43,9 +44,9 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerBot> playerBots) : IT
             throw new InvalidOperationException("UpCard must be set");
         }
 
-        if (deal.Players.Count != 4)
+        if (deal.Players.Count != PlayersPerDeal)
         {
-            throw new InvalidOperationException($"Deal must have exactly 4 players, but had {deal.Players.Count}");
+            throw new InvalidOperationException($"Deal must have exactly {PlayersPerDeal} players, but had {deal.Players.Count}");
         }
     }
 
@@ -62,6 +63,60 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerBot> playerBots) : IT
         }
     }
 
+    private static PlayerPosition GetFirstPlayerPosition(Deal deal)
+    {
+        return deal.DealerPosition!.Value.GetNextPosition();
+    }
+
+    private static bool IsDealer(Deal deal, PlayerPosition position)
+    {
+        return position == deal.DealerPosition!.Value;
+    }
+
+    private static void ValidateDecision(CallTrumpDecision decision, CallTrumpDecision[] validDecisions)
+    {
+        if (!validDecisions.Contains(decision))
+        {
+            throw new InvalidOperationException("CallTrumpDecision was not included in ValidDecisions");
+        }
+    }
+
+    private static void SetTrumpResult(Deal deal, Suit trump, PlayerPosition callingPlayer, CallTrumpDecision decision)
+    {
+        deal.Trump = trump;
+        deal.CallingPlayer = callingPlayer;
+        deal.CallingPlayerIsGoingAlone = IsGoingAloneDecision(decision);
+    }
+
+    private static void AddUpcardToDealerHand(DealPlayer dealer, Card upCard)
+    {
+        dealer.CurrentHand.Add(upCard);
+    }
+
+    private static RelativeCard[] ConvertToRelativeCards(List<Card> cards, Suit trump)
+    {
+        return [.. cards.Select(c => c.ToRelative(trump))];
+    }
+
+    private static void ValidateDiscard(RelativeCard cardToDiscard, RelativeCard[] validCards)
+    {
+        if (!validCards.Contains(cardToDiscard))
+        {
+            throw new InvalidOperationException("CardToDiscard was not included in ValidCardsToDiscard");
+        }
+    }
+
+    private static (short TeamScore, short OpponentScore) GetScores(Deal deal, PlayerPosition playerPosition)
+    {
+        var isTeam1 = playerPosition.GetTeam() == Team.Team1;
+        return isTeam1 ? (deal.Team1Score, deal.Team2Score) : (deal.Team2Score, deal.Team1Score);
+    }
+
+    private static RelativePlayerPosition GetRelativeDealerPosition(Deal deal, PlayerPosition playerPosition)
+    {
+        return deal.DealerPosition!.Value.ToRelativePosition(playerPosition);
+    }
+
     private static CallTrumpDecision[] GetValidRound1Decisions()
     {
         return [CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp, CallTrumpDecision.OrderItUpAndGoAlone];
@@ -76,34 +131,27 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerBot> playerBots) : IT
             decisions.Add(CallTrumpDecision.Pass);
         }
 
-        foreach (var suit in from suit in Enum.GetValues<Suit>()
-                             where suit != upcardSuit
-                             select suit)
+        foreach (var suit in Enum.GetValues<Suit>().Where(suit => suit != upcardSuit))
         {
-            switch (suit)
-            {
-                case Suit.Clubs:
-                    decisions.Add(CallTrumpDecision.CallClubs);
-                    decisions.Add(CallTrumpDecision.CallClubsAndGoAlone);
-                    break;
-                case Suit.Diamonds:
-                    decisions.Add(CallTrumpDecision.CallDiamonds);
-                    decisions.Add(CallTrumpDecision.CallDiamondsAndGoAlone);
-                    break;
-                case Suit.Hearts:
-                    decisions.Add(CallTrumpDecision.CallHearts);
-                    decisions.Add(CallTrumpDecision.CallHeartsAndGoAlone);
-                    break;
-                case Suit.Spades:
-                    decisions.Add(CallTrumpDecision.CallSpades);
-                    decisions.Add(CallTrumpDecision.CallSpadesAndGoAlone);
-                    break;
-                default:
-                    throw new InvalidOperationException("Invalid Suit");
-            }
+            AddSuitDecisions(decisions, suit);
         }
 
         return [.. decisions];
+    }
+
+    private static void AddSuitDecisions(List<CallTrumpDecision> decisions, Suit suit)
+    {
+        var (callDecision, callAloneDecision) = suit switch
+        {
+            Suit.Clubs => (CallTrumpDecision.CallClubs, CallTrumpDecision.CallClubsAndGoAlone),
+            Suit.Diamonds => (CallTrumpDecision.CallDiamonds, CallTrumpDecision.CallDiamondsAndGoAlone),
+            Suit.Hearts => (CallTrumpDecision.CallHearts, CallTrumpDecision.CallHeartsAndGoAlone),
+            Suit.Spades => (CallTrumpDecision.CallSpades, CallTrumpDecision.CallSpadesAndGoAlone),
+            _ => throw new InvalidOperationException($"Invalid Suit: {suit}")
+        };
+
+        decisions.Add(callDecision);
+        decisions.Add(callAloneDecision);
     }
 
     private static Suit ConvertDecisionToSuit(CallTrumpDecision decision)
@@ -132,26 +180,17 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerBot> playerBots) : IT
 
     private async Task<bool> ExecuteRound1Async(Deal deal)
     {
-        var currentPosition = deal.DealerPosition!.Value.GetNextPosition();
         var validDecisions = GetValidRound1Decisions();
+        var currentPosition = GetFirstPlayerPosition(deal);
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < PlayersPerDeal; i++)
         {
-            var decision = await GetPlayerDecisionAsync(deal, currentPosition, [.. validDecisions]);
-
-            if (!validDecisions.Contains(decision))
-            {
-                throw new InvalidOperationException("CallTrumpDecision was not included in ValidDecisions");
-            }
+            var decision = await GetAndValidatePlayerDecisionAsync(deal, currentPosition, validDecisions);
 
             if (decision != CallTrumpDecision.Pass)
             {
-                deal.Trump = deal.UpCard!.Suit;
-                deal.CallingPlayer = currentPosition;
-                deal.CallingPlayerIsGoingAlone = decision == CallTrumpDecision.OrderItUpAndGoAlone;
-
+                SetTrumpResult(deal, deal.UpCard!.Suit, currentPosition, decision);
                 await HandleDealerDiscardAsync(deal);
-
                 return true;
             }
 
@@ -163,27 +202,20 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerBot> playerBots) : IT
 
     private async Task ExecuteRound2Async(Deal deal)
     {
-        var currentPosition = deal.DealerPosition!.Value.GetNextPosition();
         var upcardSuit = deal.UpCard!.Suit;
+        var currentPosition = GetFirstPlayerPosition(deal);
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < PlayersPerDeal; i++)
         {
-            bool isDealer = currentPosition == deal.DealerPosition.Value;
+            bool isDealer = IsDealer(deal, currentPosition);
             var validDecisions = GetValidRound2Decisions(upcardSuit, isDealer);
 
-            var decision = await GetPlayerDecisionAsync(deal, currentPosition, [.. validDecisions]);
-
-            if (!validDecisions.Contains(decision))
-            {
-                throw new InvalidOperationException("CallTrumpDecision was not included in ValidDecisions");
-            }
+            var decision = await GetAndValidatePlayerDecisionAsync(deal, currentPosition, validDecisions);
 
             if (decision != CallTrumpDecision.Pass)
             {
-                deal.Trump = ConvertDecisionToSuit(decision);
-                deal.CallingPlayer = currentPosition;
-                deal.CallingPlayerIsGoingAlone = IsGoingAloneDecision(decision);
-
+                var trump = ConvertDecisionToSuit(decision);
+                SetTrumpResult(deal, trump, currentPosition, decision);
                 return;
             }
 
@@ -199,23 +231,27 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerBot> playerBots) : IT
         CallTrumpDecision[] validDecisions)
     {
         var player = deal.Players[playerPosition];
-        var playerBot = _playerBots[player.BotType!.Value];
+        var playerBot = GetPlayerBot(player);
 
-        var cardsInHand = player.CurrentHand.ToArray();
-        var upCard = deal.UpCard!;
-        var dealerPosition = deal.DealerPosition!.Value;
-        var relativeDealerPosition = dealerPosition.ToRelativePosition(playerPosition);
-
-        var teamScore = playerPosition.GetTeam() == Team.Team1 ? deal.Team1Score : deal.Team2Score;
-        var opponentScore = playerPosition.GetTeam() == Team.Team1 ? deal.Team2Score : deal.Team1Score;
+        var (teamScore, opponentScore) = GetScores(deal, playerPosition);
 
         return playerBot.CallTrumpAsync(
-            cardsInHand,
-            upCard,
-            relativeDealerPosition,
+            [.. player.CurrentHand],
+            deal.UpCard!,
+            GetRelativeDealerPosition(deal, playerPosition),
             teamScore,
             opponentScore,
             validDecisions);
+    }
+
+    private async Task<CallTrumpDecision> GetAndValidatePlayerDecisionAsync(
+        Deal deal,
+        PlayerPosition playerPosition,
+        CallTrumpDecision[] validDecisions)
+    {
+        var decision = await GetPlayerDecisionAsync(deal, playerPosition, validDecisions);
+        ValidateDecision(decision, validDecisions);
+        return decision;
     }
 
     private async Task HandleDealerDiscardAsync(Deal deal)
@@ -223,30 +259,35 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerBot> playerBots) : IT
         var dealerPosition = deal.DealerPosition!.Value;
         var dealer = deal.Players[dealerPosition];
 
-        dealer.CurrentHand.Add(deal.UpCard!);
+        AddUpcardToDealerHand(dealer, deal.UpCard!);
 
-        var dealerBot = _playerBots[dealer.BotType!.Value];
+        var relativeHand = ConvertToRelativeCards(dealer.CurrentHand, deal.Trump!.Value);
+        var cardToDiscard = await GetDealerDiscardDecisionAsync(deal, dealerPosition, dealer, relativeHand);
 
-        var trump = deal.Trump!.Value;
-        var relativeHand = dealer.CurrentHand
-            .Select(c => c.ToRelative(trump))
-            .ToArray();
+        ValidateDiscard(cardToDiscard, relativeHand);
 
-        var teamScore = dealerPosition.GetTeam() == Team.Team1 ? deal.Team1Score : deal.Team2Score;
-        var opponentScore = dealerPosition.GetTeam() == Team.Team1 ? deal.Team2Score : deal.Team1Score;
+        dealer.CurrentHand.Remove(cardToDiscard.Card);
+    }
 
-        var cardToDiscard = await dealerBot.DiscardCardAsync(
+    private Task<RelativeCard> GetDealerDiscardDecisionAsync(
+        Deal deal,
+        PlayerPosition dealerPosition,
+        DealPlayer dealer,
+        RelativeCard[] relativeHand)
+    {
+        var dealerBot = GetPlayerBot(dealer);
+        var (teamScore, opponentScore) = GetScores(deal, dealerPosition);
+
+        return dealerBot.DiscardCardAsync(
             [.. relativeHand],
             deal.ToRelative(dealerPosition),
             teamScore,
             opponentScore,
             [.. relativeHand]);
+    }
 
-        if (!relativeHand.Contains(cardToDiscard))
-        {
-            throw new InvalidOperationException("CardToDiscard was not included in ValidCardsToDiscard");
-        }
-
-        dealer.CurrentHand.Remove(cardToDiscard.Card);
+    private IPlayerBot GetPlayerBot(DealPlayer player)
+    {
+        return _playerBots[player.BotType!.Value];
     }
 }
