@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
 using NemesisEuchre.GameEngine.PlayerBots;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.DependencyInjection;
 
@@ -14,9 +15,9 @@ public static class GameEngineServiceCollectionExtensions
         serviceCollection.AddScoped<IGameScoreUpdater, GameScoreUpdater>();
         serviceCollection.AddScoped<ICardShuffler, CardShuffler>();
 
-        serviceCollection.AddScoped<IPlayerBot, ChaosBot>();
-        serviceCollection.AddScoped<IPlayerBot, ChadBot>();
-        serviceCollection.AddScoped<IPlayerBot, BetaBot>();
+        serviceCollection.AddScoped<IPlayerActor, ChaosBot>();
+        serviceCollection.AddScoped<IPlayerActor, ChadBot>();
+        serviceCollection.AddScoped<IPlayerActor, BetaBot>();
 
         serviceCollection.AddScoped<IDealOrchestrator, DealOrchestrator>();
         serviceCollection.AddScoped<ITrumpSelectionOrchestrator, TrumpSelectionOrchestrator>();

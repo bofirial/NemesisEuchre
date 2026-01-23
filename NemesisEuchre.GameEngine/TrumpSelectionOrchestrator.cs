@@ -1,15 +1,14 @@
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
-using NemesisEuchre.GameEngine.PlayerBots;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine;
 
-public class TrumpSelectionOrchestrator(IEnumerable<IPlayerBot> playerBots) : ITrumpSelectionOrchestrator
+public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors) : ITrumpSelectionOrchestrator
 {
     private const int PlayersPerDeal = 4;
-    private readonly Dictionary<BotType, IPlayerBot> _playerBots = playerBots.ToDictionary(playerBot => playerBot.BotType, playerBot => playerBot);
+    private readonly Dictionary<ActorType, IPlayerActor> _playerActors = playerActors.ToDictionary(x => x.ActorType, x => x);
 
     public async Task SelectTrumpAsync(Deal deal)
     {
@@ -231,11 +230,11 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerBot> playerBots) : IT
         CallTrumpDecision[] validDecisions)
     {
         var player = deal.Players[playerPosition];
-        var playerBot = GetPlayerBot(player);
+        var playerActor = GetPlayerActor(player);
 
         var (teamScore, opponentScore) = GetScores(deal, playerPosition);
 
-        return playerBot.CallTrumpAsync(
+        return playerActor.CallTrumpAsync(
             [.. player.CurrentHand],
             deal.UpCard!,
             GetRelativeDealerPosition(deal, playerPosition),
@@ -275,10 +274,10 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerBot> playerBots) : IT
         DealPlayer dealer,
         RelativeCard[] relativeHand)
     {
-        var dealerBot = GetPlayerBot(dealer);
+        var dealerActor = GetPlayerActor(dealer);
         var (teamScore, opponentScore) = GetScores(deal, dealerPosition);
 
-        return dealerBot.DiscardCardAsync(
+        return dealerActor.DiscardCardAsync(
             [.. relativeHand],
             deal.ToRelative(dealerPosition),
             teamScore,
@@ -286,8 +285,8 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerBot> playerBots) : IT
             [.. relativeHand]);
     }
 
-    private IPlayerBot GetPlayerBot(DealPlayer player)
+    private IPlayerActor GetPlayerActor(DealPlayer player)
     {
-        return _playerBots[player.BotType!.Value];
+        return _playerActors[player.ActorType!.Value];
     }
 }

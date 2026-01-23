@@ -5,7 +5,7 @@ using Moq;
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
-using NemesisEuchre.GameEngine.PlayerBots;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.Tests;
 
@@ -15,7 +15,7 @@ public class DealOrchestratorTests
     private readonly Mock<ITrickPlayingOrchestrator> _trickPlayingMock;
     private readonly Mock<ITrickWinnerCalculator> _trickWinnerMock;
     private readonly Mock<IDealResultCalculator> _dealResultMock;
-    private readonly Mock<IPlayerBot> _playerBotMock;
+    private readonly Mock<IPlayerActor> _playerActorMock;
     private readonly DealOrchestrator _sut;
 
     public DealOrchestratorTests()
@@ -24,9 +24,9 @@ public class DealOrchestratorTests
         _trickPlayingMock = new Mock<ITrickPlayingOrchestrator>();
         _trickWinnerMock = new Mock<ITrickWinnerCalculator>();
         _dealResultMock = new Mock<IDealResultCalculator>();
-        _playerBotMock = new Mock<IPlayerBot>();
+        _playerActorMock = new Mock<IPlayerActor>();
 
-        _playerBotMock.Setup(x => x.BotType).Returns(BotType.Chaos);
+        _playerActorMock.Setup(x => x.ActorType).Returns(ActorType.Chaos);
 
         SetupTrumpSelectionMock();
         SetupTrickPlayMocks();
@@ -306,10 +306,10 @@ public class DealOrchestratorTests
             Team2Score = 0,
             Players = new Dictionary<PlayerPosition, DealPlayer>
             {
-                { PlayerPosition.North, new DealPlayer { Position = PlayerPosition.North, BotType = BotType.Chaos } },
-                { PlayerPosition.East, new DealPlayer { Position = PlayerPosition.East, BotType = BotType.Chaos } },
-                { PlayerPosition.South, new DealPlayer { Position = PlayerPosition.South, BotType = BotType.Chaos } },
-                { PlayerPosition.West, new DealPlayer { Position = PlayerPosition.West, BotType = BotType.Chaos } },
+                { PlayerPosition.North, new DealPlayer { Position = PlayerPosition.North, ActorType = ActorType.Chaos } },
+                { PlayerPosition.East, new DealPlayer { Position = PlayerPosition.East, ActorType = ActorType.Chaos } },
+                { PlayerPosition.South, new DealPlayer { Position = PlayerPosition.South, ActorType = ActorType.Chaos } },
+                { PlayerPosition.West, new DealPlayer { Position = PlayerPosition.West, ActorType = ActorType.Chaos } },
             },
         };
     }

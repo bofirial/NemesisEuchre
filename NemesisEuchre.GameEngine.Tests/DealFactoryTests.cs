@@ -2,6 +2,7 @@ using FluentAssertions;
 
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.Tests;
 
@@ -312,19 +313,19 @@ public class DealFactoryTests
     }
 
     [Fact]
-    public async Task CreateDealAsync_CopiesBotTypeFromGamePlayer()
+    public async Task CreateDealAsync_CopiesActorTypeFromGamePlayer()
     {
         var factory = new DealFactory(new NoOpShuffler());
         var game = CreateTestGame();
-        game.Players[PlayerPosition.North].BotType = PlayerBots.BotType.Chaos;
-        game.Players[PlayerPosition.South].BotType = PlayerBots.BotType.Chad;
+        game.Players[PlayerPosition.North].ActorType = ActorType.Chaos;
+        game.Players[PlayerPosition.South].ActorType = ActorType.Chad;
 
         var deal = await factory.CreateDealAsync(game);
 
-        deal.Players[PlayerPosition.North].BotType.Should().Be(PlayerBots.BotType.Chaos);
-        deal.Players[PlayerPosition.East].BotType.Should().BeNull();
-        deal.Players[PlayerPosition.South].BotType.Should().Be(PlayerBots.BotType.Chad);
-        deal.Players[PlayerPosition.West].BotType.Should().BeNull();
+        deal.Players[PlayerPosition.North].ActorType.Should().Be(ActorType.Chaos);
+        deal.Players[PlayerPosition.East].ActorType.Should().BeNull();
+        deal.Players[PlayerPosition.South].ActorType.Should().Be(ActorType.Chad);
+        deal.Players[PlayerPosition.West].ActorType.Should().BeNull();
     }
 
     private static Game CreateTestGame()

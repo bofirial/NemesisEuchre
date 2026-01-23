@@ -1,4 +1,4 @@
-﻿using NemesisEuchre.GameEngine.PlayerBots;
+﻿using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.Models;
 
@@ -6,7 +6,7 @@ public class GameOptions
 {
     public short WinningScore { get; set; } = 10;
 
-    public BotType[] Team1BotTypes { get; set; } = [BotType.Chaos, BotType.Chaos];
+    public ActorType[] Team1ActorTypes { get; set; } = [ActorType.Chaos, ActorType.Chaos];
 
-    public BotType[] Team2BotTypes { get; set; } = [BotType.Chaos, BotType.Chaos];
+    public ActorType[] Team2ActorTypes { get; set; } = [ActorType.Chaos, ActorType.Chaos];
 }

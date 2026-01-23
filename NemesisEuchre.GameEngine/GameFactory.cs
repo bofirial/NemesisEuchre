@@ -10,7 +10,7 @@ public class GameFactory : IGameFactory
         ArgumentNullException.ThrowIfNull(gameOptions);
         ArgumentOutOfRangeException.ThrowIfLessThan(gameOptions.WinningScore, 1);
 
-        ValidateBotTypes(gameOptions);
+        ValidateActorTypes(gameOptions);
 
         var game = new Game
         {
@@ -20,40 +20,40 @@ public class GameFactory : IGameFactory
         game.Players.Add(PlayerPosition.North, new Player
         {
             Position = PlayerPosition.North,
-            BotType = gameOptions.Team1BotTypes[0],
+            ActorType = gameOptions.Team1ActorTypes[0],
         });
         game.Players.Add(PlayerPosition.East, new Player
         {
             Position = PlayerPosition.East,
-            BotType = gameOptions.Team2BotTypes[0],
+            ActorType = gameOptions.Team2ActorTypes[0],
         });
         game.Players.Add(PlayerPosition.South, new Player
         {
             Position = PlayerPosition.South,
-            BotType = gameOptions.Team1BotTypes[1],
+            ActorType = gameOptions.Team1ActorTypes[1],
         });
         game.Players.Add(PlayerPosition.West, new Player
         {
             Position = PlayerPosition.West,
-            BotType = gameOptions.Team2BotTypes[1],
+            ActorType = gameOptions.Team2ActorTypes[1],
         });
 
         return game;
     }
 
-    private static void ValidateBotTypes(GameOptions gameOptions)
+    private static void ValidateActorTypes(GameOptions gameOptions)
     {
-        ArgumentNullException.ThrowIfNull(gameOptions.Team1BotTypes);
-        ArgumentNullException.ThrowIfNull(gameOptions.Team2BotTypes);
+        ArgumentNullException.ThrowIfNull(gameOptions.Team1ActorTypes);
+        ArgumentNullException.ThrowIfNull(gameOptions.Team2ActorTypes);
 
-        if (gameOptions.Team1BotTypes.Length != 2)
+        if (gameOptions.Team1ActorTypes.Length != 2)
         {
-            throw new ArgumentException("Team1BotTypes must contain exactly 2 bot types.", nameof(gameOptions));
+            throw new ArgumentException("Team1ActorTypes must contain exactly 2 actor types.", nameof(gameOptions));
         }
 
-        if (gameOptions.Team2BotTypes.Length != 2)
+        if (gameOptions.Team2ActorTypes.Length != 2)
         {
-            throw new ArgumentException("Team2BotTypes must contain exactly 2 bot types.", nameof(gameOptions));
+            throw new ArgumentException("Team2ActorTypes must contain exactly 2 actor types.", nameof(gameOptions));
         }
     }
 }

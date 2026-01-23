@@ -1,6 +1,6 @@
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
-using NemesisEuchre.GameEngine.PlayerBots;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.Models;
 
@@ -10,5 +10,5 @@ public class Player
 
     public Team Team => Position.GetTeam();
 
-    public BotType? BotType { get; set; }
+    public ActorType? ActorType { get; set; }
 }

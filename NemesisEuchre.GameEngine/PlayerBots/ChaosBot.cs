@@ -4,11 +4,11 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.PlayerBots;
 
-public class ChaosBot : IPlayerBot
+public class ChaosBot : IPlayerActor
 {
     private readonly Random _random = new();
 
-    public BotType BotType => BotType.Chaos;
+    public ActorType ActorType => ActorType.Chaos;
 
     public Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
     {

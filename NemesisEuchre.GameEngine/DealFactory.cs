@@ -65,7 +65,7 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
                 Position = currentPosition,
                 StartingHand = cardsForPlayer,
                 CurrentHand = [.. cardsForPlayer],
-                BotType = gamePlayers[currentPosition].BotType,
+                ActorType = gamePlayers[currentPosition].ActorType,
             };
 
             currentPosition = currentPosition.GetNextPosition();

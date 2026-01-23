@@ -2,7 +2,7 @@ using FluentAssertions;
 
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
-using NemesisEuchre.GameEngine.PlayerBots;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.Tests;
 
@@ -43,11 +43,11 @@ public class GameFactoryTests
     }
 
     [Fact]
-    public Task CreateGameAsync_WithNullTeam1BotTypes_ThrowsArgumentNullException()
+    public Task CreateGameAsync_WithNullTeam1ActorTypes_ThrowsArgumentNullException()
     {
         var gameInitializer = new GameFactory();
 
-        var gameOptions = new GameOptions { Team1BotTypes = null! };
+        var gameOptions = new GameOptions { Team1ActorTypes = null! };
 
         var act = async () => await gameInitializer.CreateGameAsync(gameOptions);
 
@@ -55,11 +55,11 @@ public class GameFactoryTests
     }
 
     [Fact]
-    public Task CreateGameAsync_WithNullTeam2BotTypes_ThrowsArgumentNullException()
+    public Task CreateGameAsync_WithNullTeam2ActorTypes_ThrowsArgumentNullException()
     {
         var gameInitializer = new GameFactory();
 
-        var gameOptions = new GameOptions { Team2BotTypes = null! };
+        var gameOptions = new GameOptions { Team2ActorTypes = null! };
 
         var act = async () => await gameInitializer.CreateGameAsync(gameOptions);
 
@@ -71,20 +71,20 @@ public class GameFactoryTests
     [InlineData(1)]
     [InlineData(3)]
     [InlineData(4)]
-    public Task CreateGameAsync_WithInvalidTeam1BotTypesLength_ThrowsArgumentException(int length)
+    public Task CreateGameAsync_WithInvalidTeam1ActorTypesLength_ThrowsArgumentException(int length)
     {
         var gameInitializer = new GameFactory();
 
         var gameOptions = new GameOptions
         {
-            Team1BotTypes = new BotType[length],
+            Team1ActorTypes = new ActorType[length],
         };
 
         var act = async () => await gameInitializer.CreateGameAsync(gameOptions);
 
         return act.Should().ThrowAsync<ArgumentException>()
             .WithParameterName("gameOptions")
-            .WithMessage("Team1BotTypes must contain exactly 2 bot types.*");
+            .WithMessage("Team1ActorTypes must contain exactly 2 actor types.*");
     }
 
     [Theory]
@@ -92,57 +92,57 @@ public class GameFactoryTests
     [InlineData(1)]
     [InlineData(3)]
     [InlineData(4)]
-    public Task CreateGameAsync_WithInvalidTeam2BotTypesLength_ThrowsArgumentException(int length)
+    public Task CreateGameAsync_WithInvalidTeam2ActorTypesLength_ThrowsArgumentException(int length)
     {
         var gameInitializer = new GameFactory();
 
         var gameOptions = new GameOptions
         {
-            Team2BotTypes = new BotType[length],
+            Team2ActorTypes = new ActorType[length],
         };
 
         var act = async () => await gameInitializer.CreateGameAsync(gameOptions);
 
         return act.Should().ThrowAsync<ArgumentException>()
             .WithParameterName("gameOptions")
-            .WithMessage("Team2BotTypes must contain exactly 2 bot types.*");
+            .WithMessage("Team2ActorTypes must contain exactly 2 actor types.*");
     }
 
     [Fact]
-    public async Task CreateGameAsync_WithValidBotTypes_AssignsBotTypesToPlayers()
+    public async Task CreateGameAsync_WithValidActorTypes_AssignsActorTypesToPlayers()
     {
         var gameInitializer = new GameFactory();
 
         var gameOptions = new GameOptions
         {
-            Team1BotTypes = [BotType.Chaos, BotType.Chaos],
-            Team2BotTypes = [BotType.Chaos, BotType.Chaos],
+            Team1ActorTypes = [ActorType.Chaos, ActorType.Chaos],
+            Team2ActorTypes = [ActorType.Chaos, ActorType.Chaos],
         };
 
         var game = await gameInitializer.CreateGameAsync(gameOptions);
 
-        game.Players[PlayerPosition.North].BotType.Should().Be(BotType.Chaos);
-        game.Players[PlayerPosition.South].BotType.Should().Be(BotType.Chaos);
-        game.Players[PlayerPosition.East].BotType.Should().Be(BotType.Chaos);
-        game.Players[PlayerPosition.West].BotType.Should().Be(BotType.Chaos);
+        game.Players[PlayerPosition.North].ActorType.Should().Be(ActorType.Chaos);
+        game.Players[PlayerPosition.South].ActorType.Should().Be(ActorType.Chaos);
+        game.Players[PlayerPosition.East].ActorType.Should().Be(ActorType.Chaos);
+        game.Players[PlayerPosition.West].ActorType.Should().Be(ActorType.Chaos);
     }
 
     [Fact]
-    public async Task CreateGameAsync_WithDifferentBotTypes_AssignsCorrectBotTypesToEachPlayer()
+    public async Task CreateGameAsync_WithDifferentActorTypes_AssignsCorrectActorTypesToEachPlayer()
     {
         var gameInitializer = new GameFactory();
 
         var gameOptions = new GameOptions
         {
-            Team1BotTypes = [BotType.Chaos, BotType.Chaos],
-            Team2BotTypes = [BotType.Chaos, BotType.Chaos],
+            Team1ActorTypes = [ActorType.Chaos, ActorType.Chaos],
+            Team2ActorTypes = [ActorType.Chaos, ActorType.Chaos],
         };
 
         var game = await gameInitializer.CreateGameAsync(gameOptions);
 
-        game.Players[PlayerPosition.North].BotType.Should().Be(gameOptions.Team1BotTypes[0]);
-        game.Players[PlayerPosition.South].BotType.Should().Be(gameOptions.Team1BotTypes[1]);
-        game.Players[PlayerPosition.East].BotType.Should().Be(gameOptions.Team2BotTypes[0]);
-        game.Players[PlayerPosition.West].BotType.Should().Be(gameOptions.Team2BotTypes[1]);
+        game.Players[PlayerPosition.North].ActorType.Should().Be(gameOptions.Team1ActorTypes[0]);
+        game.Players[PlayerPosition.South].ActorType.Should().Be(gameOptions.Team1ActorTypes[1]);
+        game.Players[PlayerPosition.East].ActorType.Should().Be(gameOptions.Team2ActorTypes[0]);
+        game.Players[PlayerPosition.West].ActorType.Should().Be(gameOptions.Team2ActorTypes[1]);
     }
 }
