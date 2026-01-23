@@ -89,6 +89,7 @@ public static class CardExtensions
         {
             Rank = rank,
             Suit = card.Suit.ToRelativeSuit(trump),
+            Card = card,
         };
     }
 }

@@ -183,4 +183,14 @@ public class CardExtensionsTests
         relativeCard.Rank.Should().Be(rank);
         relativeCard.Suit.Should().Be(cardSuit.ToRelativeSuit(trump));
     }
+
+    [Fact]
+    public void ToRelative_WithCard_SetsCardPropertyToOriginalCard()
+    {
+        var card = new Card { Suit = Suit.Diamonds, Rank = Rank.King };
+
+        var relativeCard = card.ToRelative(Suit.Hearts);
+
+        relativeCard.Card.Should().BeSameAs(card);
+    }
 }

@@ -443,3 +443,6 @@ dotnet_diagnostic.VSTHRD200.severity = none
 # CA1707: Identifiers should not contain underscores
 [**/*Tests.cs]
 dotnet_diagnostic.CA1707.severity = none
+
+# SA1011: Closing square brackets should be spaced correctly
+dotnet_diagnostic.SA1011.severity = none

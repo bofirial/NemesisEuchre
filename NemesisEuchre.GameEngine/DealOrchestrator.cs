@@ -125,6 +125,9 @@ public class DealOrchestrator(
 
         var winningPosition = trickWinnerCalculator.CalculateWinner(trick, deal.Trump!.Value);
 
+        trick.WinningPosition = winningPosition;
+        trick.WinningTeam = winningPosition.GetTeam();
+
         deal.CompletedTricks.Add(trick);
 
         return winningPosition;

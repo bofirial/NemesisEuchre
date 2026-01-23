@@ -3,6 +3,7 @@ using FluentAssertions;
 using Moq;
 
 using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerBots;
 
@@ -270,6 +271,28 @@ public class DealOrchestratorTests
 
         deal.CompletedTricks.Should().HaveCount(5);
         deal.CompletedTricks.Should().BeEquivalentTo(tricks);
+    }
+
+    [Fact]
+    public async Task OrchestrateDealAsync_SetsWinningPositionAndTeamOnEachTrick()
+    {
+        var deal = CreateTestDeal();
+
+        await _sut.OrchestrateDealAsync(deal);
+
+        deal.CompletedTricks.Should().HaveCount(5);
+
+        foreach (var trick in deal.CompletedTricks)
+        {
+            trick.WinningPosition.Should().NotBeNull();
+            trick.WinningTeam.Should().NotBeNull();
+        }
+
+        deal.CompletedTricks[0].WinningTeam.Should().Be(deal.CompletedTricks[0].WinningPosition!.Value.GetTeam());
+        deal.CompletedTricks[1].WinningTeam.Should().Be(deal.CompletedTricks[1].WinningPosition!.Value.GetTeam());
+        deal.CompletedTricks[2].WinningTeam.Should().Be(deal.CompletedTricks[2].WinningPosition!.Value.GetTeam());
+        deal.CompletedTricks[3].WinningTeam.Should().Be(deal.CompletedTricks[3].WinningPosition!.Value.GetTeam());
+        deal.CompletedTricks[4].WinningTeam.Should().Be(deal.CompletedTricks[4].WinningPosition!.Value.GetTeam());
     }
 
     private static Deal CreateTestDeal()

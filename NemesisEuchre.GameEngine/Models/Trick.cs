@@ -9,4 +9,8 @@ public class Trick
     public List<PlayedCard> CardsPlayed { get; } = [];
 
     public Suit? LeadSuit { get; set; }
+
+    public PlayerPosition? WinningPosition { get; set; }
+
+    public Team? WinningTeam { get; set; }
 }
