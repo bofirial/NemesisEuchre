@@ -27,9 +27,16 @@
 8. ~~Update Score and return GameModel once complete~~
 9. ~~Orchestrate Selecting Trump by looping through IPlayerActors~~
 10. Orchestrate Tricks (Playing Cards) by looping through IPlayerActors
+    * Plan Mode: **Implement the ITrickPlayingOrchestrator with unit tests.  This class should be very similar to ITrumpSelectionOrchestrator.  It should use Dependency Injection to get the IPlayerActors.**
+    * **Refactor the TrickPlayingOrchestrator to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.**
 11. Calculate Trick Winner
+    * Plan Mode: **Implement the ITrickWinnerCalculator with unit tests.**
+    * **Refactor the ITrickWinnerCalculator to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.**
 12. Update Deal with result once complete
+    * Plan Mode: **Implement the IDealResultCalculator with unit tests.**
+    * **Refactor the IDealResultCalculator to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.**
 13. Update Console App to Play a game when called
+    * Plan Mode: **Update the DefaultCommand to play a game between 4 ChaosBots.  Display the results once the game is completed using Spectre.Console.  Also update the DefaultCommand unit tests.**
 
 ## Store Game Results 0.3
 
@@ -37,6 +44,7 @@
 2. Add DiscardCardDecisions to GameModel with relevant Machine Learning data
 3. Add PlayCardDecisions to GameModel with relevant Machine Learning data
 4. Stand up Database (SQL?, Mongo?, HomeServer?, Azure?)
+   * Consider MCP servers to allow Claude to look at the data?
 5. Create DataModels (Entity Framework?)
 6. Create Tables?
 7. Create Indexes?
@@ -66,3 +74,24 @@
 11. CONSIDER Adding hooks into the GameEngine to allow players to get GameState updates in more real time (Would allow for multiple players in the future)
 12. Play games against ChaosBot to record win percentage
 13. Play games against GenX bots to record win percentage and prove they are improving
+
+## AI Improvements
+
+1. Explore Refactor Slash Commands
+   * Refactor the {variable} to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.
+2. Explore TDD Slash Commands
+   * Is this something I want to do or just a way to burn more tokens?
+3. Explore Skills
+   * When would I use this?
+4. Improvements to AGENTS.md
+   * I currently need to refactor after implementation.  Is there something I could add to AGENTS.md to improve the code readability on first implementation?
+   * Now that there is more code can Claude improve itself with Architecture diagrams?
+5. Token Usage
+   * I have been using a lot of tokens.  Is this normal?  Could improvements be made?
+   * Test using Opus to save on refactoring time
+   * Test using Haiku to save on token use
+   * Test skipping plan mode for mid-complexity tasks
+   * Test changes to Agents.md to reduce token use and improve code quality
+   * Test changes to Prompts to reduce token use and improve code quality
+6. Consider which Analyzers are being helpful and which may just be causing extra development churn
+   * Maybe disable more rules in .editorconfig
