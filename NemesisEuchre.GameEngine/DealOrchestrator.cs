@@ -16,6 +16,14 @@ public class DealOrchestrator(
 
         await ExecuteTrumpSelectionPhaseAsync(deal);
 
+        if (deal.Trump == null || deal.CallingPlayer == null)
+        {
+            deal.DealResult = DealResult.ThrowIn;
+            deal.DealStatus = DealStatus.Complete;
+
+            return;
+        }
+
         await ExecuteTrickPlayingPhaseAsync(deal);
 
         ExecuteScoringPhase(deal);
@@ -48,19 +56,6 @@ public class DealOrchestrator(
         }
     }
 
-    private static void ValidateTrumpSelected(Deal deal)
-    {
-        if (deal.Trump == null)
-        {
-            throw new InvalidOperationException("Trump must be set after trump selection");
-        }
-
-        if (deal.CallingPlayer == null)
-        {
-            throw new InvalidOperationException("CallingPlayer must be set after trump selection");
-        }
-    }
-
     private static void ValidateAllTricksPlayed(Deal deal)
     {
         if (deal.CompletedTricks.Count != 5)
@@ -82,13 +77,11 @@ public class DealOrchestrator(
         }
     }
 
-    private async Task ExecuteTrumpSelectionPhaseAsync(Deal deal)
+    private Task ExecuteTrumpSelectionPhaseAsync(Deal deal)
     {
         deal.DealStatus = DealStatus.SelectingTrump;
 
-        await trumpSelectionOrchestrator.SelectTrumpAsync(deal);
-
-        ValidateTrumpSelected(deal);
+        return trumpSelectionOrchestrator.SelectTrumpAsync(deal);
     }
 
     private async Task ExecuteTrickPlayingPhaseAsync(Deal deal)

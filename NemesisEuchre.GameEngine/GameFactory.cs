@@ -1,41 +1,39 @@
-﻿using NemesisEuchre.GameEngine.Constants;
+﻿using Microsoft.Extensions.Options;
+
+using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine;
 
-public class GameFactory : IGameFactory
+public class GameFactory(IOptions<GameOptions> gameOptions) : IGameFactory
 {
-    public async Task<Game> CreateGameAsync(GameOptions gameOptions)
+    public async Task<Game> CreateGameAsync()
     {
         ArgumentNullException.ThrowIfNull(gameOptions);
-        ArgumentOutOfRangeException.ThrowIfLessThan(gameOptions.WinningScore, 1);
 
-        ValidateActorTypes(gameOptions);
+        ValidateActorTypes(gameOptions.Value);
 
-        var game = new Game
-        {
-            WinningScore = gameOptions.WinningScore,
-        };
+        var game = new Game();
 
         game.Players.Add(PlayerPosition.North, new Player
         {
             Position = PlayerPosition.North,
-            ActorType = gameOptions.Team1ActorTypes[0],
+            ActorType = gameOptions.Value.Team1ActorTypes[0],
         });
         game.Players.Add(PlayerPosition.East, new Player
         {
             Position = PlayerPosition.East,
-            ActorType = gameOptions.Team2ActorTypes[0],
+            ActorType = gameOptions.Value.Team2ActorTypes[0],
         });
         game.Players.Add(PlayerPosition.South, new Player
         {
             Position = PlayerPosition.South,
-            ActorType = gameOptions.Team1ActorTypes[1],
+            ActorType = gameOptions.Value.Team1ActorTypes[1],
         });
         game.Players.Add(PlayerPosition.West, new Player
         {
             Position = PlayerPosition.West,
-            ActorType = gameOptions.Team2ActorTypes[1],
+            ActorType = gameOptions.Value.Team2ActorTypes[1],
         });
 
         return game;

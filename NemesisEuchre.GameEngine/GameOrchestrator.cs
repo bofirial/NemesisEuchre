@@ -1,16 +1,17 @@
-﻿using NemesisEuchre.GameEngine.Constants;
+﻿using Microsoft.Extensions.Options;
+
+using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine;
 
-public class GameOrchestrator(IGameFactory gameFactory, IDealFactory dealFactory, IDealOrchestrator dealOrchestrator, IGameScoreUpdater gameScoreUpdater) : IGameOrchestrator
+public class GameOrchestrator(IGameFactory gameFactory, IDealFactory dealFactory, IDealOrchestrator dealOrchestrator, IGameScoreUpdater gameScoreUpdater, IOptions<GameOptions> gameOptions) : IGameOrchestrator
 {
-    public async Task<Game> OrchestrateGameAsync(GameOptions gameOptions)
+    public async Task<Game> OrchestrateGameAsync()
     {
-        ArgumentNullException.ThrowIfNull(gameOptions);
-        ArgumentOutOfRangeException.ThrowIfLessThan(gameOptions.WinningScore, 1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(gameOptions.Value.WinningScore, 1);
 
-        var game = await gameFactory.CreateGameAsync(gameOptions);
+        var game = await gameFactory.CreateGameAsync();
 
         InitializeGame(game);
 
@@ -30,11 +31,6 @@ public class GameOrchestrator(IGameFactory gameFactory, IDealFactory dealFactory
     {
         game.GameStatus = GameStatus.Complete;
         game.WinningTeam = DetermineWinner(game);
-    }
-
-    private static bool GameIsComplete(Game game)
-    {
-        return game.Team1Score >= game.WinningScore || game.Team2Score >= game.WinningScore;
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -80,5 +76,10 @@ public class GameOrchestrator(IGameFactory gameFactory, IDealFactory dealFactory
 
         game.CompletedDeals.Add(game.CurrentDeal);
         game.CurrentDeal = null;
+    }
+
+    private bool GameIsComplete(Game game)
+    {
+        return game.Team1Score >= gameOptions.Value.WinningScore || game.Team2Score >= gameOptions.Value.WinningScore;
     }
 }

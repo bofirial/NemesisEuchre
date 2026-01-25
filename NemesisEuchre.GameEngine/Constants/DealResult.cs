@@ -6,4 +6,5 @@ public enum DealResult
     WonGotAllTricks = 2,
     OpponentsEuchred = 3,
     WonAndWentAlone = 4,
+    ThrowIn = 5,
 }

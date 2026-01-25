@@ -1,5 +1,7 @@
 using FluentAssertions;
 
+using Microsoft.Extensions.Options;
+
 using Moq;
 
 using NemesisEuchre.GameEngine.Constants;
@@ -13,6 +15,7 @@ public class GameOrchestratorTests
     private readonly Mock<IDealFactory> _dealFactoryMock;
     private readonly Mock<IDealOrchestrator> _dealOrchestratorMock;
     private readonly Mock<IGameScoreUpdater> _gameScoreUpdaterMock;
+    private readonly IOptions<GameOptions> _gameOptions;
     private readonly GameOrchestrator _sut;
 
     public GameOrchestratorTests()
@@ -21,6 +24,7 @@ public class GameOrchestratorTests
         _dealFactoryMock = new Mock<IDealFactory>();
         _dealOrchestratorMock = new Mock<IDealOrchestrator>();
         _gameScoreUpdaterMock = new Mock<IGameScoreUpdater>();
+        _gameOptions = Options.Create(new GameOptions { WinningScore = 10 });
 
         _dealOrchestratorMock.Setup(x => x.OrchestrateDealAsync(It.IsAny<Deal>()))
             .Returns(Task.CompletedTask);
@@ -29,16 +33,8 @@ public class GameOrchestratorTests
             _gameFactoryMock.Object,
             _dealFactoryMock.Object,
             _dealOrchestratorMock.Object,
-            _gameScoreUpdaterMock.Object);
-    }
-
-    [Fact]
-    public Task OrchestrateGameAsync_WithNullGameOptions_ThrowsArgumentNullException()
-    {
-        var act = async () => await _sut.OrchestrateGameAsync(null!);
-
-        return act.Should().ThrowAsync<ArgumentNullException>()
-            .WithParameterName("gameOptions");
+            _gameScoreUpdaterMock.Object,
+            _gameOptions);
     }
 
     [Theory]
@@ -47,26 +43,31 @@ public class GameOrchestratorTests
     [InlineData(-10)]
     public Task OrchestrateGameAsync_WithInvalidWinningScore_ThrowsArgumentOutOfRangeException(short winningScore)
     {
-        var gameOptions = new GameOptions { WinningScore = winningScore };
+        var gameOptions = Options.Create(new GameOptions { WinningScore = winningScore });
+        var sut = new GameOrchestrator(
+            _gameFactoryMock.Object,
+            _dealFactoryMock.Object,
+            _dealOrchestratorMock.Object,
+            _gameScoreUpdaterMock.Object,
+            gameOptions);
 
-        var act = async () => await _sut.OrchestrateGameAsync(gameOptions);
+        var act = sut.OrchestrateGameAsync;
 
         return act.Should().ThrowAsync<ArgumentOutOfRangeException>()
-            .WithParameterName("gameOptions.WinningScore");
+            .WithParameterName("gameOptions.Value.WinningScore");
     }
 
     [Fact]
     public async Task OrchestrateGameAsync_WithValidOptions_CreatesGameAndSetsStatusToPlaying()
     {
-        var gameOptions = new GameOptions { WinningScore = 10 };
-        var game = new Game { WinningScore = 10 };
+        var game = new Game();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(gameOptions))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
             .ReturnsAsync(game);
 
         SetupGameToEndImmediately(game);
 
-        await _sut.OrchestrateGameAsync(gameOptions);
+        await _sut.OrchestrateGameAsync();
 
         game.GameStatus.Should().Be(GameStatus.Complete);
     }
@@ -74,11 +75,10 @@ public class GameOrchestratorTests
     [Fact]
     public async Task OrchestrateGameAsync_WhenTeam1Wins_SetsWinningTeamToTeam1()
     {
-        var gameOptions = new GameOptions { WinningScore = 10 };
-        var game = new Game { WinningScore = 10 };
+        var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(gameOptions))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -87,7 +87,7 @@ public class GameOrchestratorTests
         _gameScoreUpdaterMock.Setup(x => x.UpdateGameScoreAsync(game, deal))
             .Callback<Game, Deal>((g, _) => g.Team1Score = 10);
 
-        var result = await _sut.OrchestrateGameAsync(gameOptions);
+        var result = await _sut.OrchestrateGameAsync();
 
         result.WinningTeam.Should().Be(Team.Team1);
         result.GameStatus.Should().Be(GameStatus.Complete);
@@ -96,11 +96,10 @@ public class GameOrchestratorTests
     [Fact]
     public async Task OrchestrateGameAsync_WhenTeam2Wins_SetsWinningTeamToTeam2()
     {
-        var gameOptions = new GameOptions { WinningScore = 10 };
-        var game = new Game { WinningScore = 10 };
+        var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(gameOptions))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -109,7 +108,7 @@ public class GameOrchestratorTests
         _gameScoreUpdaterMock.Setup(x => x.UpdateGameScoreAsync(game, deal))
             .Callback<Game, Deal>((g, _) => g.Team2Score = 10);
 
-        var result = await _sut.OrchestrateGameAsync(gameOptions);
+        var result = await _sut.OrchestrateGameAsync();
 
         result.WinningTeam.Should().Be(Team.Team2);
         result.GameStatus.Should().Be(GameStatus.Complete);
@@ -118,11 +117,10 @@ public class GameOrchestratorTests
     [Fact]
     public Task OrchestrateGameAsync_WhenGameEndsinTie_ThrowsInvalidOperationException()
     {
-        var gameOptions = new GameOptions { WinningScore = 10 };
-        var game = new Game { WinningScore = 10 };
+        var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(gameOptions))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -135,7 +133,7 @@ public class GameOrchestratorTests
                 g.Team2Score = 10;
             });
 
-        var act = async () => await _sut.OrchestrateGameAsync(gameOptions);
+        var act = _sut.OrchestrateGameAsync;
 
         return act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("Game ended in a tie (10-10), which should not occur in Euchre");
@@ -144,8 +142,7 @@ public class GameOrchestratorTests
     [Fact]
     public async Task OrchestrateGameAsync_PlaysMultipleDealsUntilWinningScore()
     {
-        var gameOptions = new GameOptions { WinningScore = 10 };
-        var game = new Game { WinningScore = 10 };
+        var game = new Game();
         var deals = new List<Deal>
         {
             new(),
@@ -154,7 +151,7 @@ public class GameOrchestratorTests
             new(),
         };
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(gameOptions))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
             .ReturnsAsync(game);
 
         var dealIndex = 0;
@@ -169,7 +166,7 @@ public class GameOrchestratorTests
                 g.Team1Score = (short)(scoreIncrement * 3);
             });
 
-        var result = await _sut.OrchestrateGameAsync(gameOptions);
+        var result = await _sut.OrchestrateGameAsync();
 
         result.CompletedDeals.Should().HaveCount(4);
         result.CompletedDeals.Should().BeEquivalentTo(deals);
@@ -179,15 +176,14 @@ public class GameOrchestratorTests
     [Fact]
     public async Task OrchestrateGameAsync_SetsCurrentDealToNullAfterCompletion()
     {
-        var gameOptions = new GameOptions { WinningScore = 10 };
-        var game = new Game { WinningScore = 10 };
+        var game = new Game();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(gameOptions))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
             .ReturnsAsync(game);
 
         SetupGameToEndImmediately(game);
 
-        var result = await _sut.OrchestrateGameAsync(gameOptions);
+        var result = await _sut.OrchestrateGameAsync();
 
         result.CurrentDeal.Should().BeNull();
     }
@@ -195,12 +191,11 @@ public class GameOrchestratorTests
     [Fact]
     public async Task OrchestrateGameAsync_PassesPreviousDealToDealFactory()
     {
-        var gameOptions = new GameOptions { WinningScore = 10 };
-        var game = new Game { WinningScore = 10 };
+        var game = new Game();
         var firstDeal = new Deal();
         var secondDeal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(gameOptions))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -215,7 +210,7 @@ public class GameOrchestratorTests
         _gameScoreUpdaterMock.Setup(x => x.UpdateGameScoreAsync(game, secondDeal))
             .Callback<Game, Deal>((g, _) => g.Team1Score = 10);
 
-        await _sut.OrchestrateGameAsync(gameOptions);
+        await _sut.OrchestrateGameAsync();
 
         _dealFactoryMock.Verify(x => x.CreateDealAsync(game, null), Times.Once);
         _dealFactoryMock.Verify(x => x.CreateDealAsync(game, firstDeal), Times.Once);
@@ -224,11 +219,10 @@ public class GameOrchestratorTests
     [Fact]
     public async Task OrchestrateGameAsync_CallsDealOrchestratorForEachDeal()
     {
-        var gameOptions = new GameOptions { WinningScore = 10 };
-        var game = new Game { WinningScore = 10 };
+        var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(gameOptions))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -237,7 +231,7 @@ public class GameOrchestratorTests
         _gameScoreUpdaterMock.Setup(x => x.UpdateGameScoreAsync(game, deal))
             .Callback<Game, Deal>((g, _) => g.Team1Score = 10);
 
-        await _sut.OrchestrateGameAsync(gameOptions);
+        await _sut.OrchestrateGameAsync();
 
         _dealOrchestratorMock.Verify(x => x.OrchestrateDealAsync(deal), Times.Once);
     }
@@ -245,11 +239,10 @@ public class GameOrchestratorTests
     [Fact]
     public async Task OrchestrateGameAsync_CallsGameScoreUpdaterForEachDeal()
     {
-        var gameOptions = new GameOptions { WinningScore = 10 };
-        var game = new Game { WinningScore = 10 };
+        var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(gameOptions))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -258,7 +251,7 @@ public class GameOrchestratorTests
         _gameScoreUpdaterMock.Setup(x => x.UpdateGameScoreAsync(game, deal))
             .Callback<Game, Deal>((g, _) => g.Team1Score = 10);
 
-        await _sut.OrchestrateGameAsync(gameOptions);
+        await _sut.OrchestrateGameAsync();
 
         _gameScoreUpdaterMock.Verify(x => x.UpdateGameScoreAsync(game, deal), Times.Once);
     }
@@ -266,11 +259,18 @@ public class GameOrchestratorTests
     [Fact]
     public async Task OrchestrateGameAsync_WithCustomWinningScore_StopsAtCorrectScore()
     {
-        var gameOptions = new GameOptions { WinningScore = 5 };
-        var game = new Game { WinningScore = 5 };
+        var gameOptions = Options.Create(new GameOptions { WinningScore = 5 });
+        var sut = new GameOrchestrator(
+            _gameFactoryMock.Object,
+            _dealFactoryMock.Object,
+            _dealOrchestratorMock.Object,
+            _gameScoreUpdaterMock.Object,
+            gameOptions);
+
+        var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(gameOptions))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -279,7 +279,7 @@ public class GameOrchestratorTests
         _gameScoreUpdaterMock.Setup(x => x.UpdateGameScoreAsync(game, deal))
             .Callback<Game, Deal>((g, _) => g.Team2Score = 5);
 
-        var result = await _sut.OrchestrateGameAsync(gameOptions);
+        var result = await sut.OrchestrateGameAsync();
 
         result.Team2Score.Should().Be(5);
         result.WinningTeam.Should().Be(Team.Team2);
@@ -289,15 +289,14 @@ public class GameOrchestratorTests
     [Fact]
     public async Task OrchestrateGameAsync_ReturnsCompletedGame()
     {
-        var gameOptions = new GameOptions { WinningScore = 10 };
-        var game = new Game { WinningScore = 10 };
+        var game = new Game();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(gameOptions))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
             .ReturnsAsync(game);
 
         SetupGameToEndImmediately(game);
 
-        var result = await _sut.OrchestrateGameAsync(gameOptions);
+        var result = await _sut.OrchestrateGameAsync();
 
         result.Should().BeSameAs(game);
     }
@@ -305,11 +304,18 @@ public class GameOrchestratorTests
     [Fact]
     public Task OrchestrateGameAsync_WhenGameDoesNotCompleteWithin100Deals_ThrowsInvalidOperationException()
     {
-        var gameOptions = new GameOptions { WinningScore = 200 };
-        var game = new Game { WinningScore = 200 };
+        var gameOptions = Options.Create(new GameOptions { WinningScore = 200 });
+        var sut = new GameOrchestrator(
+            _gameFactoryMock.Object,
+            _dealFactoryMock.Object,
+            _dealOrchestratorMock.Object,
+            _gameScoreUpdaterMock.Object,
+            gameOptions);
+
+        var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(gameOptions))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(It.IsAny<Game>(), It.IsAny<Deal?>()))
@@ -318,7 +324,7 @@ public class GameOrchestratorTests
         _gameScoreUpdaterMock.Setup(x => x.UpdateGameScoreAsync(game, deal))
             .Callback<Game, Deal>((g, _) => g.Team1Score = (short)(g.Team1Score + 1));
 
-        var act = async () => await _sut.OrchestrateGameAsync(gameOptions);
+        var act = sut.OrchestrateGameAsync;
 
         return act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("Game did not complete within the maximum number of deals allowed (100)");
@@ -332,6 +338,6 @@ public class GameOrchestratorTests
             .ReturnsAsync(deal);
 
         _gameScoreUpdaterMock.Setup(x => x.UpdateGameScoreAsync(game, deal))
-            .Callback<Game, Deal>((g, _) => g.Team1Score = game.WinningScore);
+            .Callback<Game, Deal>((g, _) => g.Team1Score = _gameOptions.Value.WinningScore);
     }
 }

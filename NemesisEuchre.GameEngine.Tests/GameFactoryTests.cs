@@ -1,5 +1,7 @@
 using FluentAssertions;
 
+using Microsoft.Extensions.Options;
+
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
@@ -11,45 +13,22 @@ public class GameFactoryTests
     [Fact]
     public async Task CreateGameAsync_WithValidOptions_ReturnsGameWithFourPlayers()
     {
-        var gameInitializer = new GameFactory();
+        var gameOptions = Options.Create(new GameOptions());
+        var gameInitializer = new GameFactory(gameOptions);
 
-        var gameOptions = new GameOptions();
-        var game = await gameInitializer.CreateGameAsync(gameOptions);
+        var game = await gameInitializer.CreateGameAsync();
 
         game.Should().NotBeNull();
         game.Players.Should().HaveCount(4);
     }
 
     [Fact]
-    public async Task CreateGameAsync_WithDefaultOptions_SetsWinningScoreToDefaultValue()
-    {
-        var gameInitializer = new GameFactory();
-
-        var gameOptions = new GameOptions();
-        var game = await gameInitializer.CreateGameAsync(gameOptions);
-
-        game.WinningScore.Should().Be(10);
-    }
-
-    [Fact]
-    public async Task CreateGameAsync_WithCustomWinningScore_SetsWinningScoreToSpecifiedValue()
-    {
-        var gameInitializer = new GameFactory();
-
-        var gameOptions = new GameOptions { WinningScore = 15 };
-        var game = await gameInitializer.CreateGameAsync(gameOptions);
-
-        game.WinningScore.Should().Be(15);
-    }
-
-    [Fact]
     public Task CreateGameAsync_WithNullTeam1ActorTypes_ThrowsArgumentNullException()
     {
-        var gameInitializer = new GameFactory();
+        var gameOptions = Options.Create(new GameOptions { Team1ActorTypes = null! });
+        var gameInitializer = new GameFactory(gameOptions);
 
-        var gameOptions = new GameOptions { Team1ActorTypes = null! };
-
-        var act = async () => await gameInitializer.CreateGameAsync(gameOptions);
+        var act = gameInitializer.CreateGameAsync;
 
         return act.Should().ThrowAsync<ArgumentNullException>();
     }
@@ -57,11 +36,10 @@ public class GameFactoryTests
     [Fact]
     public Task CreateGameAsync_WithNullTeam2ActorTypes_ThrowsArgumentNullException()
     {
-        var gameInitializer = new GameFactory();
+        var gameOptions = Options.Create(new GameOptions { Team2ActorTypes = null! });
+        var gameInitializer = new GameFactory(gameOptions);
 
-        var gameOptions = new GameOptions { Team2ActorTypes = null! };
-
-        var act = async () => await gameInitializer.CreateGameAsync(gameOptions);
+        var act = gameInitializer.CreateGameAsync;
 
         return act.Should().ThrowAsync<ArgumentNullException>();
     }
@@ -73,14 +51,13 @@ public class GameFactoryTests
     [InlineData(4)]
     public Task CreateGameAsync_WithInvalidTeam1ActorTypesLength_ThrowsArgumentException(int length)
     {
-        var gameInitializer = new GameFactory();
-
-        var gameOptions = new GameOptions
+        var gameOptions = Options.Create(new GameOptions
         {
             Team1ActorTypes = new ActorType[length],
-        };
+        });
+        var gameInitializer = new GameFactory(gameOptions);
 
-        var act = async () => await gameInitializer.CreateGameAsync(gameOptions);
+        var act = gameInitializer.CreateGameAsync;
 
         return act.Should().ThrowAsync<ArgumentException>()
             .WithParameterName("gameOptions")
@@ -94,14 +71,13 @@ public class GameFactoryTests
     [InlineData(4)]
     public Task CreateGameAsync_WithInvalidTeam2ActorTypesLength_ThrowsArgumentException(int length)
     {
-        var gameInitializer = new GameFactory();
-
-        var gameOptions = new GameOptions
+        var gameOptions = Options.Create(new GameOptions
         {
             Team2ActorTypes = new ActorType[length],
-        };
+        });
+        var gameInitializer = new GameFactory(gameOptions);
 
-        var act = async () => await gameInitializer.CreateGameAsync(gameOptions);
+        var act = gameInitializer.CreateGameAsync;
 
         return act.Should().ThrowAsync<ArgumentException>()
             .WithParameterName("gameOptions")
@@ -111,15 +87,14 @@ public class GameFactoryTests
     [Fact]
     public async Task CreateGameAsync_WithValidActorTypes_AssignsActorTypesToPlayers()
     {
-        var gameInitializer = new GameFactory();
-
-        var gameOptions = new GameOptions
+        var gameOptions = Options.Create(new GameOptions
         {
             Team1ActorTypes = [ActorType.Chaos, ActorType.Chaos],
             Team2ActorTypes = [ActorType.Chaos, ActorType.Chaos],
-        };
+        });
+        var gameInitializer = new GameFactory(gameOptions);
 
-        var game = await gameInitializer.CreateGameAsync(gameOptions);
+        var game = await gameInitializer.CreateGameAsync();
 
         game.Players[PlayerPosition.North].ActorType.Should().Be(ActorType.Chaos);
         game.Players[PlayerPosition.South].ActorType.Should().Be(ActorType.Chaos);
@@ -130,19 +105,19 @@ public class GameFactoryTests
     [Fact]
     public async Task CreateGameAsync_WithDifferentActorTypes_AssignsCorrectActorTypesToEachPlayer()
     {
-        var gameInitializer = new GameFactory();
-
-        var gameOptions = new GameOptions
+        var gameOptionsValue = new GameOptions
         {
             Team1ActorTypes = [ActorType.Chaos, ActorType.Chaos],
             Team2ActorTypes = [ActorType.Chaos, ActorType.Chaos],
         };
+        var gameOptions = Options.Create(gameOptionsValue);
+        var gameInitializer = new GameFactory(gameOptions);
 
-        var game = await gameInitializer.CreateGameAsync(gameOptions);
+        var game = await gameInitializer.CreateGameAsync();
 
-        game.Players[PlayerPosition.North].ActorType.Should().Be(gameOptions.Team1ActorTypes[0]);
-        game.Players[PlayerPosition.South].ActorType.Should().Be(gameOptions.Team1ActorTypes[1]);
-        game.Players[PlayerPosition.East].ActorType.Should().Be(gameOptions.Team2ActorTypes[0]);
-        game.Players[PlayerPosition.West].ActorType.Should().Be(gameOptions.Team2ActorTypes[1]);
+        game.Players[PlayerPosition.North].ActorType.Should().Be(gameOptionsValue.Team1ActorTypes[0]);
+        game.Players[PlayerPosition.South].ActorType.Should().Be(gameOptionsValue.Team1ActorTypes[1]);
+        game.Players[PlayerPosition.East].ActorType.Should().Be(gameOptionsValue.Team2ActorTypes[0]);
+        game.Players[PlayerPosition.West].ActorType.Should().Be(gameOptionsValue.Team2ActorTypes[1]);
     }
 }

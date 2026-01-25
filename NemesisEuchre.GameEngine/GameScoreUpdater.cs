@@ -9,6 +9,11 @@ public class GameScoreUpdater : IGameScoreUpdater
     {
         ValidateInputs(game, deal);
 
+        if (deal.DealResult!.Value == DealResult.ThrowIn)
+        {
+            return Task.CompletedTask;
+        }
+
         var scoreChange = CalculateScoreChange(deal);
 
         ApplyScoreChange(game, deal.WinningTeam!.Value, scoreChange);
@@ -26,14 +31,17 @@ public class GameScoreUpdater : IGameScoreUpdater
             throw new InvalidOperationException("Deal must have a DealResult before scoring.");
         }
 
-        if (deal.WinningTeam is null)
+        if (deal.DealResult.Value != DealResult.ThrowIn)
         {
-            throw new InvalidOperationException("Deal must have a WinningTeam before scoring.");
-        }
+            if (deal.WinningTeam is null)
+            {
+                throw new InvalidOperationException("Deal must have a WinningTeam before scoring.");
+            }
 
-        if (deal.CallingPlayer is null)
-        {
-            throw new InvalidOperationException("Deal must have a CallingPlayer before scoring.");
+            if (deal.CallingPlayer is null)
+            {
+                throw new InvalidOperationException("Deal must have a CallingPlayer before scoring.");
+            }
         }
     }
 
@@ -45,6 +53,7 @@ public class GameScoreUpdater : IGameScoreUpdater
             DealResult.WonGotAllTricks => 2,
             DealResult.OpponentsEuchred => 2,
             DealResult.WonAndWentAlone => 4,
+            DealResult.ThrowIn => 0,
             _ => throw new ArgumentOutOfRangeException(nameof(deal), $"Unknown DealResult: {deal.DealResult}")
         };
     }

@@ -1,5 +1,7 @@
 using FluentAssertions;
 
+using Microsoft.Extensions.Options;
+
 using Moq;
 
 using NemesisEuchre.GameEngine.Constants;
@@ -11,15 +13,17 @@ namespace NemesisEuchre.GameEngine.Tests;
 public class TrumpSelectionOrchestratorTests
 {
     private readonly Mock<IPlayerActor> _playerActorMock;
+    private readonly IOptions<GameOptions> _gameOptions;
     private readonly TrumpSelectionOrchestrator _sut;
 
     public TrumpSelectionOrchestratorTests()
     {
         _playerActorMock = new Mock<IPlayerActor>();
         _playerActorMock.Setup(b => b.ActorType).Returns(ActorType.Chaos);
+        _gameOptions = Options.Create(new GameOptions { StickTheDealer = true });
 
         var bots = new[] { _playerActorMock.Object };
-        _sut = new TrumpSelectionOrchestrator(bots);
+        _sut = new TrumpSelectionOrchestrator(bots, _gameOptions);
     }
 
     [Fact]
@@ -573,6 +577,103 @@ public class TrumpSelectionOrchestratorTests
         playerPositions.Should().Contain(PlayerPosition.East);
         playerPositions.Should().Contain(PlayerPosition.South);
         playerPositions.Should().Contain(PlayerPosition.West);
+    }
+
+    [Fact]
+    public async Task SelectTrumpAsync_WithStickTheDealerFalse_DealerCanPass()
+    {
+        var gameOptions = Options.Create(new GameOptions { StickTheDealer = false });
+        var bots = new[] { _playerActorMock.Object };
+        var sut = new TrumpSelectionOrchestrator(bots, gameOptions);
+
+        var deal = CreateTestDeal();
+        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.DealerPosition = PlayerPosition.North;
+
+        _playerActorMock.Setup(b => b.CallTrumpAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<Card>(),
+                It.IsAny<RelativePlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<CallTrumpDecision[]>()))
+            .ReturnsAsync(CallTrumpDecision.Pass);
+
+        await sut.SelectTrumpAsync(deal);
+
+        deal.Trump.Should().BeNull();
+        deal.CallingPlayer.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task SelectTrumpAsync_WithStickTheDealerFalse_DealerPassOptionIncludedInRound2()
+    {
+        var gameOptions = Options.Create(new GameOptions { StickTheDealer = false });
+        var bots = new[] { _playerActorMock.Object };
+        var sut = new TrumpSelectionOrchestrator(bots, gameOptions);
+
+        var deal = CreateTestDeal();
+        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.DealerPosition = PlayerPosition.North;
+
+        CallTrumpDecision[]? capturedValidDecisions = null;
+        var callCount = 0;
+
+        _playerActorMock.Setup(b => b.CallTrumpAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<Card>(),
+                It.IsAny<RelativePlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<CallTrumpDecision[]>()))
+            .Callback<Card[], Card, RelativePlayerPosition, short, short, CallTrumpDecision[]>(
+                (_, _, _, _, _, validDecisions) =>
+                {
+                    callCount++;
+                    if (callCount == 8)
+                    {
+                        capturedValidDecisions = validDecisions;
+                    }
+                })
+            .ReturnsAsync(CallTrumpDecision.Pass);
+
+        await sut.SelectTrumpAsync(deal);
+
+        capturedValidDecisions.Should().Contain(CallTrumpDecision.Pass);
+    }
+
+    [Fact]
+    public async Task SelectTrumpAsync_WithStickTheDealerTrue_DealerCannotPassInRound2()
+    {
+        var deal = CreateTestDeal();
+        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.DealerPosition = PlayerPosition.North;
+
+        CallTrumpDecision[]? capturedValidDecisions = null;
+        var callCount = 0;
+
+        _playerActorMock.Setup(b => b.CallTrumpAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<Card>(),
+                It.IsAny<RelativePlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<CallTrumpDecision[]>()))
+            .Callback<Card[], Card, RelativePlayerPosition, short, short, CallTrumpDecision[]>(
+                (_, _, _, _, _, validDecisions) =>
+                {
+                    callCount++;
+                    if (callCount == 8)
+                    {
+                        capturedValidDecisions = validDecisions;
+                    }
+                })
+            .ReturnsAsync((Card[] _, Card _, RelativePlayerPosition _, short _, short _, CallTrumpDecision[] _) =>
+                callCount <= 7 ? CallTrumpDecision.Pass : CallTrumpDecision.CallClubs);
+
+        await _sut.SelectTrumpAsync(deal);
+
+        capturedValidDecisions.Should().NotContain(CallTrumpDecision.Pass);
     }
 
     private static Deal CreateTestDeal()

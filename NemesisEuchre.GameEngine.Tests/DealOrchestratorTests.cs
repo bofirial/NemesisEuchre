@@ -295,6 +295,79 @@ public class DealOrchestratorTests
         deal.CompletedTricks[4].WinningTeam.Should().Be(deal.CompletedTricks[4].WinningPosition!.Value.GetTeam());
     }
 
+    [Fact]
+    public async Task OrchestrateDealAsync_WhenTrumpNotSelected_SetsDealResultToThrowIn()
+    {
+        var deal = CreateTestDeal();
+
+        _trumpSelectionMock.Setup(x => x.SelectTrumpAsync(It.IsAny<Deal>()))
+            .Callback<Deal>(d =>
+            {
+                d.Trump = null;
+                d.CallingPlayer = null;
+            })
+            .Returns(Task.CompletedTask);
+
+        await _sut.OrchestrateDealAsync(deal);
+
+        deal.DealResult.Should().Be(DealResult.ThrowIn);
+    }
+
+    [Fact]
+    public async Task OrchestrateDealAsync_WhenTrumpNotSelected_SetsDealStatusToComplete()
+    {
+        var deal = CreateTestDeal();
+
+        _trumpSelectionMock.Setup(x => x.SelectTrumpAsync(It.IsAny<Deal>()))
+            .Callback<Deal>(d =>
+            {
+                d.Trump = null;
+                d.CallingPlayer = null;
+            })
+            .Returns(Task.CompletedTask);
+
+        await _sut.OrchestrateDealAsync(deal);
+
+        deal.DealStatus.Should().Be(DealStatus.Complete);
+    }
+
+    [Fact]
+    public async Task OrchestrateDealAsync_WhenTrumpNotSelected_DoesNotPlayTricks()
+    {
+        var deal = CreateTestDeal();
+
+        _trumpSelectionMock.Setup(x => x.SelectTrumpAsync(It.IsAny<Deal>()))
+            .Callback<Deal>(d =>
+            {
+                d.Trump = null;
+                d.CallingPlayer = null;
+            })
+            .Returns(Task.CompletedTask);
+
+        await _sut.OrchestrateDealAsync(deal);
+
+        _trickPlayingMock.Verify(x => x.PlayTrickAsync(It.IsAny<Deal>(), It.IsAny<PlayerPosition>()), Times.Never);
+        deal.CompletedTricks.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task OrchestrateDealAsync_WhenTrumpNotSelected_DoesNotCalculateDealResult()
+    {
+        var deal = CreateTestDeal();
+
+        _trumpSelectionMock.Setup(x => x.SelectTrumpAsync(It.IsAny<Deal>()))
+            .Callback<Deal>(d =>
+            {
+                d.Trump = null;
+                d.CallingPlayer = null;
+            })
+            .Returns(Task.CompletedTask);
+
+        await _sut.OrchestrateDealAsync(deal);
+
+        _dealResultMock.Verify(x => x.CalculateDealResult(It.IsAny<Deal>()), Times.Never);
+    }
+
     private static Deal CreateTestDeal()
     {
         return new Deal

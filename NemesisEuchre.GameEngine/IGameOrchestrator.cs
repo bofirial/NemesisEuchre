@@ -4,5 +4,5 @@ namespace NemesisEuchre.GameEngine;
 
 public interface IGameOrchestrator
 {
-    Task<Game> OrchestrateGameAsync(GameOptions gameOptions);
+    Task<Game> OrchestrateGameAsync();
 }

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
@@ -5,7 +7,7 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine;
 
-public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors) : ITrumpSelectionOrchestrator
+public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors, IOptions<GameOptions> gameOptions) : ITrumpSelectionOrchestrator
 {
     private const int PlayersPerDeal = 4;
     private readonly Dictionary<ActorType, IPlayerActor> _playerActors = playerActors.ToDictionary(x => x.ActorType, x => x);
@@ -20,8 +22,6 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors) 
         {
             await ExecuteRound2Async(deal);
         }
-
-        ValidatePostConditions(deal);
     }
 
     private static void ValidatePreconditions(Deal deal)
@@ -46,19 +46,6 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors) 
         if (deal.Players.Count != PlayersPerDeal)
         {
             throw new InvalidOperationException($"Deal must have exactly {PlayersPerDeal} players, but had {deal.Players.Count}");
-        }
-    }
-
-    private static void ValidatePostConditions(Deal deal)
-    {
-        if (deal.Trump == null)
-        {
-            throw new InvalidOperationException("Trump must be set after trump selection");
-        }
-
-        if (deal.CallingPlayer == null)
-        {
-            throw new InvalidOperationException("CallingPlayer must be set after trump selection");
         }
     }
 
@@ -119,23 +106,6 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors) 
     private static CallTrumpDecision[] GetValidRound1Decisions()
     {
         return [CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp, CallTrumpDecision.OrderItUpAndGoAlone];
-    }
-
-    private static CallTrumpDecision[] GetValidRound2Decisions(Suit upcardSuit, bool isDealer)
-    {
-        var decisions = new List<CallTrumpDecision>();
-
-        if (!isDealer)
-        {
-            decisions.Add(CallTrumpDecision.Pass);
-        }
-
-        foreach (var suit in Enum.GetValues<Suit>().Where(suit => suit != upcardSuit))
-        {
-            AddSuitDecisions(decisions, suit);
-        }
-
-        return [.. decisions];
     }
 
     private static void AddSuitDecisions(List<CallTrumpDecision> decisions, Suit suit)
@@ -221,7 +191,10 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors) 
             currentPosition = currentPosition.GetNextPosition();
         }
 
-        throw new InvalidOperationException("Dealer must call trump in Round 2, but all players passed");
+        if (gameOptions.Value.StickTheDealer)
+        {
+            throw new InvalidOperationException("Dealer must call trump in Round 2, but all players passed");
+        }
     }
 
     private Task<CallTrumpDecision> GetPlayerDecisionAsync(
@@ -288,5 +261,22 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors) 
     private IPlayerActor GetPlayerActor(DealPlayer player)
     {
         return _playerActors[player.ActorType!.Value];
+    }
+
+    private CallTrumpDecision[] GetValidRound2Decisions(Suit upcardSuit, bool isDealer)
+    {
+        var decisions = new List<CallTrumpDecision>();
+
+        if (!isDealer || !gameOptions.Value.StickTheDealer)
+        {
+            decisions.Add(CallTrumpDecision.Pass);
+        }
+
+        foreach (var suit in Enum.GetValues<Suit>().Where(suit => suit != upcardSuit))
+        {
+            AddSuitDecisions(decisions, suit);
+        }
+
+        return [.. decisions];
     }
 }

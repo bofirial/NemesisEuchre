@@ -12,8 +12,6 @@ public class Game
 
     public short Team2Score { get; set; }
 
-    public short WinningScore { get; set; } = 10;
-
     public Deal? CurrentDeal { get; set; }
 
     public List<Deal> CompletedDeals { get; } = [];
