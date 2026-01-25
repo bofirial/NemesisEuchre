@@ -2,12 +2,13 @@ using FluentAssertions;
 
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Validation;
 
 namespace NemesisEuchre.GameEngine.Tests;
 
 public class DealResultCalculatorTests
 {
-    private readonly DealResultCalculator _calculator = new();
+    private readonly DealResultCalculator _calculator = new(new DealResultValidator());
 
     [Fact]
     public void CalculateDealResult_WithNullDeal_ThrowsArgumentNullException()

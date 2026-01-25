@@ -7,6 +7,7 @@ using Moq;
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Validation;
 
 namespace NemesisEuchre.GameEngine.Tests;
 
@@ -23,7 +24,8 @@ public class TrumpSelectionOrchestratorTests
         _gameOptions = Options.Create(new GameOptions { StickTheDealer = true });
 
         var bots = new[] { _playerActorMock.Object };
-        _sut = new TrumpSelectionOrchestrator(bots, _gameOptions);
+        var validator = new TrumpSelectionValidator();
+        _sut = new TrumpSelectionOrchestrator(bots, _gameOptions, validator);
     }
 
     [Fact]
@@ -584,7 +586,8 @@ public class TrumpSelectionOrchestratorTests
     {
         var gameOptions = Options.Create(new GameOptions { StickTheDealer = false });
         var bots = new[] { _playerActorMock.Object };
-        var sut = new TrumpSelectionOrchestrator(bots, gameOptions);
+        var validator = new TrumpSelectionValidator();
+        var sut = new TrumpSelectionOrchestrator(bots, gameOptions, validator);
 
         var deal = CreateTestDeal();
         deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
@@ -610,7 +613,8 @@ public class TrumpSelectionOrchestratorTests
     {
         var gameOptions = Options.Create(new GameOptions { StickTheDealer = false });
         var bots = new[] { _playerActorMock.Object };
-        var sut = new TrumpSelectionOrchestrator(bots, gameOptions);
+        var validator = new TrumpSelectionValidator();
+        var sut = new TrumpSelectionOrchestrator(bots, gameOptions, validator);
 
         var deal = CreateTestDeal();
         deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };

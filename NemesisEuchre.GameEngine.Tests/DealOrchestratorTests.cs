@@ -6,6 +6,7 @@ using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Validation;
 
 namespace NemesisEuchre.GameEngine.Tests;
 
@@ -32,11 +33,13 @@ public class DealOrchestratorTests
         SetupTrickPlayMocks();
         SetupDealResultMock();
 
+        var validator = new DealValidator();
         _sut = new DealOrchestrator(
             _trumpSelectionMock.Object,
             _trickPlayingMock.Object,
             _trickWinnerMock.Object,
-            _dealResultMock.Object);
+            _dealResultMock.Object,
+            validator);
     }
 
     [Fact]

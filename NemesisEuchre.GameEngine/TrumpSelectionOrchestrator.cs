@@ -4,6 +4,7 @@ using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Validation;
 
 namespace NemesisEuchre.GameEngine;
 
@@ -12,45 +13,23 @@ public interface ITrumpSelectionOrchestrator
     Task SelectTrumpAsync(Deal deal);
 }
 
-public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors, IOptions<GameOptions> gameOptions) : ITrumpSelectionOrchestrator
+public class TrumpSelectionOrchestrator(
+    IEnumerable<IPlayerActor> playerActors,
+    IOptions<GameOptions> gameOptions,
+    ITrumpSelectionValidator validator) : ITrumpSelectionOrchestrator
 {
     private const int PlayersPerDeal = 4;
     private readonly Dictionary<ActorType, IPlayerActor> _playerActors = playerActors.ToDictionary(x => x.ActorType, x => x);
 
     public async Task SelectTrumpAsync(Deal deal)
     {
-        ValidatePreconditions(deal);
+        validator.ValidatePreconditions(deal);
 
         bool trumpSelected = await ExecuteRound1Async(deal);
 
         if (!trumpSelected)
         {
             await ExecuteRound2Async(deal);
-        }
-    }
-
-    private static void ValidatePreconditions(Deal deal)
-    {
-        ArgumentNullException.ThrowIfNull(deal);
-
-        if (deal.DealStatus != DealStatus.SelectingTrump)
-        {
-            throw new InvalidOperationException($"Deal must be in SelectingTrump status, but was {deal.DealStatus}");
-        }
-
-        if (deal.DealerPosition == null)
-        {
-            throw new InvalidOperationException("DealerPosition must be set");
-        }
-
-        if (deal.UpCard == null)
-        {
-            throw new InvalidOperationException("UpCard must be set");
-        }
-
-        if (deal.Players.Count != PlayersPerDeal)
-        {
-            throw new InvalidOperationException($"Deal must have exactly {PlayersPerDeal} players, but had {deal.Players.Count}");
         }
     }
 
@@ -62,14 +41,6 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors, 
     private static bool IsDealer(Deal deal, PlayerPosition position)
     {
         return position == deal.DealerPosition!.Value;
-    }
-
-    private static void ValidateDecision(CallTrumpDecision decision, CallTrumpDecision[] validDecisions)
-    {
-        if (!validDecisions.Contains(decision))
-        {
-            throw new InvalidOperationException("CallTrumpDecision was not included in ValidDecisions");
-        }
     }
 
     private static void SetTrumpResult(Deal deal, Suit trump, PlayerPosition callingPlayer, CallTrumpDecision decision)
@@ -87,14 +58,6 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors, 
     private static RelativeCard[] ConvertToRelativeCards(List<Card> cards, Suit trump)
     {
         return [.. cards.Select(c => c.ToRelative(trump))];
-    }
-
-    private static void ValidateDiscard(RelativeCard cardToDiscard, RelativeCard[] validCards)
-    {
-        if (!validCards.Contains(cardToDiscard))
-        {
-            throw new InvalidOperationException("CardToDiscard was not included in ValidCardsToDiscard");
-        }
     }
 
     private static (short TeamScore, short OpponentScore) GetScores(Deal deal, PlayerPosition playerPosition)
@@ -227,7 +190,7 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors, 
         CallTrumpDecision[] validDecisions)
     {
         var decision = await GetPlayerDecisionAsync(deal, playerPosition, validDecisions);
-        ValidateDecision(decision, validDecisions);
+        validator.ValidateDecision(decision, validDecisions);
         return decision;
     }
 
@@ -241,7 +204,7 @@ public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors, 
         var relativeHand = ConvertToRelativeCards(dealer.CurrentHand, deal.Trump!.Value);
         var cardToDiscard = await GetDealerDiscardDecisionAsync(deal, dealerPosition, dealer, relativeHand);
 
-        ValidateDiscard(cardToDiscard, relativeHand);
+        validator.ValidateDiscard(cardToDiscard, relativeHand);
 
         dealer.CurrentHand.Remove(cardToDiscard.Card);
     }

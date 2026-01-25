@@ -6,6 +6,7 @@ using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Validation;
 
 namespace NemesisEuchre.GameEngine.Tests;
 
@@ -20,7 +21,8 @@ public class TrickPlayingOrchestratorTests
         _playerActorMock.Setup(b => b.ActorType).Returns(ActorType.Chaos);
 
         var actors = new[] { _playerActorMock.Object };
-        _sut = new TrickPlayingOrchestrator(actors);
+        var validator = new TrickPlayingValidator();
+        _sut = new TrickPlayingOrchestrator(actors, validator);
     }
 
     [Fact]

@@ -1,6 +1,7 @@
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Validation;
 
 namespace NemesisEuchre.GameEngine;
 
@@ -9,15 +10,14 @@ public interface IDealResultCalculator
     (DealResult DealResult, Team WinningTeam) CalculateDealResult(Deal deal);
 }
 
-public class DealResultCalculator : IDealResultCalculator
+public class DealResultCalculator(IDealResultValidator validator) : IDealResultCalculator
 {
-    private const int TotalTricksInDeal = 5;
     private const int MinimumTricksToWinBid = 3;
     private const int AllTricks = 5;
 
     public (DealResult DealResult, Team WinningTeam) CalculateDealResult(Deal deal)
     {
-        ValidateDeal(deal);
+        validator.ValidateDeal(deal);
 
         var callingTeam = deal.CallingPlayer!.Value.GetTeam();
         var callingTeamTricks = CountTricksWonByTeam(deal, callingTeam);
@@ -25,40 +25,6 @@ public class DealResultCalculator : IDealResultCalculator
         var winningTeam = DetermineWinningTeam(callingTeam, dealResult);
 
         return (dealResult, winningTeam);
-    }
-
-    private static void ValidateDeal(Deal deal)
-    {
-        ArgumentNullException.ThrowIfNull(deal);
-        ValidateCompletedTricksCount(deal);
-        ValidateCallingPlayerExists(deal);
-        ValidateAllTricksHaveWinningTeam(deal);
-    }
-
-    private static void ValidateCompletedTricksCount(Deal deal)
-    {
-        if (deal.CompletedTricks.Count != TotalTricksInDeal)
-        {
-            throw new InvalidOperationException(
-                $"Deal must have exactly {TotalTricksInDeal} completed tricks");
-        }
-    }
-
-    private static void ValidateCallingPlayerExists(Deal deal)
-    {
-        if (deal.CallingPlayer is null)
-        {
-            throw new InvalidOperationException("Deal must have a CallingPlayer set");
-        }
-    }
-
-    private static void ValidateAllTricksHaveWinningTeam(Deal deal)
-    {
-        if (deal.CompletedTricks.Any(trick => trick.WinningTeam is null))
-        {
-            throw new InvalidOperationException(
-                "All completed tricks must have WinningTeam set");
-        }
     }
 
     private static int CountTricksWonByTeam(Deal deal, Team team)

@@ -13,7 +13,7 @@ public class BetaBot : IPlayerActor
     public Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
     {
         return validCallTrumpDecisions.Contains(CallTrumpDecision.Pass)
-            ? Task.FromResult(CallTrumpDecision.OrderItUpAndGoAlone)
+            ? Task.FromResult(CallTrumpDecision.Pass)
             : SelectRandomAsync(validCallTrumpDecisions);
     }
 

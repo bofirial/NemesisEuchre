@@ -2,6 +2,7 @@ using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Validation;
 
 namespace NemesisEuchre.GameEngine;
 
@@ -10,45 +11,21 @@ public interface ITrickPlayingOrchestrator
     Task<Trick> PlayTrickAsync(Deal deal, PlayerPosition leadPosition);
 }
 
-public class TrickPlayingOrchestrator(IEnumerable<IPlayerActor> playerActors) : ITrickPlayingOrchestrator
+public class TrickPlayingOrchestrator(
+    IEnumerable<IPlayerActor> playerActors,
+    ITrickPlayingValidator validator) : ITrickPlayingOrchestrator
 {
-    private const int PlayersPerTrick = 4;
     private readonly Dictionary<ActorType, IPlayerActor> _playerActors = playerActors.ToDictionary(x => x.ActorType, x => x);
 
     public async Task<Trick> PlayTrickAsync(Deal deal, PlayerPosition leadPosition)
     {
-        ValidatePreconditions(deal);
+        validator.ValidatePreconditions(deal);
 
         var trick = InitializeTrick(leadPosition);
 
         await PlayAllCardsAsync(deal, trick);
 
         return trick;
-    }
-
-    private static void ValidatePreconditions(Deal deal)
-    {
-        ArgumentNullException.ThrowIfNull(deal);
-
-        if (deal.DealStatus != DealStatus.Playing)
-        {
-            throw new InvalidOperationException($"Deal must be in Playing status, but was {deal.DealStatus}");
-        }
-
-        if (deal.Trump == null)
-        {
-            throw new InvalidOperationException("Trump must be set");
-        }
-
-        if (deal.CallingPlayer == null)
-        {
-            throw new InvalidOperationException("CallingPlayer must be set");
-        }
-
-        if (deal.Players.Count != PlayersPerTrick)
-        {
-            throw new InvalidOperationException($"Deal must have exactly {PlayersPerTrick} players, but had {deal.Players.Count}");
-        }
     }
 
     private static Trick InitializeTrick(PlayerPosition leadPosition)
@@ -81,14 +58,6 @@ public class TrickPlayingOrchestrator(IEnumerable<IPlayerActor> playerActors) : 
     private static RelativeCard[] ConvertToRelativeCards(List<Card> cards, Suit trump)
     {
         return [.. cards.Select(c => c.ToRelative(trump))];
-    }
-
-    private static void ValidateCardChoice(RelativeCard chosenCard, RelativeCard[] validCards)
-    {
-        if (!validCards.Contains(chosenCard))
-        {
-            throw new InvalidOperationException("ChosenCard was not included in ValidCards");
-        }
     }
 
     private static (short TeamScore, short OpponentScore) GetScores(Deal deal, PlayerPosition playerPosition)
@@ -172,7 +141,7 @@ public class TrickPlayingOrchestrator(IEnumerable<IPlayerActor> playerActors) : 
         var validCards = GetValidCardsToPlay(relativeHand, deal.Trump!.Value, trick.LeadSuit);
 
         var chosenCard = await GetPlayerCardChoiceAsync(deal, position, relativeHand, validCards);
-        ValidateCardChoice(chosenCard, validCards);
+        validator.ValidateCardChoice(chosenCard, validCards);
 
         SetLeadSuitIfFirstCard(trick, chosenCard, deal.Trump!.Value, isFirstCard);
         RecordPlayedCard(trick, chosenCard.Card, position);
