@@ -32,9 +32,9 @@
 11. ~~Calculate Trick Winner~~
     * ~~Plan Mode: **Implement the ITrickWinnerCalculator with unit tests.**~~
     * ~~**Refactor the ITrickWinnerCalculator to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.**~~
-12. Update Deal with result once complete
-    * Plan Mode: **Implement the IDealResultCalculator with unit tests.**
-    * **Refactor the IDealResultCalculator to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.**
+12. ~~Update Deal with result once complete~~
+    * ~~Plan Mode: **Implement the IDealResultCalculator with unit tests.**~~
+    * ~~**Refactor the IDealResultCalculator to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.**~~
 13. Update Console App to Play a game when called
     * Plan Mode: **Update the DefaultCommand to play a game between 4 ChaosBots.  Display the results once the game is completed using Spectre.Console.  Also update the DefaultCommand unit tests.**
 
