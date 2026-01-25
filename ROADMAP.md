@@ -26,12 +26,12 @@
 7. ~~Create DealOrchestrator~~
 8. ~~Update Score and return GameModel once complete~~
 9. ~~Orchestrate Selecting Trump by looping through IPlayerActors~~
-10. Orchestrate Tricks (Playing Cards) by looping through IPlayerActors
-    * Plan Mode: **Implement the ITrickPlayingOrchestrator with unit tests.  This class should be very similar to ITrumpSelectionOrchestrator.  It should use Dependency Injection to get the IPlayerActors.**
-    * **Refactor the TrickPlayingOrchestrator to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.**
-11. Calculate Trick Winner
-    * Plan Mode: **Implement the ITrickWinnerCalculator with unit tests.**
-    * **Refactor the ITrickWinnerCalculator to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.**
+10. ~~Orchestrate Tricks (Playing Cards) by looping through IPlayerActors~~
+    * ~~Plan Mode: **Implement the ITrickPlayingOrchestrator with unit tests.  This class should be very similar to ITrumpSelectionOrchestrator.  It should use Dependency Injection to get the IPlayerActors.**~~
+    * ~~**Refactor the TrickPlayingOrchestrator to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.**~~
+11. ~~Calculate Trick Winner~~
+    * ~~Plan Mode: **Implement the ITrickWinnerCalculator with unit tests.**~~
+    * ~~**Refactor the ITrickWinnerCalculator to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.**~~
 12. Update Deal with result once complete
     * Plan Mode: **Implement the IDealResultCalculator with unit tests.**
     * **Refactor the IDealResultCalculator to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.**
