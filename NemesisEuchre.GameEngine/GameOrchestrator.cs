@@ -5,6 +5,11 @@ using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine;
 
+public interface IGameOrchestrator
+{
+    Task<Game> OrchestrateGameAsync();
+}
+
 public class GameOrchestrator(IGameFactory gameFactory, IDealFactory dealFactory, IDealOrchestrator dealOrchestrator, IGameScoreUpdater gameScoreUpdater, IOptions<GameOptions> gameOptions) : IGameOrchestrator
 {
     public async Task<Game> OrchestrateGameAsync()

@@ -7,6 +7,11 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine;
 
+public interface ITrumpSelectionOrchestrator
+{
+    Task SelectTrumpAsync(Deal deal);
+}
+
 public class TrumpSelectionOrchestrator(IEnumerable<IPlayerActor> playerActors, IOptions<GameOptions> gameOptions) : ITrumpSelectionOrchestrator
 {
     private const int PlayersPerDeal = 4;

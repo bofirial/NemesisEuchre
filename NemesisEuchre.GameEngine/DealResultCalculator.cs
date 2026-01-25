@@ -4,6 +4,11 @@ using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine;
 
+public interface IDealResultCalculator
+{
+    (DealResult DealResult, Team WinningTeam) CalculateDealResult(Deal deal);
+}
+
 public class DealResultCalculator : IDealResultCalculator
 {
     private const int TotalTricksInDeal = 5;

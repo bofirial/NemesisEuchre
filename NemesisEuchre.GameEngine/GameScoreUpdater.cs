@@ -3,6 +3,11 @@ using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine;
 
+public interface IGameScoreUpdater
+{
+    Task UpdateGameScoreAsync(Game game, Deal deal);
+}
+
 public class GameScoreUpdater : IGameScoreUpdater
 {
     public Task UpdateGameScoreAsync(Game game, Deal deal)

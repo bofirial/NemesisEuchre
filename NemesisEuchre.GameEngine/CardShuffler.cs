@@ -1,5 +1,10 @@
 namespace NemesisEuchre.GameEngine;
 
+public interface ICardShuffler
+{
+    void Shuffle<T>(T[] array);
+}
+
 public class CardShuffler : ICardShuffler
 {
     private readonly Random _random = new();

@@ -4,6 +4,11 @@ using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine;
 
+public interface ITrickWinnerCalculator
+{
+    PlayerPosition CalculateWinner(Trick trick, Suit trump);
+}
+
 public class TrickWinnerCalculator : ITrickWinnerCalculator
 {
     private const int TrumpValueOffset = 100;

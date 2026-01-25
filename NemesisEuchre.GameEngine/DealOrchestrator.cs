@@ -4,6 +4,11 @@ using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine;
 
+public interface IDealOrchestrator
+{
+    Task OrchestrateDealAsync(Deal deal);
+}
+
 public class DealOrchestrator(
     ITrumpSelectionOrchestrator trumpSelectionOrchestrator,
     ITrickPlayingOrchestrator trickPlayingOrchestrator,

@@ -4,6 +4,11 @@ using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine;
 
+public interface IDealFactory
+{
+    Task<Deal> CreateDealAsync(Game game, Deal? previousDeal = null);
+}
+
 public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
 {
     public Task<Deal> CreateDealAsync(Game game, Deal? previousDeal = null)

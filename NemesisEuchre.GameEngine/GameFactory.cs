@@ -5,6 +5,11 @@ using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine;
 
+public interface IGameFactory
+{
+    Task<Game> CreateGameAsync();
+}
+
 public class GameFactory(IOptions<GameOptions> gameOptions) : IGameFactory
 {
     public async Task<Game> CreateGameAsync()

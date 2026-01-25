@@ -1,8 +1,0 @@
-﻿using NemesisEuchre.GameEngine.Models;
-
-namespace NemesisEuchre.GameEngine;
-
-public interface IGameFactory
-{
-    Task<Game> CreateGameAsync();
-}

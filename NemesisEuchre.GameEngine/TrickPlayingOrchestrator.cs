@@ -5,6 +5,11 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine;
 
+public interface ITrickPlayingOrchestrator
+{
+    Task<Trick> PlayTrickAsync(Deal deal, PlayerPosition leadPosition);
+}
+
 public class TrickPlayingOrchestrator(IEnumerable<IPlayerActor> playerActors) : ITrickPlayingOrchestrator
 {
     private const int PlayersPerTrick = 4;
