@@ -25,18 +25,30 @@ public class DealResultCalculator : IDealResultCalculator
     private static void ValidateDeal(Deal deal)
     {
         ArgumentNullException.ThrowIfNull(deal);
+        ValidateCompletedTricksCount(deal);
+        ValidateCallingPlayerExists(deal);
+        ValidateAllTricksHaveWinningTeam(deal);
+    }
 
+    private static void ValidateCompletedTricksCount(Deal deal)
+    {
         if (deal.CompletedTricks.Count != TotalTricksInDeal)
         {
             throw new InvalidOperationException(
                 $"Deal must have exactly {TotalTricksInDeal} completed tricks");
         }
+    }
 
+    private static void ValidateCallingPlayerExists(Deal deal)
+    {
         if (deal.CallingPlayer is null)
         {
             throw new InvalidOperationException("Deal must have a CallingPlayer set");
         }
+    }
 
+    private static void ValidateAllTricksHaveWinningTeam(Deal deal)
+    {
         if (deal.CompletedTricks.Any(trick => trick.WinningTeam is null))
         {
             throw new InvalidOperationException(
@@ -62,11 +74,13 @@ public class DealResultCalculator : IDealResultCalculator
 
     private static Team DetermineWinningTeam(Team callingTeam, DealResult dealResult)
     {
-        if (dealResult == DealResult.OpponentsEuchred)
-        {
-            return callingTeam == Team.Team1 ? Team.Team2 : Team.Team1;
-        }
+        return dealResult == DealResult.OpponentsEuchred
+            ? GetOpposingTeam(callingTeam)
+            : callingTeam;
+    }
 
-        return callingTeam;
+    private static Team GetOpposingTeam(Team team)
+    {
+        return team == Team.Team1 ? Team.Team2 : Team.Team1;
     }
 }
