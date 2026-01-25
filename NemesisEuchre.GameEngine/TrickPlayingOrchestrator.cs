@@ -114,10 +114,37 @@ public class TrickPlayingOrchestrator(IEnumerable<IPlayerActor> playerActors) : 
         return next;
     }
 
+    private static int GetNumberOfCardsToPlay(Deal deal)
+    {
+        return deal.CallingPlayerIsGoingAlone ? 3 : 4;
+    }
+
+    private static void SetLeadSuitIfFirstCard(Trick trick, RelativeCard chosenCard, Suit trump, bool isFirstCard)
+    {
+        if (isFirstCard)
+        {
+            trick.LeadSuit = chosenCard.Card.GetEffectiveSuit(trump);
+        }
+    }
+
+    private static void RecordPlayedCard(Trick trick, Card card, PlayerPosition position)
+    {
+        trick.CardsPlayed.Add(new PlayedCard
+        {
+            Card = card,
+            PlayerPosition = position,
+        });
+    }
+
+    private static void UpdateHandAfterPlay(DealPlayer player, Card card)
+    {
+        player.CurrentHand.Remove(card);
+    }
+
     private async Task PlayAllCardsAsync(Deal deal, Trick trick)
     {
         var currentPosition = trick.LeadPosition;
-        var cardsToPlay = deal.CallingPlayerIsGoingAlone ? 3 : 4;
+        var cardsToPlay = GetNumberOfCardsToPlay(deal);
 
         for (int i = 0; i < cardsToPlay; i++)
         {
@@ -127,31 +154,24 @@ public class TrickPlayingOrchestrator(IEnumerable<IPlayerActor> playerActors) : 
                 continue;
             }
 
-            var player = deal.Players[currentPosition];
-            var relativeHand = ConvertToRelativeCards(player.CurrentHand, deal.Trump!.Value);
-            var validCards = GetValidCardsToPlay(
-                relativeHand,
-                deal.Trump!.Value,
-                trick.LeadSuit);
-
-            var chosenCard = await GetPlayerCardChoiceAsync(
-                deal, currentPosition, relativeHand, validCards);
-            ValidateCardChoice(chosenCard, validCards);
-
-            if (i == 0)
-            {
-                trick.LeadSuit = chosenCard.Card.GetEffectiveSuit(deal.Trump.Value);
-            }
-
-            trick.CardsPlayed.Add(new PlayedCard
-            {
-                Card = chosenCard.Card,
-                PlayerPosition = currentPosition,
-            });
-
-            player.CurrentHand.Remove(chosenCard.Card);
+            var isFirstCard = i == 0;
+            await PlaySingleCardAsync(deal, trick, currentPosition, isFirstCard);
             currentPosition = GetNextActivePlayer(currentPosition, deal);
         }
+    }
+
+    private async Task PlaySingleCardAsync(Deal deal, Trick trick, PlayerPosition position, bool isFirstCard)
+    {
+        var player = deal.Players[position];
+        var relativeHand = ConvertToRelativeCards(player.CurrentHand, deal.Trump!.Value);
+        var validCards = GetValidCardsToPlay(relativeHand, deal.Trump!.Value, trick.LeadSuit);
+
+        var chosenCard = await GetPlayerCardChoiceAsync(deal, position, relativeHand, validCards);
+        ValidateCardChoice(chosenCard, validCards);
+
+        SetLeadSuitIfFirstCard(trick, chosenCard, deal.Trump!.Value, isFirstCard);
+        RecordPlayedCard(trick, chosenCard.Card, position);
+        UpdateHandAfterPlay(player, chosenCard.Card);
     }
 
     private Task<RelativeCard> GetPlayerCardChoiceAsync(
