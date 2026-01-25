@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
@@ -8,7 +6,6 @@ namespace NemesisEuchre.GameEngine.Extensions;
 
 public static class DealExtensions
 {
-    [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Conditional Expression would reduce code readability considerably")]
     public static RelativeDeal ToRelative(this Deal deal, PlayerPosition self)
     {
         if (!deal.Trump.HasValue)
