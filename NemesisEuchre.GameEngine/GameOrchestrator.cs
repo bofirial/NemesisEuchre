@@ -33,10 +33,6 @@ public class GameOrchestrator(IGameFactory gameFactory, IDealFactory dealFactory
         game.WinningTeam = DetermineWinner(game);
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Style",
-        "IDE0046:Convert to conditional expression",
-        Justification = "Multiple conditional expressions would be present and nested")]
     private static Team DetermineWinner(Game game)
     {
         if (game.Team1Score == game.Team2Score)
