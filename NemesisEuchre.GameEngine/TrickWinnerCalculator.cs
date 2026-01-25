@@ -6,7 +6,21 @@ namespace NemesisEuchre.GameEngine;
 
 public class TrickWinnerCalculator : ITrickWinnerCalculator
 {
+    private const int TrumpValueOffset = 100;
+    private const int OffSuitValue = 0;
+
     public PlayerPosition CalculateWinner(Trick trick, Suit trump)
+    {
+        ValidateTrick(trick);
+
+        var leadSuit = trick.LeadSuit!.Value;
+        var winningCard = trick.CardsPlayed
+            .MaxBy(playedCard => GetCardValue(playedCard.Card, leadSuit, trump));
+
+        return winningCard!.PlayerPosition;
+    }
+
+    private static void ValidateTrick(Trick trick)
     {
         ArgumentNullException.ThrowIfNull(trick);
 
@@ -19,38 +33,20 @@ public class TrickWinnerCalculator : ITrickWinnerCalculator
         {
             throw new InvalidOperationException("Cannot calculate winner of a trick with no lead suit");
         }
-
-        var winningCard = trick.CardsPlayed[0];
-        var winningValue = GetCardValue(winningCard.Card, trick.LeadSuit.Value, trump);
-
-        for (int i = 1; i < trick.CardsPlayed.Count; i++)
-        {
-            var currentCard = trick.CardsPlayed[i];
-            var currentValue = GetCardValue(currentCard.Card, trick.LeadSuit.Value, trump);
-
-            if (currentValue > winningValue)
-            {
-                winningCard = currentCard;
-                winningValue = currentValue;
-            }
-        }
-
-        return winningCard.PlayerPosition;
     }
 
     private static int GetCardValue(Card card, Suit leadSuit, Suit trump)
     {
         if (card.IsTrump(trump))
         {
-            return 100 + card.GetTrumpValue(trump);
+            return TrumpValueOffset + card.GetTrumpValue(trump);
         }
-        else if (card.GetEffectiveSuit(trump) == leadSuit)
+
+        if (card.GetEffectiveSuit(trump) == leadSuit)
         {
             return (int)card.Rank;
         }
-        else
-        {
-            return 0;
-        }
+
+        return OffSuitValue;
     }
 }
