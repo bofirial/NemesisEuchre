@@ -437,6 +437,9 @@ dotnet_diagnostic.SA1206.severity = none
 # SA1000: Keywords should be spaced correctly
 dotnet_diagnostic.SA1000.severity = none
 
+# IDE0046: Convert to conditional expression
+dotnet_diagnostic.IDE0046.severity = none
+
 [**/*Tests.cs]
 dotnet_diagnostic.VSTHRD200.severity = none
 
