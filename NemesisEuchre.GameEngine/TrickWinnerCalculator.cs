@@ -11,7 +11,16 @@ public interface ITrickWinnerCalculator
 
 public class TrickWinnerCalculator : ITrickWinnerCalculator
 {
+    /// <summary>
+    /// Value added to trump cards to ensure they always beat non-trump cards.
+    /// This offset places trump cards in a higher value range than any lead suit card.
+    /// </summary>
     private const int TrumpValueOffset = 100;
+
+    /// <summary>
+    /// Value assigned to off-suit cards (cards that are neither trump nor match the lead suit).
+    /// These cards cannot win the trick.
+    /// </summary>
     private const int OffSuitValue = 0;
 
     public PlayerPosition CalculateWinner(Trick trick, Suit trump)

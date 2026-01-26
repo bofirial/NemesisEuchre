@@ -1,7 +1,8 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine;
 
@@ -12,36 +13,33 @@ public interface IGameFactory
 
 public class GameFactory(IOptions<GameOptions> gameOptions) : IGameFactory
 {
+    private const int PlayersPerTeam = 2;
+
     public async Task<Game> CreateGameAsync()
     {
         ArgumentNullException.ThrowIfNull(gameOptions);
 
         ValidateActorTypes(gameOptions.Value);
 
-        var game = new Game();
+        return new Game
+        {
+            Players =
+            {
+                [PlayerPosition.North] = CreatePlayer(PlayerPosition.North, gameOptions.Value.Team1ActorTypes[0]),
+                [PlayerPosition.East] = CreatePlayer(PlayerPosition.East, gameOptions.Value.Team2ActorTypes[0]),
+                [PlayerPosition.South] = CreatePlayer(PlayerPosition.South, gameOptions.Value.Team1ActorTypes[1]),
+                [PlayerPosition.West] = CreatePlayer(PlayerPosition.West, gameOptions.Value.Team2ActorTypes[1]),
+            },
+        };
+    }
 
-        game.Players.Add(PlayerPosition.North, new Player
+    private static Player CreatePlayer(PlayerPosition position, ActorType actorType)
+    {
+        return new Player
         {
-            Position = PlayerPosition.North,
-            ActorType = gameOptions.Value.Team1ActorTypes[0],
-        });
-        game.Players.Add(PlayerPosition.East, new Player
-        {
-            Position = PlayerPosition.East,
-            ActorType = gameOptions.Value.Team2ActorTypes[0],
-        });
-        game.Players.Add(PlayerPosition.South, new Player
-        {
-            Position = PlayerPosition.South,
-            ActorType = gameOptions.Value.Team1ActorTypes[1],
-        });
-        game.Players.Add(PlayerPosition.West, new Player
-        {
-            Position = PlayerPosition.West,
-            ActorType = gameOptions.Value.Team2ActorTypes[1],
-        });
-
-        return game;
+            Position = position,
+            ActorType = actorType,
+        };
     }
 
     private static void ValidateActorTypes(GameOptions gameOptions)
@@ -49,14 +47,14 @@ public class GameFactory(IOptions<GameOptions> gameOptions) : IGameFactory
         ArgumentNullException.ThrowIfNull(gameOptions.Team1ActorTypes);
         ArgumentNullException.ThrowIfNull(gameOptions.Team2ActorTypes);
 
-        if (gameOptions.Team1ActorTypes.Length != 2)
+        if (gameOptions.Team1ActorTypes.Length != PlayersPerTeam)
         {
-            throw new ArgumentException("Team1ActorTypes must contain exactly 2 actor types.", nameof(gameOptions));
+            throw new ArgumentException($"Team1ActorTypes must contain exactly {PlayersPerTeam} actor types.", nameof(gameOptions));
         }
 
-        if (gameOptions.Team2ActorTypes.Length != 2)
+        if (gameOptions.Team2ActorTypes.Length != PlayersPerTeam)
         {
-            throw new ArgumentException("Team2ActorTypes must contain exactly 2 actor types.", nameof(gameOptions));
+            throw new ArgumentException($"Team2ActorTypes must contain exactly {PlayersPerTeam} actor types.", nameof(gameOptions));
         }
     }
 }

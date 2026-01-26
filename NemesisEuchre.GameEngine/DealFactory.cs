@@ -11,6 +11,26 @@ public interface IDealFactory
 
 public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
 {
+    /// <summary>
+    /// Number of cards dealt to each player in Euchre.
+    /// </summary>
+    private const int CardsPerPlayer = 5;
+
+    /// <summary>
+    /// Total number of players in a Euchre game.
+    /// </summary>
+    private const int PlayersPerGame = 4;
+
+    /// <summary>
+    /// Index of the up card in the shuffled deck.
+    /// </summary>
+    private const int UpCardIndex = 20;
+
+    /// <summary>
+    /// Starting index of the remaining deck (kitty) after dealing.
+    /// </summary>
+    private const int RemainingDeckStart = 21;
+
     public Task<Deal> CreateDealAsync(Game game, Deal? previousDeal = null)
     {
         ValidateInputs(game, previousDeal);
@@ -33,9 +53,9 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
     {
         ArgumentNullException.ThrowIfNull(game);
 
-        if (game.Players.Count != 4)
+        if (game.Players.Count != PlayersPerGame)
         {
-            throw new ArgumentException("Game must have exactly 4 players.", nameof(game));
+            throw new ArgumentException($"Game must have exactly {PlayersPerGame} players.", nameof(game));
         }
 
         if (previousDeal?.DealerPosition == null && previousDeal != null)
@@ -57,13 +77,9 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
         var dealPlayers = new Dictionary<PlayerPosition, DealPlayer>();
         var currentPosition = dealerPosition.GetNextPosition();
 
-        for (int i = 0; i < 4; i++)
+        for (int playerIndex = 0; playerIndex < PlayersPerGame; playerIndex++)
         {
-            var cardsForPlayer = new Card[5];
-            for (int cardIndex = 0; cardIndex < 5; cardIndex++)
-            {
-                cardsForPlayer[cardIndex] = deck[(i * 5) + cardIndex];
-            }
+            var cardsForPlayer = DealCardsToPlayer(deck, playerIndex);
 
             dealPlayers[currentPosition] = new DealPlayer
             {
@@ -79,6 +95,17 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
         return dealPlayers;
     }
 
+    private static Card[] DealCardsToPlayer(Card[] deck, int playerIndex)
+    {
+        var cardsForPlayer = new Card[CardsPerPlayer];
+        for (int cardIndex = 0; cardIndex < CardsPerPlayer; cardIndex++)
+        {
+            cardsForPlayer[cardIndex] = deck[(playerIndex * CardsPerPlayer) + cardIndex];
+        }
+
+        return cardsForPlayer;
+    }
+
     private static Deal BuildDeal(
         PlayerPosition dealerPosition,
         Card[] deck,
@@ -88,8 +115,8 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
         {
             DealStatus = DealStatus.NotStarted,
             DealerPosition = dealerPosition,
-            Deck = [.. deck[21..24]],
-            UpCard = deck[20],
+            Deck = [.. deck[RemainingDeckStart..]],
+            UpCard = deck[UpCardIndex],
             Players = players,
         };
     }

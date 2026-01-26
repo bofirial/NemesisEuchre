@@ -29,6 +29,7 @@ public static class GameEngineServiceCollectionExtensions
 
         serviceCollection.AddScoped<ITrickWinnerCalculator, TrickWinnerCalculator>();
         serviceCollection.AddScoped<IDealResultCalculator, DealResultCalculator>();
+        serviceCollection.AddScoped<IGameWinnerCalculator, GameWinnerCalculator>();
 
         serviceCollection.AddScoped<ITrumpSelectionValidator, TrumpSelectionValidator>();
         serviceCollection.AddScoped<ITrickPlayingValidator, TrickPlayingValidator>();

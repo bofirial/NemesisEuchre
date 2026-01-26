@@ -10,7 +10,13 @@ public interface IGameOrchestrator
     Task<Game> OrchestrateGameAsync();
 }
 
-public class GameOrchestrator(IGameFactory gameFactory, IDealFactory dealFactory, IDealOrchestrator dealOrchestrator, IGameScoreUpdater gameScoreUpdater, IOptions<GameOptions> gameOptions) : IGameOrchestrator
+public class GameOrchestrator(
+    IGameFactory gameFactory,
+    IDealFactory dealFactory,
+    IDealOrchestrator dealOrchestrator,
+    IGameScoreUpdater gameScoreUpdater,
+    IGameWinnerCalculator gameWinnerCalculator,
+    IOptions<GameOptions> gameOptions) : IGameOrchestrator
 {
     /// <summary>
     /// Maximum number of deals allowed per game to prevent infinite loops.
@@ -38,21 +44,10 @@ public class GameOrchestrator(IGameFactory gameFactory, IDealFactory dealFactory
         game.GameStatus = GameStatus.Playing;
     }
 
-    private static void FinalizeGame(Game game)
+    private void FinalizeGame(Game game)
     {
         game.GameStatus = GameStatus.Complete;
-        game.WinningTeam = DetermineWinner(game);
-    }
-
-    private static Team DetermineWinner(Game game)
-    {
-        if (game.Team1Score == game.Team2Score)
-        {
-            throw new InvalidOperationException(
-                $"Game ended in a tie ({game.Team1Score}-{game.Team2Score}), which should not occur in Euchre");
-        }
-
-        return game.Team1Score > game.Team2Score ? Team.Team1 : Team.Team2;
+        game.WinningTeam = gameWinnerCalculator.DetermineWinner(game);
     }
 
     private async Task ProcessDealsAsync(Game game)

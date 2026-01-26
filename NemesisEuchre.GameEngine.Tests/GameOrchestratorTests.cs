@@ -15,6 +15,7 @@ public class GameOrchestratorTests
     private readonly Mock<IDealFactory> _dealFactoryMock;
     private readonly Mock<IDealOrchestrator> _dealOrchestratorMock;
     private readonly Mock<IGameScoreUpdater> _gameScoreUpdaterMock;
+    private readonly Mock<IGameWinnerCalculator> _gameWinnerCalculatorMock;
     private readonly IOptions<GameOptions> _gameOptions;
     private readonly GameOrchestrator _sut;
 
@@ -24,16 +25,21 @@ public class GameOrchestratorTests
         _dealFactoryMock = new Mock<IDealFactory>();
         _dealOrchestratorMock = new Mock<IDealOrchestrator>();
         _gameScoreUpdaterMock = new Mock<IGameScoreUpdater>();
+        _gameWinnerCalculatorMock = new Mock<IGameWinnerCalculator>();
         _gameOptions = Options.Create(new GameOptions { WinningScore = 10 });
 
         _dealOrchestratorMock.Setup(x => x.OrchestrateDealAsync(It.IsAny<Deal>()))
             .Returns(Task.CompletedTask);
+
+        _gameWinnerCalculatorMock.Setup(x => x.DetermineWinner(It.IsAny<Game>()))
+            .Returns<Game>(game => game.Team1Score > game.Team2Score ? Team.Team1 : Team.Team2);
 
         _sut = new GameOrchestrator(
             _gameFactoryMock.Object,
             _dealFactoryMock.Object,
             _dealOrchestratorMock.Object,
             _gameScoreUpdaterMock.Object,
+            _gameWinnerCalculatorMock.Object,
             _gameOptions);
     }
 
@@ -49,6 +55,7 @@ public class GameOrchestratorTests
             _dealFactoryMock.Object,
             _dealOrchestratorMock.Object,
             _gameScoreUpdaterMock.Object,
+            _gameWinnerCalculatorMock.Object,
             gameOptions);
 
         var act = sut.OrchestrateGameAsync;
@@ -132,6 +139,9 @@ public class GameOrchestratorTests
                 g.Team1Score = 10;
                 g.Team2Score = 10;
             });
+
+        _gameWinnerCalculatorMock.Setup(x => x.DetermineWinner(It.IsAny<Game>()))
+            .Throws(new InvalidOperationException("Game ended in a tie (10-10), which should not occur in Euchre"));
 
         var act = _sut.OrchestrateGameAsync;
 
@@ -265,6 +275,7 @@ public class GameOrchestratorTests
             _dealFactoryMock.Object,
             _dealOrchestratorMock.Object,
             _gameScoreUpdaterMock.Object,
+            _gameWinnerCalculatorMock.Object,
             gameOptions);
 
         var game = new Game();
@@ -310,6 +321,7 @@ public class GameOrchestratorTests
             _dealFactoryMock.Object,
             _dealOrchestratorMock.Object,
             _gameScoreUpdaterMock.Object,
+            _gameWinnerCalculatorMock.Object,
             gameOptions);
 
         var game = new Game();
