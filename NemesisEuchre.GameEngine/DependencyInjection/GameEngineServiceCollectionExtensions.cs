@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
+using NemesisEuchre.GameEngine.Handlers;
+using NemesisEuchre.GameEngine.Mappers;
 using NemesisEuchre.GameEngine.PlayerBots;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Services;
 using NemesisEuchre.GameEngine.Validation;
 
 namespace NemesisEuchre.GameEngine.DependencyInjection;
@@ -32,5 +35,11 @@ public static class GameEngineServiceCollectionExtensions
         serviceCollection.AddScoped<IDealValidator, DealValidator>();
         serviceCollection.AddScoped<ITrickValidator, TrickValidator>();
         serviceCollection.AddScoped<IDealResultValidator, DealResultValidator>();
+
+        serviceCollection.AddScoped<ICallTrumpDecisionMapper, CallTrumpDecisionMapper>();
+        serviceCollection.AddScoped<IGoingAloneHandler, GoingAloneHandler>();
+        serviceCollection.AddScoped<IDealerDiscardHandler, DealerDiscardHandler>();
+        serviceCollection.AddScoped<IPlayerContextBuilder, PlayerContextBuilder>();
+        serviceCollection.AddScoped<IPlayerActorResolver, PlayerActorResolver>();
     }
 }

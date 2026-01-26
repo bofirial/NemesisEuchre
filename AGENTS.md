@@ -15,14 +15,6 @@ This file provides guidance to Coding AI Agents when working with code in this r
 - Provide acceptance criteria and Definition of Done for each deliverable.
 - End with next 3–5 high-impact actions and owners/placeholders.
 
-## Notifications
-
-Play terminal bell (powershell -NoProfile -Command "[Console]::Beep()") when:
-
-- Completing a significant task
-- Encountering an issue that needs user attention
-- Asking the user a question
-
 ## Project Overview
 
 NemesisEuchre is a console-based engine for training a high-performance Euchre AI using massive dataset seeding and genetic algorithms. The project is in early development with infrastructure in place but core game logic not yet implemented.

@@ -4,8 +4,10 @@ using Moq;
 
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
+using NemesisEuchre.GameEngine.Handlers;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Services;
 using NemesisEuchre.GameEngine.Validation;
 
 namespace NemesisEuchre.GameEngine.Tests;
@@ -13,6 +15,7 @@ namespace NemesisEuchre.GameEngine.Tests;
 public class TrickPlayingOrchestratorTests
 {
     private readonly Mock<IPlayerActor> _playerActorMock;
+    private readonly Mock<IPlayerActorResolver> _actorResolverMock;
     private readonly TrickPlayingOrchestrator _sut;
 
     public TrickPlayingOrchestratorTests()
@@ -20,9 +23,15 @@ public class TrickPlayingOrchestratorTests
         _playerActorMock = new Mock<IPlayerActor>();
         _playerActorMock.Setup(b => b.ActorType).Returns(ActorType.Chaos);
 
-        var actors = new[] { _playerActorMock.Object };
+        _actorResolverMock = new Mock<IPlayerActorResolver>();
+        _actorResolverMock.Setup(x => x.GetPlayerActor(It.IsAny<DealPlayer>()))
+            .Returns(_playerActorMock.Object);
+
         var validator = new TrickPlayingValidator();
-        _sut = new TrickPlayingOrchestrator(actors, validator);
+        var goingAloneHandler = new GoingAloneHandler();
+        var contextBuilder = new PlayerContextBuilder();
+
+        _sut = new TrickPlayingOrchestrator(validator, goingAloneHandler, contextBuilder, _actorResolverMock.Object);
     }
 
     [Fact]

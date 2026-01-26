@@ -5,8 +5,11 @@ using Microsoft.Extensions.Options;
 using Moq;
 
 using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.GameEngine.Handlers;
+using NemesisEuchre.GameEngine.Mappers;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Services;
 using NemesisEuchre.GameEngine.Validation;
 
 namespace NemesisEuchre.GameEngine.Tests;
@@ -14,6 +17,7 @@ namespace NemesisEuchre.GameEngine.Tests;
 public class TrumpSelectionOrchestratorTests
 {
     private readonly Mock<IPlayerActor> _playerActorMock;
+    private readonly Mock<IPlayerActorResolver> _actorResolverMock;
     private readonly IOptions<GameOptions> _gameOptions;
     private readonly TrumpSelectionOrchestrator _sut;
 
@@ -23,9 +27,22 @@ public class TrumpSelectionOrchestratorTests
         _playerActorMock.Setup(b => b.ActorType).Returns(ActorType.Chaos);
         _gameOptions = Options.Create(new GameOptions { StickTheDealer = true });
 
-        var bots = new[] { _playerActorMock.Object };
+        _actorResolverMock = new Mock<IPlayerActorResolver>();
+        _actorResolverMock.Setup(x => x.GetPlayerActor(It.IsAny<DealPlayer>()))
+            .Returns(_playerActorMock.Object);
+
         var validator = new TrumpSelectionValidator();
-        _sut = new TrumpSelectionOrchestrator(bots, _gameOptions, validator);
+        var decisionMapper = new CallTrumpDecisionMapper();
+        var contextBuilder = new PlayerContextBuilder();
+        var dealerDiscardHandler = new DealerDiscardHandler(_actorResolverMock.Object, contextBuilder, validator);
+
+        _sut = new TrumpSelectionOrchestrator(
+            _gameOptions,
+            validator,
+            decisionMapper,
+            dealerDiscardHandler,
+            contextBuilder,
+            _actorResolverMock.Object);
     }
 
     [Fact]
@@ -585,9 +602,22 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_WithStickTheDealerFalse_DealerCanPass()
     {
         var gameOptions = Options.Create(new GameOptions { StickTheDealer = false });
-        var bots = new[] { _playerActorMock.Object };
+        var actorResolverMock = new Mock<IPlayerActorResolver>();
+        actorResolverMock.Setup(x => x.GetPlayerActor(It.IsAny<DealPlayer>()))
+            .Returns(_playerActorMock.Object);
+
         var validator = new TrumpSelectionValidator();
-        var sut = new TrumpSelectionOrchestrator(bots, gameOptions, validator);
+        var decisionMapper = new CallTrumpDecisionMapper();
+        var contextBuilder = new PlayerContextBuilder();
+        var dealerDiscardHandler = new DealerDiscardHandler(actorResolverMock.Object, contextBuilder, validator);
+
+        var sut = new TrumpSelectionOrchestrator(
+            gameOptions,
+            validator,
+            decisionMapper,
+            dealerDiscardHandler,
+            contextBuilder,
+            actorResolverMock.Object);
 
         var deal = CreateTestDeal();
         deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
@@ -612,9 +642,22 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_WithStickTheDealerFalse_DealerPassOptionIncludedInRound2()
     {
         var gameOptions = Options.Create(new GameOptions { StickTheDealer = false });
-        var bots = new[] { _playerActorMock.Object };
+        var actorResolverMock = new Mock<IPlayerActorResolver>();
+        actorResolverMock.Setup(x => x.GetPlayerActor(It.IsAny<DealPlayer>()))
+            .Returns(_playerActorMock.Object);
+
         var validator = new TrumpSelectionValidator();
-        var sut = new TrumpSelectionOrchestrator(bots, gameOptions, validator);
+        var decisionMapper = new CallTrumpDecisionMapper();
+        var contextBuilder = new PlayerContextBuilder();
+        var dealerDiscardHandler = new DealerDiscardHandler(actorResolverMock.Object, contextBuilder, validator);
+
+        var sut = new TrumpSelectionOrchestrator(
+            gameOptions,
+            validator,
+            decisionMapper,
+            dealerDiscardHandler,
+            contextBuilder,
+            actorResolverMock.Object);
 
         var deal = CreateTestDeal();
         deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };

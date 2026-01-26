@@ -1,7 +1,9 @@
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
+using NemesisEuchre.GameEngine.Handlers;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Services;
 using NemesisEuchre.GameEngine.Validation;
 
 namespace NemesisEuchre.GameEngine;
@@ -12,11 +14,11 @@ public interface ITrickPlayingOrchestrator
 }
 
 public class TrickPlayingOrchestrator(
-    IEnumerable<IPlayerActor> playerActors,
-    ITrickPlayingValidator validator) : ITrickPlayingOrchestrator
+    ITrickPlayingValidator validator,
+    IGoingAloneHandler goingAloneHandler,
+    IPlayerContextBuilder contextBuilder,
+    IPlayerActorResolver actorResolver) : ITrickPlayingOrchestrator
 {
-    private readonly Dictionary<ActorType, IPlayerActor> _playerActors = playerActors.ToDictionary(x => x.ActorType, x => x);
-
     public async Task<Trick> PlayTrickAsync(Deal deal, PlayerPosition leadPosition)
     {
         validator.ValidatePreconditions(deal);
@@ -60,39 +62,6 @@ public class TrickPlayingOrchestrator(
         return [.. cards.Select(c => c.ToRelative(trump))];
     }
 
-    private static (short TeamScore, short OpponentScore) GetScores(Deal deal, PlayerPosition playerPosition)
-    {
-        var isTeam1 = playerPosition.GetTeam() == Team.Team1;
-        return isTeam1 ? (deal.Team1Score, deal.Team2Score) : (deal.Team2Score, deal.Team1Score);
-    }
-
-    private static bool ShouldPlayerSit(Deal deal, PlayerPosition position)
-    {
-        if (!deal.CallingPlayerIsGoingAlone)
-        {
-            return false;
-        }
-
-        var partnerPosition = deal.CallingPlayer!.Value.GetPartnerPosition();
-        return position == partnerPosition;
-    }
-
-    private static PlayerPosition GetNextActivePlayer(PlayerPosition current, Deal deal)
-    {
-        var next = current.GetNextPosition();
-        while (ShouldPlayerSit(deal, next))
-        {
-            next = next.GetNextPosition();
-        }
-
-        return next;
-    }
-
-    private static int GetNumberOfCardsToPlay(Deal deal)
-    {
-        return deal.CallingPlayerIsGoingAlone ? 3 : 4;
-    }
-
     private static void SetLeadSuitIfFirstCard(Trick trick, RelativeCard chosenCard, Suit trump, bool isFirstCard)
     {
         if (isFirstCard)
@@ -118,19 +87,19 @@ public class TrickPlayingOrchestrator(
     private async Task PlayAllCardsAsync(Deal deal, Trick trick)
     {
         var currentPosition = trick.LeadPosition;
-        var cardsToPlay = GetNumberOfCardsToPlay(deal);
+        var cardsToPlay = goingAloneHandler.GetNumberOfCardsToPlay(deal);
 
         for (int i = 0; i < cardsToPlay; i++)
         {
-            if (ShouldPlayerSit(deal, currentPosition))
+            if (goingAloneHandler.ShouldPlayerSit(deal, currentPosition))
             {
-                currentPosition = GetNextActivePlayer(currentPosition, deal);
+                currentPosition = goingAloneHandler.GetNextActivePlayer(currentPosition, deal);
                 continue;
             }
 
             var isFirstCard = i == 0;
             await PlaySingleCardAsync(deal, trick, currentPosition, isFirstCard);
-            currentPosition = GetNextActivePlayer(currentPosition, deal);
+            currentPosition = goingAloneHandler.GetNextActivePlayer(currentPosition, deal);
         }
     }
 
@@ -155,8 +124,8 @@ public class TrickPlayingOrchestrator(
         RelativeCard[] validCards)
     {
         var player = deal.Players[playerPosition];
-        var playerActor = GetPlayerActor(player);
-        var (teamScore, opponentScore) = GetScores(deal, playerPosition);
+        var playerActor = actorResolver.GetPlayerActor(player);
+        var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
 
         return playerActor.PlayCardAsync(
             relativeHand,
@@ -164,10 +133,5 @@ public class TrickPlayingOrchestrator(
             teamScore,
             opponentScore,
             validCards);
-    }
-
-    private IPlayerActor GetPlayerActor(DealPlayer player)
-    {
-        return _playerActors[player.ActorType!.Value];
     }
 }
