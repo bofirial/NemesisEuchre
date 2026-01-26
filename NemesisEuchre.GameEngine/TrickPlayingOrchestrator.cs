@@ -89,7 +89,7 @@ public class TrickPlayingOrchestrator(
         var currentPosition = trick.LeadPosition;
         var cardsToPlay = goingAloneHandler.GetNumberOfCardsToPlay(deal);
 
-        for (int i = 0; i < cardsToPlay; i++)
+        while (trick.CardsPlayed.Count < cardsToPlay)
         {
             if (goingAloneHandler.ShouldPlayerSit(deal, currentPosition))
             {
@@ -97,7 +97,7 @@ public class TrickPlayingOrchestrator(
                 continue;
             }
 
-            var isFirstCard = i == 0;
+            var isFirstCard = trick.CardsPlayed.Count == 0;
             await PlaySingleCardAsync(deal, trick, currentPosition, isFirstCard);
             currentPosition = goingAloneHandler.GetNextActivePlayer(currentPosition, deal);
         }
