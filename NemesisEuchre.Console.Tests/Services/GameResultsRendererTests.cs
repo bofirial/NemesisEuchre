@@ -72,4 +72,30 @@ public class GameResultsRendererTests
 
         testConsole.Output.Should().Contain("3");
     }
+
+    [Fact]
+    public void RenderResults_WhenDealHasGoingAlone_DisplaysWentAloneStatus()
+    {
+        var testConsole = new TestConsole();
+        var renderer = new GameResultsRenderer(testConsole);
+
+        var game = new Game
+        {
+            GameStatus = GameStatus.Complete,
+            Team1Score = 10,
+            Team2Score = 7,
+            WinningTeam = Team.Team1,
+        };
+
+        game.CompletedDeals.Add(new Deal
+        {
+            Trump = Suit.Hearts,
+            CallingPlayerIsGoingAlone = true,
+        });
+
+        renderer.RenderResults(game);
+
+        testConsole.Output.Should().Contain("Went Alone");
+        testConsole.Output.Should().Contain("Yes");
+    }
 }

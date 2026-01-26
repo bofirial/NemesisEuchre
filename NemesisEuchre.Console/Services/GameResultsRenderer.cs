@@ -69,6 +69,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole) : IGameResultsRendere
         table.AddColumn("Deal #");
         table.AddColumn("Trump");
         table.AddColumn("Caller");
+        table.AddColumn("Went Alone");
         table.AddColumn("Result");
         table.AddColumn("Team 1 Score");
         table.AddColumn("Team 2 Score");
@@ -80,6 +81,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole) : IGameResultsRendere
                 (i + 1).ToString(CultureInfo.InvariantCulture),
                 deal.Trump?.ToString() ?? "N/A",
                 deal.CallingPlayer?.ToString() ?? "N/A",
+                deal.CallingPlayerIsGoingAlone ? "Yes" : "No",
                 deal.DealResult?.ToString() ?? "N/A",
                 deal.Team1Score.ToString(CultureInfo.InvariantCulture),
                 deal.Team2Score.ToString(CultureInfo.InvariantCulture));
