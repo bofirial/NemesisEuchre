@@ -20,6 +20,8 @@ public class Deal
 
     public List<Trick> CompletedTricks { get; set; } = [];
 
+    public List<CallTrumpDecisionRecord> CallTrumpDecisions { get; set; } = [];
+
     public DealResult? DealResult { get; set; }
 
     public Team? WinningTeam { get; set; }
