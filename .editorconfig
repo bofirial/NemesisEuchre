@@ -408,8 +408,6 @@ dotnet_diagnostic.S3358.severity = suggestion  # Ternary operators should not be
 # Roslynator - Performance and style
 dotnet_diagnostic.RCS1018.severity = suggestion  # Add accessibility modifiers (sometimes obvious from context)
 
-# Test Files - Relax documentation and test requirements
-
 # IDE0210: Convert to top-level statements
 dotnet_diagnostic.IDE0210.severity = none
 
@@ -429,5 +427,25 @@ dotnet_diagnostic.SA1009.severity = none
 dotnet_diagnostic.VSTHRD111.severity = none
 
 # VSTHRD200 : Use Async suffix for async methods
+
+# SA1010: Opening square brackets should be spaced correctly
+dotnet_diagnostic.SA1010.severity = none
+
+# SA1206: Declaration keywords should follow order
+dotnet_diagnostic.SA1206.severity = none
+
+# SA1000: Keywords should be spaced correctly
+dotnet_diagnostic.SA1000.severity = none
+
+# IDE0046: Convert to conditional expression
+dotnet_diagnostic.IDE0046.severity = none
+
 [**/*Tests.cs]
 dotnet_diagnostic.VSTHRD200.severity = none
+
+# CA1707: Identifiers should not contain underscores
+[**/*Tests.cs]
+dotnet_diagnostic.CA1707.severity = none
+
+# SA1011: Closing square brackets should be spaced correctly
+dotnet_diagnostic.SA1011.severity = none

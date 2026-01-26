@@ -7,19 +7,13 @@ This file provides guidance to Coding AI Agents when working with code in this r
 - State assumptions explicitly; document risks and mitigations.
 - Offer 2–3 viable options with tradeoffs and a clear recommendation.
 - Provide runnable examples, scaffolds, and checklists; keep outputs concise and skimmable.
+- Always use Context7 MCP when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
 
 ## Default Output Format
 - Start with a one-paragraph summary and a bullet list of key decisions.
 - Use sections, short lists, and code fences. Include diagrams in Mermaid where helpful.
 - Provide acceptance criteria and Definition of Done for each deliverable.
 - End with next 3–5 high-impact actions and owners/placeholders.
-
-## Notifications
-
-Play terminal bell (`echo -e '\a'`) when:
-
-- Completing a significant task
-- Encountering an issue that needs user attention
 
 ## Project Overview
 

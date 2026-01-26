@@ -5,7 +5,10 @@
       "Bash(dotnet test:*)",
       "Bash(git add:*)",
       "Bash(dotnet format:*)",
-      "Bash(dotnet restore:*)"
+      "Bash(dotnet restore:*)",
+      "Bash(powershell -NoProfile -Command \"[Console]::Beep\\(\\)\")",
+      "Bash(Select-String -Pattern \"Passed|Failed|Total\")",
+      "Bash(dotnet run:*)"
     ]
   }
 }
