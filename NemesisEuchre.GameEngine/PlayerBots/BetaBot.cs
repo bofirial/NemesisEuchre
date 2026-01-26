@@ -4,11 +4,15 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.PlayerBots;
 
+/// <summary>
+/// Conservative bot that avoids trump and plays lowest cards.
+/// Always passes on calling trump when possible.
+/// </summary>
 public class BetaBot : IPlayerActor
 {
     private readonly Random _random = new();
 
-    public ActorType ActorType => ActorType.Chad;
+    public ActorType ActorType => ActorType.Beta;
 
     public Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
     {
@@ -19,24 +23,28 @@ public class BetaBot : IPlayerActor
 
     public Task<RelativeCard> DiscardCardAsync(RelativeCard[] cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard)
     {
-        var nonTrumpCards = validCardsToDiscard
-            .Where(card => card.Suit != RelativeSuit.Trump)
-            .ToArray();
-
-        return nonTrumpCards.Length > 0
-            ? Task.FromResult(nonTrumpCards.OrderBy(card => card.Rank).First())
-            : Task.FromResult(validCardsToDiscard.OrderBy(card => card.Rank).First());
+        return Task.FromResult(SelectLowestNonTrumpCardOrLowest(validCardsToDiscard));
     }
 
     public Task<RelativeCard> PlayCardAsync(RelativeCard[] cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay)
     {
-        var nonTrumpCards = validCardsToPlay
+        return Task.FromResult(SelectLowestNonTrumpCardOrLowest(validCardsToPlay));
+    }
+
+    private static RelativeCard SelectLowestNonTrumpCardOrLowest(RelativeCard[] cards)
+    {
+        var nonTrumpCards = cards
             .Where(card => card.Suit != RelativeSuit.Trump)
             .ToArray();
 
         return nonTrumpCards.Length > 0
-            ? Task.FromResult(nonTrumpCards.OrderBy(card => card.Rank).First())
-            : Task.FromResult(validCardsToPlay.OrderBy(card => card.Rank).First());
+            ? SelectLowestCard(nonTrumpCards)
+            : SelectLowestCard(cards);
+    }
+
+    private static RelativeCard SelectLowestCard(RelativeCard[] cards)
+    {
+        return cards.OrderBy(card => card.Rank).First();
     }
 
     private Task<T> SelectRandomAsync<T>(T[] options)

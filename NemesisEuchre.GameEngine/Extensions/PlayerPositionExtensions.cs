@@ -5,6 +5,12 @@ namespace NemesisEuchre.GameEngine.Extensions;
 
 public static class PlayerPositionExtensions
 {
+    /// <summary>
+    /// Total number of player positions in a Euchre game.
+    /// Used for relative position calculations.
+    /// </summary>
+    private const int TotalPlayerPositions = 4;
+
     public static Team GetTeam(this PlayerPosition position)
     {
         return position switch
@@ -45,14 +51,14 @@ public static class PlayerPositionExtensions
         this PlayerPosition absolutePosition,
         PlayerPosition self)
     {
-        var distance = (absolutePosition - self + 4) % 4;
+        var distance = (absolutePosition - self + TotalPlayerPositions) % TotalPlayerPositions;
         return distance switch
         {
             0 => RelativePlayerPosition.Self,
             1 => RelativePlayerPosition.LeftHandOpponent,
             2 => RelativePlayerPosition.Partner,
             3 => RelativePlayerPosition.RightHandOpponent,
-            _ => throw new InvalidOperationException("Impossible modulo 4 state")
+            _ => throw new InvalidOperationException($"Impossible modulo {TotalPlayerPositions} state")
         };
     }
 
@@ -69,7 +75,7 @@ public static class PlayerPositionExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(relativePosition))
         };
 
-        return (PlayerPosition)(((int)self + offset) % 4);
+        return (PlayerPosition)(((int)self + offset) % TotalPlayerPositions);
     }
 
     public static Player GetPlayerAtRelativePosition(
