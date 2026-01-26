@@ -80,10 +80,10 @@ public static class CardExtensions
 
         var suitSymbol = card.Suit switch
         {
-            Suit.Spades => "♠",
-            Suit.Hearts => "♥",
-            Suit.Clubs => "♣",
-            Suit.Diamonds => "♦",
+            Suit.Spades => "♠ ",
+            Suit.Hearts => "♥ ",
+            Suit.Clubs => "♣ ",
+            Suit.Diamonds => "♦ ",
             _ => "?"
         };
 

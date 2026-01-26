@@ -1,6 +1,7 @@
 using System.Globalization;
 
 using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 
 using Spectre.Console;
@@ -22,6 +23,42 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole) : IGameResultsRendere
         RenderWinner(game);
         RenderStatistics(game);
         RenderDealsTable(game);
+    }
+
+    private static IEnumerable<Card> SortCardsByTrump(Card[] cards, Suit? trump)
+    {
+        if (trump == null)
+        {
+            return cards.OrderByDescending(c => (int)c.Rank);
+        }
+
+        return cards
+            .OrderByDescending(c => c.IsTrump(trump.Value))
+            .ThenByDescending(c => c.IsTrump(trump.Value)
+                ? c.GetTrumpValue(trump.Value)
+                : 0)
+            .ThenBy(c => c.IsTrump(trump.Value) ? 0 : (int)c.Suit)
+            .ThenByDescending(c => c.IsTrump(trump.Value) ? 0 : (int)c.Rank);
+    }
+
+    private static string FormatHandWithColors(Card[] cards, Suit? trump)
+    {
+        if (cards.Length == 0)
+        {
+            return "N/A";
+        }
+
+        var sortedCards = SortCardsByTrump(cards, trump);
+
+        var formattedCards = sortedCards.Select(card =>
+        {
+            var displayString = card.ToDisplayString();
+            return card.Suit.IsRed()
+                ? $"[red]{displayString}[/]"
+                : displayString;
+        });
+
+        return string.Join(" ", formattedCards);
     }
 
     private void RenderWinner(Game game)
@@ -73,6 +110,10 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole) : IGameResultsRendere
         table.AddColumn("Result");
         table.AddColumn("Team 1 Score");
         table.AddColumn("Team 2 Score");
+        table.AddColumn("North Hand");
+        table.AddColumn("East Hand");
+        table.AddColumn("South Hand");
+        table.AddColumn("West Hand");
 
         for (int i = 0; i < game.CompletedDeals.Count; i++)
         {
@@ -84,7 +125,11 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole) : IGameResultsRendere
                 deal.CallingPlayerIsGoingAlone ? "Yes" : "No",
                 deal.DealResult?.ToString() ?? "N/A",
                 deal.Team1Score.ToString(CultureInfo.InvariantCulture),
-                deal.Team2Score.ToString(CultureInfo.InvariantCulture));
+                deal.Team2Score.ToString(CultureInfo.InvariantCulture),
+                FormatHandWithColors(deal.Players.GetValueOrDefault(PlayerPosition.North)?.StartingHand ?? [], deal.Trump),
+                FormatHandWithColors(deal.Players.GetValueOrDefault(PlayerPosition.East)?.StartingHand ?? [], deal.Trump),
+                FormatHandWithColors(deal.Players.GetValueOrDefault(PlayerPosition.South)?.StartingHand ?? [], deal.Trump),
+                FormatHandWithColors(deal.Players.GetValueOrDefault(PlayerPosition.West)?.StartingHand ?? [], deal.Trump));
         }
 
         ansiConsole.Write(table);
