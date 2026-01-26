@@ -53,17 +53,17 @@ This version extends the NemesisEuchre engine to capture all ML training data (C
 
 ### Decision Record Models (Steps 1-3)
 
-1. **Add CallTrumpDecisionRecord model**
-   - Create `NemesisEuchre.GameEngine\Models\CallTrumpDecisionRecord.cs`
-   - Include: player's hand (RelativeCard[]), upcard, dealer position, team/opponent scores, valid decision options, chosen decision, decision order (1-8 for two rounds of bidding)
-   - Add `List<CallTrumpDecisionRecord>` property to Deal model
-   - Include unit tests validating all required fields
+1. ~~**Add CallTrumpDecisionRecord model**~~
+   - ~~Create `NemesisEuchre.GameEngine\Models\CallTrumpDecisionRecord.cs`~~
+   - ~~Include: player's hand (RelativeCard[]), upcard, dealer position, team/opponent scores, valid decision options, chosen decision, decision order (1-8 for two rounds of bidding)~~
+   - ~~Add `List<CallTrumpDecisionRecord>` property to Deal model~~
+   - ~~Include unit tests validating all required fields~~
 
-2. **Add DiscardCardDecisionRecord model**
-   - Create `NemesisEuchre.GameEngine\Models\DiscardCardDecisionRecord.cs`
-   - Include: dealer's relative hand before discarding, current deal state (RelativeDeal), team/opponent scores, valid relative cards to discard, chosen relative card
-   - Add `List<DiscardCardDecisionRecord>` property to Deal model
-   - Include unit tests
+2. ~~**Add DiscardCardDecisionRecord model**~~
+   - ~~Create `NemesisEuchre.GameEngine\Models\DiscardCardDecisionRecord.cs`~~
+   - ~~Include: dealer's relative hand before discarding, current deal state (RelativeDeal), team/opponent scores, valid relative cards to discard, chosen relative card~~
+   - ~~Add `List<DiscardCardDecisionRecord>` property to Deal model~~
+   - ~~Include unit tests~~
 
 3. **Add PlayCardDecisionRecord model**
    - Create `NemesisEuchre.GameEngine\Models\PlayCardDecisionRecord.cs`
