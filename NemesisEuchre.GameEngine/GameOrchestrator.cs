@@ -12,6 +12,12 @@ public interface IGameOrchestrator
 
 public class GameOrchestrator(IGameFactory gameFactory, IDealFactory dealFactory, IDealOrchestrator dealOrchestrator, IGameScoreUpdater gameScoreUpdater, IOptions<GameOptions> gameOptions) : IGameOrchestrator
 {
+    /// <summary>
+    /// Maximum number of deals allowed per game to prevent infinite loops.
+    /// This safety limit ensures the game terminates even in edge cases.
+    /// </summary>
+    private const int MaxDealsPerGame = 100;
+
     public async Task<Game> OrchestrateGameAsync()
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(gameOptions.Value.WinningScore, 1);
@@ -51,7 +57,7 @@ public class GameOrchestrator(IGameFactory gameFactory, IDealFactory dealFactory
 
     private async Task ProcessDealsAsync(Game game)
     {
-        for (var dealNumber = 1; dealNumber <= 100; dealNumber++)
+        for (var dealNumber = 1; dealNumber <= MaxDealsPerGame; dealNumber++)
         {
             await ProcessSingleDealAsync(game);
 
@@ -63,7 +69,7 @@ public class GameOrchestrator(IGameFactory gameFactory, IDealFactory dealFactory
 
         if (!GameIsComplete(game))
         {
-            throw new InvalidOperationException("Game did not complete within the maximum number of deals allowed (100)");
+            throw new InvalidOperationException($"Game did not complete within the maximum number of deals allowed ({MaxDealsPerGame})");
         }
     }
 

@@ -25,7 +25,7 @@ public class TrickPlayingOrchestrator(
 
         var trick = InitializeTrick(leadPosition);
 
-        await PlayAllCardsAsync(deal, trick);
+        await ExecuteTrickCardPlaysAsync(deal, trick);
 
         return trick;
     }
@@ -84,7 +84,7 @@ public class TrickPlayingOrchestrator(
         player.CurrentHand.Remove(card);
     }
 
-    private async Task PlayAllCardsAsync(Deal deal, Trick trick)
+    private async Task ExecuteTrickCardPlaysAsync(Deal deal, Trick trick)
     {
         var currentPosition = trick.LeadPosition;
         var cardsToPlay = goingAloneHandler.GetNumberOfCardsToPlay(deal);

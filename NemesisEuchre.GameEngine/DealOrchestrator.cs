@@ -17,17 +17,17 @@ public class DealOrchestrator(
     IDealResultCalculator dealResultCalculator,
     IDealValidator validator) : IDealOrchestrator
 {
+    private const int TricksPerDeal = 5;
+
     public async Task OrchestrateDealAsync(Deal deal)
     {
         validator.ValidateDealPreconditions(deal);
 
         await ExecuteTrumpSelectionPhaseAsync(deal);
 
-        if (deal.Trump == null || deal.CallingPlayer == null)
+        if (IsThrowIn(deal))
         {
-            deal.DealResult = DealResult.ThrowIn;
-            deal.DealStatus = DealStatus.Complete;
-
+            HandleThrowInScenario(deal);
             return;
         }
 
@@ -35,6 +35,17 @@ public class DealOrchestrator(
 
         ExecuteScoringPhase(deal);
 
+        deal.DealStatus = DealStatus.Complete;
+    }
+
+    private static bool IsThrowIn(Deal deal)
+    {
+        return deal.Trump == null || deal.CallingPlayer == null;
+    }
+
+    private static void HandleThrowInScenario(Deal deal)
+    {
+        deal.DealResult = DealResult.ThrowIn;
         deal.DealStatus = DealStatus.Complete;
     }
 
@@ -67,7 +78,7 @@ public class DealOrchestrator(
     {
         var leadPosition = deal.DealerPosition!.Value.GetNextPosition();
 
-        for (int trickNumber = 0; trickNumber < 5; trickNumber++)
+        for (int trickNumber = 0; trickNumber < TricksPerDeal; trickNumber++)
         {
             leadPosition = await PlaySingleTrickAsync(deal, leadPosition);
         }
