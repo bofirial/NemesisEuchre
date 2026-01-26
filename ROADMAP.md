@@ -35,10 +35,10 @@
 12. ~~Update Deal with result once complete~~
     * ~~Plan Mode: **Implement the IDealResultCalculator with unit tests.**~~
     * ~~**Refactor the IDealResultCalculator to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.**~~
-13. Refactor GameEngine to improve readability
-14. Consider consolidating Relative classes logic to Bots instead of making conversions in all the Orchestrators
-15. Update Console App to Play a game when called
-    * Plan Mode: **Update the DefaultCommand to play a game between 4 ChaosBots.  Display the results once the game is completed using Spectre.Console.  Also update the DefaultCommand unit tests.**
+13. ~~Refactor GameEngine to improve readability~~
+14. ~~Update Console App to Play a game when called~~
+    * ~~Plan Mode: **Update the DefaultCommand to play a game between 4 ChaosBots.  Display the results once the game is completed using Spectre.Console.  Also update the DefaultCommand unit tests.**~~
+15. Consider consolidating Relative classes logic to Bots instead of making conversions in all the Orchestrators
 
 ## Store Game Results 0.3
 
