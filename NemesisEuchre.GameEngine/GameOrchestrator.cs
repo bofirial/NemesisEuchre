@@ -76,6 +76,9 @@ public class GameOrchestrator(
 
         await gameScoreUpdater.UpdateGameScoreAsync(game, game.CurrentDeal);
 
+        game.CurrentDeal.Team1Score = game.Team1Score;
+        game.CurrentDeal.Team2Score = game.Team2Score;
+
         game.CompletedDeals.Add(game.CurrentDeal);
         game.CurrentDeal = null;
     }
