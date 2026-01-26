@@ -79,10 +79,10 @@
 
 ## AI Improvements
 
-1. Explore Refactor Slash Commands
-   * Refactor the {variable} to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.
-2. Explore TDD Slash Commands
-   * Is this something I want to do or just a way to burn more tokens?
+1. ~~Explore Refactor Slash Commands~~
+   * ~~Refactor the {variable} to reduce method size and improve code readability.  Changes should not need to be made to any other files or unit tests.~~
+2. ~~Explore TDD Slash Commands~~
+   * ~~Is this something I want to do or just a way to burn more tokens?~~
 3. Explore Skills
    * When would I use this?
 4. Improvements to AGENTS.md
