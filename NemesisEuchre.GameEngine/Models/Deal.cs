@@ -22,6 +22,8 @@ public class Deal
 
     public List<CallTrumpDecisionRecord> CallTrumpDecisions { get; set; } = [];
 
+    public List<DiscardCardDecisionRecord> DiscardCardDecisions { get; set; } = [];
+
     public DealResult? DealResult { get; set; }
 
     public Team? WinningTeam { get; set; }
