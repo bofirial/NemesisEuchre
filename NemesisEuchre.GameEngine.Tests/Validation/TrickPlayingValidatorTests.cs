@@ -1,7 +1,6 @@
 using FluentAssertions;
 
 using NemesisEuchre.GameEngine.Constants;
-using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.Validation;
 
@@ -104,12 +103,11 @@ public class TrickPlayingValidatorTests
     [Fact]
     public void ValidateCardChoice_WithCardNotInValidCards_ThrowsInvalidOperationException()
     {
-        const Suit trump = Suit.Hearts;
-        var chosenCard = new Card { Suit = Suit.Spades, Rank = Rank.Ace }.ToRelative(trump);
+        var chosenCard = new Card { Suit = Suit.Spades, Rank = Rank.Ace };
         var validCards = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Jack }.ToRelative(trump),
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ace }.ToRelative(trump),
+            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
+            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
         };
 
         var act = () => _validator.ValidateCardChoice(chosenCard, validCards);
@@ -121,16 +119,14 @@ public class TrickPlayingValidatorTests
     [Fact]
     public void ValidateCardChoice_WithCardInValidCards_DoesNotThrow()
     {
-        const Suit trump = Suit.Hearts;
         var aceOfHearts = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
-        var relativeAce = aceOfHearts.ToRelative(trump);
         var validCards = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Jack }.ToRelative(trump),
-            relativeAce,
+            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
+            aceOfHearts,
         };
 
-        var act = () => _validator.ValidateCardChoice(relativeAce, validCards);
+        var act = () => _validator.ValidateCardChoice(aceOfHearts, validCards);
 
         act.Should().NotThrow();
     }

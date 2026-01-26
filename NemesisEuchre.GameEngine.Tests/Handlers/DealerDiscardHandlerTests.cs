@@ -3,7 +3,6 @@ using FluentAssertions;
 using Moq;
 
 using NemesisEuchre.GameEngine.Constants;
-using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Handlers;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
@@ -42,14 +41,14 @@ public class DealerDiscardHandlerTests
         var dealer = deal.Players[PlayerPosition.North];
         var initialHandCount = dealer.CurrentHand.Count;
 
-        var relativeDiscard = upCard.ToRelative(Suit.Hearts);
         _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .ReturnsAsync(relativeDiscard);
+                It.IsAny<Card[]>()))
+            .ReturnsAsync(upCard);
 
         await _handler.HandleDealerDiscardAsync(deal);
 
@@ -62,24 +61,25 @@ public class DealerDiscardHandlerTests
         var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
         var deal = CreateTestDeal(upCard);
 
-        var relativeDiscard = upCard.ToRelative(Suit.Hearts);
         _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .ReturnsAsync(relativeDiscard);
+                It.IsAny<Card[]>()))
+            .ReturnsAsync(upCard);
 
         await _handler.HandleDealerDiscardAsync(deal);
 
         _playerActorMock.Verify(
             x => x.DiscardCardAsync(
-                It.Is<RelativeCard[]>(cards => cards.Length == 6),
-                It.IsAny<RelativeDeal>(),
+                It.Is<Card[]>(cards => cards.Length == 6),
+                It.IsAny<Deal>(),
+                PlayerPosition.North,
                 10,
                 5,
-                It.Is<RelativeCard[]>(cards => cards.Length == 6)),
+                It.Is<Card[]>(cards => cards.Length == 6)),
             Times.Once);
     }
 
@@ -89,21 +89,21 @@ public class DealerDiscardHandlerTests
         var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
         var deal = CreateTestDeal(upCard);
 
-        var relativeDiscard = upCard.ToRelative(Suit.Hearts);
         _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .ReturnsAsync(relativeDiscard);
+                It.IsAny<Card[]>()))
+            .ReturnsAsync(upCard);
 
         await _handler.HandleDealerDiscardAsync(deal);
 
         _validatorMock.Verify(
             x => x.ValidateDiscard(
-                It.IsAny<RelativeCard>(),
-                It.IsAny<RelativeCard[]>()),
+                It.IsAny<Card>(),
+                It.IsAny<Card[]>()),
             Times.Once);
     }
 
@@ -116,15 +116,15 @@ public class DealerDiscardHandlerTests
         var initialHandCount = dealer.CurrentHand.Count;
 
         var cardToDiscard = dealer.CurrentHand[0];
-        var relativeDiscard = cardToDiscard.ToRelative(Suit.Hearts);
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .ReturnsAsync(relativeDiscard);
+                It.IsAny<Card[]>()))
+            .ReturnsAsync(cardToDiscard);
 
         await _handler.HandleDealerDiscardAsync(deal);
 

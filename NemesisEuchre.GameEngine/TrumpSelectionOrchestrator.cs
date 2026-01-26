@@ -118,10 +118,11 @@ public class TrumpSelectionOrchestrator(
         return playerActor.CallTrumpAsync(
             [.. player.CurrentHand],
             deal.UpCard!,
+            playerPosition,
             contextBuilder.GetRelativeDealerPosition(deal, playerPosition),
             teamScore,
             opponentScore,
-            validDecisions);
+            [.. validDecisions]);
     }
 
     private async Task<CallTrumpDecision> GetAndValidatePlayerDecisionAsync(

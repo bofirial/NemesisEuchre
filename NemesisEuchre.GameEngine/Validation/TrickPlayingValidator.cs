@@ -1,6 +1,5 @@
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.Validation;
 
@@ -8,7 +7,7 @@ public interface ITrickPlayingValidator
 {
     void ValidatePreconditions(Deal deal);
 
-    void ValidateCardChoice(RelativeCard chosenCard, RelativeCard[] validCards);
+    void ValidateCardChoice(Card chosenCard, Card[] validCards);
 }
 
 public class TrickPlayingValidator : ITrickPlayingValidator
@@ -40,7 +39,7 @@ public class TrickPlayingValidator : ITrickPlayingValidator
         }
     }
 
-    public void ValidateCardChoice(RelativeCard chosenCard, RelativeCard[] validCards)
+    public void ValidateCardChoice(Card chosenCard, Card[] validCards)
     {
         if (!validCards.Contains(chosenCard))
         {

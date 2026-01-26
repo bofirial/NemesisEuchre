@@ -133,12 +133,13 @@ public class TrickPlayingOrchestratorTests
         deal.Trump = Suit.Hearts;
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .ReturnsAsync((RelativeCard[] _, RelativeDeal _, short _, short _, RelativeCard[] valid) => valid[0]);
+                It.IsAny<Card[]>()))
+            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] valid) => valid[0]);
 
         var result = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -167,19 +168,20 @@ public class TrickPlayingOrchestratorTests
         var playOrder = new List<PlayerPosition>();
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (hand, _, _, _, _) =>
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (hand, _, _, _, _, _) =>
                 {
                     var card = hand[0];
-                    var position = GetPositionFromCard(card.Card);
+                    var position = GetPositionFromCard(card);
                     playOrder.Add(position);
                 })
-            .ReturnsAsync((RelativeCard[] hand, RelativeDeal _, short _, short _, RelativeCard[] _) => hand[0]);
+            .ReturnsAsync((Card[] hand, Deal? _, PlayerPosition _, short _, short _, Card[] _) => hand[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -193,19 +195,20 @@ public class TrickPlayingOrchestratorTests
         var playOrder = new List<PlayerPosition>();
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (hand, _, _, _, _) =>
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (hand, _, _, _, _, _) =>
                 {
                     var card = hand[0];
-                    var position = GetPositionFromCard(card.Card);
+                    var position = GetPositionFromCard(card);
                     playOrder.Add(position);
                 })
-            .ReturnsAsync((RelativeCard[] hand, RelativeDeal _, short _, short _, RelativeCard[] _) => hand[0]);
+            .ReturnsAsync((Card[] hand, Deal? _, PlayerPosition _, short _, short _, Card[] _) => hand[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.East);
 
@@ -232,17 +235,18 @@ public class TrickPlayingOrchestratorTests
     public async Task PlayTrickAsync_LeadPlayerCanPlayAnyCard()
     {
         var deal = CreateTestDeal();
-        RelativeCard[]? capturedValidCards = null;
+        Card[]? capturedValidCards = null;
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (_, _, _, _, valid) => capturedValidCards ??= valid)
-            .ReturnsAsync((RelativeCard[] hand, RelativeDeal _, short _, short _, RelativeCard[] _) => hand[0]);
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (_, _, _, _, _, valid) => capturedValidCards ??= valid)
+            .ReturnsAsync((Card[] hand, Deal? _, PlayerPosition _, short _, short _, Card[] _) => hand[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -269,17 +273,18 @@ public class TrickPlayingOrchestratorTests
             new Card { Suit = Suit.Diamonds, Rank = Rank.Ace }
         ];
 
-        RelativeCard[]? capturedValidCards = null;
+        Card[]? capturedValidCards = null;
         var callCount = 0;
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (_, _, _, _, valid) =>
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (_, _, _, _, _, valid) =>
                 {
                     callCount++;
                     if (callCount == 2)
@@ -287,12 +292,12 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((RelativeCard[] _, RelativeDeal _, short _, short _, RelativeCard[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
         capturedValidCards.Should().HaveCount(2);
-        capturedValidCards!.All(c => c.Card.Suit == Suit.Spades).Should().BeTrue();
+        capturedValidCards!.All(c => c.Suit == Suit.Spades).Should().BeTrue();
     }
 
     [Fact]
@@ -315,17 +320,18 @@ public class TrickPlayingOrchestratorTests
             new Card { Suit = Suit.Diamonds, Rank = Rank.Ten }
         ];
 
-        RelativeCard[]? capturedValidCards = null;
+        Card[]? capturedValidCards = null;
         var callCount = 0;
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (_, _, _, _, valid) =>
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (_, _, _, _, _, valid) =>
                 {
                     callCount++;
                     if (callCount == 2)
@@ -333,7 +339,7 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((RelativeCard[] _, RelativeDeal _, short _, short _, RelativeCard[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -355,20 +361,16 @@ public class TrickPlayingOrchestratorTests
 
         var callCount = 0;
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (_, _, _, _, _) => callCount++)
-            .ReturnsAsync((RelativeCard[] _, RelativeDeal _, short _, short _, RelativeCard[] valid) => callCount == 2
-                    ? new RelativeCard
-                    {
-                        Card = new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
-                        Rank = Rank.RightBower,
-                        Suit = RelativeSuit.Trump,
-                    }
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (_, _, _, _, _, _) => callCount++)
+            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] valid) => callCount == 2
+                    ? new Card { Suit = Suit.Hearts, Rank = Rank.Jack }
                     : valid[0]);
 
         var act = async () => await _sut.PlayTrickAsync(deal, PlayerPosition.North);
@@ -390,17 +392,18 @@ public class TrickPlayingOrchestratorTests
             new Card { Suit = Suit.Diamonds, Rank = Rank.Queen }
         ];
 
-        List<RelativeCard[]> allValidCards = [];
+        List<Card[]> allValidCards = [];
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (_, _, _, _, valid) => allValidCards.Add(valid))
-            .ReturnsAsync((RelativeCard[] _, RelativeDeal _, short _, short _, RelativeCard[] valid) => valid[0]);
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (_, _, _, _, _, valid) => allValidCards.Add(valid))
+            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -422,17 +425,18 @@ public class TrickPlayingOrchestratorTests
             new Card { Suit = Suit.Spades, Rank = Rank.King }
         ];
 
-        RelativeCard[]? capturedValidCards = null;
+        Card[]? capturedValidCards = null;
         var callCount = 0;
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (_, _, _, _, valid) =>
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (_, _, _, _, _, valid) =>
                 {
                     callCount++;
                     if (callCount == 2)
@@ -440,7 +444,7 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((RelativeCard[] _, RelativeDeal _, short _, short _, RelativeCard[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] valid) => valid[0]);
 
         var result = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -468,17 +472,18 @@ public class TrickPlayingOrchestratorTests
             new Card { Suit = Suit.Spades, Rank = Rank.Ten }
         ];
 
-        RelativeCard[]? capturedValidCards = null;
+        Card[]? capturedValidCards = null;
         var callCount = 0;
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (_, _, _, _, valid) =>
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (_, _, _, _, _, valid) =>
                 {
                     callCount++;
                     if (callCount == 2)
@@ -486,12 +491,12 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((RelativeCard[] _, RelativeDeal _, short _, short _, RelativeCard[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
         capturedValidCards.Should().HaveCount(1);
-        capturedValidCards![0].Card.Suit.Should().Be(Suit.Clubs);
+        capturedValidCards![0].Suit.Should().Be(Suit.Clubs);
     }
 
     [Fact]
@@ -501,12 +506,13 @@ public class TrickPlayingOrchestratorTests
         deal.Trump = Suit.Hearts;
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .ReturnsAsync((RelativeCard[] _, RelativeDeal _, short _, short _, RelativeCard[] valid) => valid[0]);
+                It.IsAny<Card[]>()))
+            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] valid) => valid[0]);
 
         var result = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -533,17 +539,18 @@ public class TrickPlayingOrchestratorTests
             new Card { Suit = Suit.Diamonds, Rank = Rank.Ten }
         ];
 
-        RelativeCard[]? capturedValidCards = null;
+        Card[]? capturedValidCards = null;
         var callCount = 0;
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (_, _, _, _, valid) =>
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (_, _, _, _, _, valid) =>
                 {
                     callCount++;
                     if (callCount == 2)
@@ -551,12 +558,13 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((RelativeCard[] _, RelativeDeal _, short _, short _, RelativeCard[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
         capturedValidCards.Should().HaveCount(1);
-        capturedValidCards![0].Rank.Should().Be(Rank.LeftBower);
+        capturedValidCards![0].Rank.Should().Be(Rank.Jack);
+        capturedValidCards![0].Suit.Should().Be(Suit.Clubs);
     }
 
     [Fact]
@@ -572,17 +580,18 @@ public class TrickPlayingOrchestratorTests
             new Card { Suit = Suit.Clubs, Rank = Rank.Ten }
         ];
 
-        RelativeCard[]? capturedValidCards = null;
+        Card[]? capturedValidCards = null;
         var callCount = 0;
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (_, _, _, _, valid) =>
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (_, _, _, _, _, valid) =>
                 {
                     callCount++;
                     if (callCount == 2)
@@ -590,12 +599,13 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((RelativeCard[] _, RelativeDeal _, short _, short _, RelativeCard[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
         capturedValidCards.Should().HaveCount(1);
-        capturedValidCards![0].Rank.Should().Be(Rank.LeftBower);
+        capturedValidCards![0].Rank.Should().Be(Rank.Jack);
+        capturedValidCards![0].Suit.Should().Be(Suit.Diamonds);
     }
 
     [Fact]
@@ -605,12 +615,13 @@ public class TrickPlayingOrchestratorTests
         deal.Trump = Suit.Clubs;
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .ReturnsAsync((RelativeCard[] _, RelativeDeal _, short _, short _, RelativeCard[] valid) => valid[0]);
+                It.IsAny<Card[]>()))
+            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] valid) => valid[0]);
 
         var result = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -671,19 +682,20 @@ public class TrickPlayingOrchestratorTests
         var playOrder = new List<PlayerPosition>();
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (hand, _, _, _, _) =>
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (hand, _, _, _, _, _) =>
                 {
                     var card = hand[0];
-                    var position = GetPositionFromCard(card.Card);
+                    var position = GetPositionFromCard(card);
                     playOrder.Add(position);
                 })
-            .ReturnsAsync((RelativeCard[] hand, RelativeDeal _, short _, short _, RelativeCard[] _) => hand[0]);
+            .ReturnsAsync((Card[] hand, Deal? _, PlayerPosition _, short _, short _, Card[] _) => hand[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -699,20 +711,21 @@ public class TrickPlayingOrchestratorTests
         deal.Team1Score = 5;
         deal.Team2Score = 3;
 
-        RelativeCard[]? capturedHand = null;
-        RelativeDeal? capturedDeal = null;
+        Card[]? capturedHand = null;
+        Deal? capturedDeal = null;
         short? capturedTeamScore = null;
         short? capturedOpponentScore = null;
-        RelativeCard[]? capturedValidCards = null;
+        Card[]? capturedValidCards = null;
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (hand, deal, team, opp, valid) =>
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (hand, deal, _, team, opp, valid) =>
                 {
                     if (capturedHand == null)
                     {
@@ -723,7 +736,7 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((RelativeCard[] hand, RelativeDeal _, short _, short _, RelativeCard[] _) => hand[0]);
+            .ReturnsAsync((Card[] hand, Deal? _, PlayerPosition _, short _, short _, Card[] _) => hand[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -742,25 +755,26 @@ public class TrickPlayingOrchestratorTests
         deal.DealerPosition = PlayerPosition.North;
         deal.CallingPlayer = PlayerPosition.East;
 
-        List<RelativeDeal> capturedDeals = [];
+        List<Deal?> capturedDeals = [];
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (_, deal, _, _, _) => capturedDeals.Add(deal))
-            .ReturnsAsync((RelativeCard[] hand, RelativeDeal _, short _, short _, RelativeCard[] _) => hand[0]);
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (_, deal, _, _, _, _) => capturedDeals.Add(deal))
+            .ReturnsAsync((Card[] hand, Deal? _, PlayerPosition _, short _, short _, Card[] _) => hand[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
         capturedDeals.Should().HaveCount(4);
-        capturedDeals[0].DealerPosition.Should().Be(RelativePlayerPosition.Self);
-        capturedDeals[1].DealerPosition.Should().Be(RelativePlayerPosition.RightHandOpponent);
-        capturedDeals[2].DealerPosition.Should().Be(RelativePlayerPosition.Partner);
-        capturedDeals[3].DealerPosition.Should().Be(RelativePlayerPosition.LeftHandOpponent);
+        capturedDeals[0]!.DealerPosition.Should().Be(PlayerPosition.North);
+        capturedDeals[1]!.DealerPosition.Should().Be(PlayerPosition.North);
+        capturedDeals[2]!.DealerPosition.Should().Be(PlayerPosition.North);
+        capturedDeals[3]!.DealerPosition.Should().Be(PlayerPosition.North);
     }
 
     [Fact]
@@ -773,14 +787,15 @@ public class TrickPlayingOrchestratorTests
         List<(short Team, short Opponent)> capturedScores = [];
 
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .Callback<RelativeCard[], RelativeDeal, short, short, RelativeCard[]>(
-                (_, _, team, opp, _) => capturedScores.Add((team, opp)))
-            .ReturnsAsync((RelativeCard[] hand, RelativeDeal _, short _, short _, RelativeCard[] _) => hand[0]);
+                It.IsAny<Card[]>()))
+            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
+                (_, _, _, team, opp, _) => capturedScores.Add((team, opp)))
+            .ReturnsAsync((Card[] hand, Deal? _, PlayerPosition _, short _, short _, Card[] _) => hand[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -876,11 +891,12 @@ public class TrickPlayingOrchestratorTests
     private void SetupBasicCardPlaySequence()
     {
         _playerActorMock.Setup(b => b.PlayCardAsync(
-                It.IsAny<RelativeCard[]>(),
-                It.IsAny<RelativeDeal>(),
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
-                It.IsAny<RelativeCard[]>()))
-            .ReturnsAsync((RelativeCard[] _, RelativeDeal _, short _, short _, RelativeCard[] valid) => valid[0]);
+                It.IsAny<Card[]>()))
+            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] valid) => valid[0]);
     }
 }

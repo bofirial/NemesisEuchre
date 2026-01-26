@@ -10,7 +10,7 @@ public interface ITrumpSelectionValidator
 
     void ValidateDecision(CallTrumpDecision decision, CallTrumpDecision[] validDecisions);
 
-    void ValidateDiscard(RelativeCard cardToDiscard, RelativeCard[] validCards);
+    void ValidateDiscard(Card cardToDiscard, Card[] validCards);
 }
 
 public class TrumpSelectionValidator : ITrumpSelectionValidator
@@ -50,7 +50,7 @@ public class TrumpSelectionValidator : ITrumpSelectionValidator
         }
     }
 
-    public void ValidateDiscard(RelativeCard cardToDiscard, RelativeCard[] validCards)
+    public void ValidateDiscard(Card cardToDiscard, Card[] validCards)
     {
         if (!validCards.Contains(cardToDiscard))
         {

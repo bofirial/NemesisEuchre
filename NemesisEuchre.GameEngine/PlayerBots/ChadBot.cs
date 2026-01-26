@@ -4,20 +4,18 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.PlayerBots;
 
-public class ChadBot : IPlayerActor
+public class ChadBot : BotBase
 {
-    private readonly Random _random = new();
+    public override ActorType ActorType => ActorType.Chad;
 
-    public ActorType ActorType => ActorType.Chad;
-
-    public Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, Card upCard, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
+    public override Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, Card upCard, PlayerPosition playerPosition, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions)
     {
         return validCallTrumpDecisions.Contains(CallTrumpDecision.OrderItUpAndGoAlone)
             ? Task.FromResult(CallTrumpDecision.OrderItUpAndGoAlone)
             : SelectRandomAsync(validCallTrumpDecisions);
     }
 
-    public Task<RelativeCard> DiscardCardAsync(RelativeCard[] cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard)
+    public override Task<RelativeCard> DiscardCardAsync(RelativeCard[] cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard)
     {
         var nonTrumpCards = validCardsToDiscard
             .Where(card => card.Suit != RelativeSuit.Trump)
@@ -28,7 +26,7 @@ public class ChadBot : IPlayerActor
             : Task.FromResult(validCardsToDiscard.OrderBy(card => card.Rank).First());
     }
 
-    public Task<RelativeCard> PlayCardAsync(RelativeCard[] cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay)
+    public override Task<RelativeCard> PlayCardAsync(RelativeCard[] cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay)
     {
         var trumpCards = validCardsToPlay
             .Where(card => card.Suit == RelativeSuit.Trump)
@@ -37,12 +35,5 @@ public class ChadBot : IPlayerActor
         return trumpCards.Length > 0
             ? Task.FromResult(trumpCards.OrderByDescending(card => card.Rank).First())
             : Task.FromResult(validCardsToPlay.OrderByDescending(card => card.Rank).First());
-    }
-
-    private Task<T> SelectRandomAsync<T>(T[] options)
-    {
-        return options.Length == 0
-            ? throw new ArgumentException("Cannot select from empty array", nameof(options))
-            : Task.FromResult(options[_random.Next(options.Length)]);
     }
 }

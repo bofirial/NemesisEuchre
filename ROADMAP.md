@@ -38,7 +38,7 @@
 13. ~~Refactor GameEngine to improve readability~~
 14. ~~Update Console App to Play a game when called~~
     * ~~Plan Mode: **Update the DefaultCommand to play a game between 4 ChaosBots.  Display the results once the game is completed using Spectre.Console.  Also update the DefaultCommand unit tests.**~~
-15. Consider consolidating Relative classes logic to Bots instead of making conversions in all the Orchestrators
+15. ~~Consider consolidating Relative classes logic to Bots instead of making conversions in all the Orchestrators~~
 
 ## Store Game Results 0.3
 
