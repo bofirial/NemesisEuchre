@@ -24,6 +24,8 @@ public class Deal
 
     public List<DiscardCardDecisionRecord> DiscardCardDecisions { get; set; } = [];
 
+    public List<PlayCardDecisionRecord> PlayCardDecisions { get; set; } = [];
+
     public DealResult? DealResult { get; set; }
 
     public Team? WinningTeam { get; set; }
