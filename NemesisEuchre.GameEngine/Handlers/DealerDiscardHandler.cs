@@ -69,10 +69,12 @@ public class DealerDiscardHandler(
 
         return dealerActor.DiscardCardAsync(
             [.. hand],
-            deal,
             dealerPosition,
             teamScore,
             opponentScore,
+            deal.Trump!.Value,
+            deal.CallingPlayer!.Value,
+            deal.CallingPlayerIsGoingAlone,
             [.. hand]);
     }
 }

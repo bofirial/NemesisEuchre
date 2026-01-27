@@ -11,39 +11,27 @@ public abstract class BotBase : IPlayerActor
 
     public abstract ActorType ActorType { get; }
 
-    public abstract Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, Card upCard, PlayerPosition playerPosition, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions);
+    public abstract Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, PlayerPosition dealerPosition, Card upCard, CallTrumpDecision[] validCallTrumpDecisions);
 
-    public abstract Task<RelativeCard> DiscardCardAsync(RelativeCard[] cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToDiscard);
+    public abstract Task<RelativeCard> DiscardCardAsync(RelativeCard[] cardsInHand, short teamScore, short opponentScore, RelativePlayerPosition callingPlayer, bool callingPlayerGoingAlone, RelativeCard[] validCardsToDiscard);
 
-    public abstract Task<RelativeCard> PlayCardAsync(RelativeCard[] cardsInHand, RelativeDeal? currentDeal, short teamScore, short opponentScore, RelativeCard[] validCardsToPlay);
+    public abstract Task<RelativeCard> PlayCardAsync(RelativeCard[] cardsInHand, short teamScore, short opponentScore, RelativePlayerPosition leadPlayer, RelativeSuit? leadSuit, Dictionary<RelativePlayerPosition, RelativeCard> playedCards, RelativePlayerPosition? winningTrickPlayer, RelativeCard[] validCardsToPlay);
 
-    public async Task<Card> DiscardCardAsync(Card[] cardsInHand, Deal? currentDeal, PlayerPosition playerPosition, short teamScore, short opponentScore, Card[] validCardsToDiscard)
+    public async Task<Card> DiscardCardAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, Suit trumpSuit, PlayerPosition callingPlayer, bool callingPlayerGoingAlone, Card[] validCardsToDiscard)
     {
-        if (currentDeal?.Trump == null)
-        {
-            throw new InvalidOperationException("Trump must be set before discarding cards");
-        }
+        var relativeHand = cardsInHand.Select(c => c.ToRelative(trumpSuit)).ToArray();
+        var relativeValidCards = validCardsToDiscard.Select(c => c.ToRelative(trumpSuit)).ToArray();
 
-        var relativeHand = cardsInHand.Select(c => c.ToRelative(currentDeal.Trump.Value)).ToArray();
-        var relativeDeal = currentDeal.ToRelative(playerPosition);
-        var relativeValidCards = validCardsToDiscard.Select(c => c.ToRelative(currentDeal.Trump.Value)).ToArray();
-
-        var relativeChoice = await DiscardCardAsync(relativeHand, relativeDeal, teamScore, opponentScore, relativeValidCards);
+        var relativeChoice = await DiscardCardAsync(relativeHand, teamScore, opponentScore, callingPlayer.ToRelativePosition(playerPosition), callingPlayerGoingAlone, relativeValidCards);
         return relativeChoice.Card;
     }
 
-    public async Task<Card> PlayCardAsync(Card[] cardsInHand, Deal? currentDeal, PlayerPosition playerPosition, short teamScore, short opponentScore, Card[] validCardsToPlay)
+    public async Task<Card> PlayCardAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, Suit trumpSuit, PlayerPosition leadPlayer, Suit? leadSuit, Dictionary<PlayerPosition, Card> playedCards, PlayerPosition? winningTrickPlayer, Card[] validCardsToPlay)
     {
-        if (currentDeal?.Trump == null)
-        {
-            throw new InvalidOperationException("Trump must be set before playing cards");
-        }
+        var relativeHand = cardsInHand.Select(c => c.ToRelative(trumpSuit)).ToArray();
+        var relativeValidCards = validCardsToPlay.Select(c => c.ToRelative(trumpSuit)).ToArray();
 
-        var relativeHand = cardsInHand.Select(c => c.ToRelative(currentDeal.Trump.Value)).ToArray();
-        var relativeDeal = currentDeal.ToRelative(playerPosition);
-        var relativeValidCards = validCardsToPlay.Select(c => c.ToRelative(currentDeal.Trump.Value)).ToArray();
-
-        var relativeChoice = await PlayCardAsync(relativeHand, relativeDeal, teamScore, opponentScore, relativeValidCards);
+        var relativeChoice = await PlayCardAsync(relativeHand, teamScore, opponentScore, leadPlayer.ToRelativePosition(playerPosition), leadSuit?.ToRelativeSuit(trumpSuit), playedCards.ToDictionary(kvp => kvp.Key.ToRelativePosition(playerPosition), kvp => kvp.Value.ToRelative(trumpSuit)), winningTrickPlayer?.ToRelativePosition(playerPosition), relativeValidCards);
         return relativeChoice.Card;
     }
 

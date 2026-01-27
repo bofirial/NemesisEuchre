@@ -7,9 +7,9 @@ public interface IPlayerActor
 {
     ActorType ActorType { get; }
 
-    Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, Card upCard, PlayerPosition playerPosition, RelativePlayerPosition dealerPosition, short teamScore, short opponentScore, CallTrumpDecision[] validCallTrumpDecisions);
+    Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, PlayerPosition dealerPosition, Card upCard, CallTrumpDecision[] validCallTrumpDecisions);
 
-    Task<Card> DiscardCardAsync(Card[] cardsInHand, Deal? currentDeal, PlayerPosition playerPosition, short teamScore, short opponentScore, Card[] validCardsToDiscard);
+    Task<Card> DiscardCardAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, Suit trumpSuit, PlayerPosition callingPlayer, bool callingPlayerGoingAlone, Card[] validCardsToDiscard);
 
-    Task<Card> PlayCardAsync(Card[] cardsInHand, Deal? currentDeal, PlayerPosition playerPosition, short teamScore, short opponentScore, Card[] validCardsToPlay);
+    Task<Card> PlayCardAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, Suit trumpSuit, PlayerPosition leadPlayer, Suit? leadSuit, Dictionary<PlayerPosition, Card> playedCards, PlayerPosition? winningTrickPlayer, Card[] validCardsToPlay);
 }

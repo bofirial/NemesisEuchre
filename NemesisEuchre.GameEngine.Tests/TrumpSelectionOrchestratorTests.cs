@@ -124,11 +124,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.OrderItUp);
 
@@ -150,11 +150,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass)
             .ReturnsAsync(CallTrumpDecision.OrderItUp);
@@ -177,11 +177,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass)
             .ReturnsAsync(CallTrumpDecision.Pass)
@@ -206,11 +206,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.OrderItUpAndGoAlone);
 
@@ -232,11 +232,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass)
             .ReturnsAsync(CallTrumpDecision.Pass)
@@ -259,11 +259,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass)
             .ReturnsAsync(CallTrumpDecision.Pass)
@@ -287,11 +287,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass)
             .ReturnsAsync(CallTrumpDecision.Pass)
@@ -318,11 +318,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass)
             .ReturnsAsync(CallTrumpDecision.Pass)
@@ -350,13 +350,13 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.Setup(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
-            .Callback<Card[], Card, PlayerPosition, RelativePlayerPosition, short, short, CallTrumpDecision[]>(
+            .Callback<Card[], PlayerPosition, short, short, PlayerPosition, Card, CallTrumpDecision[]>(
                 (_, _, _, _, _, _, validDecisions) =>
                 {
                     callCount++;
@@ -365,7 +365,7 @@ public class TrumpSelectionOrchestratorTests
                         capturedValidDecisions = validDecisions;
                     }
                 })
-            .ReturnsAsync((Card[] _, Card _, PlayerPosition _, RelativePlayerPosition _, short _, short _, CallTrumpDecision[] _) =>
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, PlayerPosition _, Card _, CallTrumpDecision[] _) =>
                 callCount <= 4 ? CallTrumpDecision.Pass : CallTrumpDecision.CallClubs);
 
         await _sut.SelectTrumpAsync(deal);
@@ -384,23 +384,23 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.Setup(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
-            .Callback<Card[], Card, PlayerPosition, RelativePlayerPosition, short, short, CallTrumpDecision[]>(
+            .Callback<Card[], PlayerPosition, short, short, PlayerPosition, Card, CallTrumpDecision[]>(
                 (_, _, _, _, _, _, validDecisions) => allCapturedDecisions.Add(validDecisions))
             .ReturnsAsync(CallTrumpDecision.Pass);
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass)
             .ReturnsAsync(CallTrumpDecision.Pass)
@@ -440,24 +440,26 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.OrderItUp);
 
         _playerActorMock.Setup(b => b.DiscardCardAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Deal?>(),
                 It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], Deal?, PlayerPosition, short, short, Card[]>(
-                (hand, _, _, _, _, _) => handSizeBeforeDiscard = hand.Length)
-            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] hand) => hand[0]);
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, Card[]>(
+                (hand, _, _, _, _, _, _, _) => handSizeBeforeDiscard = hand.Length)
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, Card[] hand) => hand[0]);
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -482,22 +484,24 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.OrderItUp);
 
         _playerActorMock.Setup(b => b.DiscardCardAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Deal?>(),
                 It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
                 It.IsAny<Card[]>()))
-            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] hand) => hand[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, Card[] hand) => hand[0]);
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -523,11 +527,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.OrderItUp);
 
@@ -550,20 +554,20 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.Setup(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
-            .Callback<Card[], Card, PlayerPosition, RelativePlayerPosition, short, short, CallTrumpDecision[]>(
+            .Callback<Card[], PlayerPosition, short, short, PlayerPosition, Card, CallTrumpDecision[]>(
                 (hand, _, _, _, _, _, _) =>
                 {
                     var player = deal.Players.First(p => p.Value.CurrentHand.SequenceEqual(hand)).Key;
                     playerPositions.Add(player);
                     callCount++;
                 })
-            .ReturnsAsync((Card[] _, Card _, PlayerPosition _, RelativePlayerPosition _, short _, short _, CallTrumpDecision[] _) =>
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, PlayerPosition _, Card _, CallTrumpDecision[] _) =>
                 callCount <= 4 ? CallTrumpDecision.Pass : CallTrumpDecision.CallClubs);
 
         await _sut.SelectTrumpAsync(deal);
@@ -587,13 +591,13 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.Setup(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
-            .Callback<Card[], Card, PlayerPosition, RelativePlayerPosition, short, short, CallTrumpDecision[]>(
+            .Callback<Card[], PlayerPosition, short, short, PlayerPosition, Card, CallTrumpDecision[]>(
                 (hand, _, _, _, _, _, _) =>
                 {
                     var player = deal.Players.First(p => p.Value.CurrentHand.SequenceEqual(hand)).Key;
@@ -604,7 +608,7 @@ public class TrumpSelectionOrchestratorTests
 
                     callCount++;
                 })
-            .ReturnsAsync((Card[] _, Card _, PlayerPosition _, RelativePlayerPosition _, short _, short _, CallTrumpDecision[] _) =>
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, PlayerPosition _, Card _, CallTrumpDecision[] _) =>
                 callCount <= 4 ? CallTrumpDecision.Pass : CallTrumpDecision.CallClubs);
 
         await _sut.SelectTrumpAsync(deal);
@@ -643,11 +647,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.Setup(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass);
 
@@ -687,13 +691,13 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.Setup(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
-            .Callback<Card[], Card, PlayerPosition, RelativePlayerPosition, short, short, CallTrumpDecision[]>(
+            .Callback<Card[], PlayerPosition, short, short, PlayerPosition, Card, CallTrumpDecision[]>(
                 (_, _, _, _, _, _, validDecisions) =>
                 {
                     callCount++;
@@ -721,13 +725,13 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.Setup(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
-            .Callback<Card[], Card, PlayerPosition, RelativePlayerPosition, short, short, CallTrumpDecision[]>(
+            .Callback<Card[], PlayerPosition, short, short, PlayerPosition, Card, CallTrumpDecision[]>(
                 (_, _, _, _, _, _, validDecisions) =>
                 {
                     callCount++;
@@ -736,7 +740,7 @@ public class TrumpSelectionOrchestratorTests
                         capturedValidDecisions = validDecisions;
                     }
                 })
-            .ReturnsAsync((Card[] _, Card _, PlayerPosition _, RelativePlayerPosition _, short _, short _, CallTrumpDecision[] _) =>
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, PlayerPosition _, Card _, CallTrumpDecision[] _) =>
                 callCount <= 7 ? CallTrumpDecision.Pass : CallTrumpDecision.CallClubs);
 
         await _sut.SelectTrumpAsync(deal);
@@ -753,11 +757,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.OrderItUp);
 
@@ -779,11 +783,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass)
             .ReturnsAsync(CallTrumpDecision.Pass)
@@ -810,11 +814,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass)
             .ReturnsAsync(CallTrumpDecision.Pass)
@@ -842,11 +846,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass)
             .ReturnsAsync(CallTrumpDecision.Pass)
@@ -875,11 +879,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.OrderItUp);
 
@@ -901,11 +905,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass)
             .ReturnsAsync(CallTrumpDecision.OrderItUp);
@@ -932,11 +936,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.OrderItUp);
 
@@ -958,11 +962,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass)
             .ReturnsAsync(CallTrumpDecision.Pass)
@@ -988,11 +992,11 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Card>(),
                 It.IsAny<PlayerPosition>(),
-                It.IsAny<RelativePlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Card>(),
                 It.IsAny<CallTrumpDecision[]>()))
             .ReturnsAsync(CallTrumpDecision.Pass)
             .ReturnsAsync(CallTrumpDecision.Pass)
@@ -1048,11 +1052,13 @@ public class TrumpSelectionOrchestratorTests
     {
         _playerActorMock.Setup(b => b.DiscardCardAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Deal?>(),
                 It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
                 It.IsAny<Card[]>()))
-            .ReturnsAsync((Card[] hand, Deal? _, PlayerPosition _, short _, short _, Card[] _) => hand[0]);
+            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, Card[] _) => hand[0]);
     }
 }

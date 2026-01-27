@@ -16,7 +16,8 @@ public class TrickPlayingOrchestrator(
     ITrickPlayingValidator validator,
     IGoingAloneHandler goingAloneHandler,
     IPlayerContextBuilder contextBuilder,
-    IPlayerActorResolver actorResolver) : ITrickPlayingOrchestrator
+    IPlayerActorResolver actorResolver,
+    ITrickWinnerCalculator trickWinnerCalculator) : ITrickPlayingOrchestrator
 {
     public async Task<Trick> PlayTrickAsync(Deal deal, PlayerPosition leadPosition)
     {
@@ -103,7 +104,7 @@ public class TrickPlayingOrchestrator(
         var hand = player.CurrentHand.ToArray();
         var validCards = GetValidCardsToPlay(hand, deal.Trump!.Value, trick.LeadSuit);
 
-        var chosenCard = await GetPlayerCardChoiceAsync(deal, position, hand, validCards);
+        var chosenCard = await GetPlayerCardChoiceAsync(deal, trick, position, hand, validCards);
         CapturePlayCardDecision(deal, position, hand, validCards, trick, chosenCard);
         validator.ValidateCardChoice(chosenCard, validCards);
 
@@ -114,6 +115,7 @@ public class TrickPlayingOrchestrator(
 
     private Task<Card> GetPlayerCardChoiceAsync(
         Deal deal,
+        Trick trick,
         PlayerPosition playerPosition,
         Card[] hand,
         Card[] validCards)
@@ -122,12 +124,26 @@ public class TrickPlayingOrchestrator(
         var playerActor = actorResolver.GetPlayerActor(player);
         var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
 
+        var playedCards = trick.CardsPlayed.ToDictionary(
+            pc => pc.PlayerPosition,
+            pc => pc.Card);
+
+        PlayerPosition? winningTrickPlayer = null;
+        if (trick.CardsPlayed.Count > 0 && trick.LeadSuit.HasValue)
+        {
+            winningTrickPlayer = trickWinnerCalculator.CalculateWinner(trick, deal.Trump!.Value);
+        }
+
         return playerActor.PlayCardAsync(
             [.. hand],
-            deal,
             playerPosition,
             teamScore,
             opponentScore,
+            deal.Trump!.Value,
+            trick.LeadPosition,
+            trick.LeadSuit,
+            playedCards,
+            winningTrickPlayer,
             [.. validCards]);
     }
 

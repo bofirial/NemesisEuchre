@@ -43,10 +43,12 @@ public class DealerDiscardHandlerTests
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Deal>(),
                 It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
                 It.IsAny<Card[]>()))
             .ReturnsAsync(upCard);
 
@@ -63,10 +65,12 @@ public class DealerDiscardHandlerTests
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Deal>(),
                 It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
                 It.IsAny<Card[]>()))
             .ReturnsAsync(upCard);
 
@@ -75,10 +79,12 @@ public class DealerDiscardHandlerTests
         _playerActorMock.Verify(
             x => x.DiscardCardAsync(
                 It.Is<Card[]>(cards => cards.Length == 6),
-                It.IsAny<Deal>(),
                 PlayerPosition.North,
                 10,
                 5,
+                Suit.Hearts,
+                PlayerPosition.North,
+                false,
                 It.Is<Card[]>(cards => cards.Length == 6)),
             Times.Once);
     }
@@ -91,10 +97,12 @@ public class DealerDiscardHandlerTests
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Deal>(),
                 It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
                 It.IsAny<Card[]>()))
             .ReturnsAsync(upCard);
 
@@ -119,10 +127,12 @@ public class DealerDiscardHandlerTests
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Deal>(),
                 It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
                 It.IsAny<Card[]>()))
             .ReturnsAsync(cardToDiscard);
 
@@ -140,10 +150,12 @@ public class DealerDiscardHandlerTests
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Deal>(),
                 It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
                 It.IsAny<Card[]>()))
             .ReturnsAsync(upCard);
 
@@ -162,10 +174,12 @@ public class DealerDiscardHandlerTests
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Deal>(),
                 It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
                 It.IsAny<Card[]>()))
             .ReturnsAsync(upCard);
 
@@ -188,10 +202,12 @@ public class DealerDiscardHandlerTests
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Deal>(),
                 It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
                 It.IsAny<Card[]>()))
             .ReturnsAsync(upCard);
 
@@ -210,10 +226,12 @@ public class DealerDiscardHandlerTests
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Deal>(),
                 It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
                 It.IsAny<Card[]>()))
             .ReturnsAsync(upCard);
 
@@ -233,6 +251,8 @@ public class DealerDiscardHandlerTests
             DealerPosition = PlayerPosition.South,
             UpCard = upCard,
             Trump = Suit.Hearts,
+            CallingPlayer = PlayerPosition.South,
+            CallingPlayerIsGoingAlone = false,
         };
 
         var southPlayer = new DealPlayer
@@ -255,10 +275,12 @@ public class DealerDiscardHandlerTests
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Deal>(),
                 It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
                 It.IsAny<Card[]>()))
             .ReturnsAsync(upCard);
 
@@ -278,10 +300,12 @@ public class DealerDiscardHandlerTests
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(
                 It.IsAny<Card[]>(),
-                It.IsAny<Deal>(),
                 It.IsAny<PlayerPosition>(),
                 It.IsAny<short>(),
                 It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
                 It.IsAny<Card[]>()))
             .ReturnsAsync(cardToDiscard);
 
@@ -302,6 +326,8 @@ public class DealerDiscardHandlerTests
             DealerPosition = PlayerPosition.North,
             UpCard = upCard,
             Trump = Suit.Hearts,
+            CallingPlayer = PlayerPosition.North,
+            CallingPlayerIsGoingAlone = false,
         };
 
         var northPlayer = new DealPlayer

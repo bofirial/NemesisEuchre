@@ -149,11 +149,11 @@ public class TrumpSelectionOrchestrator(
 
         return playerActor.CallTrumpAsync(
             [.. player.CurrentHand],
-            deal.UpCard!,
             playerPosition,
-            contextBuilder.GetRelativeDealerPosition(deal, playerPosition),
             teamScore,
             opponentScore,
+            deal.DealerPosition!.Value,
+            deal.UpCard!,
             [.. validDecisions]);
     }
 
