@@ -169,12 +169,12 @@ This version extends the NemesisEuchre engine to capture all ML training data (C
 
 ### Game Storage (Step 14)
 
-14. **Update GameOrchestrator to save completed games**
-    - Update `NemesisEuchre.GameEngine\GameOrchestrator.cs`
-    - Call `IGameRepository.SaveCompletedGameAsync` after game completes successfully
-    - Add proper error handling and logging around save operation
-    - Save should happen asynchronously and not block game completion
-    - Include unit tests verifying repository is called with completed game
+14. ~~**Update GameOrchestrator to save completed games**~~
+    - ~~Update `NemesisEuchre.GameEngine\GameOrchestrator.cs`~~
+    - ~~Call `IGameRepository.SaveCompletedGameAsync` after game completes successfully~~
+    - ~~Add proper error handling and logging around save operation~~
+    - ~~Save should happen asynchronously and not block game completion~~
+    - ~~Include unit tests verifying repository is called with completed game~~
 
 ### Parallel Execution (Steps 15-17)
 
