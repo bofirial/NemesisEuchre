@@ -806,6 +806,198 @@ public class TrickPlayingOrchestratorTests
         capturedScores[3].Should().Be((4, 7));
     }
 
+    [Fact]
+    public async Task PlayTrickAsync_CapturesPlayCardDecision()
+    {
+        var deal = CreateTestDeal();
+        SetupBasicCardPlaySequence();
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        deal.PlayCardDecisions.Should().NotBeEmpty();
+        deal.PlayCardDecisions.Should().HaveCount(4);
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_CapturesHandWithCorrectCards()
+    {
+        var deal = CreateTestDeal();
+        var expectedHand = deal.Players[PlayerPosition.North].CurrentHand.ToArray();
+        SetupBasicCardPlaySequence();
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        var firstDecision = deal.PlayCardDecisions[0];
+        firstDecision.Hand.Should().HaveCount(5);
+        firstDecision.Hand.Should().BeEquivalentTo(expectedHand);
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_CapturesTeamAndOpponentScores()
+    {
+        var deal = CreateTestDeal();
+        deal.Team1Score = 6;
+        deal.Team2Score = 3;
+        SetupBasicCardPlaySequence();
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        var northDecision = deal.PlayCardDecisions.First(d => d.DecidingPlayerPosition == PlayerPosition.North);
+        northDecision.TeamScore.Should().Be(6);
+        northDecision.OpponentScore.Should().Be(3);
+
+        var eastDecision = deal.PlayCardDecisions.First(d => d.DecidingPlayerPosition == PlayerPosition.East);
+        eastDecision.TeamScore.Should().Be(3);
+        eastDecision.OpponentScore.Should().Be(6);
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_CapturesValidCardsToPlay()
+    {
+        var deal = CreateTestDeal();
+        SetupBasicCardPlaySequence();
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        var leadDecision = deal.PlayCardDecisions[0];
+        leadDecision.ValidCardsToPlay.Should().HaveCount(5);
+        leadDecision.ValidCardsToPlay.Should().BeEquivalentTo(leadDecision.Hand);
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_CapturesValidCardsToPlay_WhenMustFollowSuit()
+    {
+        var deal = CreateTestDeal();
+        deal.Trump = Suit.Hearts;
+        deal.Players[PlayerPosition.North].CurrentHand = [
+            new Card { Suit = Suit.Spades, Rank = Rank.King },
+            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+        ];
+        deal.Players[PlayerPosition.East].CurrentHand = [
+            new Card { Suit = Suit.Spades, Rank = Rank.Nine },
+            new Card { Suit = Suit.Spades, Rank = Rank.Ten },
+            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Ace },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace }
+        ];
+
+        _playerActorMock.Setup(b => b.PlayCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal?>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync((Card[] _, Deal? _, PlayerPosition _, short _, short _, Card[] valid) => valid[0]);
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        var eastDecision = deal.PlayCardDecisions.First(d => d.DecidingPlayerPosition == PlayerPosition.East);
+        eastDecision.ValidCardsToPlay.Should().HaveCount(2);
+        eastDecision.ValidCardsToPlay.All(c => c.Suit == Suit.Spades).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_CapturesChosenCard()
+    {
+        var deal = CreateTestDeal();
+        var expectedCard = deal.Players[PlayerPosition.North].CurrentHand[0];
+        SetupBasicCardPlaySequence();
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        var firstDecision = deal.PlayCardDecisions[0];
+        firstDecision.ChosenCard.Should().BeEquivalentTo(expectedCard);
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_CapturesDecidingPlayerPosition()
+    {
+        var deal = CreateTestDeal();
+        SetupBasicCardPlaySequence();
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.East);
+
+        deal.PlayCardDecisions.Should().HaveCount(4);
+        deal.PlayCardDecisions[0].DecidingPlayerPosition.Should().Be(PlayerPosition.East);
+        deal.PlayCardDecisions[1].DecidingPlayerPosition.Should().Be(PlayerPosition.South);
+        deal.PlayCardDecisions[2].DecidingPlayerPosition.Should().Be(PlayerPosition.West);
+        deal.PlayCardDecisions[3].DecidingPlayerPosition.Should().Be(PlayerPosition.North);
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_CapturesLeadPosition()
+    {
+        var deal = CreateTestDeal();
+        SetupBasicCardPlaySequence();
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.South);
+
+        deal.PlayCardDecisions.Should().OnlyContain(d => d.LeadPosition == PlayerPosition.South);
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_CapturesCurrentTrick_EmptyForLeadPlayer()
+    {
+        var deal = CreateTestDeal();
+        SetupBasicCardPlaySequence();
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        var leadDecision = deal.PlayCardDecisions[0];
+        leadDecision.CurrentTrick.CardsPlayed.Should().BeEmpty();
+        leadDecision.CurrentTrick.LeadPosition.Should().Be(PlayerPosition.North);
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_CapturesCurrentTrick_WithPreviousCards()
+    {
+        var deal = CreateTestDeal();
+        SetupBasicCardPlaySequence();
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        var secondDecision = deal.PlayCardDecisions[1];
+        secondDecision.CurrentTrick.CardsPlayed.Should().HaveCount(1);
+
+        var thirdDecision = deal.PlayCardDecisions[2];
+        thirdDecision.CurrentTrick.CardsPlayed.Should().HaveCount(2);
+
+        var fourthDecision = deal.PlayCardDecisions[3];
+        fourthDecision.CurrentTrick.CardsPlayed.Should().HaveCount(3);
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_WhenGoingAlone_CapturesOnly3Decisions()
+    {
+        var deal = CreateTestDeal();
+        deal.CallingPlayer = PlayerPosition.North;
+        deal.CallingPlayerIsGoingAlone = true;
+        SetupBasicCardPlaySequence();
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        deal.PlayCardDecisions.Should().HaveCount(3);
+        deal.PlayCardDecisions.Should().NotContain(d => d.DecidingPlayerPosition == PlayerPosition.South);
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_CapturesAllDecisionsInCompleteDeal()
+    {
+        var deal = CreateTestDeal();
+        SetupBasicCardPlaySequence();
+
+        for (int trickNumber = 0; trickNumber < 5; trickNumber++)
+        {
+            await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+        }
+
+        deal.PlayCardDecisions.Should().HaveCount(20);
+    }
+
     private static Deal CreateTestDeal()
     {
         var deal = new Deal

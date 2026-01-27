@@ -104,6 +104,7 @@ public class TrickPlayingOrchestrator(
         var validCards = GetValidCardsToPlay(hand, deal.Trump!.Value, trick.LeadSuit);
 
         var chosenCard = await GetPlayerCardChoiceAsync(deal, position, hand, validCards);
+        CapturePlayCardDecision(deal, position, hand, validCards, trick, chosenCard);
         validator.ValidateCardChoice(chosenCard, validCards);
 
         SetLeadSuitIfFirstCard(trick, chosenCard, deal.Trump!.Value, isFirstCard);
@@ -128,5 +129,38 @@ public class TrickPlayingOrchestrator(
             teamScore,
             opponentScore,
             [.. validCards]);
+    }
+
+    private void CapturePlayCardDecision(
+        Deal deal,
+        PlayerPosition playerPosition,
+        Card[] hand,
+        Card[] validCards,
+        Trick trick,
+        Card chosenCard)
+    {
+        var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
+
+        var trickSnapshot = new Trick
+        {
+            LeadPosition = trick.LeadPosition,
+            LeadSuit = trick.LeadSuit,
+        };
+
+        trickSnapshot.CardsPlayed.AddRange(trick.CardsPlayed);
+
+        var record = new PlayCardDecisionRecord
+        {
+            Hand = [.. hand],
+            DecidingPlayerPosition = playerPosition,
+            CurrentTrick = trickSnapshot,
+            TeamScore = teamScore,
+            OpponentScore = opponentScore,
+            ValidCardsToPlay = [.. validCards],
+            ChosenCard = chosenCard,
+            LeadPosition = trick.LeadPosition,
+        };
+
+        deal.PlayCardDecisions.Add(record);
     }
 }
