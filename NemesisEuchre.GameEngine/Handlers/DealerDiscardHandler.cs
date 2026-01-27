@@ -25,6 +25,8 @@ public class DealerDiscardHandler(
         var hand = dealer.CurrentHand.ToArray();
         var cardToDiscard = await GetDealerDiscardDecisionAsync(deal, dealerPosition, dealer, hand);
 
+        CaptureDiscardDecision(deal, dealerPosition, hand, cardToDiscard);
+
         validator.ValidateDiscard(cardToDiscard, hand);
 
         dealer.CurrentHand.Remove(cardToDiscard);
@@ -33,6 +35,27 @@ public class DealerDiscardHandler(
     private static void AddUpcardToDealerHand(DealPlayer dealer, Card upCard)
     {
         dealer.CurrentHand.Add(upCard);
+    }
+
+    private void CaptureDiscardDecision(
+        Deal deal,
+        PlayerPosition dealerPosition,
+        Card[] hand,
+        Card chosenCard)
+    {
+        var (teamScore, opponentScore) = contextBuilder.GetScores(deal, dealerPosition);
+
+        var record = new DiscardCardDecisionRecord
+        {
+            Hand = [.. hand],
+            DealerPosition = dealerPosition,
+            TeamScore = teamScore,
+            OpponentScore = opponentScore,
+            ValidCardsToDiscard = [.. hand],
+            ChosenCard = chosenCard,
+        };
+
+        deal.DiscardCardDecisions.Add(record);
     }
 
     private Task<Card> GetDealerDiscardDecisionAsync(

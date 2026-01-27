@@ -132,6 +132,169 @@ public class DealerDiscardHandlerTests
         dealer.CurrentHand.Count.Should().Be(initialHandCount);
     }
 
+    [Fact]
+    public async Task HandleDealerDiscardAsync_CapturesDiscardDecision()
+    {
+        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var deal = CreateTestDeal(upCard);
+
+        _playerActorMock.Setup(x => x.DiscardCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync(upCard);
+
+        await _handler.HandleDealerDiscardAsync(deal);
+
+        deal.DiscardCardDecisions.Should().HaveCount(1);
+        deal.DiscardCardDecisions[0].ChosenCard.Should().Be(upCard);
+    }
+
+    [Fact]
+    public async Task HandleDealerDiscardAsync_CapturesSixCardHand()
+    {
+        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var deal = CreateTestDeal(upCard);
+        var dealer = deal.Players[PlayerPosition.North];
+
+        _playerActorMock.Setup(x => x.DiscardCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync(upCard);
+
+        await _handler.HandleDealerDiscardAsync(deal);
+
+        var record = deal.DiscardCardDecisions[0];
+        record.Hand.Should().HaveCount(6);
+        record.Hand.Should().Contain(upCard);
+        dealer.CurrentHand.Should().HaveCount(5);
+    }
+
+    [Fact]
+    public async Task HandleDealerDiscardAsync_CapturesScoresFromContextBuilder()
+    {
+        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var deal = CreateTestDeal(upCard);
+
+        _contextBuilderMock.Setup(x => x.GetScores(deal, PlayerPosition.North))
+            .Returns((7, 5));
+
+        _playerActorMock.Setup(x => x.DiscardCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync(upCard);
+
+        await _handler.HandleDealerDiscardAsync(deal);
+
+        var record = deal.DiscardCardDecisions[0];
+        record.TeamScore.Should().Be(7);
+        record.OpponentScore.Should().Be(5);
+    }
+
+    [Fact]
+    public async Task HandleDealerDiscardAsync_ValidCardsToDiscardMatchesHand()
+    {
+        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var deal = CreateTestDeal(upCard);
+
+        _playerActorMock.Setup(x => x.DiscardCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync(upCard);
+
+        await _handler.HandleDealerDiscardAsync(deal);
+
+        var record = deal.DiscardCardDecisions[0];
+        record.ValidCardsToDiscard.Should().HaveCount(6);
+        record.ValidCardsToDiscard.Should().BeEquivalentTo(record.Hand);
+    }
+
+    [Fact]
+    public async Task HandleDealerDiscardAsync_CapturesDealerPosition()
+    {
+        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var dealSouth = new Deal
+        {
+            DealerPosition = PlayerPosition.South,
+            UpCard = upCard,
+            Trump = Suit.Hearts,
+        };
+
+        var southPlayer = new DealPlayer
+        {
+            ActorType = ActorType.Chaos,
+            CurrentHand =
+            [
+                new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+                new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
+                new Card { Suit = Suit.Clubs, Rank = Rank.Jack },
+                new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
+                new Card { Suit = Suit.Spades, Rank = Rank.King },
+            ],
+        };
+
+        dealSouth.Players.Add(PlayerPosition.South, southPlayer);
+
+        _contextBuilderMock.Setup(x => x.GetScores(dealSouth, PlayerPosition.South))
+            .Returns((10, 5));
+
+        _playerActorMock.Setup(x => x.DiscardCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync(upCard);
+
+        await _handler.HandleDealerDiscardAsync(dealSouth);
+
+        var record = dealSouth.DiscardCardDecisions[0];
+        record.DealerPosition.Should().Be(PlayerPosition.South);
+    }
+
+    [Fact]
+    public async Task HandleDealerDiscardAsync_CapturesAndDiscardsCorrectly()
+    {
+        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var deal = CreateTestDeal(upCard);
+        var dealer = deal.Players[PlayerPosition.North];
+        var cardToDiscard = dealer.CurrentHand[0];
+
+        _playerActorMock.Setup(x => x.DiscardCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<Deal>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync(cardToDiscard);
+
+        await _handler.HandleDealerDiscardAsync(deal);
+
+        deal.DiscardCardDecisions.Should().HaveCount(1);
+        var record = deal.DiscardCardDecisions[0];
+        record.Hand.Should().HaveCount(6);
+        record.ChosenCard.Should().Be(cardToDiscard);
+        dealer.CurrentHand.Should().NotContain(cardToDiscard);
+        dealer.CurrentHand.Should().HaveCount(5);
+    }
+
     private static Deal CreateTestDeal(Card upCard)
     {
         var deal = new Deal

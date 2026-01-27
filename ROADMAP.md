@@ -73,12 +73,12 @@ This version extends the NemesisEuchre engine to capture all ML training data (C
 
 ### Capture Decisions (Steps 4-6)
 
-4. **Capture CallTrump decisions in TrumpSelectionOrchestrator**
-   - Update `TrumpSelectionOrchestrator.GetAndValidatePlayerDecisionAsync`
-   - Capture each CallTrump decision immediately after player makes it
-   - Create CallTrumpDecisionRecord with all context and add to `deal.CallTrumpDecisions`
-   - Should capture all 4-8 decisions (two rounds of bidding)
-   - Include unit tests verifying decisions are captured correctly
+4. ~~**Capture CallTrump decisions in TrumpSelectionOrchestrator**~~
+   - ~~Update `TrumpSelectionOrchestrator.GetAndValidatePlayerDecisionAsync`~~
+   - ~~Capture each CallTrump decision immediately after player makes it~~
+   - ~~Create CallTrumpDecisionRecord with all context and add to `deal.CallTrumpDecisions`~~
+   - ~~Should capture all 4-8 decisions (two rounds of bidding)~~
+   - ~~Include unit tests verifying decisions are captured correctly~~
 
 5. **Capture DiscardCard decisions in DealerDiscardHandler**
    - Update `DealerDiscardHandler.GetDealerDiscardDecisionAsync`
