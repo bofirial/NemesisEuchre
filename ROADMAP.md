@@ -65,11 +65,11 @@ This version extends the NemesisEuchre engine to capture all ML training data (C
    - ~~Add `List<DiscardCardDecisionRecord>` property to Deal model~~
    - ~~Include unit tests~~
 
-3. **Add PlayCardDecisionRecord model**
-   - Create `NemesisEuchre.GameEngine\Models\PlayCardDecisionRecord.cs`
-   - Include: player's current relative hand, full deal state (RelativeDeal), team/opponent scores, valid relative cards to play, chosen relative card, relative lead position
-   - Add `List<PlayCardDecisionRecord>` property to Deal model
-   - Include unit tests
+3. ~~**Add PlayCardDecisionRecord model**~~
+   - ~~Create `NemesisEuchre.GameEngine\Models\PlayCardDecisionRecord.cs`~~
+   - ~~Include: player's current relative hand, full deal state (RelativeDeal), team/opponent scores, valid relative cards to play, chosen relative card, relative lead position~~
+   - ~~Add `List<PlayCardDecisionRecord>` property to Deal model~~
+   - ~~Include unit tests~~
 
 ### Capture Decisions (Steps 4-6)
 
