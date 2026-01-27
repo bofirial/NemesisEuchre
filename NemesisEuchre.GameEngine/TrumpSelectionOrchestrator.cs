@@ -25,10 +25,13 @@ public class TrumpSelectionOrchestrator(
     IPlayerActorResolver actorResolver) : ITrumpSelectionOrchestrator
 {
     private const int PlayersPerDeal = 4;
+    private byte _decisionOrder;
 
     public async Task SelectTrumpAsync(Deal deal)
     {
         validator.ValidatePreconditions(deal);
+
+        _decisionOrder = 0;
 
         bool trumpSelected = await ExecuteRound1Async(deal);
 
@@ -64,6 +67,8 @@ public class TrumpSelectionOrchestrator(
         {
             var decision = await GetAndValidatePlayerDecisionAsync(deal, currentPosition, validDecisions);
 
+            CaptureCallTrumpDecision(deal, currentPosition, validDecisions, decision);
+
             if (decision != CallTrumpDecision.Pass)
             {
                 SetTrumpResult(deal, deal.UpCard!.Suit, currentPosition, decision);
@@ -89,6 +94,8 @@ public class TrumpSelectionOrchestrator(
 
             var decision = await GetAndValidatePlayerDecisionAsync(deal, currentPosition, validDecisions);
 
+            CaptureCallTrumpDecision(deal, currentPosition, validDecisions, decision);
+
             if (decision != CallTrumpDecision.Pass)
             {
                 var trump = decisionMapper.ConvertDecisionToSuit(decision);
@@ -103,6 +110,31 @@ public class TrumpSelectionOrchestrator(
         {
             throw new InvalidOperationException("Dealer must call trump in Round 2, but all players passed");
         }
+    }
+
+    private void CaptureCallTrumpDecision(
+        Deal deal,
+        PlayerPosition playerPosition,
+        CallTrumpDecision[] validDecisions,
+        CallTrumpDecision chosenDecision)
+    {
+        var player = deal.Players[playerPosition];
+        var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
+
+        var record = new CallTrumpDecisionRecord
+        {
+            Hand = [.. player.CurrentHand],
+            UpCard = deal.UpCard!,
+            DealerPosition = deal.DealerPosition!.Value,
+            DecidingPlayerPosition = playerPosition,
+            TeamScore = teamScore,
+            OpponentScore = opponentScore,
+            ValidDecisions = [.. validDecisions],
+            ChosenDecision = chosenDecision,
+            DecisionOrder = ++_decisionOrder,
+        };
+
+        deal.CallTrumpDecisions.Add(record);
     }
 
     private Task<CallTrumpDecision> GetPlayerDecisionAsync(
