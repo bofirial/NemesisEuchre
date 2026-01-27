@@ -27,6 +27,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\NemesisEuchre.GameEngine\NemesisEuchre.GameEngine.csproj" />
+        <ProjectReference Include="..\NemesisEuchre.DataAccess\NemesisEuchre.DataAccess.csproj" />
     </ItemGroup>
 
 </Project>
