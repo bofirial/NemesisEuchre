@@ -80,18 +80,18 @@ This version extends the NemesisEuchre engine to capture all ML training data (C
    - ~~Should capture all 4-8 decisions (two rounds of bidding)~~
    - ~~Include unit tests verifying decisions are captured correctly~~
 
-5. **Capture DiscardCard decisions in DealerDiscardHandler**
-   - Update `DealerDiscardHandler.GetDealerDiscardDecisionAsync`
-   - Capture dealer's discard decision after trump is ordered up
-   - Create DiscardCardDecisionRecord with context and add to `deal.DiscardCardDecisions`
-   - Include unit tests
+5. ~~**Capture DiscardCard decisions in DealerDiscardHandler**~~
+   - ~~Update `DealerDiscardHandler.GetDealerDiscardDecisionAsync`~~
+   - ~~Capture dealer's discard decision after trump is ordered up~~
+   - ~~Create DiscardCardDecisionRecord with context and add to `deal.DiscardCardDecisions`~~
+   - ~~Include unit tests~~
 
-6. **Capture PlayCard decisions in TrickPlayingOrchestrator**
-   - Update `TrickPlayingOrchestrator.GetPlayerCardChoiceAsync`
-   - Capture every card play decision during trick execution
-   - Create PlayCardDecisionRecord with context and add to `deal.PlayCardDecisions`
-   - Should capture 15-20 decisions per deal (5 tricks × 3-4 players)
-   - Include unit tests
+6. ~~**Capture PlayCard decisions in TrickPlayingOrchestrator**~~
+   - ~~Update `TrickPlayingOrchestrator.GetPlayerCardChoiceAsync`~~
+   - ~~Capture every card play decision during trick execution~~
+   - ~~Create PlayCardDecisionRecord with context and add to `deal.PlayCardDecisions`~~
+   - ~~Should capture 15-20 decisions per deal (5 tricks × 3-4 players)~~
+   - ~~Include unit tests~~
 
 ### Database Layer (Steps 7-11)
 
