@@ -13,7 +13,8 @@ public interface IDealerDiscardHandler
 public class DealerDiscardHandler(
     IPlayerActorResolver playerActorResolver,
     IPlayerContextBuilder contextBuilder,
-    ITrumpSelectionValidator validator) : IDealerDiscardHandler
+    ITrumpSelectionValidator validator,
+    IDecisionRecorder decisionRecorder) : IDealerDiscardHandler
 {
     public async Task HandleDealerDiscardAsync(Deal deal)
     {
@@ -25,7 +26,7 @@ public class DealerDiscardHandler(
         var hand = dealer.CurrentHand.ToArray();
         var cardToDiscard = await GetDealerDiscardDecisionAsync(deal, dealerPosition, dealer, hand);
 
-        CaptureDiscardDecision(deal, dealerPosition, hand, cardToDiscard);
+        decisionRecorder.RecordDiscardDecision(deal, dealerPosition, hand, cardToDiscard);
 
         validator.ValidateDiscard(cardToDiscard, hand);
 
@@ -35,30 +36,6 @@ public class DealerDiscardHandler(
     private static void AddUpcardToDealerHand(DealPlayer dealer, Card upCard)
     {
         dealer.CurrentHand.Add(upCard);
-    }
-
-    private void CaptureDiscardDecision(
-        Deal deal,
-        PlayerPosition dealerPosition,
-        Card[] hand,
-        Card chosenCard)
-    {
-        var (teamScore, opponentScore) = contextBuilder.GetScores(deal, dealerPosition);
-
-        var record = new DiscardCardDecisionRecord
-        {
-            CardsInHand = [.. hand],
-            PlayerPosition = dealerPosition,
-            TeamScore = teamScore,
-            OpponentScore = opponentScore,
-            TrumpSuit = deal.Trump!.Value,
-            CallingPlayer = deal.CallingPlayer!.Value,
-            CallingPlayerGoingAlone = deal.CallingPlayerIsGoingAlone,
-            ValidCardsToDiscard = [.. hand],
-            ChosenCard = chosenCard,
-        };
-
-        deal.DiscardCardDecisions.Add(record);
     }
 
     private Task<Card> GetDealerDiscardDecisionAsync(

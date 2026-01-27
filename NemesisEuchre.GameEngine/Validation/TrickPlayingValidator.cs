@@ -12,31 +12,14 @@ public interface ITrickPlayingValidator
 
 public class TrickPlayingValidator : ITrickPlayingValidator
 {
-    private const int PlayersPerTrick = 4;
-
     public void ValidatePreconditions(Deal deal)
     {
         ArgumentNullException.ThrowIfNull(deal);
 
-        if (deal.DealStatus != DealStatus.Playing)
-        {
-            throw new InvalidOperationException($"Deal must be in Playing status, but was {deal.DealStatus}");
-        }
-
-        if (deal.Trump == null)
-        {
-            throw new InvalidOperationException("Trump must be set");
-        }
-
-        if (deal.CallingPlayer == null)
-        {
-            throw new InvalidOperationException("CallingPlayer must be set");
-        }
-
-        if (deal.Players.Count != PlayersPerTrick)
-        {
-            throw new InvalidOperationException($"Deal must have exactly {PlayersPerTrick} players, but had {deal.Players.Count}");
-        }
+        DealValidationHelpers.ValidateDealStatus(deal, DealStatus.Playing);
+        DealValidationHelpers.ValidateTrump(deal);
+        DealValidationHelpers.ValidateCallingPlayer(deal);
+        DealValidationHelpers.ValidatePlayerCount(deal);
     }
 
     public void ValidateCardChoice(Card chosenCard, Card[] validCards)

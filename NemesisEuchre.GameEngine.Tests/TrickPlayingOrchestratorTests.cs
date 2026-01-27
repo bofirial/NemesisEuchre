@@ -31,8 +31,9 @@ public class TrickPlayingOrchestratorTests
         var goingAloneHandler = new GoingAloneHandler();
         var contextBuilder = new PlayerContextBuilder();
         var trickWinnerCalculator = new TrickWinnerCalculator();
+        var decisionRecorder = new DecisionRecorder(contextBuilder);
 
-        _sut = new TrickPlayingOrchestrator(validator, goingAloneHandler, contextBuilder, _actorResolverMock.Object, trickWinnerCalculator);
+        _sut = new TrickPlayingOrchestrator(validator, goingAloneHandler, contextBuilder, _actorResolverMock.Object, trickWinnerCalculator, decisionRecorder);
     }
 
     [Fact]

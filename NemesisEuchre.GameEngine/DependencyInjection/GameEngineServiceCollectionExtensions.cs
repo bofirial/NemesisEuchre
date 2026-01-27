@@ -42,5 +42,6 @@ public static class GameEngineServiceCollectionExtensions
         serviceCollection.AddScoped<IDealerDiscardHandler, DealerDiscardHandler>();
         serviceCollection.AddScoped<IPlayerContextBuilder, PlayerContextBuilder>();
         serviceCollection.AddScoped<IPlayerActorResolver, PlayerActorResolver>();
+        serviceCollection.AddScoped<IDecisionRecorder, DecisionRecorder>();
     }
 }

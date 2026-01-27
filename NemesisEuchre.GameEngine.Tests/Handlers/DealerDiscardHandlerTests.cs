@@ -21,10 +21,12 @@ public class DealerDiscardHandlerTests
 
     public DealerDiscardHandlerTests()
     {
+        var decisionRecorder = new DecisionRecorder(_contextBuilderMock.Object);
         _handler = new DealerDiscardHandler(
             _actorResolverMock.Object,
             _contextBuilderMock.Object,
-            _validatorMock.Object);
+            _validatorMock.Object,
+            decisionRecorder);
 
         _actorResolverMock.Setup(x => x.GetPlayerActor(It.IsAny<DealPlayer>()))
             .Returns(_playerActorMock.Object);

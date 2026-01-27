@@ -34,7 +34,8 @@ public class TrumpSelectionOrchestratorTests
         var validator = new TrumpSelectionValidator();
         var decisionMapper = new CallTrumpDecisionMapper();
         var contextBuilder = new PlayerContextBuilder();
-        var dealerDiscardHandler = new DealerDiscardHandler(_actorResolverMock.Object, contextBuilder, validator);
+        var decisionRecorder = new DecisionRecorder(contextBuilder);
+        var dealerDiscardHandler = new DealerDiscardHandler(_actorResolverMock.Object, contextBuilder, validator, decisionRecorder);
 
         _sut = new TrumpSelectionOrchestrator(
             _gameOptions,
@@ -42,7 +43,8 @@ public class TrumpSelectionOrchestratorTests
             decisionMapper,
             dealerDiscardHandler,
             contextBuilder,
-            _actorResolverMock.Object);
+            _actorResolverMock.Object,
+            decisionRecorder);
     }
 
     [Fact]
@@ -631,7 +633,8 @@ public class TrumpSelectionOrchestratorTests
         var validator = new TrumpSelectionValidator();
         var decisionMapper = new CallTrumpDecisionMapper();
         var contextBuilder = new PlayerContextBuilder();
-        var dealerDiscardHandler = new DealerDiscardHandler(actorResolverMock.Object, contextBuilder, validator);
+        var decisionRecorder = new DecisionRecorder(contextBuilder);
+        var dealerDiscardHandler = new DealerDiscardHandler(actorResolverMock.Object, contextBuilder, validator, decisionRecorder);
 
         var sut = new TrumpSelectionOrchestrator(
             gameOptions,
@@ -639,7 +642,8 @@ public class TrumpSelectionOrchestratorTests
             decisionMapper,
             dealerDiscardHandler,
             contextBuilder,
-            actorResolverMock.Object);
+            actorResolverMock.Object,
+            decisionRecorder);
 
         var deal = CreateTestDeal();
         deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
@@ -672,7 +676,8 @@ public class TrumpSelectionOrchestratorTests
         var validator = new TrumpSelectionValidator();
         var decisionMapper = new CallTrumpDecisionMapper();
         var contextBuilder = new PlayerContextBuilder();
-        var dealerDiscardHandler = new DealerDiscardHandler(actorResolverMock.Object, contextBuilder, validator);
+        var decisionRecorder = new DecisionRecorder(contextBuilder);
+        var dealerDiscardHandler = new DealerDiscardHandler(actorResolverMock.Object, contextBuilder, validator, decisionRecorder);
 
         var sut = new TrumpSelectionOrchestrator(
             gameOptions,
@@ -680,7 +685,8 @@ public class TrumpSelectionOrchestratorTests
             decisionMapper,
             dealerDiscardHandler,
             contextBuilder,
-            actorResolverMock.Object);
+            actorResolverMock.Object,
+            decisionRecorder);
 
         var deal = CreateTestDeal();
         deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };

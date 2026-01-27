@@ -17,7 +17,8 @@ public class TrickPlayingOrchestrator(
     IGoingAloneHandler goingAloneHandler,
     IPlayerContextBuilder contextBuilder,
     IPlayerActorResolver actorResolver,
-    ITrickWinnerCalculator trickWinnerCalculator) : ITrickPlayingOrchestrator
+    ITrickWinnerCalculator trickWinnerCalculator,
+    IDecisionRecorder decisionRecorder) : ITrickPlayingOrchestrator
 {
     public async Task<Trick> PlayTrickAsync(Deal deal, PlayerPosition leadPosition)
     {
@@ -105,7 +106,7 @@ public class TrickPlayingOrchestrator(
         var validCards = GetValidCardsToPlay(hand, deal.Trump!.Value, trick.LeadSuit);
 
         var chosenCard = await GetPlayerCardChoiceAsync(deal, trick, position, hand, validCards);
-        CapturePlayCardDecision(deal, position, hand, validCards, trick, chosenCard);
+        decisionRecorder.RecordPlayCardDecision(deal, trick, position, hand, validCards, chosenCard, trickWinnerCalculator);
         validator.ValidateCardChoice(chosenCard, validCards);
 
         SetLeadSuitIfFirstCard(trick, chosenCard, deal.Trump!.Value, isFirstCard);
@@ -145,37 +146,5 @@ public class TrickPlayingOrchestrator(
             playedCards,
             winningTrickPlayer,
             [.. validCards]);
-    }
-
-    private void CapturePlayCardDecision(
-        Deal deal,
-        PlayerPosition playerPosition,
-        Card[] hand,
-        Card[] validCards,
-        Trick trick,
-        Card chosenCard)
-    {
-        var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
-
-        var record = new PlayCardDecisionRecord
-        {
-            CardsInHand = [.. hand],
-            PlayerPosition = playerPosition,
-            TeamScore = teamScore,
-            OpponentScore = opponentScore,
-            TrumpSuit = deal.Trump!.Value,
-            LeadPlayer = trick.LeadPosition,
-            LeadSuit = trick.LeadSuit,
-            PlayedCards = trick.CardsPlayed.ToDictionary(
-                pc => pc.PlayerPosition,
-                pc => pc.Card),
-            WinningTrickPlayer = trick.CardsPlayed.Count > 0 && trick.LeadSuit.HasValue
-                ? trickWinnerCalculator.CalculateWinner(trick, deal.Trump!.Value)
-                : null,
-            ValidCardsToPlay = [.. validCards],
-            ChosenCard = chosenCard,
-        };
-
-        trick.PlayCardDecisions.Add(record);
     }
 }
