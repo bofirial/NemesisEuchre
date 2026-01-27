@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Commands;
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.DataAccess.DependencyInjection;
 using NemesisEuchre.GameEngine.DependencyInjection;
 using NemesisEuchre.GameEngine.Models;
 
@@ -36,6 +37,7 @@ public static class Program
 
             services.AddNemesisEuchreGameEngine();
             services.Configure<GameOptions>(_ => { });
+            services.AddNemesisEuchreDataAccess(config);
         });
 
         return Cli.RunAsync<DefaultCommand>(args, new CliSettings { EnableDefaultExceptionHandler = true });

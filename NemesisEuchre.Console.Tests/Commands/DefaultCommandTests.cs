@@ -6,6 +6,7 @@ using Moq;
 
 using NemesisEuchre.Console.Commands;
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.GameEngine;
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
@@ -23,6 +24,7 @@ public class DefaultCommandTests
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
         var mockBanner = new Mock<IApplicationBanner>();
         var mockGameOrchestrator = new Mock<IGameOrchestrator>();
+        var mockGameRepository = new Mock<IGameRepository>();
         var mockGameResultsRenderer = new Mock<IGameResultsRenderer>();
 
         var game = new Game
@@ -33,8 +35,10 @@ public class DefaultCommandTests
             WinningTeam = Team.Team1,
         };
         mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockGameRepository.Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(42);
 
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockGameOrchestrator.Object, mockGameResultsRenderer.Object);
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockGameOrchestrator.Object, mockGameRepository.Object, mockGameResultsRenderer.Object);
 
         await command.RunAsync();
 
@@ -48,6 +52,7 @@ public class DefaultCommandTests
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
         var mockBanner = new Mock<IApplicationBanner>();
         var mockGameOrchestrator = new Mock<IGameOrchestrator>();
+        var mockGameRepository = new Mock<IGameRepository>();
         var mockGameResultsRenderer = new Mock<IGameResultsRenderer>();
 
         var game = new Game
@@ -58,8 +63,10 @@ public class DefaultCommandTests
             WinningTeam = Team.Team1,
         };
         mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockGameRepository.Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(42);
 
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockGameOrchestrator.Object, mockGameResultsRenderer.Object);
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockGameOrchestrator.Object, mockGameRepository.Object, mockGameResultsRenderer.Object);
 
         await command.RunAsync();
 
@@ -73,6 +80,7 @@ public class DefaultCommandTests
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
         var mockBanner = Mock.Of<IApplicationBanner>();
         var mockGameOrchestrator = new Mock<IGameOrchestrator>();
+        var mockGameRepository = new Mock<IGameRepository>();
         var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
 
         var game = new Game
@@ -83,8 +91,10 @@ public class DefaultCommandTests
             WinningTeam = Team.Team1,
         };
         mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockGameRepository.Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(42);
 
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockGameOrchestrator.Object, mockGameResultsRenderer);
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockGameOrchestrator.Object, mockGameRepository.Object, mockGameResultsRenderer);
 
         var result = await command.RunAsync();
 
@@ -98,6 +108,7 @@ public class DefaultCommandTests
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
         var mockBanner = Mock.Of<IApplicationBanner>();
         var mockGameOrchestrator = new Mock<IGameOrchestrator>();
+        var mockGameRepository = new Mock<IGameRepository>();
         var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
 
         var game = new Game
@@ -108,8 +119,10 @@ public class DefaultCommandTests
             WinningTeam = Team.Team1,
         };
         mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockGameRepository.Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(42);
 
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockGameOrchestrator.Object, mockGameResultsRenderer);
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockGameOrchestrator.Object, mockGameRepository.Object, mockGameResultsRenderer);
 
         await command.RunAsync();
 
@@ -123,6 +136,7 @@ public class DefaultCommandTests
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
         var mockBanner = Mock.Of<IApplicationBanner>();
         var mockGameOrchestrator = new Mock<IGameOrchestrator>();
+        var mockGameRepository = new Mock<IGameRepository>();
         var mockGameResultsRenderer = new Mock<IGameResultsRenderer>();
 
         var game = new Game
@@ -133,8 +147,10 @@ public class DefaultCommandTests
             WinningTeam = Team.Team1,
         };
         mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockGameRepository.Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(42);
 
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockGameOrchestrator.Object, mockGameResultsRenderer.Object);
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockGameOrchestrator.Object, mockGameRepository.Object, mockGameResultsRenderer.Object);
 
         await command.RunAsync();
 
@@ -148,6 +164,7 @@ public class DefaultCommandTests
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
         var mockBanner = Mock.Of<IApplicationBanner>();
         var mockGameOrchestrator = new Mock<IGameOrchestrator>();
+        var mockGameRepository = new Mock<IGameRepository>();
         var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
 
         var game = new Game
@@ -158,11 +175,178 @@ public class DefaultCommandTests
             WinningTeam = Team.Team1,
         };
         mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockGameRepository.Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(42);
 
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockGameOrchestrator.Object, mockGameResultsRenderer);
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockGameOrchestrator.Object, mockGameRepository.Object, mockGameResultsRenderer);
 
         await command.RunAsync();
 
         testConsole.Output.Should().Contain("Playing a game between 4 ChaosBots");
+    }
+
+    [Fact]
+    public async Task RunAsync_Should_PersistCompletedGame_WhenGameCompletes()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockGameOrchestrator = new Mock<IGameOrchestrator>();
+        var mockGameRepository = new Mock<IGameRepository>();
+        var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
+
+        var game = new Game
+        {
+            GameStatus = GameStatus.Complete,
+            Team1Score = 10,
+            Team2Score = 7,
+            WinningTeam = Team.Team1,
+        };
+        mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockGameRepository.Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(42);
+
+        var command = new DefaultCommand(
+            mockLogger,
+            testConsole,
+            mockBanner,
+            mockGameOrchestrator.Object,
+            mockGameRepository.Object,
+            mockGameResultsRenderer);
+
+        var result = await command.RunAsync();
+
+        result.Should().Be(0);
+        mockGameRepository.Verify(
+            x => x.SaveCompletedGameAsync(
+                It.Is<Game>(g => g.GameStatus == GameStatus.Complete && g.WinningTeam == Team.Team1),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task RunAsync_Should_RenderResults_EvenWhen_PersistenceFails()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockGameOrchestrator = new Mock<IGameOrchestrator>();
+        var mockGameRepository = new Mock<IGameRepository>();
+        var mockGameResultsRenderer = new Mock<IGameResultsRenderer>();
+
+        var game = new Game
+        {
+            GameStatus = GameStatus.Complete,
+            Team1Score = 10,
+            Team2Score = 7,
+            WinningTeam = Team.Team1,
+        };
+        mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockGameRepository
+            .Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("Database connection failed"));
+
+        var command = new DefaultCommand(
+            mockLogger,
+            testConsole,
+            mockBanner,
+            mockGameOrchestrator.Object,
+            mockGameRepository.Object,
+            mockGameResultsRenderer.Object);
+
+        var result = await command.RunAsync();
+
+        result.Should().Be(0);
+        mockGameResultsRenderer.Verify(
+            x => x.RenderResults(It.Is<Game>(g => g == game)),
+            Times.Once,
+            "Game results should be rendered even when persistence fails");
+    }
+
+    [Fact]
+    public async Task RunAsync_Should_ContinueGracefully_When_PersistenceFails()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = new Mock<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockGameOrchestrator = new Mock<IGameOrchestrator>();
+        var mockGameRepository = new Mock<IGameRepository>();
+        var mockGameResultsRenderer = new Mock<IGameResultsRenderer>();
+
+        var game = new Game
+        {
+            GameStatus = GameStatus.Complete,
+            Team1Score = 10,
+            Team2Score = 7,
+            WinningTeam = Team.Team1,
+        };
+        var expectedException = new InvalidOperationException("Database connection failed");
+
+        mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockGameRepository
+            .Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(expectedException);
+
+        var command = new DefaultCommand(
+            mockLogger.Object,
+            testConsole,
+            mockBanner,
+            mockGameOrchestrator.Object,
+            mockGameRepository.Object,
+            mockGameResultsRenderer.Object);
+
+        var result = await command.RunAsync();
+
+        result.Should().Be(0, "Command should complete successfully even when persistence fails");
+        mockGameResultsRenderer.Verify(
+            x => x.RenderResults(It.Is<Game>(g => g == game)),
+            Times.Once,
+            "Game results should be rendered even when persistence fails");
+        mockLogger.Verify(
+            x => x.IsEnabled(LogLevel.Error),
+            Times.AtLeastOnce(),
+            "Error logging should be attempted when persistence fails");
+    }
+
+    [Fact]
+    public async Task RunAsync_Should_CallRepositoryWith_CompletedGameData()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockGameOrchestrator = new Mock<IGameOrchestrator>();
+        var mockGameRepository = new Mock<IGameRepository>();
+        var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
+
+        var game = new Game
+        {
+            GameStatus = GameStatus.Complete,
+            Team1Score = 10,
+            Team2Score = 7,
+            WinningTeam = Team.Team1,
+        };
+        mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockGameRepository.Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(99);
+
+        var command = new DefaultCommand(
+            mockLogger,
+            testConsole,
+            mockBanner,
+            mockGameOrchestrator.Object,
+            mockGameRepository.Object,
+            mockGameResultsRenderer);
+
+        await command.RunAsync();
+
+        mockGameRepository.Verify(
+            x => x.SaveCompletedGameAsync(
+                It.Is<Game>(g =>
+                    g.GameStatus == GameStatus.Complete &&
+                    g.WinningTeam == Team.Team1 &&
+                    g.Team1Score == 10 &&
+                    g.Team2Score == 7),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }

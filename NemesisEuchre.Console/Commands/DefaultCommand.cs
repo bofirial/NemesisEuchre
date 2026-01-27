@@ -3,7 +3,9 @@
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.GameEngine;
+using NemesisEuchre.GameEngine.Models;
 
 using Spectre.Console;
 
@@ -15,6 +17,7 @@ public class DefaultCommand(
     IAnsiConsole ansiConsole,
     IApplicationBanner applicationBanner,
     IGameOrchestrator gameOrchestrator,
+    IGameRepository gameRepository,
     IGameResultsRenderer gameResultsRenderer) : ICliRunAsyncWithReturn
 {
     public async Task<int> RunAsync()
@@ -31,8 +34,26 @@ public class DefaultCommand(
             .Spinner(Spinner.Known.Dots)
             .StartAsync("Playing game...", async _ => await gameOrchestrator.OrchestrateGameAsync());
 
+        await PersistCompletedGameAsync(game);
+
         gameResultsRenderer.RenderResults(game);
 
         return 0;
+    }
+
+    private async Task PersistCompletedGameAsync(Game game)
+    {
+        try
+        {
+            LoggerMessages.LogPersistingCompletedGame(logger, game.GameStatus);
+
+            var gameId = await gameRepository.SaveCompletedGameAsync(game);
+
+            LoggerMessages.LogGamePersistedSuccessfully(logger, gameId);
+        }
+        catch (Exception ex)
+        {
+            LoggerMessages.LogGamePersistenceFailed(logger, ex);
+        }
     }
 }
