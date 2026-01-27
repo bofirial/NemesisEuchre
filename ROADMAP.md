@@ -95,77 +95,77 @@ This version extends the NemesisEuchre engine to capture all ML training data (C
 
 ### Database Layer (Steps 7-11)
 
-7. **Create NemesisEuchre.DataAccess project**
-   - Create new class library: `NemesisEuchre.DataAccess\NemesisEuchre.DataAccess.csproj`
-   - Install NuGet packages:
-     - Microsoft.EntityFrameworkCore.SqlServer
-     - Microsoft.EntityFrameworkCore.Design
-     - Microsoft.EntityFrameworkCore.Tools
-   - Create project structure: Entities/, Mappers/, Repositories/
-   - Create NemesisEuchreDbContext with DbSet properties for Games, Deals, and decision entities
-   - Add connection string configuration for Sql Server in appsettings.json
+7. ~~**Create NemesisEuchre.DataAccess project**~~
+   - ~~Create new class library: `NemesisEuchre.DataAccess\NemesisEuchre.DataAccess.csproj`~~
+   - ~~Install NuGet packages:~~
+     - ~~Microsoft.EntityFrameworkCore.SqlServer~~
+     - ~~Microsoft.EntityFrameworkCore.Design~~
+     - ~~Microsoft.EntityFrameworkCore.Tools~~
+   - ~~Create project structure: Entities/, Mappers/, Repositories/~~
+   - ~~Create NemesisEuchreDbContext with DbSet properties for Games, Deals, and decision entities~~
+   - ~~Add connection string configuration for Sql Server in appsettings.json~~
 
-8. **Create Entity Models for database persistence**
-   - Create entity classes:
-     - `NemesisEuchre.DataAccess\Entities\GameEntity.cs`
-     - `NemesisEuchre.DataAccess\Entities\DealEntity.cs`
-     - `NemesisEuchre.DataAccess\Entities\TrickEntity.cs`
-     - `NemesisEuchre.DataAccess\Entities\CallTrumpDecisionEntity.cs`
-     - `NemesisEuchre.DataAccess\Entities\DiscardCardDecisionEntity.cs`
-     - `NemesisEuchre.DataAccess\Entities\PlayCardDecisionEntity.cs`
-   - Use JSON columns (via EF Core value converters) for RelativeCard[], RelativeDeal, valid decision arrays
-   - Include proper foreign key relationships and navigation properties
-   - Add unit tests for entity creation and relationships
+8. ~~**Create Entity Models for database persistence**~~
+   - ~~Create entity classes:~~
+     - ~~`NemesisEuchre.DataAccess\Entities\GameEntity.cs`~~
+     - ~~`NemesisEuchre.DataAccess\Entities\DealEntity.cs`~~
+     - ~~`NemesisEuchre.DataAccess\Entities\TrickEntity.cs`~~
+     - ~~`NemesisEuchre.DataAccess\Entities\CallTrumpDecisionEntity.cs`~~
+     - ~~`NemesisEuchre.DataAccess\Entities\DiscardCardDecisionEntity.cs`~~
+     - ~~`NemesisEuchre.DataAccess\Entities\PlayCardDecisionEntity.cs`~~
+   - ~~Use JSON columns (via EF Core value converters) for RelativeCard[], RelativeDeal, valid decision arrays~~
+   - ~~Include proper foreign key relationships and navigation properties~~
+   - ~~Add unit tests for entity creation and relationships~~
 
 9. **Configure DbContext with indexes and relationships**
-   - Configure `NemesisEuchreDbContext.OnModelCreating`
-   - Define indexes optimized for ML queries:
-     - Index on ActorType + ChosenDecision for CallTrumpDecisions
-     - Index on ActorType + TrickNumber for PlayCardDecisions
-     - Composite indexes for filtering games by date and winning team
-   - Configure JSON value converters for RelativeCard[], RelativeDeal, decision arrays
-   - Include FluentAssertions-based unit tests
+   - ~~Configure `NemesisEuchreDbContext.OnModelCreating`~~
+   - ~~Define indexes optimized for ML queries:~~
+     - ~~Index on ActorType + ChosenDecision for CallTrumpDecisions~~
+     - ~~Index on ActorType + TrickNumber for PlayCardDecisions~~
+     - ~~Composite indexes for filtering games by date and winning team~~
+   - ~~Configure JSON value converters for RelativeCard[], RelativeDeal, decision arrays~~
+   - ~~Include FluentAssertions-based unit tests~~
 
-10. **Create GameToEntityMapper for model conversion**
-    - Create `NemesisEuchre.DataAccess\Mappers\GameToEntityMapper.cs`
-    - Convert Game models to GameEntity with all child entities (Deals, Tricks, Decisions)
-    - Use System.Text.Json to serialize complex objects to JSON strings
-    - Calculate denormalized outcome fields (DidTeamWinTrick, DidTeamWinDeal, DidTeamWinGame) for each decision
-    - Include comprehensive unit tests validating correct mapping and JSON serialization roundtrips
+10. ~~**Create GameToEntityMapper for model conversion**~~
+    - ~~Create `NemesisEuchre.DataAccess\Mappers\GameToEntityMapper.cs`~~
+    - ~~Convert Game models to GameEntity with all child entities (Deals, Tricks, Decisions)~~
+    - ~~Use System.Text.Json to serialize complex objects to JSON strings~~
+    - ~~Calculate denormalized outcome fields (DidTeamWinTrick, DidTeamWinDeal, DidTeamWinGame) for each decision~~
+    - ~~Include comprehensive unit tests validating correct mapping and JSON serialization roundtrips~~
 
-11. **Create IGameRepository interface and implementation**
-    - Create `NemesisEuchre.DataAccess\IGameRepository.cs`
-    - Create `NemesisEuchre.DataAccess\GameRepository.cs`
-    - Implement async methods:
-      - SaveCompletedGameAsync
-      - GetTotalGamesStoredAsync
-      - GetRecentGamesAsync
-    - Use NemesisEuchreDbContext and GameToEntityMapper
-    - Include logging for save operations (elapsed time, deal count)
-    - Add proper error handling
-    - Add unit tests using EF Core in-memory database provider
+11. ~~**Create IGameRepository interface and implementation**~~
+    - ~~Create `NemesisEuchre.DataAccess\IGameRepository.cs`~~
+    - ~~Create `NemesisEuchre.DataAccess\GameRepository.cs`~~
+    - ~~Implement async methods:~~
+      - ~~SaveCompletedGameAsync~~
+      - ~~GetTotalGamesStoredAsync~~
+      - ~~GetRecentGamesAsync~~
+    - ~~Use NemesisEuchreDbContext and GameToEntityMapper~~
+    - ~~Include logging for save operations (elapsed time, deal count)~~
+    - ~~Add proper error handling~~
+    - ~~Add unit tests using EF Core in-memory database provider~~
 
 ### Database Setup (Steps 12-13)
 
-12. **Create EF Core migration and update database**
-    - Create initial migration:
+12. ~~**Create EF Core migration and update database**~~
+    - ~~Create initial migration:~~
       ```bash
       dotnet ef migrations add InitialCreate --project NemesisEuchre.DataAccess --startup-project NemesisEuchre.Console
       ```
-    - Review generated migration (verify table structures, indexes, relationships)
-    - Apply migration to create LocalDB database:
+    - ~~Review generated migration (verify table structures, indexes, relationships)~~
+    - ~~Apply migration to create LocalDB database:~~
       ```bash
       dotnet ef database update --project NemesisEuchre.DataAccess --startup-project NemesisEuchre.Console
       ```
 
-13. **Add Dependency Injection for DataAccess layer**
-    - Create `NemesisEuchre.DataAccess\DependencyInjection\DataAccessServiceCollectionExtensions.cs`
-    - Implement AddDataAccess extension method
-    - Register NemesisEuchreDbContext (with SQL Server connection string from configuration)
-    - Register IGameRepository as scoped service
-    - Configure SQL Server retry logic and connection resiliency
-    - Update `NemesisEuchre.Console\Program.cs` to call AddDataAccess and apply migrations on startup
-    - Include unit tests for DI registration
+13. ~~**Add Dependency Injection for DataAccess layer**~~
+    - ~~Create `NemesisEuchre.DataAccess\DependencyInjection\DataAccessServiceCollectionExtensions.cs`~~
+    - ~~Implement AddDataAccess extension method~~
+    - ~~Register NemesisEuchreDbContext (with SQL Server connection string from configuration)~~
+    - ~~Register IGameRepository as scoped service~~
+    - ~~Configure SQL Server retry logic and connection resiliency~~
+    - ~~Update `NemesisEuchre.Console\Program.cs` to call AddDataAccess and apply migrations on startup~~
+    - ~~Include unit tests for DI registration~~
 
 ### Game Storage (Step 14)
 

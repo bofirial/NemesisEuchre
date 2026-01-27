@@ -21,4 +21,6 @@ public class TrickEntity
     public Team? WinningTeam { get; set; }
 
     public DealEntity Deal { get; set; } = null!;
+
+    public List<PlayCardDecisionEntity> PlayCardDecisions { get; set; } = [];
 }

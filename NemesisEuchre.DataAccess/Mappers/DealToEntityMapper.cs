@@ -16,6 +16,19 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
 {
     public DealEntity Map(Deal deal, int dealNumber, Dictionary<PlayerPosition, Player> gamePlayers, bool didTeam1WinGame, bool didTeam2WinGame)
     {
+        if (deal.DealNumber == 0)
+        {
+            throw new InvalidOperationException("DealNumber must be set before mapping");
+        }
+
+        foreach (var trick in deal.CompletedTricks)
+        {
+            if (trick.TrickNumber == 0)
+            {
+                throw new InvalidOperationException("TrickNumber must be set for all tricks before mapping");
+            }
+        }
+
         var dealEntity = new DealEntity
         {
             DealNumber = dealNumber,
@@ -31,12 +44,11 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
             Team1Score = deal.Team1Score,
             Team2Score = deal.Team2Score,
             PlayersJson = JsonSerializer.Serialize(deal.Players),
-            Tricks = [.. deal.CompletedTricks.Select((trick, index) => trickMapper.Map(trick, index + 1))],
+            Tricks = [.. deal.CompletedTricks.Select((trick, index) => trickMapper.Map(trick, index + 1, gamePlayers, didTeam1WinGame, didTeam2WinGame, deal.WinningTeam))],
         };
 
         MapCallTrumpDecisions(deal, dealEntity, gamePlayers, didTeam1WinGame, didTeam2WinGame);
         MapDiscardCardDecisions(deal, dealEntity, gamePlayers, didTeam1WinGame, didTeam2WinGame);
-        MapPlayCardDecisions(deal, dealEntity, gamePlayers, didTeam1WinGame, didTeam2WinGame);
 
         return dealEntity;
     }
@@ -48,22 +60,22 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
 
         dealEntity.CallTrumpDecisions = [.. deal.CallTrumpDecisions.Select(decision =>
         {
-            var actorType = gamePlayers[decision.DecidingPlayerPosition].ActorType;
-            var playerTeam = decision.DecidingPlayerPosition.GetTeam();
+            var actorType = gamePlayers[decision.PlayerPosition].ActorType;
+            var playerTeam = decision.PlayerPosition.GetTeam();
             var didTeamWinDeal = playerTeam == Team.Team1 ? didTeam1WinDeal : didTeam2WinDeal;
             var didTeamWinGame = playerTeam == Team.Team1 ? didTeam1WinGame : didTeam2WinGame;
 
             return new CallTrumpDecisionEntity
             {
-                HandJson = JsonSerializer.Serialize(decision.Hand),
+                HandJson = JsonSerializer.Serialize(decision.CardsInHand),
                 UpCardJson = JsonSerializer.Serialize(decision.UpCard),
                 DealerPosition = decision.DealerPosition,
-                DecidingPlayerPosition = decision.DecidingPlayerPosition,
+                DecidingPlayerPosition = decision.PlayerPosition,
                 TeamScore = decision.TeamScore,
                 OpponentScore = decision.OpponentScore,
-                ValidDecisionsJson = JsonSerializer.Serialize(decision.ValidDecisions),
+                ValidDecisionsJson = JsonSerializer.Serialize(decision.ValidCallTrumpDecisions),
                 ChosenDecisionJson = JsonSerializer.Serialize(decision.ChosenDecision),
-                DecisionOrder = decision.DecisionOrder,
+                DecisionOrder = (byte)decision.DecisionOrder,
                 ActorType = actorType,
                 DidTeamWinDeal = didTeamWinDeal,
                 DidTeamWinGame = didTeamWinGame,
@@ -78,64 +90,20 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
 
         dealEntity.DiscardCardDecisions = [.. deal.DiscardCardDecisions.Select(decision =>
         {
-            var actorType = gamePlayers[decision.DealerPosition].ActorType;
-            var playerTeam = decision.DealerPosition.GetTeam();
+            var actorType = gamePlayers[decision.PlayerPosition].ActorType;
+            var playerTeam = decision.PlayerPosition.GetTeam();
             var didTeamWinDeal = playerTeam == Team.Team1 ? didTeam1WinDeal : didTeam2WinDeal;
             var didTeamWinGame = playerTeam == Team.Team1 ? didTeam1WinGame : didTeam2WinGame;
 
             return new DiscardCardDecisionEntity
             {
-                HandJson = JsonSerializer.Serialize(decision.Hand.Select(c => c.ToRelative(deal.Trump!.Value))),
-                CallingPlayerPosition = deal.CallingPlayer!.Value.ToRelativePosition(decision.DealerPosition),
+                HandJson = JsonSerializer.Serialize(decision.CardsInHand.Select(c => c.ToRelative(deal.Trump!.Value))),
+                CallingPlayerPosition = deal.CallingPlayer!.Value.ToRelativePosition(decision.PlayerPosition),
                 TeamScore = decision.TeamScore,
                 OpponentScore = decision.OpponentScore,
                 ValidCardsToDiscardJson = JsonSerializer.Serialize(decision.ValidCardsToDiscard.Select(c => c.ToRelative(deal.Trump!.Value))),
                 ChosenCardJson = JsonSerializer.Serialize(decision.ChosenCard.ToRelative(deal.Trump!.Value)),
                 ActorType = actorType,
-                DidTeamWinDeal = didTeamWinDeal,
-                DidTeamWinGame = didTeamWinGame,
-            };
-        })];
-    }
-
-    private static void MapPlayCardDecisions(Deal deal, DealEntity dealEntity, Dictionary<PlayerPosition, Player> gamePlayers, bool didTeam1WinGame, bool didTeam2WinGame)
-    {
-        var didTeam1WinDeal = deal.WinningTeam == Team.Team1;
-        var didTeam2WinDeal = deal.WinningTeam == Team.Team2;
-
-        dealEntity.PlayCardDecisions = [.. deal.PlayCardDecisions.Select(decision =>
-        {
-            var actorType = gamePlayers[decision.DecidingPlayerPosition].ActorType;
-            var playerTeam = decision.DecidingPlayerPosition.GetTeam();
-
-            var trickNumber = decision.CurrentTrick.CardsPlayed.Count > 0
-                ? deal.CompletedTricks.FindIndex(t => t.LeadPosition == decision.LeadPosition && t.CardsPlayed.Count > decision.CurrentTrick.CardsPlayed.Count) + 1
-                : deal.CompletedTricks.Count + 1;
-
-            if (trickNumber == 0)
-            {
-                trickNumber = deal.CompletedTricks.Count;
-            }
-
-            var completedTrick = trickNumber <= deal.CompletedTricks.Count ? deal.CompletedTricks[trickNumber - 1] : null;
-            var didTeamWinTrick = completedTrick?.WinningTeam == playerTeam;
-
-            var didTeamWinDeal = playerTeam == Team.Team1 ? didTeam1WinDeal : didTeam2WinDeal;
-            var didTeamWinGame = playerTeam == Team.Team1 ? didTeam1WinGame : didTeam2WinGame;
-
-            return new PlayCardDecisionEntity
-            {
-                TrickNumber = trickNumber,
-                HandJson = JsonSerializer.Serialize(decision.Hand),
-                DecidingPlayerPosition = decision.DecidingPlayerPosition,
-                CurrentTrickJson = JsonSerializer.Serialize(decision.CurrentTrick),
-                TeamScore = decision.TeamScore,
-                OpponentScore = decision.OpponentScore,
-                ValidCardsToPlayJson = JsonSerializer.Serialize(decision.ValidCardsToPlay),
-                ChosenCardJson = JsonSerializer.Serialize(decision.ChosenCard),
-                LeadPosition = decision.LeadPosition,
-                ActorType = actorType,
-                DidTeamWinTrick = didTeamWinTrick,
                 DidTeamWinDeal = didTeamWinDeal,
                 DidTeamWinGame = didTeamWinGame,
             };

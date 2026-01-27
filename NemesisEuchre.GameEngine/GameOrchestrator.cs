@@ -71,6 +71,7 @@ public class GameOrchestrator(
     private async Task ProcessSingleDealAsync(Game game)
     {
         game.CurrentDeal = await dealFactory.CreateDealAsync(game, game.CompletedDeals.LastOrDefault());
+        game.CurrentDeal.DealNumber = (short)(game.CompletedDeals.Count + 1);
 
         await dealOrchestrator.OrchestrateDealAsync(game.CurrentDeal);
 

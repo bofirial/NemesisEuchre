@@ -9,23 +9,31 @@ public class PlayCardDecisionEntity
 
     public int DealId { get; set; }
 
+    public int TrickId { get; set; }
+
     public int TrickNumber { get; set; }
 
     public string HandJson { get; set; } = null!;
 
     public PlayerPosition DecidingPlayerPosition { get; set; }
 
-    public string CurrentTrickJson { get; set; } = null!;
-
     public short TeamScore { get; set; }
 
     public short OpponentScore { get; set; }
 
+    public Suit TrumpSuit { get; set; }
+
+    public PlayerPosition LeadPlayer { get; set; }
+
+    public Suit? LeadSuit { get; set; }
+
+    public string PlayedCardsJson { get; set; } = null!;
+
+    public PlayerPosition? WinningTrickPlayer { get; set; }
+
     public string ValidCardsToPlayJson { get; set; } = null!;
 
     public string ChosenCardJson { get; set; } = null!;
-
-    public PlayerPosition LeadPosition { get; set; }
 
     public ActorType? ActorType { get; set; }
 
@@ -36,4 +44,6 @@ public class PlayCardDecisionEntity
     public bool? DidTeamWinGame { get; set; }
 
     public DealEntity Deal { get; set; } = null!;
+
+    public TrickEntity Trick { get; set; } = null!;
 }

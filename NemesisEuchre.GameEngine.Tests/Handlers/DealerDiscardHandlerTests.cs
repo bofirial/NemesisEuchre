@@ -186,8 +186,8 @@ public class DealerDiscardHandlerTests
         await _handler.HandleDealerDiscardAsync(deal);
 
         var record = deal.DiscardCardDecisions[0];
-        record.Hand.Should().HaveCount(6);
-        record.Hand.Should().Contain(upCard);
+        record.CardsInHand.Should().HaveCount(6);
+        record.CardsInHand.Should().Contain(upCard);
         dealer.CurrentHand.Should().HaveCount(5);
     }
 
@@ -239,7 +239,35 @@ public class DealerDiscardHandlerTests
 
         var record = deal.DiscardCardDecisions[0];
         record.ValidCardsToDiscard.Should().HaveCount(6);
-        record.ValidCardsToDiscard.Should().BeEquivalentTo(record.Hand);
+        record.ValidCardsToDiscard.Should().BeEquivalentTo(record.CardsInHand);
+    }
+
+    [Fact]
+    public async Task HandleDealerDiscardAsync_CapturesTrumpAndCallingPlayerInfo()
+    {
+        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var deal = CreateTestDeal(upCard);
+        deal.Trump = Suit.Spades;
+        deal.CallingPlayer = PlayerPosition.East;
+        deal.CallingPlayerIsGoingAlone = true;
+
+        _playerActorMock.Setup(x => x.DiscardCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync(upCard);
+
+        await _handler.HandleDealerDiscardAsync(deal);
+
+        var record = deal.DiscardCardDecisions[0];
+        record.TrumpSuit.Should().Be(Suit.Spades);
+        record.CallingPlayer.Should().Be(PlayerPosition.East);
+        record.CallingPlayerGoingAlone.Should().BeTrue();
     }
 
     [Fact]
@@ -287,7 +315,7 @@ public class DealerDiscardHandlerTests
         await _handler.HandleDealerDiscardAsync(dealSouth);
 
         var record = dealSouth.DiscardCardDecisions[0];
-        record.DealerPosition.Should().Be(PlayerPosition.South);
+        record.PlayerPosition.Should().Be(PlayerPosition.South);
     }
 
     [Fact]
@@ -313,7 +341,7 @@ public class DealerDiscardHandlerTests
 
         deal.DiscardCardDecisions.Should().HaveCount(1);
         var record = deal.DiscardCardDecisions[0];
-        record.Hand.Should().HaveCount(6);
+        record.CardsInHand.Should().HaveCount(6);
         record.ChosenCard.Should().Be(cardToDiscard);
         dealer.CurrentHand.Should().NotContain(cardToDiscard);
         dealer.CurrentHand.Should().HaveCount(5);

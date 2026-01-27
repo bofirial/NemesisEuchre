@@ -8,6 +8,8 @@ public class Deal
 
     public PlayerPosition? DealerPosition { get; set; }
 
+    public short DealNumber { get; set; }
+
     public List<Card> Deck { get; set; } = [];
 
     public Card? UpCard { get; set; }
@@ -23,8 +25,6 @@ public class Deal
     public List<CallTrumpDecisionRecord> CallTrumpDecisions { get; set; } = [];
 
     public List<DiscardCardDecisionRecord> DiscardCardDecisions { get; set; } = [];
-
-    public List<PlayCardDecisionRecord> PlayCardDecisions { get; set; } = [];
 
     public DealResult? DealResult { get; set; }
 

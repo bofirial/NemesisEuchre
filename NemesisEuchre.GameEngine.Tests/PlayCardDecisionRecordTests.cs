@@ -12,11 +12,12 @@ public class PlayCardDecisionRecordTests
     {
         var record = new PlayCardDecisionRecord();
 
-        record.Hand.Should().NotBeNull();
-        record.Hand.Should().BeEmpty();
+        record.CardsInHand.Should().NotBeNull();
+        record.CardsInHand.Should().BeEmpty();
         record.ValidCardsToPlay.Should().NotBeNull();
         record.ValidCardsToPlay.Should().BeEmpty();
-        record.CurrentTrick.Should().NotBeNull();
+        record.PlayedCards.Should().NotBeNull();
+        record.PlayedCards.Should().BeEmpty();
     }
 
     [Theory]
@@ -35,11 +36,11 @@ public class PlayCardDecisionRecordTests
 
         var record = new PlayCardDecisionRecord
         {
-            Hand = hand,
+            CardsInHand = hand,
         };
 
-        record.Hand.Should().HaveCount(cardCount);
-        record.Hand.Should().AllBeOfType<Card>();
+        record.CardsInHand.Should().HaveCount(cardCount);
+        record.CardsInHand.Should().AllBeOfType<Card>();
     }
 
     [Fact]
@@ -56,7 +57,7 @@ public class PlayCardDecisionRecordTests
 
         var record = new PlayCardDecisionRecord
         {
-            Hand = hand,
+            CardsInHand = hand,
             ValidCardsToPlay = hand,
         };
 
@@ -83,7 +84,7 @@ public class PlayCardDecisionRecordTests
 
         var record = new PlayCardDecisionRecord
         {
-            Hand = hand,
+            CardsInHand = hand,
             ValidCardsToPlay = validCards,
         };
 
@@ -103,7 +104,7 @@ public class PlayCardDecisionRecordTests
 
         var record = new PlayCardDecisionRecord
         {
-            Hand = hand,
+            CardsInHand = hand,
             ValidCardsToPlay = hand,
         };
 
@@ -111,62 +112,41 @@ public class PlayCardDecisionRecordTests
         record.ValidCardsToPlay.Should().BeEquivalentTo(hand);
     }
 
-    [Fact]
-    public void CurrentTrick_CanBeEmptyWhenLeading()
-    {
-        var record = new PlayCardDecisionRecord
-        {
-            CurrentTrick = new Trick
-            {
-                LeadPosition = PlayerPosition.North,
-            },
-        };
-
-        record.CurrentTrick.CardsPlayed.Should().BeEmpty();
-    }
-
-    [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(3)]
-    public void CurrentTrick_CanStoreCardsPlayedBeforeDecision(int cardsPlayed)
-    {
-        var trick = new Trick
-        {
-            LeadPosition = PlayerPosition.East,
-        };
-
-        for (int i = 0; i < cardsPlayed; i++)
-        {
-            trick.CardsPlayed.Add(new PlayedCard
-            {
-                Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-                PlayerPosition = PlayerPosition.East,
-            });
-        }
-
-        var record = new PlayCardDecisionRecord
-        {
-            CurrentTrick = trick,
-        };
-
-        record.CurrentTrick.CardsPlayed.Should().HaveCount(cardsPlayed);
-        record.CurrentTrick.CardsPlayed.Should().AllBeOfType<PlayedCard>();
-    }
-
     [Theory]
     [InlineData(PlayerPosition.North)]
     [InlineData(PlayerPosition.East)]
     [InlineData(PlayerPosition.South)]
     [InlineData(PlayerPosition.West)]
-    public void LeadPosition_AcceptsAllPlayerPositions(PlayerPosition position)
+    public void LeadPlayer_AcceptsAllPlayerPositions(PlayerPosition position)
     {
         var record = new PlayCardDecisionRecord
         {
-            LeadPosition = position,
+            LeadPlayer = position,
         };
 
-        record.LeadPosition.Should().Be(position);
+        record.LeadPlayer.Should().Be(position);
+    }
+
+    [Fact]
+    public void LeadSuit_CanBeNullWhenLeading()
+    {
+        var record = new PlayCardDecisionRecord
+        {
+            LeadSuit = null,
+        };
+
+        record.LeadSuit.Should().BeNull();
+    }
+
+    [Fact]
+    public void LeadSuit_CanBeSetWhenFollowing()
+    {
+        var record = new PlayCardDecisionRecord
+        {
+            LeadSuit = Suit.Hearts,
+        };
+
+        record.LeadSuit.Should().Be(Suit.Hearts);
     }
 
     [Fact]
@@ -187,118 +167,99 @@ public class PlayCardDecisionRecordTests
 
         var chosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
 
-        var currentTrick = new Trick
+        var playedCards = new Dictionary<PlayerPosition, Card>
         {
-            LeadPosition = PlayerPosition.East,
-            LeadSuit = Suit.Spades,
+            { PlayerPosition.East, new Card { Suit = Suit.Spades, Rank = Rank.Queen } },
         };
-        currentTrick.CardsPlayed.Add(new PlayedCard
-        {
-            Card = new Card { Suit = Suit.Spades, Rank = Rank.Queen },
-            PlayerPosition = PlayerPosition.East,
-        });
 
         var record = new PlayCardDecisionRecord
         {
-            Hand = hand,
-            DecidingPlayerPosition = PlayerPosition.North,
-            CurrentTrick = currentTrick,
+            CardsInHand = hand,
+            PlayerPosition = PlayerPosition.North,
             TeamScore = 7,
             OpponentScore = 4,
+            TrumpSuit = Suit.Clubs,
+            LeadPlayer = PlayerPosition.East,
+            LeadSuit = Suit.Spades,
+            PlayedCards = playedCards,
+            WinningTrickPlayer = PlayerPosition.East,
             ValidCardsToPlay = validCardsToPlay,
             ChosenCard = chosenCard,
-            LeadPosition = PlayerPosition.East,
         };
 
-        record.Hand.Should().BeEquivalentTo(hand);
-        record.DecidingPlayerPosition.Should().Be(PlayerPosition.North);
-        record.CurrentTrick.Should().BeEquivalentTo(currentTrick);
+        record.CardsInHand.Should().BeEquivalentTo(hand);
+        record.PlayerPosition.Should().Be(PlayerPosition.North);
         record.TeamScore.Should().Be(7);
         record.OpponentScore.Should().Be(4);
+        record.TrumpSuit.Should().Be(Suit.Clubs);
+        record.LeadPlayer.Should().Be(PlayerPosition.East);
+        record.LeadSuit.Should().Be(Suit.Spades);
+        record.PlayedCards.Should().BeEquivalentTo(playedCards);
+        record.WinningTrickPlayer.Should().Be(PlayerPosition.East);
         record.ValidCardsToPlay.Should().BeEquivalentTo(validCardsToPlay);
         record.ChosenCard.Should().BeEquivalentTo(chosenCard);
-        record.LeadPosition.Should().Be(PlayerPosition.East);
     }
 
     [Fact]
-    public void Deal_PlayCardDecisions_InitializesToEmptyList()
+    public void Trick_PlayCardDecisions_InitializesToEmptyList()
     {
-        var deal = new Deal();
+        var trick = new Trick();
 
-        deal.PlayCardDecisions.Should().NotBeNull();
-        deal.PlayCardDecisions.Should().BeEmpty();
-        deal.PlayCardDecisions.Should().BeOfType<List<PlayCardDecisionRecord>>();
+        trick.PlayCardDecisions.Should().NotBeNull();
+        trick.PlayCardDecisions.Should().BeEmpty();
+        trick.PlayCardDecisions.Should().BeOfType<List<PlayCardDecisionRecord>>();
     }
 
     [Fact]
-    public void Deal_PlayCardDecisions_CanAddMultipleRecords()
+    public void Trick_PlayCardDecisions_CanAddMultipleRecords()
     {
-        var deal = new Deal();
+        var trick = new Trick();
 
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 4; i++)
         {
             var record = new PlayCardDecisionRecord
             {
-                DecidingPlayerPosition = PlayerPosition.North,
+                PlayerPosition = PlayerPosition.North,
                 TeamScore = 5,
                 OpponentScore = 3,
+                TrumpSuit = Suit.Hearts,
+                LeadPlayer = PlayerPosition.North,
                 ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-                LeadPosition = PlayerPosition.North,
             };
 
-            deal.PlayCardDecisions.Add(record);
+            trick.PlayCardDecisions.Add(record);
         }
 
-        deal.PlayCardDecisions.Should().HaveCount(20);
+        trick.PlayCardDecisions.Should().HaveCount(4);
     }
 
     [Fact]
-    public void Deal_PlayCardDecisions_CanAddFewerRecordsForGoingAlone()
+    public void Trick_PlayCardDecisions_RecordsMaintainIndependence()
     {
-        var deal = new Deal();
-
-        for (int i = 0; i < 15; i++)
-        {
-            var record = new PlayCardDecisionRecord
-            {
-                DecidingPlayerPosition = PlayerPosition.South,
-                TeamScore = 2,
-                OpponentScore = 1,
-                ChosenCard = new Card { Suit = Suit.Spades, Rank = Rank.King },
-                LeadPosition = PlayerPosition.East,
-            };
-
-            deal.PlayCardDecisions.Add(record);
-        }
-
-        deal.PlayCardDecisions.Should().HaveCount(15);
-    }
-
-    [Fact]
-    public void Deal_PlayCardDecisions_RecordsMaintainIndependence()
-    {
-        var deal = new Deal();
+        var trick = new Trick();
 
         var record1 = new PlayCardDecisionRecord
         {
-            DecidingPlayerPosition = PlayerPosition.North,
+            PlayerPosition = PlayerPosition.North,
             TeamScore = 0,
-            LeadPosition = PlayerPosition.North,
+            TrumpSuit = Suit.Hearts,
+            LeadPlayer = PlayerPosition.North,
         };
 
         var record2 = new PlayCardDecisionRecord
         {
-            DecidingPlayerPosition = PlayerPosition.South,
+            PlayerPosition = PlayerPosition.South,
             TeamScore = 5,
-            LeadPosition = PlayerPosition.East,
+            TrumpSuit = Suit.Hearts,
+            LeadPlayer = PlayerPosition.East,
         };
 
-        deal.PlayCardDecisions.Add(record1);
-        deal.PlayCardDecisions.Add(record2);
+        trick.PlayCardDecisions.Add(record1);
+        trick.PlayCardDecisions.Add(record2);
 
-        deal.PlayCardDecisions[0].TeamScore = 10;
+        trick.PlayCardDecisions[0].TeamScore = 10;
 
-        deal.PlayCardDecisions[0].TeamScore.Should().Be(10);
-        deal.PlayCardDecisions[1].TeamScore.Should().Be(5);
+        trick.PlayCardDecisions[0].TeamScore.Should().Be(10);
+        trick.PlayCardDecisions[1].TeamScore.Should().Be(5);
     }
 }

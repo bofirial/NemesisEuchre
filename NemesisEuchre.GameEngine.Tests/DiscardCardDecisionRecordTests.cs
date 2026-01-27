@@ -12,8 +12,8 @@ public class DiscardCardDecisionRecordTests
     {
         var record = new DiscardCardDecisionRecord();
 
-        record.Hand.Should().NotBeNull();
-        record.Hand.Should().BeEmpty();
+        record.CardsInHand.Should().NotBeNull();
+        record.CardsInHand.Should().BeEmpty();
         record.ValidCardsToDiscard.Should().NotBeNull();
         record.ValidCardsToDiscard.Should().BeEmpty();
     }
@@ -23,7 +23,7 @@ public class DiscardCardDecisionRecordTests
     {
         var record = new DiscardCardDecisionRecord
         {
-            Hand =
+            CardsInHand =
             [
                 new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
                 new Card { Suit = Suit.Hearts, Rank = Rank.King },
@@ -34,8 +34,8 @@ public class DiscardCardDecisionRecordTests
             ],
         };
 
-        record.Hand.Should().HaveCount(6);
-        record.Hand.Should().AllBeOfType<Card>();
+        record.CardsInHand.Should().HaveCount(6);
+        record.CardsInHand.Should().AllBeOfType<Card>();
     }
 
     [Fact]
@@ -85,18 +85,24 @@ public class DiscardCardDecisionRecordTests
 
         var record = new DiscardCardDecisionRecord
         {
-            Hand = hand,
-            DealerPosition = PlayerPosition.North,
+            CardsInHand = hand,
+            PlayerPosition = PlayerPosition.North,
             TeamScore = 5,
             OpponentScore = 3,
+            TrumpSuit = Suit.Hearts,
+            CallingPlayer = PlayerPosition.East,
+            CallingPlayerGoingAlone = true,
             ValidCardsToDiscard = validCardsToDiscard,
             ChosenCard = chosenCard,
         };
 
-        record.Hand.Should().BeEquivalentTo(hand);
-        record.DealerPosition.Should().Be(PlayerPosition.North);
+        record.CardsInHand.Should().BeEquivalentTo(hand);
+        record.PlayerPosition.Should().Be(PlayerPosition.North);
         record.TeamScore.Should().Be(5);
         record.OpponentScore.Should().Be(3);
+        record.TrumpSuit.Should().Be(Suit.Hearts);
+        record.CallingPlayer.Should().Be(PlayerPosition.East);
+        record.CallingPlayerGoingAlone.Should().BeTrue();
         record.ValidCardsToDiscard.Should().BeEquivalentTo(validCardsToDiscard);
         record.ChosenCard.Should().BeEquivalentTo(chosenCard);
     }
@@ -118,7 +124,7 @@ public class DiscardCardDecisionRecordTests
 
         var record = new DiscardCardDecisionRecord
         {
-            DealerPosition = PlayerPosition.South,
+            PlayerPosition = PlayerPosition.South,
             TeamScore = 2,
             OpponentScore = 4,
             ChosenCard = new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
@@ -127,7 +133,7 @@ public class DiscardCardDecisionRecordTests
         deal.DiscardCardDecisions.Add(record);
 
         deal.DiscardCardDecisions.Should().HaveCount(1);
-        deal.DiscardCardDecisions[0].DealerPosition.Should().Be(PlayerPosition.South);
+        deal.DiscardCardDecisions[0].PlayerPosition.Should().Be(PlayerPosition.South);
         deal.DiscardCardDecisions[0].TeamScore.Should().Be(2);
         deal.DiscardCardDecisions[0].OpponentScore.Should().Be(4);
     }
@@ -139,13 +145,13 @@ public class DiscardCardDecisionRecordTests
 
         var record1 = new DiscardCardDecisionRecord
         {
-            DealerPosition = PlayerPosition.North,
+            PlayerPosition = PlayerPosition.North,
             TeamScore = 0,
         };
 
         var record2 = new DiscardCardDecisionRecord
         {
-            DealerPosition = PlayerPosition.South,
+            PlayerPosition = PlayerPosition.South,
             TeamScore = 5,
         };
 

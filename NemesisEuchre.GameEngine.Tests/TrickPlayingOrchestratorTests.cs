@@ -888,10 +888,10 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         SetupBasicCardPlaySequence();
 
-        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        deal.PlayCardDecisions.Should().NotBeEmpty();
-        deal.PlayCardDecisions.Should().HaveCount(4);
+        trick.PlayCardDecisions.Should().NotBeEmpty();
+        trick.PlayCardDecisions.Should().HaveCount(4);
     }
 
     [Fact]
@@ -901,11 +901,11 @@ public class TrickPlayingOrchestratorTests
         var expectedHand = deal.Players[PlayerPosition.North].CurrentHand.ToArray();
         SetupBasicCardPlaySequence();
 
-        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        var firstDecision = deal.PlayCardDecisions[0];
-        firstDecision.Hand.Should().HaveCount(5);
-        firstDecision.Hand.Should().BeEquivalentTo(expectedHand);
+        var firstDecision = trick.PlayCardDecisions[0];
+        firstDecision.CardsInHand.Should().HaveCount(5);
+        firstDecision.CardsInHand.Should().BeEquivalentTo(expectedHand);
     }
 
     [Fact]
@@ -916,13 +916,13 @@ public class TrickPlayingOrchestratorTests
         deal.Team2Score = 3;
         SetupBasicCardPlaySequence();
 
-        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        var northDecision = deal.PlayCardDecisions.First(d => d.DecidingPlayerPosition == PlayerPosition.North);
+        var northDecision = trick.PlayCardDecisions.First(d => d.PlayerPosition == PlayerPosition.North);
         northDecision.TeamScore.Should().Be(6);
         northDecision.OpponentScore.Should().Be(3);
 
-        var eastDecision = deal.PlayCardDecisions.First(d => d.DecidingPlayerPosition == PlayerPosition.East);
+        var eastDecision = trick.PlayCardDecisions.First(d => d.PlayerPosition == PlayerPosition.East);
         eastDecision.TeamScore.Should().Be(3);
         eastDecision.OpponentScore.Should().Be(6);
     }
@@ -933,11 +933,11 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         SetupBasicCardPlaySequence();
 
-        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        var leadDecision = deal.PlayCardDecisions[0];
+        var leadDecision = trick.PlayCardDecisions[0];
         leadDecision.ValidCardsToPlay.Should().HaveCount(5);
-        leadDecision.ValidCardsToPlay.Should().BeEquivalentTo(leadDecision.Hand);
+        leadDecision.ValidCardsToPlay.Should().BeEquivalentTo(leadDecision.CardsInHand);
     }
 
     [Fact]
@@ -973,9 +973,9 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>()))
             .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, Suit? _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
 
-        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        var eastDecision = deal.PlayCardDecisions.First(d => d.DecidingPlayerPosition == PlayerPosition.East);
+        var eastDecision = trick.PlayCardDecisions.First(d => d.PlayerPosition == PlayerPosition.East);
         eastDecision.ValidCardsToPlay.Should().HaveCount(2);
         eastDecision.ValidCardsToPlay.All(c => c.Suit == Suit.Spades).Should().BeTrue();
     }
@@ -987,67 +987,68 @@ public class TrickPlayingOrchestratorTests
         var expectedCard = deal.Players[PlayerPosition.North].CurrentHand[0];
         SetupBasicCardPlaySequence();
 
-        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        var firstDecision = deal.PlayCardDecisions[0];
+        var firstDecision = trick.PlayCardDecisions[0];
         firstDecision.ChosenCard.Should().BeEquivalentTo(expectedCard);
     }
 
     [Fact]
-    public async Task PlayTrickAsync_CapturesDecidingPlayerPosition()
+    public async Task PlayTrickAsync_CapturesPlayerPosition()
     {
         var deal = CreateTestDeal();
         SetupBasicCardPlaySequence();
 
-        await _sut.PlayTrickAsync(deal, PlayerPosition.East);
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.East);
 
-        deal.PlayCardDecisions.Should().HaveCount(4);
-        deal.PlayCardDecisions[0].DecidingPlayerPosition.Should().Be(PlayerPosition.East);
-        deal.PlayCardDecisions[1].DecidingPlayerPosition.Should().Be(PlayerPosition.South);
-        deal.PlayCardDecisions[2].DecidingPlayerPosition.Should().Be(PlayerPosition.West);
-        deal.PlayCardDecisions[3].DecidingPlayerPosition.Should().Be(PlayerPosition.North);
+        trick.PlayCardDecisions.Should().HaveCount(4);
+        trick.PlayCardDecisions[0].PlayerPosition.Should().Be(PlayerPosition.East);
+        trick.PlayCardDecisions[1].PlayerPosition.Should().Be(PlayerPosition.South);
+        trick.PlayCardDecisions[2].PlayerPosition.Should().Be(PlayerPosition.West);
+        trick.PlayCardDecisions[3].PlayerPosition.Should().Be(PlayerPosition.North);
     }
 
     [Fact]
-    public async Task PlayTrickAsync_CapturesLeadPosition()
+    public async Task PlayTrickAsync_CapturesLeadPlayer()
     {
         var deal = CreateTestDeal();
         SetupBasicCardPlaySequence();
 
-        await _sut.PlayTrickAsync(deal, PlayerPosition.South);
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.South);
 
-        deal.PlayCardDecisions.Should().OnlyContain(d => d.LeadPosition == PlayerPosition.South);
+        trick.PlayCardDecisions.Should().OnlyContain(d => d.LeadPlayer == PlayerPosition.South);
     }
 
     [Fact]
-    public async Task PlayTrickAsync_CapturesCurrentTrick_EmptyForLeadPlayer()
+    public async Task PlayTrickAsync_CapturesPlayedCards_EmptyForLeadPlayer()
     {
         var deal = CreateTestDeal();
         SetupBasicCardPlaySequence();
 
-        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        var leadDecision = deal.PlayCardDecisions[0];
-        leadDecision.CurrentTrick.CardsPlayed.Should().BeEmpty();
-        leadDecision.CurrentTrick.LeadPosition.Should().Be(PlayerPosition.North);
+        var leadDecision = trick.PlayCardDecisions[0];
+        leadDecision.PlayedCards.Should().BeEmpty();
+        leadDecision.LeadPlayer.Should().Be(PlayerPosition.North);
+        leadDecision.LeadSuit.Should().BeNull();
     }
 
     [Fact]
-    public async Task PlayTrickAsync_CapturesCurrentTrick_WithPreviousCards()
+    public async Task PlayTrickAsync_CapturesPlayedCards_WithPreviousCards()
     {
         var deal = CreateTestDeal();
         SetupBasicCardPlaySequence();
 
-        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        var secondDecision = deal.PlayCardDecisions[1];
-        secondDecision.CurrentTrick.CardsPlayed.Should().HaveCount(1);
+        var secondDecision = trick.PlayCardDecisions[1];
+        secondDecision.PlayedCards.Should().HaveCount(1);
 
-        var thirdDecision = deal.PlayCardDecisions[2];
-        thirdDecision.CurrentTrick.CardsPlayed.Should().HaveCount(2);
+        var thirdDecision = trick.PlayCardDecisions[2];
+        thirdDecision.PlayedCards.Should().HaveCount(2);
 
-        var fourthDecision = deal.PlayCardDecisions[3];
-        fourthDecision.CurrentTrick.CardsPlayed.Should().HaveCount(3);
+        var fourthDecision = trick.PlayCardDecisions[3];
+        fourthDecision.PlayedCards.Should().HaveCount(3);
     }
 
     [Fact]
@@ -1058,10 +1059,10 @@ public class TrickPlayingOrchestratorTests
         deal.CallingPlayerIsGoingAlone = true;
         SetupBasicCardPlaySequence();
 
-        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        deal.PlayCardDecisions.Should().HaveCount(3);
-        deal.PlayCardDecisions.Should().NotContain(d => d.DecidingPlayerPosition == PlayerPosition.South);
+        trick.PlayCardDecisions.Should().HaveCount(3);
+        trick.PlayCardDecisions.Should().NotContain(d => d.PlayerPosition == PlayerPosition.South);
     }
 
     [Fact]
@@ -1072,10 +1073,11 @@ public class TrickPlayingOrchestratorTests
 
         for (int trickNumber = 0; trickNumber < 5; trickNumber++)
         {
-            await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+            var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+            deal.CompletedTricks.Add(trick);
         }
 
-        deal.PlayCardDecisions.Should().HaveCount(20);
+        deal.CompletedTricks.SelectMany(t => t.PlayCardDecisions).Should().HaveCount(20);
     }
 
     private static Deal CreateTestDeal()

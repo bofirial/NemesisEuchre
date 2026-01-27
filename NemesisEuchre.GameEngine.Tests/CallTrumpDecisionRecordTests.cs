@@ -13,10 +13,10 @@ public class CallTrumpDecisionRecordTests
     {
         var record = new CallTrumpDecisionRecord();
 
-        record.Hand.Should().NotBeNull();
-        record.Hand.Should().BeEmpty();
-        record.ValidDecisions.Should().NotBeNull();
-        record.ValidDecisions.Should().BeEmpty();
+        record.CardsInHand.Should().NotBeNull();
+        record.CardsInHand.Should().BeEmpty();
+        record.ValidCallTrumpDecisions.Should().NotBeNull();
+        record.ValidCallTrumpDecisions.Should().BeEmpty();
     }
 
     [Fact]
@@ -24,7 +24,7 @@ public class CallTrumpDecisionRecordTests
     {
         var record = new CallTrumpDecisionRecord
         {
-            Hand =
+            CardsInHand =
             [
                 new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
                 new Card { Suit = Suit.Hearts, Rank = Rank.King },
@@ -34,8 +34,8 @@ public class CallTrumpDecisionRecordTests
             ],
         };
 
-        record.Hand.Should().HaveCount(5);
-        record.Hand.Should().AllBeOfType<Card>();
+        record.CardsInHand.Should().HaveCount(5);
+        record.CardsInHand.Should().AllBeOfType<Card>();
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class CallTrumpDecisionRecordTests
     {
         var record = new CallTrumpDecisionRecord
         {
-            ValidDecisions =
+            ValidCallTrumpDecisions =
             [
                 CallTrumpDecision.Pass,
                 CallTrumpDecision.OrderItUp,
@@ -51,10 +51,10 @@ public class CallTrumpDecisionRecordTests
             ],
         };
 
-        record.ValidDecisions.Should().HaveCount(3);
-        record.ValidDecisions.Should().Contain(CallTrumpDecision.Pass);
-        record.ValidDecisions.Should().Contain(CallTrumpDecision.OrderItUp);
-        record.ValidDecisions.Should().Contain(CallTrumpDecision.OrderItUpAndGoAlone);
+        record.ValidCallTrumpDecisions.Should().HaveCount(3);
+        record.ValidCallTrumpDecisions.Should().Contain(CallTrumpDecision.Pass);
+        record.ValidCallTrumpDecisions.Should().Contain(CallTrumpDecision.OrderItUp);
+        record.ValidCallTrumpDecisions.Should().Contain(CallTrumpDecision.OrderItUpAndGoAlone);
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class CallTrumpDecisionRecordTests
     {
         var record = new CallTrumpDecisionRecord
         {
-            ValidDecisions =
+            ValidCallTrumpDecisions =
             [
                 CallTrumpDecision.Pass,
                 CallTrumpDecision.CallClubs,
@@ -76,12 +76,12 @@ public class CallTrumpDecisionRecordTests
             ],
         };
 
-        record.ValidDecisions.Should().HaveCount(9);
-        record.ValidDecisions.Should().Contain(CallTrumpDecision.Pass);
-        record.ValidDecisions.Should().Contain(CallTrumpDecision.CallClubs);
-        record.ValidDecisions.Should().Contain(CallTrumpDecision.CallDiamonds);
-        record.ValidDecisions.Should().Contain(CallTrumpDecision.CallHearts);
-        record.ValidDecisions.Should().Contain(CallTrumpDecision.CallSpades);
+        record.ValidCallTrumpDecisions.Should().HaveCount(9);
+        record.ValidCallTrumpDecisions.Should().Contain(CallTrumpDecision.Pass);
+        record.ValidCallTrumpDecisions.Should().Contain(CallTrumpDecision.CallClubs);
+        record.ValidCallTrumpDecisions.Should().Contain(CallTrumpDecision.CallDiamonds);
+        record.ValidCallTrumpDecisions.Should().Contain(CallTrumpDecision.CallHearts);
+        record.ValidCallTrumpDecisions.Should().Contain(CallTrumpDecision.CallSpades);
     }
 
     [Theory]
@@ -126,24 +126,24 @@ public class CallTrumpDecisionRecordTests
 
         var record = new CallTrumpDecisionRecord
         {
-            Hand = hand,
+            CardsInHand = hand,
             UpCard = upCard,
             DealerPosition = PlayerPosition.North,
-            DecidingPlayerPosition = PlayerPosition.East,
+            PlayerPosition = PlayerPosition.East,
             TeamScore = 5,
             OpponentScore = 3,
-            ValidDecisions = validDecisions,
+            ValidCallTrumpDecisions = validDecisions,
             ChosenDecision = CallTrumpDecision.OrderItUp,
             DecisionOrder = 2,
         };
 
-        record.Hand.Should().BeEquivalentTo(hand);
+        record.CardsInHand.Should().BeEquivalentTo(hand);
         record.UpCard.Should().BeEquivalentTo(upCard);
         record.DealerPosition.Should().Be(PlayerPosition.North);
-        record.DecidingPlayerPosition.Should().Be(PlayerPosition.East);
+        record.PlayerPosition.Should().Be(PlayerPosition.East);
         record.TeamScore.Should().Be(5);
         record.OpponentScore.Should().Be(3);
-        record.ValidDecisions.Should().BeEquivalentTo(validDecisions);
+        record.ValidCallTrumpDecisions.Should().BeEquivalentTo(validDecisions);
         record.ChosenDecision.Should().Be(CallTrumpDecision.OrderItUp);
         record.DecisionOrder.Should().Be(2);
     }
@@ -168,7 +168,7 @@ public class CallTrumpDecisionRecordTests
             var record = new CallTrumpDecisionRecord
             {
                 DecisionOrder = i,
-                DecidingPlayerPosition = (PlayerPosition)(i % 4),
+                PlayerPosition = (PlayerPosition)(i % 4),
                 ChosenDecision = CallTrumpDecision.Pass,
             };
             deal.CallTrumpDecisions.Add(record);

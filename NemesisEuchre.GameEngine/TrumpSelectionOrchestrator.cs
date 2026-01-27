@@ -123,13 +123,13 @@ public class TrumpSelectionOrchestrator(
 
         var record = new CallTrumpDecisionRecord
         {
-            Hand = [.. player.CurrentHand],
+            CardsInHand = [.. player.CurrentHand],
             UpCard = deal.UpCard!,
             DealerPosition = deal.DealerPosition!.Value,
-            DecidingPlayerPosition = playerPosition,
+            PlayerPosition = playerPosition,
             TeamScore = teamScore,
             OpponentScore = opponentScore,
-            ValidDecisions = [.. validDecisions],
+            ValidCallTrumpDecisions = [.. validDecisions],
             ChosenDecision = chosenDecision,
             DecisionOrder = ++_decisionOrder,
         };

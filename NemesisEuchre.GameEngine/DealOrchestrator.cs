@@ -87,6 +87,7 @@ public class DealOrchestrator(
     private async Task<PlayerPosition> PlaySingleTrickAsync(Deal deal, PlayerPosition leadPosition)
     {
         var trick = await trickPlayingOrchestrator.PlayTrickAsync(deal, leadPosition);
+        trick.TrickNumber = (short)(deal.CompletedTricks.Count + 1);
 
         var winningPosition = trickWinnerCalculator.CalculateWinner(trick, deal.Trump!.Value);
 

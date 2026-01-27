@@ -892,7 +892,7 @@ public class TrumpSelectionOrchestratorTests
         await _sut.SelectTrumpAsync(deal);
 
         var record = deal.CallTrumpDecisions[0];
-        record.Hand.Should().BeEquivalentTo(firstPlayer.CurrentHand);
+        record.CardsInHand.Should().BeEquivalentTo(firstPlayer.CurrentHand);
         record.UpCard.Should().BeEquivalentTo(deal.UpCard);
     }
 
@@ -920,9 +920,9 @@ public class TrumpSelectionOrchestratorTests
 
         deal.CallTrumpDecisions.Should().HaveCount(2);
         deal.CallTrumpDecisions[0].DealerPosition.Should().Be(PlayerPosition.North);
-        deal.CallTrumpDecisions[0].DecidingPlayerPosition.Should().Be(PlayerPosition.East);
+        deal.CallTrumpDecisions[0].PlayerPosition.Should().Be(PlayerPosition.East);
         deal.CallTrumpDecisions[1].DealerPosition.Should().Be(PlayerPosition.North);
-        deal.CallTrumpDecisions[1].DecidingPlayerPosition.Should().Be(PlayerPosition.South);
+        deal.CallTrumpDecisions[1].PlayerPosition.Should().Be(PlayerPosition.South);
     }
 
     [Fact]
@@ -976,9 +976,9 @@ public class TrumpSelectionOrchestratorTests
 
         await _sut.SelectTrumpAsync(deal);
 
-        deal.CallTrumpDecisions[0].ValidDecisions.Should()
+        deal.CallTrumpDecisions[0].ValidCallTrumpDecisions.Should()
             .Contain([CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp, CallTrumpDecision.OrderItUpAndGoAlone]);
-        deal.CallTrumpDecisions[4].ValidDecisions.Should()
+        deal.CallTrumpDecisions[4].ValidCallTrumpDecisions.Should()
             .NotContain(CallTrumpDecision.CallHearts)
             .And.NotContain(CallTrumpDecision.CallHeartsAndGoAlone);
     }
@@ -1009,7 +1009,7 @@ public class TrumpSelectionOrchestratorTests
         deal.CallTrumpDecisions.Should().HaveCount(5);
         deal.CallTrumpDecisions[4].DecisionOrder.Should().Be(5);
         deal.CallTrumpDecisions[4].ChosenDecision.Should().Be(CallTrumpDecision.CallSpades);
-        deal.CallTrumpDecisions[4].DecidingPlayerPosition.Should().Be(PlayerPosition.East);
+        deal.CallTrumpDecisions[4].PlayerPosition.Should().Be(PlayerPosition.East);
     }
 
     private static Deal CreateTestDeal()

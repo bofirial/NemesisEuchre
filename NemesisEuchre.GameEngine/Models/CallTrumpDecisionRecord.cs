@@ -5,21 +5,21 @@ namespace NemesisEuchre.GameEngine.Models;
 
 public class CallTrumpDecisionRecord
 {
-    public Card[] Hand { get; set; } = [];
+    public Card[] CardsInHand { get; set; } = [];
 
-    public Card UpCard { get; set; } = new();
-
-    public PlayerPosition DealerPosition { get; set; }
-
-    public PlayerPosition DecidingPlayerPosition { get; set; }
+    public PlayerPosition PlayerPosition { get; set; }
 
     public short TeamScore { get; set; }
 
     public short OpponentScore { get; set; }
 
-    public CallTrumpDecision[] ValidDecisions { get; set; } = [];
+    public PlayerPosition DealerPosition { get; set; }
+
+    public Card UpCard { get; set; } = new();
+
+    public CallTrumpDecision[] ValidCallTrumpDecisions { get; set; } = [];
 
     public CallTrumpDecision ChosenDecision { get; set; }
 
-    public byte DecisionOrder { get; set; }
+    public short DecisionOrder { get; set; }
 }

@@ -37,6 +37,7 @@ public class GamePersistenceIntegrationTests
             var savedGame = await context.Games!
                 .Include(g => g.Deals)
                     .ThenInclude(d => d.Tricks)
+                        .ThenInclude(t => t.PlayCardDecisions)
                 .Include(g => g.Deals)
                     .ThenInclude(d => d.CallTrumpDecisions)
                 .Include(g => g.Deals)
@@ -56,11 +57,20 @@ public class GamePersistenceIntegrationTests
             deal.Trump.Should().Be(Suit.Hearts);
             deal.Tricks.Should().HaveCount(5);
             deal.CallTrumpDecisions.Should().HaveCountGreaterThan(0);
-            deal.PlayCardDecisions.Should().HaveCount(20);
 
-            var playDecision = deal.PlayCardDecisions.First();
+            deal.Tricks.Should().AllSatisfy(trick =>
+            {
+                trick.TrickNumber.Should().BeInRange(1, 5);
+                trick.PlayCardDecisions.Should().HaveCount(4);
+            });
+
+            var firstTrick = deal.Tricks.First();
+            firstTrick.TrickNumber.Should().Be(1);
+            var playDecision = firstTrick.PlayCardDecisions[0];
             playDecision.ActorType.Should().Be(ActorType.Chaos);
             playDecision.DidTeamWinGame.Should().NotBeNull();
+            playDecision.TrumpSuit.Should().Be(Suit.Hearts);
+            playDecision.LeadPlayer.Should().Be(PlayerPosition.North);
         }
     }
 
@@ -81,6 +91,7 @@ public class GamePersistenceIntegrationTests
 
         var deal = new Deal
         {
+            DealNumber = 1,
             DealStatus = DealStatus.Complete,
             DealerPosition = PlayerPosition.North,
             Trump = Suit.Hearts,
@@ -106,13 +117,13 @@ public class GamePersistenceIntegrationTests
 
         deal.CallTrumpDecisions.Add(new CallTrumpDecisionRecord
         {
-            Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
+            CardsInHand = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
             UpCard = deal.UpCard,
             DealerPosition = PlayerPosition.North,
-            DecidingPlayerPosition = PlayerPosition.South,
+            PlayerPosition = PlayerPosition.South,
             TeamScore = 0,
             OpponentScore = 0,
-            ValidDecisions = [CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp],
+            ValidCallTrumpDecisions = [CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp],
             ChosenDecision = CallTrumpDecision.OrderItUp,
             DecisionOrder = 1,
         });
@@ -121,6 +132,7 @@ public class GamePersistenceIntegrationTests
         {
             var trick = new Trick
             {
+                TrickNumber = (short)(i + 1),
                 LeadPosition = PlayerPosition.North,
                 LeadSuit = Suit.Hearts,
                 WinningPosition = PlayerPosition.South,
@@ -135,16 +147,19 @@ public class GamePersistenceIntegrationTests
                     PlayerPosition = position,
                 });
 
-                deal.PlayCardDecisions.Add(new PlayCardDecisionRecord
+                trick.PlayCardDecisions.Add(new PlayCardDecisionRecord
                 {
-                    Hand = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
-                    DecidingPlayerPosition = position,
-                    CurrentTrick = trick,
+                    CardsInHand = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
+                    PlayerPosition = position,
                     TeamScore = 0,
                     OpponentScore = 0,
+                    TrumpSuit = Suit.Hearts,
+                    LeadPlayer = PlayerPosition.North,
+                    LeadSuit = Suit.Hearts,
+                    PlayedCards = [],
+                    WinningTrickPlayer = null,
                     ValidCardsToPlay = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
                     ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-                    LeadPosition = PlayerPosition.North,
                 });
             }
 

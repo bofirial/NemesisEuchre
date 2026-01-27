@@ -157,26 +157,25 @@ public class TrickPlayingOrchestrator(
     {
         var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
 
-        var trickSnapshot = new Trick
-        {
-            LeadPosition = trick.LeadPosition,
-            LeadSuit = trick.LeadSuit,
-        };
-
-        trickSnapshot.CardsPlayed.AddRange(trick.CardsPlayed);
-
         var record = new PlayCardDecisionRecord
         {
-            Hand = [.. hand],
-            DecidingPlayerPosition = playerPosition,
-            CurrentTrick = trickSnapshot,
+            CardsInHand = [.. hand],
+            PlayerPosition = playerPosition,
             TeamScore = teamScore,
             OpponentScore = opponentScore,
+            TrumpSuit = deal.Trump!.Value,
+            LeadPlayer = trick.LeadPosition,
+            LeadSuit = trick.LeadSuit,
+            PlayedCards = trick.CardsPlayed.ToDictionary(
+                pc => pc.PlayerPosition,
+                pc => pc.Card),
+            WinningTrickPlayer = trick.CardsPlayed.Count > 0 && trick.LeadSuit.HasValue
+                ? trickWinnerCalculator.CalculateWinner(trick, deal.Trump!.Value)
+                : null,
             ValidCardsToPlay = [.. validCards],
             ChosenCard = chosenCard,
-            LeadPosition = trick.LeadPosition,
         };
 
-        deal.PlayCardDecisions.Add(record);
+        trick.PlayCardDecisions.Add(record);
     }
 }

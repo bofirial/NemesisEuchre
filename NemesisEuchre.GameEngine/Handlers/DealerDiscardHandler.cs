@@ -47,10 +47,13 @@ public class DealerDiscardHandler(
 
         var record = new DiscardCardDecisionRecord
         {
-            Hand = [.. hand],
-            DealerPosition = dealerPosition,
+            CardsInHand = [.. hand],
+            PlayerPosition = dealerPosition,
             TeamScore = teamScore,
             OpponentScore = opponentScore,
+            TrumpSuit = deal.Trump!.Value,
+            CallingPlayer = deal.CallingPlayer!.Value,
+            CallingPlayerGoingAlone = deal.CallingPlayerIsGoingAlone,
             ValidCardsToDiscard = [.. hand],
             ChosenCard = chosenCard,
         };

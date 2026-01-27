@@ -4,13 +4,19 @@ namespace NemesisEuchre.GameEngine.Models;
 
 public class DiscardCardDecisionRecord
 {
-    public Card[] Hand { get; set; } = [];
+    public Card[] CardsInHand { get; set; } = [];
 
-    public PlayerPosition DealerPosition { get; set; }
+    public PlayerPosition PlayerPosition { get; set; }
 
     public short TeamScore { get; set; }
 
     public short OpponentScore { get; set; }
+
+    public Suit TrumpSuit { get; set; }
+
+    public PlayerPosition CallingPlayer { get; set; }
+
+    public bool CallingPlayerGoingAlone { get; set; }
 
     public Card[] ValidCardsToDiscard { get; set; } = [];
 
