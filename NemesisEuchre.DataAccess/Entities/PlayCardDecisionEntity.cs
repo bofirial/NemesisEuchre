@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
@@ -11,25 +14,19 @@ public class PlayCardDecisionEntity
 
     public int TrickId { get; set; }
 
-    public int TrickNumber { get; set; }
-
-    public string HandJson { get; set; } = null!;
-
-    public PlayerPosition DecidingPlayerPosition { get; set; }
+    public string CardsInHandJson { get; set; } = null!;
 
     public short TeamScore { get; set; }
 
     public short OpponentScore { get; set; }
 
-    public Suit TrumpSuit { get; set; }
+    public RelativePlayerPosition LeadPlayer { get; set; }
 
-    public PlayerPosition LeadPlayer { get; set; }
-
-    public Suit? LeadSuit { get; set; }
+    public RelativeSuit? LeadSuit { get; set; }
 
     public string PlayedCardsJson { get; set; } = null!;
 
-    public PlayerPosition? WinningTrickPlayer { get; set; }
+    public RelativePlayerPosition? WinningTrickPlayer { get; set; }
 
     public string ValidCardsToPlayJson { get; set; } = null!;
 
@@ -46,4 +43,76 @@ public class PlayCardDecisionEntity
     public DealEntity Deal { get; set; } = null!;
 
     public TrickEntity Trick { get; set; } = null!;
+}
+
+public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<PlayCardDecisionEntity>
+{
+    public void Configure(EntityTypeBuilder<PlayCardDecisionEntity> builder)
+    {
+        builder.ToTable("PlayCardDecisions");
+
+        builder.HasKey(e => e.PlayCardDecisionId);
+
+        builder.Property(e => e.PlayCardDecisionId)
+            .ValueGeneratedOnAdd();
+
+        builder.Property(e => e.DealId)
+            .IsRequired();
+
+        builder.Property(e => e.TrickId)
+            .IsRequired();
+
+        builder.Property(e => e.CardsInHandJson)
+            .IsRequired();
+
+        builder.Property(e => e.TeamScore)
+            .IsRequired();
+
+        builder.Property(e => e.OpponentScore)
+            .IsRequired();
+
+        builder.Property(e => e.LeadPlayer)
+            .IsRequired();
+
+        builder.Property(e => e.LeadSuit);
+
+        builder.Property(e => e.PlayedCardsJson)
+            .IsRequired();
+
+        builder.Property(e => e.WinningTrickPlayer);
+
+        builder.Property(e => e.ValidCardsToPlayJson)
+            .IsRequired();
+
+        builder.Property(e => e.ChosenCardJson)
+            .IsRequired()
+            .HasMaxLength(200);
+
+        builder.Property(e => e.ActorType);
+
+        builder.Property(e => e.DidTeamWinTrick);
+
+        builder.Property(e => e.DidTeamWinDeal);
+
+        builder.Property(e => e.DidTeamWinGame);
+
+        builder.HasOne(e => e.Deal)
+            .WithMany(d => d.PlayCardDecisions)
+            .HasForeignKey(e => e.DealId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasOne(e => e.Trick)
+            .WithMany(t => t.PlayCardDecisions)
+            .HasForeignKey(e => e.TrickId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(e => e.DealId)
+            .HasDatabaseName("IX_PlayCardDecisions_DealId");
+
+        builder.HasIndex(e => e.TrickId)
+            .HasDatabaseName("IX_PlayCardDecisions_TrickId");
+
+        builder.HasIndex(e => e.ActorType)
+            .HasDatabaseName("IX_PlayCardDecisions_ActorType");
+    }
 }

@@ -37,18 +37,21 @@ public class TrickToEntityMapper : ITrickToEntityMapper
 
                 return new PlayCardDecisionEntity
                 {
-                    TrickNumber = trick.TrickNumber,
-                    HandJson = JsonSerializer.Serialize(decision.CardsInHand),
-                    DecidingPlayerPosition = decision.PlayerPosition,
-                    TrumpSuit = decision.TrumpSuit,
-                    LeadPlayer = decision.LeadPlayer,
-                    LeadSuit = decision.LeadSuit,
-                    PlayedCardsJson = JsonSerializer.Serialize(decision.PlayedCards),
-                    WinningTrickPlayer = decision.WinningTrickPlayer,
+                    CardsInHandJson = JsonSerializer.Serialize(
+                        decision.CardsInHand.Select(c => c.ToRelative(decision.TrumpSuit))),
+                    LeadPlayer = decision.LeadPlayer.ToRelativePosition(decision.PlayerPosition),
+                    LeadSuit = decision.LeadSuit?.ToRelativeSuit(decision.TrumpSuit),
+                    PlayedCardsJson = JsonSerializer.Serialize(
+                        decision.PlayedCards.ToDictionary(
+                            kvp => kvp.Key.ToRelativePosition(decision.PlayerPosition),
+                            kvp => kvp.Value.ToRelative(decision.TrumpSuit))),
+                    WinningTrickPlayer = decision.WinningTrickPlayer?.ToRelativePosition(decision.PlayerPosition),
                     TeamScore = decision.TeamScore,
                     OpponentScore = decision.OpponentScore,
-                    ValidCardsToPlayJson = JsonSerializer.Serialize(decision.ValidCardsToPlay),
-                    ChosenCardJson = JsonSerializer.Serialize(decision.ChosenCard),
+                    ValidCardsToPlayJson = JsonSerializer.Serialize(
+                        decision.ValidCardsToPlay.Select(c => c.ToRelative(decision.TrumpSuit))),
+                    ChosenCardJson = JsonSerializer.Serialize(
+                        decision.ChosenCard.ToRelative(decision.TrumpSuit)),
                     ActorType = actorType,
                     DidTeamWinTrick = didTeamWinTrick,
                     DidTeamWinDeal = didTeamWinDeal,

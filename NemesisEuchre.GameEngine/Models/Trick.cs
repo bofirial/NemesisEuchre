@@ -4,13 +4,13 @@ namespace NemesisEuchre.GameEngine.Models;
 
 public class Trick
 {
-    public PlayerPosition LeadPosition { get; set; }
-
     public short TrickNumber { get; set; }
 
-    public List<PlayedCard> CardsPlayed { get; } = [];
+    public PlayerPosition LeadPosition { get; set; }
 
     public Suit? LeadSuit { get; set; }
+
+    public List<PlayedCard> CardsPlayed { get; } = [];
 
     public PlayerPosition? WinningPosition { get; set; }
 

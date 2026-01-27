@@ -50,6 +50,8 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
         MapCallTrumpDecisions(deal, dealEntity, gamePlayers, didTeam1WinGame, didTeam2WinGame);
         MapDiscardCardDecisions(deal, dealEntity, gamePlayers, didTeam1WinGame, didTeam2WinGame);
 
+        dealEntity.PlayCardDecisions = [.. dealEntity.Tricks.SelectMany(t => t.PlayCardDecisions)];
+
         return dealEntity;
     }
 
@@ -67,7 +69,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
 
             return new CallTrumpDecisionEntity
             {
-                HandJson = JsonSerializer.Serialize(decision.CardsInHand),
+                CardsInHandJson = JsonSerializer.Serialize(decision.CardsInHand),
                 UpCardJson = JsonSerializer.Serialize(decision.UpCard),
                 DealerPosition = decision.DealerPosition,
                 DecidingPlayerPosition = decision.PlayerPosition,
@@ -97,8 +99,8 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
 
             return new DiscardCardDecisionEntity
             {
-                HandJson = JsonSerializer.Serialize(decision.CardsInHand.Select(c => c.ToRelative(deal.Trump!.Value))),
-                CallingPlayerPosition = deal.CallingPlayer!.Value.ToRelativePosition(decision.PlayerPosition),
+                CardsInHandJson = JsonSerializer.Serialize(decision.CardsInHand.Select(c => c.ToRelative(deal.Trump!.Value))),
+                CallingPlayer = deal.CallingPlayer!.Value.ToRelativePosition(decision.PlayerPosition),
                 TeamScore = decision.TeamScore,
                 OpponentScore = decision.OpponentScore,
                 ValidCardsToDiscardJson = JsonSerializer.Serialize(decision.ValidCardsToDiscard.Select(c => c.ToRelative(deal.Trump!.Value))),

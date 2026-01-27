@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 using FluentAssertions;
 
 using Microsoft.EntityFrameworkCore;
@@ -69,8 +71,18 @@ public class GamePersistenceIntegrationTests
             var playDecision = firstTrick.PlayCardDecisions[0];
             playDecision.ActorType.Should().Be(ActorType.Chaos);
             playDecision.DidTeamWinGame.Should().NotBeNull();
-            playDecision.TrumpSuit.Should().Be(Suit.Hearts);
-            playDecision.LeadPlayer.Should().Be(PlayerPosition.North);
+            playDecision.LeadPlayer.Should().BeDefined();
+            playDecision.DealId.Should().Be(deal.DealId);
+            playDecision.TrickId.Should().Be(firstTrick.TrickId);
+
+            var cardsInHand = JsonSerializer.Deserialize<List<RelativeCard>>(playDecision.CardsInHandJson);
+            cardsInHand.Should().NotBeNull();
+            cardsInHand.Should().AllBeOfType<RelativeCard>();
+
+            var playedCards = JsonSerializer.Deserialize<Dictionary<RelativePlayerPosition, RelativeCard>>(playDecision.PlayedCardsJson);
+            playedCards.Should().NotBeNull();
+            playedCards!.Keys.Should().AllBeOfType<RelativePlayerPosition>();
+            playedCards.Values.Should().AllBeOfType<RelativeCard>();
         }
     }
 
