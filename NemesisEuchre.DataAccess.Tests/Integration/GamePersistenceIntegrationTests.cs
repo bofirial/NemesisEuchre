@@ -3,11 +3,14 @@ using System.Text.Json;
 using FluentAssertions;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+using Moq;
 
 using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.DataAccess.Repositories;
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
@@ -24,15 +27,15 @@ public class GamePersistenceIntegrationTests
 
         var game = CreateCompletedGame();
 
-        int gameId;
         await using (var context = new NemesisEuchreDbContext(options))
         {
+            var mockLogger = new Mock<ILogger<GameRepository>>();
             var trickMapper = new TrickToEntityMapper();
             var dealMapper = new DealToEntityMapper(trickMapper);
             var gameMapper = new GameToEntityMapper(dealMapper);
-            var repository = new GameRepository(context, gameMapper);
+            var repository = new GameRepository(context, mockLogger.Object, gameMapper);
 
-            gameId = await repository.SaveCompletedGameAsync(game);
+            await repository.SaveCompletedGameAsync(game);
         }
 
         await using (var context = new NemesisEuchreDbContext(options))
@@ -47,7 +50,7 @@ public class GamePersistenceIntegrationTests
                     .ThenInclude(d => d.DiscardCardDecisions)
                 .Include(g => g.Deals)
                     .ThenInclude(d => d.PlayCardDecisions)
-                .FirstOrDefaultAsync(g => g.GameId == gameId);
+                .FirstOrDefaultAsync();
 
             savedGame.Should().NotBeNull();
             savedGame!.GameStatus.Should().Be(GameStatus.Complete);

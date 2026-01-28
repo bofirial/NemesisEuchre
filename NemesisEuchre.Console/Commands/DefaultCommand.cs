@@ -2,10 +2,11 @@
 
 using Microsoft.Extensions.Logging;
 
+using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.DataAccess.Repositories;
+using NemesisEuchre.Foundation;
 using NemesisEuchre.GameEngine;
-using NemesisEuchre.GameEngine.Models;
 
 using Spectre.Console;
 
@@ -17,9 +18,13 @@ public class DefaultCommand(
     IAnsiConsole ansiConsole,
     IApplicationBanner applicationBanner,
     IGameOrchestrator gameOrchestrator,
+    IBatchGameOrchestrator batchGameOrchestrator,
     IGameRepository gameRepository,
     IGameResultsRenderer gameResultsRenderer) : ICliRunAsyncWithReturn
 {
+    [CliOption(Description = "Number of games to play")]
+    public int Count { get; set; } = 1;
+
     public async Task<int> RunAsync()
     {
         LoggerMessages.LogStartingUp(logger);
@@ -27,6 +32,21 @@ public class DefaultCommand(
         applicationBanner.Display();
 
         ansiConsole.MarkupLine("[green]Welcome to NemesisEuchre - AI-Powered Euchre Strategy[/]");
+
+        if (Count == 1)
+        {
+            await RunSingleGameAsync();
+        }
+        else
+        {
+            await RunBatchGamesAsync();
+        }
+
+        return 0;
+    }
+
+    private async Task RunSingleGameAsync()
+    {
         ansiConsole.MarkupLine("[dim]Playing a game between 4 ChaosBots...[/]");
         ansiConsole.WriteLine();
 
@@ -34,26 +54,55 @@ public class DefaultCommand(
             .Spinner(Spinner.Known.Dots)
             .StartAsync("Playing game...", async _ => await gameOrchestrator.OrchestrateGameAsync());
 
-        await PersistCompletedGameAsync(game);
-
-        gameResultsRenderer.RenderResults(game);
-
-        return 0;
-    }
-
-    private async Task PersistCompletedGameAsync(Game game)
-    {
         try
         {
-            LoggerMessages.LogPersistingCompletedGame(logger, game.GameStatus);
-
-            var gameId = await gameRepository.SaveCompletedGameAsync(game);
-
-            LoggerMessages.LogGamePersistedSuccessfully(logger, gameId);
+            await gameRepository.SaveCompletedGameAsync(game);
         }
         catch (Exception ex)
         {
             LoggerMessages.LogGamePersistenceFailed(logger, ex);
         }
+
+        gameResultsRenderer.RenderResults(game);
+    }
+
+    private async Task RunBatchGamesAsync()
+    {
+        ansiConsole.MarkupLine($"[dim]Playing {Count} games between 4 ChaosBots...[/]");
+        ansiConsole.WriteLine();
+
+        var results = await ansiConsole.Progress()
+            .StartAsync(async ctx =>
+            {
+                var task = ctx.AddTask($"[green]Playing {Count} games...[/]", maxValue: Count);
+
+                var progress = new Progress<int>(completed => task.Value = completed);
+
+                return await batchGameOrchestrator.RunBatchAsync(Count, progress: progress);
+            });
+
+        RenderBatchResults(results);
+    }
+
+    private void RenderBatchResults(BatchGameResults results)
+    {
+        ansiConsole.WriteLine();
+        ansiConsole.MarkupLine("[bold green]Batch Game Results[/]");
+        ansiConsole.WriteLine();
+
+        var table = new Table()
+            .Border(TableBorder.Rounded)
+            .AddColumn(new TableColumn("[bold]Metric[/]").Centered())
+            .AddColumn(new TableColumn("[bold]Value[/]").Centered());
+
+        table.AddRow("Total Games", results.TotalGames.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        table.AddRow("Team 1 Wins", $"{results.Team1Wins} ([green]{results.Team1WinRate:P1}[/])");
+        table.AddRow("Team 2 Wins", $"{results.Team2Wins} ([green]{results.Team2WinRate:P1}[/])");
+        table.AddRow("Failed Games", results.FailedGames.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        table.AddRow("Total Deals Played", results.TotalDeals.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        table.AddRow("Elapsed Time", $"{results.ElapsedTime.TotalSeconds:F2}s");
+
+        ansiConsole.Write(table);
+        ansiConsole.WriteLine();
     }
 }

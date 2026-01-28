@@ -1,13 +1,14 @@
 using FluentAssertions;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 using Moq;
 
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.DataAccess.Repositories;
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.DataAccess.Tests.Repositories;
@@ -21,6 +22,7 @@ public class GameRepositoryTests
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
+        var mockLogger = new Mock<ILogger<GameRepository>>();
         var mockMapper = new Mock<IGameToEntityMapper>();
         mockMapper.Setup(m => m.Map(It.IsAny<Game>()))
             .Returns(new GameEntity
@@ -34,13 +36,12 @@ public class GameRepositoryTests
             });
 
         await using var context = new NemesisEuchreDbContext(options);
-        var repository = new GameRepository(context, mockMapper.Object);
+        var repository = new GameRepository(context, mockLogger.Object, mockMapper.Object);
 
         var game = new Game { GameStatus = GameStatus.Complete };
-        var gameId = await repository.SaveCompletedGameAsync(game);
+        await repository.SaveCompletedGameAsync(game);
 
-        gameId.Should().BeGreaterThan(0);
-        var savedGame = await context.Games!.FindAsync(gameId);
+        var savedGame = await context.Games!.FirstOrDefaultAsync();
         savedGame.Should().NotBeNull();
         savedGame!.GameStatus.Should().Be(GameStatus.Complete);
     }

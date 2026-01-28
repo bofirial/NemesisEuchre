@@ -4,8 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Models;
+using NemesisEuchre.DataAccess.Repositories;
+using NemesisEuchre.Foundation;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine;
-using NemesisEuchre.GameEngine.Constants;
 
 namespace NemesisEuchre.Console.Services;
 
@@ -20,11 +22,9 @@ public interface IBatchGameOrchestrator
 
 public class BatchGameOrchestrator(
     IServiceScopeFactory serviceScopeFactory,
+    IGameRepository gameRepository,
     ILogger<BatchGameOrchestrator> logger) : IBatchGameOrchestrator
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-    private readonly ILogger<BatchGameOrchestrator> _logger = logger;
-
     public async Task<BatchGameResults> RunBatchAsync(
         int numberOfGames,
         int maxConcurrentGames = 4,
@@ -67,6 +67,7 @@ public class BatchGameOrchestrator(
             Team1Wins = state.Team1Wins,
             Team2Wins = state.Team2Wins,
             FailedGames = state.FailedGames,
+            TotalDeals = state.TotalDeals,
             ElapsedTime = stopwatch.Elapsed,
         };
     }
@@ -78,7 +79,7 @@ public class BatchGameOrchestrator(
     {
         try
         {
-            using var scope = _serviceScopeFactory.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var gameOrchestrator = scope.ServiceProvider.GetRequiredService<IGameOrchestrator>();
             var game = await gameOrchestrator.OrchestrateGameAsync();
 
@@ -93,13 +94,23 @@ public class BatchGameOrchestrator(
                     state.Team2Wins++;
                 }
 
+                state.TotalDeals += game.CompletedDeals.Count;
                 state.CompletedGames++;
                 progress?.Report(state.CompletedGames);
+            }
+
+            try
+            {
+                await gameRepository.SaveCompletedGameAsync(game);
+            }
+            catch (Exception ex)
+            {
+                LoggerMessages.LogGamePersistenceFailed(logger, ex);
             }
         }
         catch (Exception ex)
         {
-            LoggerMessages.LogGameFailed(_logger, gameNumber, ex);
+            LoggerMessages.LogGameFailed(logger, gameNumber, ex);
             lock (state.LockObject)
             {
                 state.FailedGames++;
@@ -120,5 +131,7 @@ public class BatchGameOrchestrator(
         public int FailedGames { get; set; }
 
         public int CompletedGames { get; set; }
+
+        public int TotalDeals { get; set; }
     }
 }
