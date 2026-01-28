@@ -18,6 +18,8 @@ public class NemesisEuchreDbContext(DbContextOptions<NemesisEuchreDbContext> opt
 
     public DbSet<PlayCardDecisionEntity>? PlayCardDecisions { get; set; }
 
+    public DbSet<TrainingBatchEntity>? TrainingBatches { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

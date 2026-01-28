@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using NemesisEuchre.GameEngine.Constants;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
@@ -32,7 +31,13 @@ public class PlayCardDecisionEntity
 
     public string ChosenCardJson { get; set; } = null!;
 
-    public ActorType? ActorType { get; set; }
+    public string? ChosenCardRank { get; set; }
+
+    public string? ChosenCardSuit { get; set; }
+
+    public string? ActorType { get; set; }
+
+    public float? DecisionConfidence { get; set; }
 
     public bool? DidTeamWinTrick { get; set; }
 
@@ -94,9 +99,16 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
             .IsRequired()
             .HasMaxLength(200);
 
-        builder.Property(e => e.ActorType)
-            .HasConversion<string>()
+        builder.Property(e => e.ChosenCardRank)
             .HasMaxLength(10);
+
+        builder.Property(e => e.ChosenCardSuit)
+            .HasMaxLength(10);
+
+        builder.Property(e => e.ActorType)
+            .HasMaxLength(25);
+
+        builder.Property(e => e.DecisionConfidence);
 
         builder.Property(e => e.DidTeamWinTrick);
 

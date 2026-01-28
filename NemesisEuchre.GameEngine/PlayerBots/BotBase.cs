@@ -9,7 +9,7 @@ public abstract class BotBase : IPlayerActor
 {
     private readonly Random _random = new();
 
-    public abstract ActorType ActorType { get; }
+    public abstract string ActorType { get; }
 
     public abstract Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, PlayerPosition dealerPosition, Card upCard, CallTrumpDecision[] validCallTrumpDecisions);
 

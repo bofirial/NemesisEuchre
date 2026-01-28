@@ -53,7 +53,7 @@ public class GameFactoryTests
     {
         var gameOptions = Options.Create(new GameOptions
         {
-            Team1ActorTypes = new ActorType[length],
+            Team1ActorTypes = new string[length],
         });
         var gameInitializer = new GameFactory(gameOptions);
 
@@ -73,7 +73,7 @@ public class GameFactoryTests
     {
         var gameOptions = Options.Create(new GameOptions
         {
-            Team2ActorTypes = new ActorType[length],
+            Team2ActorTypes = new string[length],
         });
         var gameInitializer = new GameFactory(gameOptions);
 

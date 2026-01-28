@@ -10,7 +10,7 @@ namespace NemesisEuchre.GameEngine.PlayerBots;
 /// </summary>
 public class BetaBot : BotBase
 {
-    public override ActorType ActorType => ActorType.Beta;
+    public override string ActorType => PlayerDecisionEngine.ActorType.Beta;
 
     public override Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, PlayerPosition dealerPosition, Card upCard, CallTrumpDecision[] validCallTrumpDecisions)
     {

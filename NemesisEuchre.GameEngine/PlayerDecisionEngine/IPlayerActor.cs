@@ -5,7 +5,7 @@ namespace NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 public interface IPlayerActor
 {
-    ActorType ActorType { get; }
+    string ActorType { get; }
 
     Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, PlayerPosition dealerPosition, Card upCard, CallTrumpDecision[] validCallTrumpDecisions);
 

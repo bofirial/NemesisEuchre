@@ -6,7 +6,7 @@ namespace NemesisEuchre.GameEngine.PlayerBots;
 
 public class ChadBot : BotBase
 {
-    public override ActorType ActorType => ActorType.Chad;
+    public override string ActorType => PlayerDecisionEngine.ActorType.Chad;
 
     public override Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, PlayerPosition dealerPosition, Card upCard, CallTrumpDecision[] validCallTrumpDecisions)
     {

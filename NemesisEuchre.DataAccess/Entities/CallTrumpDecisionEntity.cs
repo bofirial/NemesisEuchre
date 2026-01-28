@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using NemesisEuchre.GameEngine.Constants;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
@@ -28,9 +27,15 @@ public class CallTrumpDecisionEntity
 
     public string ChosenDecisionJson { get; set; } = null!;
 
+    public string? ChosenDecisionType { get; set; }
+
+    public string? ChosenTrumpSuit { get; set; }
+
     public byte DecisionOrder { get; set; }
 
-    public ActorType? ActorType { get; set; }
+    public string? ActorType { get; set; }
+
+    public float? DecisionConfidence { get; set; }
 
     public bool? DidTeamWinDeal { get; set; }
 
@@ -82,12 +87,19 @@ public class CallTrumpDecisionEntityConfiguration : IEntityTypeConfiguration<Cal
         builder.Property(e => e.ChosenDecisionJson)
             .IsRequired();
 
+        builder.Property(e => e.ChosenDecisionType)
+            .HasMaxLength(20);
+
+        builder.Property(e => e.ChosenTrumpSuit)
+            .HasMaxLength(10);
+
         builder.Property(e => e.DecisionOrder)
             .IsRequired();
 
         builder.Property(e => e.ActorType)
-            .HasConversion<string>()
-            .HasMaxLength(10);
+            .HasMaxLength(25);
+
+        builder.Property(e => e.DecisionConfidence);
 
         builder.Property(e => e.DidTeamWinDeal);
 

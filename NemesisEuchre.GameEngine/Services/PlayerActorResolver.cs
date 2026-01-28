@@ -10,10 +10,10 @@ public interface IPlayerActorResolver
 
 public class PlayerActorResolver(IEnumerable<IPlayerActor> playerActors) : IPlayerActorResolver
 {
-    private readonly Dictionary<ActorType, IPlayerActor> _playerActors = playerActors.ToDictionary(x => x.ActorType, x => x);
+    private readonly Dictionary<string, IPlayerActor> _playerActors = playerActors.ToDictionary(x => x.ActorType, x => x);
 
     public IPlayerActor GetPlayerActor(DealPlayer player)
     {
-        return _playerActors[player.ActorType!.Value];
+        return _playerActors[player.ActorType!];
     }
 }

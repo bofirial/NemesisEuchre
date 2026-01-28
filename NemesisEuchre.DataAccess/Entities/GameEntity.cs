@@ -21,6 +21,8 @@ public class GameEntity
 
     public DateTime CreatedAt { get; set; }
 
+    public string DatasetSplit { get; set; } = "Train";
+
     public ICollection<DealEntity> Deals { get; set; } = [];
 }
 
@@ -57,6 +59,11 @@ public class GameEntityConfiguration : IEntityTypeConfiguration<GameEntity>
         builder.Property(e => e.CreatedAt)
             .IsRequired()
             .HasDefaultValueSql("GETUTCDATE()");
+
+        builder.Property(e => e.DatasetSplit)
+            .IsRequired()
+            .HasMaxLength(20)
+            .HasDefaultValue("Train");
 
         builder.HasMany(e => e.Deals)
             .WithOne(d => d.Game)

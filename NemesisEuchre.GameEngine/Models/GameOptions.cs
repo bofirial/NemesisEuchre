@@ -8,7 +8,7 @@ public class GameOptions
 
     public short WinningScore { get; set; } = 10;
 
-    public ActorType[] Team1ActorTypes { get; set; } = [ActorType.Chaos, ActorType.Chaos];
+    public string[] Team1ActorTypes { get; set; } = [ActorType.Chaos, ActorType.Chaos];
 
-    public ActorType[] Team2ActorTypes { get; set; } = [ActorType.Chaos, ActorType.Chaos];
+    public string[] Team2ActorTypes { get; set; } = [ActorType.Chaos, ActorType.Chaos];
 }

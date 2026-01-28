@@ -1,5 +1,4 @@
 using NemesisEuchre.GameEngine.Constants;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.Models;
 
@@ -11,5 +10,5 @@ public class DealPlayer
 
     public List<Card> CurrentHand { get; set; } = [];
 
-    public ActorType? ActorType { get; set; }
+    public string? ActorType { get; set; }
 }

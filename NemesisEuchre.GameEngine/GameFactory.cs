@@ -2,7 +2,6 @@ using Microsoft.Extensions.Options;
 
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine;
 
@@ -33,7 +32,7 @@ public class GameFactory(IOptions<GameOptions> gameOptions) : IGameFactory
         };
     }
 
-    private static Player CreatePlayer(PlayerPosition position, ActorType actorType)
+    private static Player CreatePlayer(PlayerPosition position, string actorType)
     {
         return new Player
         {
