@@ -32,4 +32,10 @@ public static partial class LoggerMessages
     public static partial void LogGamePersistenceFailed(
         ILogger logger,
         Exception exception);
+
+    [LoggerMessage(
+        EventId = 5,
+        Level = LogLevel.Error,
+        Message = "Game {GameNumber} failed")]
+    public static partial void LogGameFailed(ILogger logger, int gameNumber, Exception exception);
 }

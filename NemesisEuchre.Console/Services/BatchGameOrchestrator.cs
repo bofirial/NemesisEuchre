@@ -18,7 +18,7 @@ public interface IBatchGameOrchestrator
         CancellationToken cancellationToken = default);
 }
 
-public partial class BatchGameOrchestrator(
+public class BatchGameOrchestrator(
     IServiceScopeFactory serviceScopeFactory,
     ILogger<BatchGameOrchestrator> logger) : IBatchGameOrchestrator
 {
@@ -99,7 +99,7 @@ public partial class BatchGameOrchestrator(
         }
         catch (Exception ex)
         {
-            LogGameFailed(gameNumber, ex);
+            LoggerMessages.LogGameFailed(_logger, gameNumber, ex);
             lock (state.LockObject)
             {
                 state.FailedGames++;
@@ -108,9 +108,6 @@ public partial class BatchGameOrchestrator(
             }
         }
     }
-
-    [LoggerMessage(Level = LogLevel.Error, Message = "Game {GameNumber} failed")]
-    private partial void LogGameFailed(int gameNumber, Exception exception);
 
     private sealed class BatchState
     {
