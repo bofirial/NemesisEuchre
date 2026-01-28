@@ -1,6 +1,6 @@
 using FluentAssertions;
 
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.GameEngine.Validation;

@@ -1,6 +1,6 @@
 using System.Globalization;
 
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 

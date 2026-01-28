@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Handlers;
 using NemesisEuchre.GameEngine.Mappers;

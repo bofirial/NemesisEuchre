@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Handlers;
 using NemesisEuchre.GameEngine.Mappers;
 using NemesisEuchre.GameEngine.Models;

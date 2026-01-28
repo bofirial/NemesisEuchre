@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 
 namespace NemesisEuchre.DataAccess.Entities;
 

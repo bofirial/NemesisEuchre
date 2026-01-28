@@ -1,4 +1,4 @@
-namespace NemesisEuchre.GameEngine.Constants;
+namespace NemesisEuchre.Foundation.Constants;
 
 public enum Suit
 {

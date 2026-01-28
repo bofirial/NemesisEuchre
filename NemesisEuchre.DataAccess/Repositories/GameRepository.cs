@@ -1,23 +1,35 @@
+using Microsoft.Extensions.Logging;
+
 using NemesisEuchre.DataAccess.Mappers;
+using NemesisEuchre.Foundation;
 using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.DataAccess.Repositories;
 
 public interface IGameRepository
 {
-    Task<int> SaveCompletedGameAsync(Game game, CancellationToken cancellationToken = default);
+    Task SaveCompletedGameAsync(Game game, CancellationToken cancellationToken = default);
 }
 
-public class GameRepository(NemesisEuchreDbContext context, IGameToEntityMapper mapper) : IGameRepository
+public class GameRepository(NemesisEuchreDbContext context, ILogger<GameRepository> logger, IGameToEntityMapper mapper) : IGameRepository
 {
-    public async Task<int> SaveCompletedGameAsync(Game game, CancellationToken cancellationToken = default)
+    public async Task SaveCompletedGameAsync(Game game, CancellationToken cancellationToken = default)
     {
-        var gameEntity = mapper.Map(game);
+        try
+        {
+            LoggerMessages.LogPersistingCompletedGame(logger, game.GameStatus);
 
-        context.Games!.Add(gameEntity);
+            var gameEntity = mapper.Map(game);
 
-        await context.SaveChangesAsync(cancellationToken);
+            context.Games!.Add(gameEntity);
 
-        return gameEntity.GameId;
+            await context.SaveChangesAsync(cancellationToken);
+
+            LoggerMessages.LogGamePersistedSuccessfully(logger, gameEntity.GameId);
+        }
+        catch (Exception ex)
+        {
+            LoggerMessages.LogGamePersistenceFailed(logger, ex);
+        }
     }
 }

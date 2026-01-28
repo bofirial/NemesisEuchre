@@ -187,17 +187,17 @@ This version extends the NemesisEuchre engine to capture all ML training data (C
     - ~~Return BatchGameResults with statistics (total games, team1/team2 wins, elapsed time)~~
     - ~~Include unit tests with mocked IGameOrchestrator~~
 
-16. **Update DefaultCommand for parallel game execution**
-    - Update `NemesisEuchre.Console\Commands\DefaultCommand.cs`
-    - Accept --count parameter (default 1) for number of games to play
-    - When count > 1, use IBatchGameOrchestrator instead of IGameOrchestrator
-    - Display Spectre.Console progress bar showing "Playing N games..." with live updates
-    - After completion, display aggregate statistics:
-      - Total games
-      - Team1 wins / Team2 wins
-      - Win percentages
-      - Total deals played
-    - Update unit tests
+16. ~~**Update DefaultCommand for parallel game execution**~~
+    - ~~Update `NemesisEuchre.Console\Commands\DefaultCommand.cs`~~
+    - ~~Accept --count parameter (default 1) for number of games to play~~
+    - ~~When count > 1, use IBatchGameOrchestrator instead of IGameOrchestrator~~
+    - ~~Display Spectre.Console progress bar showing "Playing N games..." with live updates~~
+    - ~~After completion, display aggregate statistics:~~
+      - ~~Total games~~
+      - ~~Team1 wins / Team2 wins~~
+      - ~~Win percentages~~
+      - ~~Total deals played~~
+    - ~~Update unit tests~~
 
 17. **Add configuration for parallel execution settings**
     - Create `NemesisEuchre.GameEngine\Options\GameExecutionOptions.cs`

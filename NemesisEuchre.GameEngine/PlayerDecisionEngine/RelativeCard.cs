@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine.PlayerDecisionEngine;

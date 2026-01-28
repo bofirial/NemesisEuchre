@@ -1,4 +1,4 @@
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 
 namespace NemesisEuchre.GameEngine.PlayerDecisionEngine;
 

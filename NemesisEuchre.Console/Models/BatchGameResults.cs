@@ -10,6 +10,8 @@ public class BatchGameResults
 
     public required int FailedGames { get; init; }
 
+    public required int TotalDeals { get; init; }
+
     public required TimeSpan ElapsedTime { get; init; }
 
     public double Team1WinRate => (Team1Wins + Team2Wins) > 0

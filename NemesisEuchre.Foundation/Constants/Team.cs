@@ -1,4 +1,4 @@
-namespace NemesisEuchre.GameEngine.Constants;
+namespace NemesisEuchre.Foundation.Constants;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage(
     "Naming",

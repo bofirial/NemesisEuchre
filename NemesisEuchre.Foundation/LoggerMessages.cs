@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 
-namespace NemesisEuchre.Console;
+namespace NemesisEuchre.Foundation;
 
 public static partial class LoggerMessages
 {

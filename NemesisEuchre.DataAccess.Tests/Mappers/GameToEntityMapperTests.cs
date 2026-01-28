@@ -3,7 +3,7 @@ using FluentAssertions;
 using Moq;
 
 using NemesisEuchre.DataAccess.Mappers;
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.DataAccess.Tests.Mappers;

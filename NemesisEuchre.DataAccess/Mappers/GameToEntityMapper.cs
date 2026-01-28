@@ -2,7 +2,7 @@ using System.Text.Json;
 
 using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Entities;
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.DataAccess.Mappers;

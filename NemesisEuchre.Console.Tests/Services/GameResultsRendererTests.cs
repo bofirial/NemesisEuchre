@@ -1,7 +1,7 @@
 using FluentAssertions;
 
 using NemesisEuchre.Console.Services;
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 
 using Spectre.Console.Testing;
