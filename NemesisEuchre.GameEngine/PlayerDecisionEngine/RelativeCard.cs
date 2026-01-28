@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
 
@@ -9,5 +11,6 @@ public class RelativeCard
 
     public RelativeSuit Suit { get; set; }
 
-    public required Card Card { get; set; }
+    [JsonIgnore]
+    public Card Card { get; set; } = null!;
 }
