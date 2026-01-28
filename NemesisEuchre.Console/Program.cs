@@ -34,6 +34,7 @@ public static class Program
 
             services.AddScoped<IApplicationBanner, ApplicationBanner>();
             services.AddScoped<IGameResultsRenderer, GameResultsRenderer>();
+            services.AddScoped<IBatchGameOrchestrator, BatchGameOrchestrator>();
 
             services.AddNemesisEuchreGameEngine();
             services.Configure<GameOptions>(_ => { });

@@ -178,14 +178,14 @@ This version extends the NemesisEuchre engine to capture all ML training data (C
 
 ### Parallel Execution (Steps 15-17)
 
-15. **Create BatchGameOrchestrator for parallel execution**
-    - Create `NemesisEuchre.Console\Services\IBatchGameOrchestrator.cs`
-    - Create `NemesisEuchre.Console\Services\BatchGameOrchestrator.cs`
-    - Run multiple games in parallel using Task.WhenAll with SemaphoreSlim (default 4)
-    - Each game uses scoped IServiceProvider to avoid state sharing bugs
-    - Include IProgress<int> for reporting completion count
-    - Return BatchGameResults with statistics (total games, team1/team2 wins, elapsed time)
-    - Include unit tests with mocked IGameOrchestrator
+15. ~~**Create BatchGameOrchestrator for parallel execution**~~
+    - ~~Create `NemesisEuchre.Console\Services\IBatchGameOrchestrator.cs`~~
+    - ~~Create `NemesisEuchre.Console\Services\BatchGameOrchestrator.cs`~~
+    - ~~Run multiple games in parallel using Task.WhenAll with SemaphoreSlim (default 4)~~
+    - ~~Each game uses scoped IServiceProvider to avoid state sharing bugs~~
+    - ~~Include IProgress<int> for reporting completion count~~
+    - ~~Return BatchGameResults with statistics (total games, team1/team2 wins, elapsed time)~~
+    - ~~Include unit tests with mocked IGameOrchestrator~~
 
 16. **Update DefaultCommand for parallel game execution**
     - Update `NemesisEuchre.Console\Commands\DefaultCommand.cs`
@@ -205,43 +205,6 @@ This version extends the NemesisEuchre engine to capture all ML training data (C
     - Add configuration section to `NemesisEuchre.Console\appsettings.json`
     - Update BatchGameOrchestrator to use IOptions<GameExecutionOptions>
     - Include unit tests
-
-### Testing & Documentation (Steps 18-21)
-
-18. **Add data validation and integration tests**
-    - Create `NemesisEuchre.DataAccess.Tests\Integration\GamePersistenceIntegrationTests.cs`
-    - Test full data pipeline: play game → save to database → query back → verify all decisions captured
-    - Use EF Core in-memory provider for fast tests
-    - Validate JSON serialization roundtrips for RelativeCard[], RelativeDeal, decision arrays
-    - Test edge cases: going alone, stick the dealer, euchre scenarios
-    - Test concurrent game saves (verify no deadlocks)
-    - Test large dataset (1000+ games) → verify query performance
-
-19. **Add logging and monitoring for database operations**
-    - Update `NemesisEuchre.DataAccess\GameRepository.cs`
-    - Add comprehensive logging using ILogger<GameRepository>
-    - Log save operations: elapsed time, game ID, deal count, decision counts
-    - Add error logging with full exception details
-    - Consider adding metrics for monitoring database performance (saves per second, average save duration)
-    - Include unit tests verifying log messages
-
-20. **Create sample SQL queries for ML data exploration**
-    - Create `docs\ML-QUERIES.md`
-    - Document sample SQL queries for exploring training data:
-      - Count games by actor type
-      - Find all CallTrump decisions where player went alone
-      - Calculate win rates by decision type
-      - Extract all PlayCard decisions from position 0 in tricks
-      - Query games where ChaosBot won
-    - These queries validate data quality before ML analysis in v0.4
-
-21. **Add database backup documentation**
-    - Update `README.md` with LocalDB backup strategy
-    - Include SQL commands for manual backups
-    - Provide PowerShell script for automated weekly backups
-    - Document restoration procedures
-    - Explain how to copy .mdf file for sharing datasets or moving to another machine
-    - Add instructions for upgrading from LocalDB to full SQL Server if needed
 
 ### Performance Optimization (Step 22)
 
