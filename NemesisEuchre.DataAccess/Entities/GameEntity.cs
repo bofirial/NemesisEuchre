@@ -36,7 +36,9 @@ public class GameEntityConfiguration : IEntityTypeConfiguration<GameEntity>
             .ValueGeneratedOnAdd();
 
         builder.Property(e => e.GameStatus)
-            .IsRequired();
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(20);
 
         builder.Property(e => e.PlayersJson)
             .IsRequired()
@@ -48,7 +50,9 @@ public class GameEntityConfiguration : IEntityTypeConfiguration<GameEntity>
         builder.Property(e => e.Team2Score)
             .IsRequired();
 
-        builder.Property(e => e.WinningTeam);
+        builder.Property(e => e.WinningTeam)
+            .HasConversion<string>()
+            .HasMaxLength(10);
 
         builder.Property(e => e.CreatedAt)
             .IsRequired()

@@ -66,9 +66,13 @@ public class DealEntityConfiguration : IEntityTypeConfiguration<DealEntity>
             .IsRequired();
 
         builder.Property(e => e.DealStatus)
-            .IsRequired();
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(20);
 
-        builder.Property(e => e.DealerPosition);
+        builder.Property(e => e.DealerPosition)
+            .HasConversion<string>()
+            .HasMaxLength(10);
 
         builder.Property(e => e.DeckJson)
             .IsRequired();
@@ -76,16 +80,24 @@ public class DealEntityConfiguration : IEntityTypeConfiguration<DealEntity>
         builder.Property(e => e.UpCardJson)
             .HasMaxLength(200);
 
-        builder.Property(e => e.Trump);
+        builder.Property(e => e.Trump)
+            .HasConversion<string>()
+            .HasMaxLength(10);
 
-        builder.Property(e => e.CallingPlayer);
+        builder.Property(e => e.CallingPlayer)
+            .HasConversion<string>()
+            .HasMaxLength(10);
 
         builder.Property(e => e.CallingPlayerIsGoingAlone)
             .IsRequired();
 
-        builder.Property(e => e.DealResult);
+        builder.Property(e => e.DealResult)
+            .HasConversion<string>()
+            .HasMaxLength(25);
 
-        builder.Property(e => e.WinningTeam);
+        builder.Property(e => e.WinningTeam)
+            .HasConversion<string>()
+            .HasMaxLength(10);
 
         builder.Property(e => e.Team1Score)
             .IsRequired();

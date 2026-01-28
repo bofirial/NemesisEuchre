@@ -53,7 +53,9 @@ public class DiscardCardDecisionEntityConfiguration : IEntityTypeConfiguration<D
             .IsRequired();
 
         builder.Property(e => e.CallingPlayer)
-            .IsRequired();
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(25);
 
         builder.Property(e => e.TeamScore)
             .IsRequired();
@@ -68,7 +70,9 @@ public class DiscardCardDecisionEntityConfiguration : IEntityTypeConfiguration<D
             .IsRequired()
             .HasMaxLength(200);
 
-        builder.Property(e => e.ActorType);
+        builder.Property(e => e.ActorType)
+            .HasConversion<string>()
+            .HasMaxLength(10);
 
         builder.Property(e => e.DidTeamWinDeal);
 

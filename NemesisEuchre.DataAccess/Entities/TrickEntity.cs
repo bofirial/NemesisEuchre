@@ -46,17 +46,25 @@ public class TrickEntityConfiguration : IEntityTypeConfiguration<TrickEntity>
             .IsRequired();
 
         builder.Property(e => e.LeadPosition)
-            .IsRequired();
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(10);
 
         builder.Property(e => e.CardsPlayedJson)
             .IsRequired()
             .HasMaxLength(1000);
 
-        builder.Property(e => e.LeadSuit);
+        builder.Property(e => e.LeadSuit)
+            .HasConversion<string>()
+            .HasMaxLength(10);
 
-        builder.Property(e => e.WinningPosition);
+        builder.Property(e => e.WinningPosition)
+            .HasConversion<string>()
+            .HasMaxLength(10);
 
-        builder.Property(e => e.WinningTeam);
+        builder.Property(e => e.WinningTeam)
+            .HasConversion<string>()
+            .HasMaxLength(10);
 
         builder.HasOne(e => e.Deal)
             .WithMany(d => d.Tricks)
