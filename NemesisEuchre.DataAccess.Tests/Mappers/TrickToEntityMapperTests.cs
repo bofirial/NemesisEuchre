@@ -2,6 +2,7 @@ using System.Text.Json;
 
 using FluentAssertions;
 
+using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
@@ -98,15 +99,15 @@ public class TrickToEntityMapperTests
         var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1);
 
         var decision = entity.PlayCardDecisions[0];
-        var cardsInHand = JsonSerializer.Deserialize<List<RelativeCard>>(decision.CardsInHandJson);
+        var cardsInHand = JsonSerializer.Deserialize<List<RelativeCard>>(decision.CardsInHandJson, JsonSerializationOptions.Default);
         cardsInHand.Should().NotBeNull();
         cardsInHand.Should().AllBeOfType<RelativeCard>();
 
-        var validCards = JsonSerializer.Deserialize<List<RelativeCard>>(decision.ValidCardsToPlayJson);
+        var validCards = JsonSerializer.Deserialize<List<RelativeCard>>(decision.ValidCardsToPlayJson, JsonSerializationOptions.Default);
         validCards.Should().NotBeNull();
         validCards.Should().AllBeOfType<RelativeCard>();
 
-        var chosenCard = JsonSerializer.Deserialize<RelativeCard>(decision.ChosenCardJson);
+        var chosenCard = JsonSerializer.Deserialize<RelativeCard>(decision.ChosenCardJson, JsonSerializationOptions.Default);
         chosenCard.Should().NotBeNull();
         chosenCard.Suit.Should().BeDefined();
     }
@@ -121,7 +122,7 @@ public class TrickToEntityMapperTests
         var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1);
 
         var decision = entity.PlayCardDecisions[0];
-        var playedCards = JsonSerializer.Deserialize<Dictionary<RelativePlayerPosition, RelativeCard>>(decision.PlayedCardsJson);
+        var playedCards = JsonSerializer.Deserialize<Dictionary<RelativePlayerPosition, RelativeCard>>(decision.PlayedCardsJson, JsonSerializationOptions.Default);
 
         playedCards.Should().NotBeNull();
         playedCards.Should().NotBeEmpty();

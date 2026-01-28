@@ -1,5 +1,6 @@
 using System.Text.Json;
 
+using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Models;
@@ -21,7 +22,7 @@ public class GameToEntityMapper(IDealToEntityMapper dealMapper) : IGameToEntityM
         return new GameEntity
         {
             GameStatus = game.GameStatus,
-            PlayersJson = JsonSerializer.Serialize(game.Players),
+            PlayersJson = JsonSerializer.Serialize(game.Players, JsonSerializationOptions.Default),
             Team1Score = game.Team1Score,
             Team2Score = game.Team2Score,
             WinningTeam = game.WinningTeam,

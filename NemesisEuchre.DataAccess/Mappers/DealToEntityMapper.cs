@@ -1,5 +1,6 @@
 using System.Text.Json;
 
+using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.GameEngine.Constants;
 using NemesisEuchre.GameEngine.Extensions;
@@ -34,8 +35,8 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
             DealNumber = dealNumber,
             DealStatus = deal.DealStatus,
             DealerPosition = deal.DealerPosition,
-            DeckJson = JsonSerializer.Serialize(deal.Deck),
-            UpCardJson = deal.UpCard != null ? JsonSerializer.Serialize(deal.UpCard) : null,
+            DeckJson = JsonSerializer.Serialize(deal.Deck, JsonSerializationOptions.Default),
+            UpCardJson = deal.UpCard != null ? JsonSerializer.Serialize(deal.UpCard, JsonSerializationOptions.Default) : null,
             Trump = deal.Trump,
             CallingPlayer = deal.CallingPlayer,
             CallingPlayerIsGoingAlone = deal.CallingPlayerIsGoingAlone,
@@ -43,7 +44,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
             WinningTeam = deal.WinningTeam,
             Team1Score = deal.Team1Score,
             Team2Score = deal.Team2Score,
-            PlayersJson = JsonSerializer.Serialize(deal.Players),
+            PlayersJson = JsonSerializer.Serialize(deal.Players, JsonSerializationOptions.Default),
             Tricks = [.. deal.CompletedTricks.Select((trick, index) => trickMapper.Map(trick, index + 1, gamePlayers, didTeam1WinGame, didTeam2WinGame, deal.WinningTeam))],
         };
 
@@ -69,14 +70,14 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
 
             return new CallTrumpDecisionEntity
             {
-                CardsInHandJson = JsonSerializer.Serialize(decision.CardsInHand),
-                UpCardJson = JsonSerializer.Serialize(decision.UpCard),
+                CardsInHandJson = JsonSerializer.Serialize(decision.CardsInHand, JsonSerializationOptions.Default),
+                UpCardJson = JsonSerializer.Serialize(decision.UpCard, JsonSerializationOptions.Default),
                 DealerPosition = decision.DealerPosition,
                 DecidingPlayerPosition = decision.PlayerPosition,
                 TeamScore = decision.TeamScore,
                 OpponentScore = decision.OpponentScore,
-                ValidDecisionsJson = JsonSerializer.Serialize(decision.ValidCallTrumpDecisions),
-                ChosenDecisionJson = JsonSerializer.Serialize(decision.ChosenDecision),
+                ValidDecisionsJson = JsonSerializer.Serialize(decision.ValidCallTrumpDecisions, JsonSerializationOptions.Default),
+                ChosenDecisionJson = JsonSerializer.Serialize(decision.ChosenDecision, JsonSerializationOptions.Default),
                 DecisionOrder = (byte)decision.DecisionOrder,
                 ActorType = actorType,
                 DidTeamWinDeal = didTeamWinDeal,
@@ -99,12 +100,12 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
 
             return new DiscardCardDecisionEntity
             {
-                CardsInHandJson = JsonSerializer.Serialize(decision.CardsInHand.Select(c => c.ToRelative(deal.Trump!.Value))),
+                CardsInHandJson = JsonSerializer.Serialize(decision.CardsInHand.Select(c => c.ToRelative(deal.Trump!.Value)), JsonSerializationOptions.Default),
                 CallingPlayer = deal.CallingPlayer!.Value.ToRelativePosition(decision.PlayerPosition),
                 TeamScore = decision.TeamScore,
                 OpponentScore = decision.OpponentScore,
-                ValidCardsToDiscardJson = JsonSerializer.Serialize(decision.ValidCardsToDiscard.Select(c => c.ToRelative(deal.Trump!.Value))),
-                ChosenCardJson = JsonSerializer.Serialize(decision.ChosenCard.ToRelative(deal.Trump!.Value)),
+                ValidCardsToDiscardJson = JsonSerializer.Serialize(decision.ValidCardsToDiscard.Select(c => c.ToRelative(deal.Trump!.Value)), JsonSerializationOptions.Default),
+                ChosenCardJson = JsonSerializer.Serialize(decision.ChosenCard.ToRelative(deal.Trump!.Value), JsonSerializationOptions.Default),
                 ActorType = actorType,
                 DidTeamWinDeal = didTeamWinDeal,
                 DidTeamWinGame = didTeamWinGame,

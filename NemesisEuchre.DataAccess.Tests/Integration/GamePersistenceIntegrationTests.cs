@@ -4,6 +4,7 @@ using FluentAssertions;
 
 using Microsoft.EntityFrameworkCore;
 
+using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.GameEngine.Constants;
@@ -75,11 +76,11 @@ public class GamePersistenceIntegrationTests
             playDecision.DealId.Should().Be(deal.DealId);
             playDecision.TrickId.Should().Be(firstTrick.TrickId);
 
-            var cardsInHand = JsonSerializer.Deserialize<List<RelativeCard>>(playDecision.CardsInHandJson);
+            var cardsInHand = JsonSerializer.Deserialize<List<RelativeCard>>(playDecision.CardsInHandJson, JsonSerializationOptions.Default);
             cardsInHand.Should().NotBeNull();
             cardsInHand.Should().AllBeOfType<RelativeCard>();
 
-            var playedCards = JsonSerializer.Deserialize<Dictionary<RelativePlayerPosition, RelativeCard>>(playDecision.PlayedCardsJson);
+            var playedCards = JsonSerializer.Deserialize<Dictionary<RelativePlayerPosition, RelativeCard>>(playDecision.PlayedCardsJson, JsonSerializationOptions.Default);
             playedCards.Should().NotBeNull();
             playedCards!.Keys.Should().AllBeOfType<RelativePlayerPosition>();
             playedCards.Values.Should().AllBeOfType<RelativeCard>();
