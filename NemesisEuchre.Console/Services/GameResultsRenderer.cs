@@ -25,22 +25,6 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole) : IGameResultsRendere
         RenderDealsTable(game);
     }
 
-    private static IEnumerable<Card> SortCardsByTrump(Card[] cards, Suit? trump)
-    {
-        if (trump == null)
-        {
-            return cards.OrderByDescending(c => (int)c.Rank);
-        }
-
-        return cards
-            .OrderByDescending(c => c.IsTrump(trump.Value))
-            .ThenByDescending(c => c.IsTrump(trump.Value)
-                ? c.GetTrumpValue(trump.Value)
-                : 0)
-            .ThenBy(c => c.IsTrump(trump.Value) ? 0 : (int)c.Suit)
-            .ThenByDescending(c => c.IsTrump(trump.Value) ? 0 : (int)c.Rank);
-    }
-
     private static string FormatHandWithColors(Card[] cards, Suit? trump)
     {
         if (cards.Length == 0)
@@ -48,7 +32,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole) : IGameResultsRendere
             return "N/A";
         }
 
-        var sortedCards = SortCardsByTrump(cards, trump);
+        var sortedCards = cards.SortByTrump(trump);
 
         var formattedCards = sortedCards.Select(card =>
         {

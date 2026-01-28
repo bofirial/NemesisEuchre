@@ -260,7 +260,7 @@ public class GameResultsRendererTests
     }
 
     [Fact]
-    public void RenderResults_WhenTrumpIsNull_SortsByRankOnly()
+    public void RenderResults_WhenTrumpIsNull_SortsBySuitThenRank()
     {
         var testConsole = new TestConsole();
         var renderer = new GameResultsRenderer(testConsole);
@@ -301,7 +301,7 @@ public class GameResultsRendererTests
         var kingIndex = output.IndexOf("K♦ ", StringComparison.Ordinal);
         var nineIndex = output.IndexOf("9♥ ", StringComparison.Ordinal);
 
-        aceIndex.Should().BeLessThan(kingIndex);
-        kingIndex.Should().BeLessThan(nineIndex);
+        aceIndex.Should().BeLessThan(nineIndex);
+        nineIndex.Should().BeLessThan(kingIndex);
     }
 }
