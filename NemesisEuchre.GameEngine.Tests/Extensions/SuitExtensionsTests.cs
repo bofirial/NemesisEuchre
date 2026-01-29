@@ -62,7 +62,7 @@ public class SuitExtensionsTests
     [InlineData(Suit.Diamonds, Suit.Clubs, RelativeSuit.NonTrumpOppositeColor2)]
     public void ToRelativeSuit_WithTrumpAndSuit_ConvertsCorrectly(Suit trump, Suit suit, RelativeSuit expected)
     {
-        var result = suit.ToRelativeSuit(trump);
+        var result = suit.ToRelativeSuit(trump, Rank.King);
 
         result.Should().Be(expected);
     }
@@ -75,12 +75,48 @@ public class SuitExtensionsTests
     public void ToRelativeSuit_WithAnyTrump_ProducesOneOfEachRelativeSuit(Suit trump)
     {
         var allSuits = new[] { Suit.Spades, Suit.Hearts, Suit.Clubs, Suit.Diamonds };
-        var relativeSuits = allSuits.Select(s => s.ToRelativeSuit(trump)).ToList();
+        var relativeSuits = allSuits.Select(s => s.ToRelativeSuit(trump, Rank.King)).ToList();
 
         relativeSuits.Should().Contain(RelativeSuit.Trump);
         relativeSuits.Should().Contain(RelativeSuit.NonTrumpSameColor);
         relativeSuits.Should().Contain(RelativeSuit.NonTrumpOppositeColor1);
         relativeSuits.Should().Contain(RelativeSuit.NonTrumpOppositeColor2);
         relativeSuits.Should().HaveCount(4);
+    }
+
+    [Theory]
+    [InlineData(Suit.Spades, Suit.Clubs)]
+    [InlineData(Suit.Clubs, Suit.Spades)]
+    [InlineData(Suit.Hearts, Suit.Diamonds)]
+    [InlineData(Suit.Diamonds, Suit.Hearts)]
+    public void ToRelativeSuit_WithJackOfSameColorAsTrump_ReturnsTrump(Suit trump, Suit sameColorSuit)
+    {
+        var result = sameColorSuit.ToRelativeSuit(trump, Rank.Jack);
+
+        result.Should().Be(RelativeSuit.Trump);
+    }
+
+    [Theory]
+    [InlineData(Suit.Spades, Suit.Clubs)]
+    [InlineData(Suit.Clubs, Suit.Spades)]
+    [InlineData(Suit.Hearts, Suit.Diamonds)]
+    [InlineData(Suit.Diamonds, Suit.Hearts)]
+    public void ToRelativeSuit_WithLeftBowerOfSameColorAsTrump_ReturnsTrump(Suit trump, Suit sameColorSuit)
+    {
+        var result = sameColorSuit.ToRelativeSuit(trump, Rank.LeftBower);
+
+        result.Should().Be(RelativeSuit.Trump);
+    }
+
+    [Theory]
+    [InlineData(Suit.Spades, Suit.Clubs)]
+    [InlineData(Suit.Clubs, Suit.Spades)]
+    [InlineData(Suit.Hearts, Suit.Diamonds)]
+    [InlineData(Suit.Diamonds, Suit.Hearts)]
+    public void ToRelativeSuit_WithNonJackOfSameColorAsTrump_ReturnsNonTrumpSameColor(Suit trump, Suit sameColorSuit)
+    {
+        var result = sameColorSuit.ToRelativeSuit(trump, Rank.King);
+
+        result.Should().Be(RelativeSuit.NonTrumpSameColor);
     }
 }

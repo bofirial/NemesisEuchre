@@ -107,7 +107,7 @@ public static class CardExtensions
         return new RelativeCard
         {
             Rank = rank,
-            Suit = card.Suit.ToRelativeSuit(trump),
+            Suit = card.Suit.ToRelativeSuit(trump, rank),
             Card = card,
         };
     }

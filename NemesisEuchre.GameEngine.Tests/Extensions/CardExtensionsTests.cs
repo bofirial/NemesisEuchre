@@ -181,7 +181,7 @@ public class CardExtensionsTests
         var relativeCard = card.ToRelative(trump);
 
         relativeCard.Rank.Should().Be(rank);
-        relativeCard.Suit.Should().Be(cardSuit.ToRelativeSuit(trump));
+        relativeCard.Suit.Should().Be(cardSuit.ToRelativeSuit(trump, rank));
     }
 
     [Fact]

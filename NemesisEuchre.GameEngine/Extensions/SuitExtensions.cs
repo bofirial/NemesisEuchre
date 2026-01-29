@@ -26,7 +26,7 @@ public static class SuitExtensions
         return suit is Suit.Spades or Suit.Clubs;
     }
 
-    public static RelativeSuit ToRelativeSuit(this Suit suit, Suit trump)
+    public static RelativeSuit ToRelativeSuit(this Suit suit, Suit trump, Rank? rank = null)
     {
         if (suit == trump)
         {
@@ -36,6 +36,11 @@ public static class SuitExtensions
         var sameColorSuit = trump.GetSameColorSuit();
         if (suit == sameColorSuit)
         {
+            if (rank is Rank.Jack or Rank.LeftBower)
+            {
+                return RelativeSuit.Trump;
+            }
+
             return RelativeSuit.NonTrumpSameColor;
         }
 
