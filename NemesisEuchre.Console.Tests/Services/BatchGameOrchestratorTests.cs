@@ -41,10 +41,13 @@ public class BatchGameOrchestratorTests
         _scopedServiceProviderMock.Setup(x => x.GetService(typeof(IGameOrchestrator)))
             .Returns(_gameOrchestratorMock.Object);
 
+        _scopedServiceProviderMock.Setup(x => x.GetService(typeof(IGameRepository)))
+            .Returns(_gameRepositoryMock.Object);
+
         _gameRepositoryMock.Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        _sut = new BatchGameOrchestrator(_serviceScopeFactoryMock.Object, _gameRepositoryMock.Object, _loggerMock.Object);
+        _sut = new BatchGameOrchestrator(_serviceScopeFactoryMock.Object, _loggerMock.Object);
     }
 
     [Fact]

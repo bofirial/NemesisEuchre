@@ -22,7 +22,6 @@ public interface IBatchGameOrchestrator
 
 public class BatchGameOrchestrator(
     IServiceScopeFactory serviceScopeFactory,
-    IGameRepository gameRepository,
     ILogger<BatchGameOrchestrator> logger) : IBatchGameOrchestrator
 {
     public async Task<BatchGameResults> RunBatchAsync(
@@ -81,6 +80,7 @@ public class BatchGameOrchestrator(
         {
             using var scope = serviceScopeFactory.CreateScope();
             var gameOrchestrator = scope.ServiceProvider.GetRequiredService<IGameOrchestrator>();
+            var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
             var game = await gameOrchestrator.OrchestrateGameAsync();
 
             lock (state.LockObject)
