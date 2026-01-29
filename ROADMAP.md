@@ -215,13 +215,306 @@ This version extends the NemesisEuchre engine to capture all ML training data (C
     - ~~Use `DbContext.ChangeTracker.AutoDetectChangesEnabled = false` during bulk operations~~
     - ~~Reduces database round-trips and improves performance when generating millions of games~~
 
-## Machine Learning 0.4
+## Machine Learning with ML.NET 0.4
 
-1. Use Console App to Generate TONS of Euchre Game data using ChaosBots
-2. Use Machine Learning? to analyze data in order to create a new bot (Gen1) that can play better than ChaosBot (Use R?, Stored Procedures?)
-3. Implement the new (Gen1) Bot
-4. Use Console App to Generate TONS of Euchre Game data using Gen1Bots
-5. etc.
+This version introduces ML.NET-powered bots that learn from game data, establishing a repeatable training cycle: generate game data → train ML models → deploy new bot generation → generate more data. The approach uses multiclass classification for three decision types (CallTrump, DiscardCard, PlayCard) with generational improvement tracking.
+
+**Key Decisions:**
+- **ML Framework**: ML.NET (multiclass classification using SdcaMaximumEntropy)
+- **Model Strategy**: Three separate models per bot generation (CallTrump, Discard, PlayCard)
+- **Bot Versioning**: Gen1Bot → Gen2Bot → Gen3Bot... (each trained on previous generation's data)
+- **Project Structure**: New `NemesisEuchre.MachineLearning` project for training infrastructure
+- **Feature Engineering**: Encode RelativeCard arrays, scores, positions, game state into ML.NET vectors
+- **Evaluation**: Measure improvement via head-to-head matchups (target: 52%+ win rate vs previous gen)
+
+### Phase 1: Data Extraction & Feature Engineering (Steps 1-5)
+
+1. **Create NemesisEuchre.MachineLearning project**
+   - Create new class library: `NemesisEuchre.MachineLearning\NemesisEuchre.MachineLearning.csproj`
+   - Install NuGet packages:
+     - Microsoft.ML (core ML.NET package)
+     - Microsoft.ML.FastTree (optional: additional algorithms)
+   - Create project structure: Models/, Trainers/, DataAccess/, FeatureEngineering/
+   - Add project references to NemesisEuchre.DataAccess and NemesisEuchre.GameEngine
+   - Create DI registration extension method for ML services
+
+2. **Create ML training data DTOs**
+   - Create `NemesisEuchre.MachineLearning\Models\CallTrumpTrainingData.cs`
+     - Feature properties: encoded hand (RelativeCard arrays as rank/suit integers), upcard, dealer position, team/opponent scores, decision order
+     - Label property: ChosenDecisionIndex (0-based integer for multiclass classification)
+   - Create `NemesisEuchre.MachineLearning\Models\DiscardCardTrainingData.cs`
+     - Feature properties: encoded hand, team/opponent scores, calling player position
+     - Label property: ChosenCardIndex (0-5, representing which card to discard)
+   - Create `NemesisEuchre.MachineLearning\Models\PlayCardTrainingData.cs`
+     - Feature properties: encoded hand, lead player, lead suit, played cards, team/opponent scores, trick state
+     - Label property: ChosenCardIndex (0-based index into valid cards array)
+   - Include unit tests for DTO instantiation
+
+3. **Implement feature engineering**
+   - Create `NemesisEuchre.MachineLearning\FeatureEngineering\IFeatureEngineer.cs` interface
+   - Create `NemesisEuchre.MachineLearning\FeatureEngineering\CallTrumpFeatureEngineer.cs`
+     - Transform CallTrumpDecisionEntity → CallTrumpTrainingData
+     - Encoding: RelativeCard → (Rank: 0-5, Suit: 0-1), PlayerPosition → 0-3, scores as-is
+     - Map chosen decision to index (0-10 for 11 possible decisions)
+   - Create `NemesisEuchre.MachineLearning\FeatureEngineering\DiscardCardFeatureEngineer.cs`
+     - Transform DiscardCardDecisionEntity → DiscardCardTrainingData
+     - Encode 6-card hand as 12 integers (6 cards × 2 values: rank, suit)
+     - Map chosen card to index (0-5)
+   - Create `NemesisEuchre.MachineLearning\FeatureEngineering\PlayCardFeatureEngineer.cs`
+     - Transform PlayCardDecisionEntity → PlayCardTrainingData
+     - Encode variable-length hand (1-5 cards), played cards, lead suit
+     - Map chosen card to index within valid cards list
+   - Include unit tests verifying correct encoding and label mapping
+
+4. **Add repository methods for ML data queries**
+   - Extend `NemesisEuchre.DataAccess\IGameRepository.cs` with ML-specific queries:
+     - `IAsyncEnumerable<CallTrumpDecisionEntity> GetCallTrumpTrainingDataAsync(ActorType actorType, int limit = 0, bool winningTeamOnly = false)`
+     - `IAsyncEnumerable<DiscardCardDecisionEntity> GetDiscardCardTrainingDataAsync(ActorType actorType, int limit = 0, bool winningTeamOnly = false)`
+     - `IAsyncEnumerable<PlayCardDecisionEntity> GetPlayCardTrainingDataAsync(ActorType actorType, int limit = 0, bool winningTeamOnly = false)`
+   - Use IAsyncEnumerable for streaming large datasets without loading all into memory
+   - Filter by ActorType to get decisions from specific bot generations
+   - Optional winningTeamOnly parameter to train only on successful strategies
+   - Include unit tests using EF Core in-memory database with sample decision records
+
+5. **Implement train/validation/test splitting**
+   - Create `NemesisEuchre.MachineLearning\DataAccess\DataSplitter.cs` utility class
+   - Split data into: 70% train, 15% validation, 15% test (configurable ratios)
+   - Support stratified sampling by outcome (DidTeamWinDeal) if needed
+   - Shuffle with configurable seed for reproducibility
+   - Return three IDataView instances for ML.NET consumption
+   - Include unit tests verifying split ratios and shuffling
+
+### Phase 2: ML Model Training (Steps 6-10)
+
+6. **Create model trainer interfaces and implementations**
+   - Create `NemesisEuchre.MachineLearning\Trainers\IModelTrainer<TData, TLabel>.cs` generic interface
+     - Methods: TrainAsync, EvaluateAsync, SaveModelAsync
+   - Create `NemesisEuchre.MachineLearning\Trainers\CallTrumpModelTrainer.cs`
+     - Implements IModelTrainer<CallTrumpTrainingData, int>
+     - Trains 11-class multiclass classification model
+   - Create `NemesisEuchre.MachineLearning\Trainers\DiscardCardModelTrainer.cs`
+     - Implements IModelTrainer<DiscardCardTrainingData, int>
+     - Trains 6-class multiclass classification model
+   - Create `NemesisEuchre.MachineLearning\Trainers\PlayCardModelTrainer.cs`
+     - Implements IModelTrainer<PlayCardTrainingData, int>
+     - Trains variable-class model (1-13 possible cards to play)
+   - Include unit tests using small synthetic datasets
+
+7. **Build ML.NET pipelines**
+   - Define feature columns and transformations in each trainer
+   - Use ML.NET's `Concatenate` to combine all features into single "Features" vector
+   - Example pipeline:
+     ```
+     .Append(mlContext.Transforms.Concatenate("Features", "Hand_Rank1", "Hand_Suit1", ..., "TeamScore", "OpponentScore"))
+     .Append(mlContext.Transforms.Conversion.MapValueToKey("Label", "ChosenDecisionIndex"))
+     .Append(mlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy())
+     .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"))
+     ```
+   - Document alternative algorithms in comments: FastTree, LightGbm, OneVersusAll
+   - Configure hyperparameters (learning rate, max iterations)
+
+8. **Implement training workflow**
+   - Load training data from IGameRepository using feature engineers
+   - Convert IEnumerable<TrainingData> to IDataView
+   - Split into train/validation sets using DataSplitter
+   - Fit ML.NET pipeline on training data
+   - Cache trained PredictionEngine for fast inference
+   - Log training metrics: elapsed time, sample count, memory usage
+   - Include unit tests verifying pipeline execution
+
+9. **Add model evaluation**
+   - Evaluate trained model on validation set
+   - Calculate multiclass metrics:
+     - MacroAccuracy (average accuracy across all classes)
+     - MicroAccuracy (overall accuracy)
+     - LogLoss (lower is better)
+     - PerClassPrecision, PerClassRecall, PerClassF1
+   - Generate confusion matrix for error analysis
+   - Log evaluation report to console and file
+   - Return EvaluationReport DTO with all metrics
+   - Include unit tests verifying metric calculation
+
+10. **Implement model serialization**
+    - Save trained ML.NET models to `Models/gen{N}_{decisionType}_v{version}.zip`
+      - Example: `Models/gen1_calltrump_v1.zip`
+    - Store model metadata in accompanying JSON file:
+      - Training date/time
+      - ActorType (which bot's data was used)
+      - Sample count (train/validation/test)
+      - Evaluation metrics (accuracy, log loss)
+      - Feature schema version
+    - Version management: increment version on each training run
+    - Create ModelLoader utility for loading models at runtime
+    - Include unit tests for save/load roundtrip
+
+### Phase 3: Gen1Bot Implementation (Steps 11-14)
+
+11. **Create Gen1Bot class**
+    - Create `NemesisEuchre.GameEngine\PlayerBots\Gen1Bot.cs`
+    - Inherit from BotBase (same pattern as ChaosBot)
+    - Add ActorType.Gen1 to `NemesisEuchre.Foundation.Constants\ActorType` enum
+    - Override ActorType property to return ActorType.Gen1
+    - Constructor: accepts three model file paths (CallTrump, Discard, PlayCard)
+    - Load ML.NET PredictionEngines for each model in constructor
+    - Implement IDisposable to clean up PredictionEngines
+    - Include unit tests with mock PredictionEngines
+
+12. **Implement CallTrumpAsync prediction**
+    - Override `CallTrumpAsync` protected method from BotBase
+    - Convert input parameters to CallTrumpTrainingData features
+    - Use ML.NET PredictionEngine to predict decision index
+    - Map prediction index back to CallTrumpDecision (0 → Pass, 1-4 → OrderUp/CallSuit, etc.)
+    - Validate prediction is in validCallTrumpDecisions array
+    - Fallback to random selection if prediction is invalid
+    - Include unit tests verifying correct prediction and fallback
+
+13. **Implement DiscardCardAsync prediction**
+    - Override `DiscardCardAsync` protected method from BotBase
+    - Convert RelativeCard[] hand to DiscardCardTrainingData features
+    - Use ML.NET PredictionEngine to predict card index (0-5)
+    - Map prediction index to specific RelativeCard in hand
+    - Validate predicted card is in validCardsToDiscard array
+    - Fallback to random selection if prediction is invalid
+    - Include unit tests
+
+14. **Implement PlayCardAsync prediction**
+    - Override `PlayCardAsync` protected method from BotBase
+    - Convert game state to PlayCardTrainingData features
+    - Use ML.NET PredictionEngine to predict card index
+    - Map prediction index to RelativeCard in validCardsToPlay array
+    - Handle variable-length valid cards list (1-13 possible cards)
+    - Fallback to random selection if prediction is out of bounds or invalid
+    - Include unit tests with various trick scenarios
+
+### Phase 4: Evaluation & Iteration (Steps 15-18)
+
+15. **Generate Gen1Bot vs ChaosBot games**
+    - Use existing BatchGameOrchestrator from v0.3
+    - Configure matchup: Team1 (2 Gen1Bots) vs Team2 (2 ChaosBots)
+    - Generate 10,000+ games for statistical significance
+    - Store results in database via existing GameRepository
+    - Display progress with Spectre.Console progress bar
+    - Calculate win rate metrics after completion
+    - Example command:
+      ```bash
+      dotnet run --project NemesisEuchre.Console -- --count 10000 --team1-actor Gen1 --team2-actor Chaos
+      ```
+
+16. **Create evaluation report**
+    - Query database for Gen1 vs Chaos games using GameRepository
+    - Calculate metrics:
+      - Win rate (Team1 wins / total games)
+      - Average points per game for each team
+      - Euchre rate (how often teams get euchred)
+      - Average deal length
+    - Compare to Chaos vs Chaos baseline (expected ~50% win rate)
+    - Document improvement percentage (e.g., "Gen1Bot wins 54% → 4% improvement")
+    - Export report to markdown file: `Reports/gen1_vs_chaos_evaluation.md`
+    - Include statistical significance test (z-test for proportions)
+
+17. **Train Gen2Bot from Gen1Bot data**
+    - Query Gen1Bot decision records from database (use ActorType.Gen1 filter)
+    - Feature engineer Gen1Bot decisions (NOT ChaosBot data)
+    - Train three new models using Gen1Bot's gameplay data
+    - Save models as `Models/gen2_*.zip`
+    - Create `NemesisEuchre.GameEngine\PlayerBots\Gen2Bot.cs` (add ActorType.Gen2 to enum)
+    - Load Gen2 models in Gen2Bot constructor
+    - Include unit tests for Gen2Bot
+
+18. **Evaluate Gen2Bot vs Gen1Bot**
+    - Generate 10,000+ games: Gen2Bot vs Gen1Bot
+    - Calculate improvement metrics (expect Gen2 to improve over Gen1)
+    - Document generational improvement pattern
+    - Establish criteria for "good enough" model:
+      - 55%+ win rate vs previous generation
+      - Consistent improvement over 3+ generations
+      - Diminishing returns threshold (e.g., <1% improvement)
+    - Create visualization of win rate trends across generations
+
+### Phase 5: Infrastructure & Tooling (Steps 19-22)
+
+19. **Add ML training console command**
+    - Create `NemesisEuchre.Console\Commands\TrainCommand.cs`
+    - Parameters:
+      - `--actor-type` (Chaos, Gen1, Gen2, etc.) - which bot's data to train on
+      - `--decision-type` (CallTrump, Discard, PlayCard, All) - which model(s) to train
+      - `--output-path` (optional) - where to save models (default: Models/)
+      - `--sample-limit` (optional) - max training samples (default: all available)
+    - Use DI to get IModelTrainer implementations
+    - Display training progress with Spectre.Console:
+      - Loading data... (with count)
+      - Training model... (with progress bar if possible)
+      - Evaluating model... (show accuracy metrics)
+    - Output model paths and evaluation metrics to console
+    - Example:
+      ```bash
+      dotnet run --project NemesisEuchre.Console -- train --actor-type Chaos --decision-type All --sample-limit 50000
+      ```
+    - Include unit tests for command parsing and execution
+
+20. **Add model version management**
+    - Create `NemesisEuchre.MachineLearning\Models\IModelRepository.cs` interface
+    - Create `NemesisEuchre.MachineLearning\Models\ModelRepository.cs` implementation
+    - Methods:
+      - `ListAvailableModelsAsync(ActorType?, DecisionType?)` - list all models
+      - `GetLatestModelPathAsync(ActorType, DecisionType)` - get most recent model
+      - `LoadModelMetadataAsync(string modelPath)` - read JSON metadata
+      - `DeleteModelAsync(string modelPath)` - remove obsolete models
+    - Store models with timestamp: `gen1_calltrump_20260129_143052_v1.zip`
+    - Include unit tests with temporary file system
+
+21. **Create evaluation/benchmarking command**
+    - Create `NemesisEuchre.Console\Commands\BenchmarkCommand.cs`
+    - Parameters:
+      - `--team1-actor` (Chaos, Gen1, Gen2, etc.)
+      - `--team2-actor` (Chaos, Gen1, Gen2, etc.)
+      - `--game-count` (default: 1000)
+      - `--output-format` (Console, Json, Csv, Markdown)
+    - Run head-to-head matchups using BatchGameOrchestrator
+    - Display live progress with Spectre.Console:
+      - Progress bar showing games completed
+      - Live win rate counter updating in real-time
+    - Final statistics:
+      - Total games
+      - Team1 wins / Team2 wins
+      - Win percentages with confidence intervals
+      - Average points per game
+    - Export results to file (JSON/CSV/Markdown based on --output-format)
+    - Example:
+      ```bash
+      dotnet run --project NemesisEuchre.Console -- benchmark --team1-actor Gen2 --team2-actor Gen1 --game-count 5000 --output-format Markdown
+      ```
+    - Include unit tests
+
+22. **Add model comparison analytics**
+    - Create `NemesisEuchre.Console\Commands\CompareModelsCommand.cs`
+    - Compare evaluation metrics across multiple model versions
+    - Load metadata from all models in Models/ directory
+    - Display comparison table:
+      - Model name | Training date | Accuracy | LogLoss | Sample count
+    - Show accuracy trends over generations (Gen1 → Gen2 → Gen3)
+    - Identify decision types with best/worst performance
+    - Suggest next training focus areas:
+      - "CallTrump model has lowest accuracy (42%) - consider more training data"
+      - "Gen3 only improved 0.5% over Gen2 - approaching diminishing returns"
+    - Export comparison to CSV for further analysis
+    - Include unit tests
+
+## Suggested Prompts for v0.4 Implementation
+
+**Step 1**: "Create NemesisEuchre.MachineLearning class library project. Install Microsoft.ML and Microsoft.ML.FastTree NuGet packages. Set up project structure with Models/, Trainers/, DataAccess/, FeatureEngineering/ directories. Add project references to NemesisEuchre.DataAccess and NemesisEuchre.GameEngine. Create DI registration extension method."
+
+**Step 3**: "Implement the IFeatureEngineer interface and all three feature engineer classes (CallTrumpFeatureEngineer, DiscardCardFeatureEngineer, PlayCardFeatureEngineer). Transform decision entities to training DTOs with proper encoding: RelativeCard → (Rank, Suit) integers, enums to integers, map chosen decision to index. Include comprehensive unit tests."
+
+**Step 6-10**: Plan Mode: **Implement the complete ML training infrastructure: IModelTrainer interface, three trainer implementations (CallTrump, Discard, PlayCard), ML.NET pipelines using SdcaMaximumEntropy, evaluation metrics, and model serialization. Include unit tests for each component.**
+
+**Step 11-14**: Plan Mode: **Implement Gen1Bot class inheriting from BotBase. Override CallTrumpAsync, DiscardCardAsync, and PlayCardAsync to use ML.NET PredictionEngines. Add fallback logic for invalid predictions. Include ActorType.Gen1 enum value and DI registration. Add unit tests for each decision method.**
+
+**Step 15**: "Use the existing BatchGameOrchestrator to generate 10,000 games with Team1 using 2 Gen1Bots and Team2 using 2 ChaosBots. Display results using Spectre.Console with win rates and improvement percentage compared to the Chaos vs Chaos baseline."
+
+**Step 19**: Plan Mode: **Implement TrainCommand with parameters for actor-type, decision-type, output-path, and sample-limit. Use DI to get IModelTrainer implementations. Display training progress with Spectre.Console. Include unit tests.**
+
+**Step 21**: Plan Mode: **Implement BenchmarkCommand with parameters for team1-actor, team2-actor, game-count, and output-format. Use BatchGameOrchestrator for head-to-head matchups. Display live progress and export results to JSON/CSV/Markdown. Include unit tests.**
 
 ## User Players 1.0
 
