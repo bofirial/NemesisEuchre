@@ -11,7 +11,7 @@ public static partial class LoggerMessages
 
     [LoggerMessage(
         EventId = 2,
-        Level = LogLevel.Information,
+        Level = LogLevel.Debug,
         Message = "Persisting completed game with status: {GameStatus}")]
     public static partial void LogPersistingCompletedGame(
         ILogger logger,
@@ -19,7 +19,7 @@ public static partial class LoggerMessages
 
     [LoggerMessage(
         EventId = 3,
-        Level = LogLevel.Information,
+        Level = LogLevel.Debug,
         Message = "Game persisted successfully with ID: {GameId}")]
     public static partial void LogGamePersistedSuccessfully(
         ILogger logger,
