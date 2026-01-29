@@ -29,11 +29,11 @@ public class GameOrchestrator(
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(gameOptions.Value.WinningScore, 1);
 
-        var game = await gameFactory.CreateGameAsync();
+        var game = await gameFactory.CreateGameAsync().ConfigureAwait(false);
 
         InitializeGame(game);
 
-        await ProcessDealsAsync(game);
+        await ProcessDealsAsync(game).ConfigureAwait(false);
 
         FinalizeGame(game);
 
@@ -55,7 +55,7 @@ public class GameOrchestrator(
     {
         for (var dealNumber = 1; dealNumber <= MaxDealsPerGame; dealNumber++)
         {
-            await ProcessSingleDealAsync(game);
+            await ProcessSingleDealAsync(game).ConfigureAwait(false);
 
             if (GameIsComplete(game))
             {
@@ -71,12 +71,12 @@ public class GameOrchestrator(
 
     private async Task ProcessSingleDealAsync(Game game)
     {
-        game.CurrentDeal = await dealFactory.CreateDealAsync(game, game.CompletedDeals.LastOrDefault());
+        game.CurrentDeal = await dealFactory.CreateDealAsync(game, game.CompletedDeals.LastOrDefault()).ConfigureAwait(false);
         game.CurrentDeal.DealNumber = (short)(game.CompletedDeals.Count + 1);
 
-        await dealOrchestrator.OrchestrateDealAsync(game.CurrentDeal);
+        await dealOrchestrator.OrchestrateDealAsync(game.CurrentDeal).ConfigureAwait(false);
 
-        await gameScoreUpdater.UpdateGameScoreAsync(game, game.CurrentDeal);
+        await gameScoreUpdater.UpdateGameScoreAsync(game, game.CurrentDeal).ConfigureAwait(false);
 
         game.CurrentDeal.Team1Score = game.Team1Score;
         game.CurrentDeal.Team2Score = game.Team2Score;

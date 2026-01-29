@@ -32,10 +32,10 @@
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.1" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.1" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.9" />
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" />

@@ -2,6 +2,7 @@ using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Handlers;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Pooling;
 using NemesisEuchre.GameEngine.Services;
 using NemesisEuchre.GameEngine.Validation;
 
@@ -102,16 +103,28 @@ public class TrickPlayingOrchestrator(
     private async Task PlaySingleCardAsync(Deal deal, Trick trick, PlayerPosition position, bool isFirstCard)
     {
         var player = deal.Players[position];
-        var hand = player.CurrentHand.ToArray();
-        var validCards = GetValidCardsToPlay(hand, deal.Trump!.Value, trick.LeadSuit);
+        var handCount = player.CurrentHand.Count;
+        var hand = GameEnginePoolManager.RentCardArray(handCount);
 
-        var chosenCard = await GetPlayerCardChoiceAsync(deal, trick, position, hand, validCards);
-        decisionRecorder.RecordPlayCardDecision(deal, trick, position, hand, validCards, chosenCard, trickWinnerCalculator);
-        validator.ValidateCardChoice(chosenCard, validCards);
+        try
+        {
+            player.CurrentHand.CopyTo(hand, 0);
+            var handArray = new Card[handCount];
+            Array.Copy(hand, handArray, handCount);
+            var validCards = GetValidCardsToPlay(handArray, deal.Trump!.Value, trick.LeadSuit);
 
-        SetLeadSuitIfFirstCard(trick, chosenCard, deal.Trump!.Value, isFirstCard);
-        RecordPlayedCard(trick, chosenCard, position);
-        UpdateHandAfterPlay(player, chosenCard);
+            var chosenCard = await GetPlayerCardChoiceAsync(deal, trick, position, handArray, validCards).ConfigureAwait(false);
+            decisionRecorder.RecordPlayCardDecision(deal, trick, position, handArray, validCards, chosenCard, trickWinnerCalculator);
+            validator.ValidateCardChoice(chosenCard, validCards);
+
+            SetLeadSuitIfFirstCard(trick, chosenCard, deal.Trump!.Value, isFirstCard);
+            RecordPlayedCard(trick, chosenCard, position);
+            UpdateHandAfterPlay(player, chosenCard);
+        }
+        finally
+        {
+            GameEnginePoolManager.ReturnCardArray(hand);
+        }
     }
 
     private Task<Card> GetPlayerCardChoiceAsync(
