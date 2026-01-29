@@ -3,9 +3,8 @@
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Services;
-using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation;
-using NemesisEuchre.GameEngine;
+using NemesisEuchre.GameEngine.Models;
 
 using Spectre.Console;
 
@@ -16,9 +15,8 @@ public class DefaultCommand(
     ILogger<DefaultCommand> logger,
     IAnsiConsole ansiConsole,
     IApplicationBanner applicationBanner,
-    IGameOrchestrator gameOrchestrator,
+    ISingleGameRunner singleGameRunner,
     IBatchGameOrchestrator batchGameOrchestrator,
-    IGameRepository gameRepository,
     IGameResultsRenderer gameResultsRenderer) : ICliRunAsyncWithReturn
 {
     [CliOption(Description = "Number of games to play")]
@@ -44,25 +42,14 @@ public class DefaultCommand(
         return 0;
     }
 
-    private async Task RunSingleGameAsync()
+    private Task<Game> RunSingleGameAsync()
     {
         ansiConsole.MarkupLine("[dim]Playing a game between 4 ChaosBots...[/]");
         ansiConsole.WriteLine();
 
-        var game = await ansiConsole.Status()
+        return ansiConsole.Status()
             .Spinner(Spinner.Known.Dots)
-            .StartAsync("Playing game...", async _ => await gameOrchestrator.OrchestrateGameAsync());
-
-        try
-        {
-            await gameRepository.SaveCompletedGameAsync(game);
-        }
-        catch (Exception ex)
-        {
-            LoggerMessages.LogGamePersistenceFailed(logger, ex);
-        }
-
-        gameResultsRenderer.RenderResults(game);
+            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync());
     }
 
     private async Task RunBatchGamesAsync()

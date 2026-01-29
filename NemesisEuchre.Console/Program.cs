@@ -35,6 +35,7 @@ public static class Program
 
             services.AddScoped<IApplicationBanner, ApplicationBanner>();
             services.AddScoped<IGameResultsRenderer, GameResultsRenderer>();
+            services.AddScoped<ISingleGameRunner, SingleGameRunner>();
             services.AddScoped<IBatchGameOrchestrator, BatchGameOrchestrator>();
 
             services.AddNemesisEuchreGameEngine();
