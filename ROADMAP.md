@@ -199,50 +199,21 @@ This version extends the NemesisEuchre engine to capture all ML training data (C
       - ~~Total deals played~~
     - ~~Update unit tests~~
 
-17. **Add configuration for parallel execution settings**
-    - Create `NemesisEuchre.GameEngine\Options\GameExecutionOptions.cs`
-    - Properties: ParallelGameCount (default 4), MaxDegreeOfParallelism (default 4)
-    - Add configuration section to `NemesisEuchre.Console\appsettings.json`
-    - Update BatchGameOrchestrator to use IOptions<GameExecutionOptions>
-    - Include unit tests
+17. ~~**Add configuration for parallel execution settings**~~
+    - ~~Create `NemesisEuchre.GameEngine\Options\GameExecutionOptions.cs`~~
+    - ~~Properties: ParallelGameCount (default 4), MaxDegreeOfParallelism (default 4)~~
+    - ~~Add configuration section to `NemesisEuchre.Console\appsettings.json`~~
+    - ~~Update BatchGameOrchestrator to use IOptions<GameExecutionOptions>~~
+    - ~~Include unit tests~~
 
 ### Performance Optimization (Step 22)
 
-22. **Optimize batch save performance**
-    - Update `NemesisEuchre.DataAccess\GameRepository.cs`
-    - Support batch saving for high-throughput scenarios
-    - Accumulate N games (configurable, default 100) and save in batches
-    - Use `DbContext.ChangeTracker.AutoDetectChangesEnabled = false` during bulk operations
-    - Reduces database round-trips and improves performance when generating millions of games
-    - Create `NemesisEuchre.DataAccess.Tests\Performance\GameRepositoryBenchmarks.cs`
-    - Include performance benchmark tests
-
-### Verification & Success Criteria
-
-After completing all steps, verify:
-- ✅ All CallTrump, DiscardCard, PlayCard decisions captured during gameplay
-- ✅ SQL Server LocalDB installed and database created via EF migrations
-- ✅ Completed games persist to database with all child entities
-- ✅ Console app runs N games in parallel (configurable, default 4)
-- ✅ Progress bar shows real-time completion status
-- ✅ Aggregate statistics displayed after batch completion
-- ✅ Unit tests >80% coverage for all new code
-- ✅ Integration tests validate full data pipeline
-- ✅ Sample SQL queries documented for ML exploration
-- ✅ 10,000+ game performance benchmark passes
-- ✅ Database size acceptable (<100MB for 10k games)
-
-**End-to-End Testing:**
-1. Single game storage: `dotnet run --project NemesisEuchre.Console`
-2. Parallel execution: `dotnet run --project NemesisEuchre.Console -- --count 100`
-3. Database verification (SSMS):
-   ```sql
-   SELECT COUNT(*) FROM Games;
-   SELECT COUNT(*) FROM Deals;
-   SELECT COUNT(*) FROM CallTrumpDecisions;
-   SELECT COUNT(*) FROM PlayCardDecisions;
-   ```
-4. Performance benchmark: `dotnet run --project NemesisEuchre.Console -- --count 10000`
+22. ~~**Optimize batch save performance**~~
+    - ~~Update `NemesisEuchre.DataAccess\GameRepository.cs`~~
+    - ~~Support batch saving for high-throughput scenarios~~
+    - ~~Accumulate N games (configurable, default 100) and save in batches~~
+    - ~~Use `DbContext.ChangeTracker.AutoDetectChangesEnabled = false` during bulk operations~~
+    - ~~Reduces database round-trips and improves performance when generating millions of games~~
 
 ## Machine Learning 0.4
 
