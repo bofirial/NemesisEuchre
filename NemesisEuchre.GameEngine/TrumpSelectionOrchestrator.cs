@@ -5,6 +5,7 @@ using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Handlers;
 using NemesisEuchre.GameEngine.Mappers;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Options;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.GameEngine.Services;
 using NemesisEuchre.GameEngine.Validation;

@@ -4,11 +4,13 @@ using FluentAssertions;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using Moq;
 
 using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Mappers;
+using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
@@ -33,7 +35,9 @@ public class GamePersistenceIntegrationTests
             var trickMapper = new TrickToEntityMapper();
             var dealMapper = new DealToEntityMapper(trickMapper);
             var gameMapper = new GameToEntityMapper(dealMapper);
-            var repository = new GameRepository(context, mockLogger.Object, gameMapper);
+            var mockOptions = new Mock<IOptions<PersistenceOptions>>();
+            mockOptions.Setup(x => x.Value).Returns(new PersistenceOptions());
+            var repository = new GameRepository(context, mockLogger.Object, gameMapper, mockOptions.Object);
 
             await repository.SaveCompletedGameAsync(game);
         }

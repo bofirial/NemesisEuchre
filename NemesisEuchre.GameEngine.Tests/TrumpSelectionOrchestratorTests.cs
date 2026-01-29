@@ -1,16 +1,17 @@
 using FluentAssertions;
 
-using Microsoft.Extensions.Options;
-
 using Moq;
 
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Handlers;
 using NemesisEuchre.GameEngine.Mappers;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Options;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.GameEngine.Services;
 using NemesisEuchre.GameEngine.Validation;
+
+using MsOptions = Microsoft.Extensions.Options;
 
 namespace NemesisEuchre.GameEngine.Tests;
 
@@ -18,14 +19,14 @@ public class TrumpSelectionOrchestratorTests
 {
     private readonly Mock<IPlayerActor> _playerActorMock;
     private readonly Mock<IPlayerActorResolver> _actorResolverMock;
-    private readonly IOptions<GameOptions> _gameOptions;
+    private readonly MsOptions.IOptions<GameOptions> _gameOptions;
     private readonly TrumpSelectionOrchestrator _sut;
 
     public TrumpSelectionOrchestratorTests()
     {
         _playerActorMock = new Mock<IPlayerActor>();
         _playerActorMock.Setup(b => b.ActorType).Returns(ActorType.Chaos);
-        _gameOptions = Options.Create(new GameOptions { StickTheDealer = true });
+        _gameOptions = MsOptions.Options.Create(new GameOptions { StickTheDealer = true });
 
         _actorResolverMock = new Mock<IPlayerActorResolver>();
         _actorResolverMock.Setup(x => x.GetPlayerActor(It.IsAny<DealPlayer>()))
@@ -625,7 +626,7 @@ public class TrumpSelectionOrchestratorTests
     [Fact]
     public async Task SelectTrumpAsync_WithStickTheDealerFalse_DealerCanPass()
     {
-        var gameOptions = Options.Create(new GameOptions { StickTheDealer = false });
+        var gameOptions = MsOptions.Options.Create(new GameOptions { StickTheDealer = false });
         var actorResolverMock = new Mock<IPlayerActorResolver>();
         actorResolverMock.Setup(x => x.GetPlayerActor(It.IsAny<DealPlayer>()))
             .Returns(_playerActorMock.Object);
@@ -668,7 +669,7 @@ public class TrumpSelectionOrchestratorTests
     [Fact]
     public async Task SelectTrumpAsync_WithStickTheDealerFalse_DealerPassOptionIncludedInRound2()
     {
-        var gameOptions = Options.Create(new GameOptions { StickTheDealer = false });
+        var gameOptions = MsOptions.Options.Create(new GameOptions { StickTheDealer = false });
         var actorResolverMock = new Mock<IPlayerActorResolver>();
         actorResolverMock.Setup(x => x.GetPlayerActor(It.IsAny<DealPlayer>()))
             .Returns(_playerActorMock.Object);

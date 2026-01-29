@@ -2,12 +2,16 @@ using System.Diagnostics;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Console.Models;
+using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine;
+using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Options;
 
 namespace NemesisEuchre.Console.Services;
 
@@ -15,18 +19,21 @@ public interface IBatchGameOrchestrator
 {
     Task<BatchGameResults> RunBatchAsync(
         int numberOfGames,
-        int maxConcurrentGames = 4,
         IProgress<int>? progress = null,
         CancellationToken cancellationToken = default);
 }
 
 public class BatchGameOrchestrator(
     IServiceScopeFactory serviceScopeFactory,
+    IOptions<GameExecutionOptions> options,
+    IOptions<PersistenceOptions> persistenceOptions,
     ILogger<BatchGameOrchestrator> logger) : IBatchGameOrchestrator
 {
+    private readonly GameExecutionOptions _options = options.Value;
+    private readonly PersistenceOptions _persistenceOptions = persistenceOptions.Value;
+
     public async Task<BatchGameResults> RunBatchAsync(
         int numberOfGames,
-        int maxConcurrentGames = 4,
         IProgress<int>? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -35,21 +42,16 @@ public class BatchGameOrchestrator(
             throw new ArgumentOutOfRangeException(nameof(numberOfGames), "Number of games must be greater than zero.");
         }
 
-        if (maxConcurrentGames <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(maxConcurrentGames), "Max concurrent games must be greater than zero.");
-        }
-
         var stopwatch = Stopwatch.StartNew();
-        var semaphore = new SemaphoreSlim(maxConcurrentGames);
-        var state = new BatchState();
+        var semaphore = new SemaphoreSlim(_options.MaxDegreeOfParallelism);
+        var state = new BatchState(_persistenceOptions.BatchSize);
 
         var tasks = Enumerable.Range(0, numberOfGames).Select(async gameNumber =>
         {
             await semaphore.WaitAsync(cancellationToken);
             try
             {
-                await RunSingleGameAsync(gameNumber, state, progress);
+                await RunSingleGameAsync(gameNumber, state, progress, cancellationToken);
             }
             finally
             {
@@ -58,6 +60,7 @@ public class BatchGameOrchestrator(
         });
 
         await Task.WhenAll(tasks);
+        await SavePendingGamesAsync(state, force: true, cancellationToken);
         stopwatch.Stop();
 
         return new BatchGameResults
@@ -74,13 +77,13 @@ public class BatchGameOrchestrator(
     private async Task RunSingleGameAsync(
         int gameNumber,
         BatchState state,
-        IProgress<int>? progress)
+        IProgress<int>? progress,
+        CancellationToken cancellationToken = default)
     {
         try
         {
             using var scope = serviceScopeFactory.CreateScope();
             var gameOrchestrator = scope.ServiceProvider.GetRequiredService<IGameOrchestrator>();
-            var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
             var game = await gameOrchestrator.OrchestrateGameAsync();
 
             lock (state.LockObject)
@@ -96,17 +99,11 @@ public class BatchGameOrchestrator(
 
                 state.TotalDeals += game.CompletedDeals.Count;
                 state.CompletedGames++;
+                state.PendingGames.Add(game);
                 progress?.Report(state.CompletedGames);
             }
 
-            try
-            {
-                await gameRepository.SaveCompletedGameAsync(game);
-            }
-            catch (Exception ex)
-            {
-                LoggerMessages.LogGamePersistenceFailed(logger, ex);
-            }
+            await SavePendingGamesAsync(state, force: false, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -120,9 +117,45 @@ public class BatchGameOrchestrator(
         }
     }
 
-    private sealed class BatchState
+    private async Task SavePendingGamesAsync(
+        BatchState state,
+        bool force,
+        CancellationToken cancellationToken = default)
+    {
+        List<Game>? gamesToSave = null;
+
+        lock (state.LockObject)
+        {
+            if ((force && state.PendingGames.Count > 0) ||
+                state.PendingGames.Count >= state.BatchSize)
+            {
+                gamesToSave = [.. state.PendingGames];
+                state.PendingGames.Clear();
+            }
+        }
+
+        if (gamesToSave?.Count > 0)
+        {
+            try
+            {
+                using var scope = serviceScopeFactory.CreateScope();
+                var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
+                await gameRepository.SaveCompletedGamesAsync(gamesToSave, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                LoggerMessages.LogGamePersistenceFailed(logger, ex);
+            }
+        }
+    }
+
+    private sealed class BatchState(int batchSize)
     {
         public object LockObject { get; } = new();
+
+        public int BatchSize { get; } = batchSize;
+
+        public List<Game> PendingGames { get; } = [];
 
         public int Team1Wins { get; set; }
 

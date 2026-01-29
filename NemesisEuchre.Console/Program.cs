@@ -7,8 +7,9 @@ using Microsoft.Extensions.Logging;
 using NemesisEuchre.Console.Commands;
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.DataAccess.DependencyInjection;
+using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.GameEngine.DependencyInjection;
-using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Options;
 
 using Spectre.Console;
 
@@ -38,6 +39,8 @@ public static class Program
 
             services.AddNemesisEuchreGameEngine();
             services.Configure<GameOptions>(_ => { });
+            services.Configure<GameExecutionOptions>(config.GetSection("GameExecution"));
+            services.Configure<PersistenceOptions>(config.GetSection("Persistence"));
             services.AddNemesisEuchreDataAccess(config);
         });
 

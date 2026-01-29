@@ -2,14 +2,17 @@ using FluentAssertions;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using Moq;
 
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Options;
 
 namespace NemesisEuchre.Console.Tests.Services;
 
@@ -20,6 +23,8 @@ public class BatchGameOrchestratorTests
     private readonly Mock<IServiceProvider> _scopedServiceProviderMock;
     private readonly Mock<IGameOrchestrator> _gameOrchestratorMock;
     private readonly Mock<IGameRepository> _gameRepositoryMock;
+    private readonly Mock<IOptions<GameExecutionOptions>> _optionsMock;
+    private readonly Mock<IOptions<PersistenceOptions>> _persistenceOptionsMock;
     private readonly Mock<ILogger<BatchGameOrchestrator>> _loggerMock;
     private readonly BatchGameOrchestrator _sut;
 
@@ -30,7 +35,20 @@ public class BatchGameOrchestratorTests
         _scopedServiceProviderMock = new Mock<IServiceProvider>();
         _gameOrchestratorMock = new Mock<IGameOrchestrator>();
         _gameRepositoryMock = new Mock<IGameRepository>();
+        _optionsMock = new Mock<IOptions<GameExecutionOptions>>();
+        _persistenceOptionsMock = new Mock<IOptions<PersistenceOptions>>();
         _loggerMock = new Mock<ILogger<BatchGameOrchestrator>>();
+
+        _optionsMock.Setup(x => x.Value).Returns(new GameExecutionOptions
+        {
+            MaxDegreeOfParallelism = 4,
+        });
+
+        _persistenceOptionsMock.Setup(x => x.Value).Returns(new PersistenceOptions
+        {
+            BatchSize = 100,
+            MaxBatchSizeForChangeTracking = 50,
+        });
 
         _serviceScopeFactoryMock.Setup(x => x.CreateScope())
             .Returns(_serviceScopeMock.Object);
@@ -44,10 +62,14 @@ public class BatchGameOrchestratorTests
         _scopedServiceProviderMock.Setup(x => x.GetService(typeof(IGameRepository)))
             .Returns(_gameRepositoryMock.Object);
 
-        _gameRepositoryMock.Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
+        _gameRepositoryMock.Setup(x => x.SaveCompletedGamesAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        _sut = new BatchGameOrchestrator(_serviceScopeFactoryMock.Object, _loggerMock.Object);
+        _sut = new BatchGameOrchestrator(
+            _serviceScopeFactoryMock.Object,
+            _optionsMock.Object,
+            _persistenceOptionsMock.Object,
+            _loggerMock.Object);
     }
 
     [Fact]
@@ -103,7 +125,7 @@ public class BatchGameOrchestratorTests
 
         await _sut.RunBatchAsync(5);
 
-        _serviceScopeFactoryMock.Verify(x => x.CreateScope(), Times.Exactly(5));
+        _serviceScopeFactoryMock.Verify(x => x.CreateScope(), Times.Exactly(6), "5 scopes for games + 1 scope for batch save");
     }
 
     [Fact]
@@ -115,7 +137,7 @@ public class BatchGameOrchestratorTests
 
         await _sut.RunBatchAsync(5);
 
-        _serviceScopeMock.Verify(x => x.Dispose(), Times.Exactly(5));
+        _serviceScopeMock.Verify(x => x.Dispose(), Times.Exactly(6), "5 scopes for games + 1 scope for batch save");
     }
 
     [Fact]
@@ -135,8 +157,19 @@ public class BatchGameOrchestratorTests
     }
 
     [Fact]
-    public async Task RunBatchAsync_WithMaxConcurrentGames_LimitsParallelism()
+    public async Task RunBatchAsync_WithMaxDegreeOfParallelism_LimitsParallelism()
     {
+        _optionsMock.Setup(x => x.Value).Returns(new GameExecutionOptions
+        {
+            MaxDegreeOfParallelism = 2,
+        });
+
+        var sut = new BatchGameOrchestrator(
+            _serviceScopeFactoryMock.Object,
+            _optionsMock.Object,
+            _persistenceOptionsMock.Object,
+            _loggerMock.Object);
+
         var game = CreateGameWithWinner(Team.Team1);
         int currentConcurrent = 0;
         int maxConcurrent = 0;
@@ -161,7 +194,7 @@ public class BatchGameOrchestratorTests
                 return game;
             });
 
-        await _sut.RunBatchAsync(10, maxConcurrentGames: 2);
+        await sut.RunBatchAsync(10);
 
         maxConcurrent.Should().BeLessThanOrEqualTo(2);
     }
@@ -224,19 +257,67 @@ public class BatchGameOrchestratorTests
             .WithParameterName(nameof(numberOfGames));
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public Task RunBatchAsync_WithInvalidMaxConcurrentGames_ThrowsArgumentOutOfRangeException(int maxConcurrentGames)
+    [Fact]
+    public async Task RunBatchAsync_UsesConfiguredMaxDegreeOfParallelism()
     {
+        _optionsMock.Setup(x => x.Value).Returns(new GameExecutionOptions
+        {
+            MaxDegreeOfParallelism = 3,
+        });
+
+        var sut = new BatchGameOrchestrator(
+            _serviceScopeFactoryMock.Object,
+            _optionsMock.Object,
+            _persistenceOptionsMock.Object,
+            _loggerMock.Object);
+
+        var game = CreateGameWithWinner(Team.Team1);
+        int currentConcurrent = 0;
+        int maxConcurrent = 0;
+        var lockObject = new object();
+
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .Returns(async () =>
+            {
+                lock (lockObject)
+                {
+                    currentConcurrent++;
+                    maxConcurrent = Math.Max(maxConcurrent, currentConcurrent);
+                }
+
+                await Task.Delay(50);
+
+                lock (lockObject)
+                {
+                    currentConcurrent--;
+                }
+
+                return game;
+            });
+
+        await sut.RunBatchAsync(10);
+
+        maxConcurrent.Should().BeLessThanOrEqualTo(3);
+    }
+
+    [Fact]
+    public Task RunBatchAsync_UsesDefaultOptionsWhenNotConfigured()
+    {
+        _optionsMock.Setup(x => x.Value).Returns(new GameExecutionOptions());
+
+        var sut = new BatchGameOrchestrator(
+            _serviceScopeFactoryMock.Object,
+            _optionsMock.Object,
+            _persistenceOptionsMock.Object,
+            _loggerMock.Object);
+
         var game = CreateGameWithWinner(Team.Team1);
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(game);
 
-        var act = async () => await _sut.RunBatchAsync(1, maxConcurrentGames);
+        var act = async () => await sut.RunBatchAsync(5);
 
-        return act.Should().ThrowAsync<ArgumentOutOfRangeException>()
-            .WithParameterName(nameof(maxConcurrentGames));
+        return act.Should().NotThrowAsync();
     }
 
     [Fact]
@@ -293,7 +374,7 @@ public class BatchGameOrchestratorTests
     }
 
     [Fact]
-    public async Task RunBatchAsync_Should_PersistEachCompletedGame()
+    public async Task RunBatchAsync_Should_PersistCompletedGamesInBatches()
     {
         var game = CreateGameWithWinner(Team.Team1);
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
@@ -302,8 +383,8 @@ public class BatchGameOrchestratorTests
         await _sut.RunBatchAsync(5);
 
         _gameRepositoryMock.Verify(
-            x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()),
-            Times.Exactly(5));
+            x => x.SaveCompletedGamesAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<CancellationToken>()),
+            Times.AtLeastOnce);
     }
 
     [Fact]
@@ -316,10 +397,11 @@ public class BatchGameOrchestratorTests
         await _sut.RunBatchAsync(3);
 
         _gameRepositoryMock.Verify(
-            x => x.SaveCompletedGameAsync(
-                It.Is<Game>(g => g.WinningTeam == Team.Team1 && g.CompletedDeals.Count == 5),
+            x => x.SaveCompletedGamesAsync(
+                It.Is<IEnumerable<Game>>(games =>
+                    games.All(g => g.WinningTeam == Team.Team1 && g.CompletedDeals.Count == 5)),
                 It.IsAny<CancellationToken>()),
-            Times.Exactly(3));
+            Times.AtLeastOnce);
     }
 
     [Fact]
@@ -329,7 +411,7 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(game);
 
-        _gameRepositoryMock.Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
+        _gameRepositoryMock.Setup(x => x.SaveCompletedGamesAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
         var results = await _sut.RunBatchAsync(3);
@@ -338,8 +420,8 @@ public class BatchGameOrchestratorTests
         results.Team1Wins.Should().Be(3);
         results.FailedGames.Should().Be(0);
         _gameRepositoryMock.Verify(
-            x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()),
-            Times.Exactly(3));
+            x => x.SaveCompletedGamesAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<CancellationToken>()),
+            Times.AtLeastOnce);
     }
 
     [Fact]
@@ -349,7 +431,7 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(game);
 
-        _gameRepositoryMock.Setup(x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()))
+        _gameRepositoryMock.Setup(x => x.SaveCompletedGamesAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
         _loggerMock.Setup(x => x.IsEnabled(LogLevel.Error)).Returns(true);
@@ -383,12 +465,14 @@ public class BatchGameOrchestratorTests
                 return game;
             });
 
+        var persistedGameCount = 0;
+        _gameRepositoryMock.Setup(x => x.SaveCompletedGamesAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<CancellationToken>()))
+            .Callback<IEnumerable<Game>, CancellationToken>((games, _) => persistedGameCount += games.Count())
+            .Returns(Task.CompletedTask);
+
         await _sut.RunBatchAsync(3);
 
-        _gameRepositoryMock.Verify(
-            x => x.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()),
-            Times.Exactly(2),
-            "Only 2 games should be persisted (1 failed)");
+        persistedGameCount.Should().Be(2, "Only 2 games should be persisted (1 failed)");
     }
 
     private static Game CreateGameWithWinner(Team winningTeam, int numberOfDeals = 5)

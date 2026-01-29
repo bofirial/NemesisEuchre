@@ -1,11 +1,12 @@
 using FluentAssertions;
 
-using Microsoft.Extensions.Options;
-
 using Moq;
 
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Options;
+
+using MsOptions = Microsoft.Extensions.Options;
 
 namespace NemesisEuchre.GameEngine.Tests;
 
@@ -16,7 +17,7 @@ public class GameOrchestratorTests
     private readonly Mock<IDealOrchestrator> _dealOrchestratorMock;
     private readonly Mock<IGameScoreUpdater> _gameScoreUpdaterMock;
     private readonly Mock<IGameWinnerCalculator> _gameWinnerCalculatorMock;
-    private readonly IOptions<GameOptions> _gameOptions;
+    private readonly MsOptions.IOptions<GameOptions> _gameOptions;
     private readonly GameOrchestrator _sut;
 
     public GameOrchestratorTests()
@@ -26,7 +27,7 @@ public class GameOrchestratorTests
         _dealOrchestratorMock = new Mock<IDealOrchestrator>();
         _gameScoreUpdaterMock = new Mock<IGameScoreUpdater>();
         _gameWinnerCalculatorMock = new Mock<IGameWinnerCalculator>();
-        _gameOptions = Options.Create(new GameOptions { WinningScore = 10 });
+        _gameOptions = MsOptions.Options.Create(new GameOptions { WinningScore = 10 });
 
         _dealOrchestratorMock.Setup(x => x.OrchestrateDealAsync(It.IsAny<Deal>()))
             .Returns(Task.CompletedTask);
@@ -49,7 +50,7 @@ public class GameOrchestratorTests
     [InlineData(-10)]
     public Task OrchestrateGameAsync_WithInvalidWinningScore_ThrowsArgumentOutOfRangeException(short winningScore)
     {
-        var gameOptions = Options.Create(new GameOptions { WinningScore = winningScore });
+        var gameOptions = MsOptions.Options.Create(new GameOptions { WinningScore = winningScore });
         var sut = new GameOrchestrator(
             _gameFactoryMock.Object,
             _dealFactoryMock.Object,
@@ -269,7 +270,7 @@ public class GameOrchestratorTests
     [Fact]
     public async Task OrchestrateGameAsync_WithCustomWinningScore_StopsAtCorrectScore()
     {
-        var gameOptions = Options.Create(new GameOptions { WinningScore = 5 });
+        var gameOptions = MsOptions.Options.Create(new GameOptions { WinningScore = 5 });
         var sut = new GameOrchestrator(
             _gameFactoryMock.Object,
             _dealFactoryMock.Object,
@@ -315,7 +316,7 @@ public class GameOrchestratorTests
     [Fact]
     public Task OrchestrateGameAsync_WhenGameDoesNotCompleteWithin100Deals_ThrowsInvalidOperationException()
     {
-        var gameOptions = Options.Create(new GameOptions { WinningScore = 200 });
+        var gameOptions = MsOptions.Options.Create(new GameOptions { WinningScore = 200 });
         var sut = new GameOrchestrator(
             _gameFactoryMock.Object,
             _dealFactoryMock.Object,

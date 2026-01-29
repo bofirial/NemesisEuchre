@@ -1,6 +1,6 @@
 ﻿using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
-namespace NemesisEuchre.GameEngine.Models;
+namespace NemesisEuchre.GameEngine.Options;
 
 public class GameOptions
 {

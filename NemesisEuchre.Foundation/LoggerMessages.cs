@@ -38,4 +38,22 @@ public static partial class LoggerMessages
         Level = LogLevel.Error,
         Message = "Game {GameNumber} failed")]
     public static partial void LogGameFailed(ILogger logger, int gameNumber, Exception exception);
+
+    [LoggerMessage(
+        EventId = 6,
+        Level = LogLevel.Debug,
+        Message = "Persisting batch of {BatchSize} completed games")]
+    public static partial void LogPersistingBatchedGames(ILogger logger, int batchSize);
+
+    [LoggerMessage(
+        EventId = 7,
+        Level = LogLevel.Debug,
+        Message = "Batch of {BatchSize} games persisted successfully")]
+    public static partial void LogBatchGamesPersisted(ILogger logger, int batchSize);
+
+    [LoggerMessage(
+        EventId = 8,
+        Level = LogLevel.Error,
+        Message = "Failed to persist batch of {BatchSize} games. Games will not be saved.")]
+    public static partial void LogBatchGamePersistenceFailed(ILogger logger, int batchSize, Exception exception);
 }

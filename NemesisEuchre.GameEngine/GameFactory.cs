@@ -2,6 +2,7 @@ using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Options;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine;
