@@ -2,7 +2,6 @@
 
 using Microsoft.Extensions.Logging;
 
-using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation;
@@ -81,28 +80,6 @@ public class DefaultCommand(
                 return await batchGameOrchestrator.RunBatchAsync(Count, progress: progress);
             });
 
-        RenderBatchResults(results);
-    }
-
-    private void RenderBatchResults(BatchGameResults results)
-    {
-        ansiConsole.WriteLine();
-        ansiConsole.MarkupLine("[bold green]Batch Game Results[/]");
-        ansiConsole.WriteLine();
-
-        var table = new Table()
-            .Border(TableBorder.Rounded)
-            .AddColumn(new TableColumn("[bold]Metric[/]").Centered())
-            .AddColumn(new TableColumn("[bold]Value[/]").Centered());
-
-        table.AddRow("Total Games", results.TotalGames.ToString(System.Globalization.CultureInfo.InvariantCulture));
-        table.AddRow("Team 1 Wins", $"{results.Team1Wins} ([green]{results.Team1WinRate:P1}[/])");
-        table.AddRow("Team 2 Wins", $"{results.Team2Wins} ([green]{results.Team2WinRate:P1}[/])");
-        table.AddRow("Failed Games", results.FailedGames.ToString(System.Globalization.CultureInfo.InvariantCulture));
-        table.AddRow("Total Deals Played", results.TotalDeals.ToString(System.Globalization.CultureInfo.InvariantCulture));
-        table.AddRow("Elapsed Time", $"{results.ElapsedTime.TotalSeconds:F2}s");
-
-        ansiConsole.Write(table);
-        ansiConsole.WriteLine();
+        gameResultsRenderer.RenderBatchResults(results);
     }
 }

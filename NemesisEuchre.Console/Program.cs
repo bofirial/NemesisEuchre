@@ -39,8 +39,14 @@ public static class Program
 
             services.AddNemesisEuchreGameEngine();
             services.Configure<GameOptions>(_ => { });
-            services.Configure<GameExecutionOptions>(config.GetSection("GameExecution"));
-            services.Configure<PersistenceOptions>(config.GetSection("Persistence"));
+            services.AddOptions<GameExecutionOptions>()
+                .Bind(config.GetSection("GameExecution"))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+            services.AddOptions<PersistenceOptions>()
+                .Bind(config.GetSection("Persistence"))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
             services.AddNemesisEuchreDataAccess(config);
         });
 

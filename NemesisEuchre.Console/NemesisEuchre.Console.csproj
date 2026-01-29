@@ -15,6 +15,7 @@
         <PackageReference Include="Microsoft.Extensions.Configuration" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
         <PackageReference Include="Spectre.Console" />
         <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="all" />
     </ItemGroup>
@@ -29,6 +30,10 @@
         <ProjectReference Include="..\NemesisEuchre.Foundation\NemesisEuchre.Foundation.csproj" />
         <ProjectReference Include="..\NemesisEuchre.GameEngine\NemesisEuchre.GameEngine.csproj" />
         <ProjectReference Include="..\NemesisEuchre.DataAccess\NemesisEuchre.DataAccess.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="NemesisEuchre.Console.Tests" />
     </ItemGroup>
 
 </Project>

@@ -43,10 +43,41 @@ public class BatchGameOrchestrator(
         }
 
         var stopwatch = Stopwatch.StartNew();
-        var semaphore = new SemaphoreSlim(_options.MaxDegreeOfParallelism);
-        var state = new BatchState(_persistenceOptions.BatchSize);
+        using var state = new BatchExecutionState(_persistenceOptions.BatchSize);
+        var tasks = CreateGameExecutionTasks(numberOfGames, state, progress, cancellationToken);
 
-        var tasks = Enumerable.Range(0, numberOfGames).Select(async gameNumber =>
+        await Task.WhenAll(tasks);
+        await SavePendingGamesAsync(state, force: true, cancellationToken);
+        stopwatch.Stop();
+
+        return AggregateResults(numberOfGames, state, stopwatch.Elapsed);
+    }
+
+    private static BatchGameResults AggregateResults(
+        int numberOfGames,
+        BatchExecutionState state,
+        TimeSpan elapsedTime)
+    {
+        return new BatchGameResults
+        {
+            TotalGames = numberOfGames,
+            Team1Wins = state.Team1Wins,
+            Team2Wins = state.Team2Wins,
+            FailedGames = state.FailedGames,
+            TotalDeals = state.TotalDeals,
+            ElapsedTime = elapsedTime,
+        };
+    }
+
+    private IEnumerable<Task> CreateGameExecutionTasks(
+        int numberOfGames,
+        BatchExecutionState state,
+        IProgress<int>? progress,
+        CancellationToken cancellationToken)
+    {
+        var semaphore = new SemaphoreSlim(_options.MaxDegreeOfParallelism);
+
+        return Enumerable.Range(0, numberOfGames).Select(async gameNumber =>
         {
             await semaphore.WaitAsync(cancellationToken);
             try
@@ -58,25 +89,11 @@ public class BatchGameOrchestrator(
                 semaphore.Release();
             }
         });
-
-        await Task.WhenAll(tasks);
-        await SavePendingGamesAsync(state, force: true, cancellationToken);
-        stopwatch.Stop();
-
-        return new BatchGameResults
-        {
-            TotalGames = numberOfGames,
-            Team1Wins = state.Team1Wins,
-            Team2Wins = state.Team2Wins,
-            FailedGames = state.FailedGames,
-            TotalDeals = state.TotalDeals,
-            ElapsedTime = stopwatch.Elapsed,
-        };
     }
 
     private async Task RunSingleGameAsync(
         int gameNumber,
-        BatchState state,
+        BatchExecutionState state,
         IProgress<int>? progress,
         CancellationToken cancellationToken = default)
     {
@@ -86,7 +103,8 @@ public class BatchGameOrchestrator(
             var gameOrchestrator = scope.ServiceProvider.GetRequiredService<IGameOrchestrator>();
             var game = await gameOrchestrator.OrchestrateGameAsync();
 
-            lock (state.LockObject)
+            await state.ExecuteWithLockAsync(
+                () =>
             {
                 if (game.WinningTeam == Team.Team1)
                 {
@@ -101,38 +119,41 @@ public class BatchGameOrchestrator(
                 state.CompletedGames++;
                 state.PendingGames.Add(game);
                 progress?.Report(state.CompletedGames);
-            }
+            }, cancellationToken);
 
             await SavePendingGamesAsync(state, force: false, cancellationToken);
         }
         catch (Exception ex)
         {
             LoggerMessages.LogGameFailed(logger, gameNumber, ex);
-            lock (state.LockObject)
+            await state.ExecuteWithLockAsync(
+                () =>
             {
                 state.FailedGames++;
                 state.CompletedGames++;
                 progress?.Report(state.CompletedGames);
-            }
+            }, cancellationToken);
         }
     }
 
     private async Task SavePendingGamesAsync(
-        BatchState state,
+        BatchExecutionState state,
         bool force,
         CancellationToken cancellationToken = default)
     {
-        List<Game>? gamesToSave = null;
-
-        lock (state.LockObject)
+        var gamesToSave = await state.ExecuteWithLockAsync(
+            () =>
         {
             if ((force && state.PendingGames.Count > 0) ||
                 state.PendingGames.Count >= state.BatchSize)
             {
-                gamesToSave = [.. state.PendingGames];
+                var games = new List<Game>(state.PendingGames);
                 state.PendingGames.Clear();
+                return games;
             }
-        }
+
+            return null;
+        }, cancellationToken);
 
         if (gamesToSave?.Count > 0)
         {
@@ -147,24 +168,5 @@ public class BatchGameOrchestrator(
                 LoggerMessages.LogGamePersistenceFailed(logger, ex);
             }
         }
-    }
-
-    private sealed class BatchState(int batchSize)
-    {
-        public object LockObject { get; } = new();
-
-        public int BatchSize { get; } = batchSize;
-
-        public List<Game> PendingGames { get; } = [];
-
-        public int Team1Wins { get; set; }
-
-        public int Team2Wins { get; set; }
-
-        public int FailedGames { get; set; }
-
-        public int CompletedGames { get; set; }
-
-        public int TotalDeals { get; set; }
     }
 }

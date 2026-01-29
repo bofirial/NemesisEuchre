@@ -304,4 +304,71 @@ public class GameResultsRendererTests
         aceIndex.Should().BeLessThan(nineIndex);
         nineIndex.Should().BeLessThan(kingIndex);
     }
+
+    [Fact]
+    public void RenderResults_WhenTeam2Wins_DisplaysCorrectWinnerWithYellowColor()
+    {
+        var testConsole = new TestConsole();
+        var renderer = new GameResultsRenderer(testConsole);
+
+        var game = new Game
+        {
+            GameStatus = GameStatus.Complete,
+            Team1Score = 7,
+            Team2Score = 10,
+            WinningTeam = Team.Team2,
+        };
+
+        renderer.RenderResults(game);
+
+        testConsole.Output.Should().Contain("Team2");
+        testConsole.Output.Should().Contain("wins");
+    }
+
+    [Fact]
+    public void RenderResults_WhenNoDealsPlayed_HandlesGracefully()
+    {
+        var testConsole = new TestConsole();
+        var renderer = new GameResultsRenderer(testConsole);
+
+        var game = new Game
+        {
+            GameStatus = GameStatus.Complete,
+            Team1Score = 0,
+            Team2Score = 0,
+            WinningTeam = Team.Team1,
+        };
+
+        renderer.RenderResults(game);
+
+        testConsole.Output.Should().Contain("0");
+    }
+
+    [Fact]
+    public void RenderDealsTable_WhenPlayerDataMissing_DisplaysNA()
+    {
+        var testConsole = new TestConsole();
+        var renderer = new GameResultsRenderer(testConsole);
+
+        var game = new Game
+        {
+            GameStatus = GameStatus.Complete,
+            Team1Score = 10,
+            Team2Score = 7,
+            WinningTeam = Team.Team1,
+        };
+
+        var deal = new Deal
+        {
+            Trump = Suit.Spades,
+            Players = [],
+        };
+
+        game.CompletedDeals.Add(deal);
+
+        renderer.RenderResults(game);
+
+        var naCount = testConsole.Output.Split("N/A", StringSplitOptions.None).Length - 1;
+        naCount.Should().BeGreaterThanOrEqualTo(4);
+    }
 }

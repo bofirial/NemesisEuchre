@@ -486,7 +486,7 @@ public class DefaultCommandTests
         var mockGameOrchestrator = Mock.Of<IGameOrchestrator>();
         var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
         var mockGameRepository = Mock.Of<IGameRepository>();
-        var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
+        var mockGameResultsRenderer = new Mock<IGameResultsRenderer>();
 
         var batchResults = new BatchGameResults
         {
@@ -511,18 +511,14 @@ public class DefaultCommandTests
             mockGameOrchestrator,
             mockBatchGameOrchestrator.Object,
             mockGameRepository,
-            mockGameResultsRenderer)
+            mockGameResultsRenderer.Object)
         {
             Count = 10,
         };
 
         await command.RunAsync();
 
-        testConsole.Output.Should().Contain("Batch Game Results");
-        testConsole.Output.Should().Contain("Total Games");
-        testConsole.Output.Should().Contain("Team 1 Wins");
-        testConsole.Output.Should().Contain("Team 2 Wins");
-        testConsole.Output.Should().Contain("Total Deals Played");
+        mockGameResultsRenderer.Verify(r => r.RenderBatchResults(batchResults), Times.Once);
     }
 
     [Fact]
