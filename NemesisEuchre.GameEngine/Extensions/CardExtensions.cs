@@ -1,4 +1,4 @@
-﻿using NemesisEuchre.GameEngine.Constants;
+﻿using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
@@ -80,10 +80,10 @@ public static class CardExtensions
 
         var suitSymbol = card.Suit switch
         {
-            Suit.Spades => "♠",
-            Suit.Hearts => "♥",
-            Suit.Clubs => "♣",
-            Suit.Diamonds => "♦",
+            Suit.Spades => "♠ ",
+            Suit.Hearts => "♥ ",
+            Suit.Clubs => "♣ ",
+            Suit.Diamonds => "♦ ",
             _ => "?"
         };
 
@@ -107,7 +107,7 @@ public static class CardExtensions
         return new RelativeCard
         {
             Rank = rank,
-            Suit = card.Suit.ToRelativeSuit(trump),
+            Suit = card.Suit.ToRelativeSuit(trump, rank),
             Card = card,
         };
     }

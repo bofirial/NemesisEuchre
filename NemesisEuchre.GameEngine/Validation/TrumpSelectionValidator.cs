@@ -1,4 +1,4 @@
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
@@ -10,36 +10,19 @@ public interface ITrumpSelectionValidator
 
     void ValidateDecision(CallTrumpDecision decision, CallTrumpDecision[] validDecisions);
 
-    void ValidateDiscard(RelativeCard cardToDiscard, RelativeCard[] validCards);
+    void ValidateDiscard(Card cardToDiscard, Card[] validCards);
 }
 
 public class TrumpSelectionValidator : ITrumpSelectionValidator
 {
-    private const int PlayersPerDeal = 4;
-
     public void ValidatePreconditions(Deal deal)
     {
         ArgumentNullException.ThrowIfNull(deal);
 
-        if (deal.DealStatus != DealStatus.SelectingTrump)
-        {
-            throw new InvalidOperationException($"Deal must be in SelectingTrump status, but was {deal.DealStatus}");
-        }
-
-        if (deal.DealerPosition == null)
-        {
-            throw new InvalidOperationException("DealerPosition must be set");
-        }
-
-        if (deal.UpCard == null)
-        {
-            throw new InvalidOperationException("UpCard must be set");
-        }
-
-        if (deal.Players.Count != PlayersPerDeal)
-        {
-            throw new InvalidOperationException($"Deal must have exactly {PlayersPerDeal} players, but had {deal.Players.Count}");
-        }
+        DealValidationHelpers.ValidateDealStatus(deal, DealStatus.SelectingTrump);
+        DealValidationHelpers.ValidateDealerPosition(deal);
+        DealValidationHelpers.ValidateUpCard(deal);
+        DealValidationHelpers.ValidatePlayerCount(deal);
     }
 
     public void ValidateDecision(CallTrumpDecision decision, CallTrumpDecision[] validDecisions)
@@ -50,7 +33,7 @@ public class TrumpSelectionValidator : ITrumpSelectionValidator
         }
     }
 
-    public void ValidateDiscard(RelativeCard cardToDiscard, RelativeCard[] validCards)
+    public void ValidateDiscard(Card cardToDiscard, Card[] validCards)
     {
         if (!validCards.Contains(cardToDiscard))
         {

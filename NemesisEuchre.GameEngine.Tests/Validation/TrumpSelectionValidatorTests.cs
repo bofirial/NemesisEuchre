@@ -1,7 +1,6 @@
 using FluentAssertions;
 
-using NemesisEuchre.GameEngine.Constants;
-using NemesisEuchre.GameEngine.Extensions;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.GameEngine.Validation;
@@ -128,12 +127,11 @@ public class TrumpSelectionValidatorTests
     [Fact]
     public void ValidateDiscard_WithCardNotInValidCards_ThrowsInvalidOperationException()
     {
-        const Suit trump = Suit.Hearts;
-        var cardToDiscard = new Card { Suit = Suit.Spades, Rank = Rank.Ace }.ToRelative(trump);
+        var cardToDiscard = new Card { Suit = Suit.Spades, Rank = Rank.Ace };
         var validCards = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Jack }.ToRelative(trump),
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ace }.ToRelative(trump),
+            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
+            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
         };
 
         var act = () => _validator.ValidateDiscard(cardToDiscard, validCards);
@@ -145,16 +143,14 @@ public class TrumpSelectionValidatorTests
     [Fact]
     public void ValidateDiscard_WithCardInValidCards_DoesNotThrow()
     {
-        const Suit trump = Suit.Hearts;
         var aceOfHearts = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
-        var relativeAce = aceOfHearts.ToRelative(trump);
         var validCards = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Jack }.ToRelative(trump),
-            relativeAce,
+            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
+            aceOfHearts,
         };
 
-        var act = () => _validator.ValidateDiscard(relativeAce, validCards);
+        var act = () => _validator.ValidateDiscard(aceOfHearts, validCards);
 
         act.Should().NotThrow();
     }

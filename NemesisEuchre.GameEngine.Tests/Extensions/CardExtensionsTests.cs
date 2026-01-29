@@ -1,6 +1,6 @@
 using FluentAssertions;
 
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 
@@ -125,12 +125,12 @@ public class CardExtensionsTests
     }
 
     [Theory]
-    [InlineData(Rank.Nine, Suit.Spades, "9♠")]
-    [InlineData(Rank.Ten, Suit.Hearts, "10♥")]
-    [InlineData(Rank.Jack, Suit.Clubs, "J♣")]
-    [InlineData(Rank.Queen, Suit.Diamonds, "Q♦")]
-    [InlineData(Rank.King, Suit.Spades, "K♠")]
-    [InlineData(Rank.Ace, Suit.Hearts, "A♥")]
+    [InlineData(Rank.Nine, Suit.Spades, "9♠ ")]
+    [InlineData(Rank.Ten, Suit.Hearts, "10♥ ")]
+    [InlineData(Rank.Jack, Suit.Clubs, "J♣ ")]
+    [InlineData(Rank.Queen, Suit.Diamonds, "Q♦ ")]
+    [InlineData(Rank.King, Suit.Spades, "K♠ ")]
+    [InlineData(Rank.Ace, Suit.Hearts, "A♥ ")]
     public void ToDisplayString_WithAnyCard_ReturnsCorrectSymbolRepresentation(Rank rank, Suit suit, string expected)
     {
         var card = new Card { Suit = suit, Rank = rank };
@@ -146,7 +146,7 @@ public class CardExtensionsTests
         var ranks = new[] { Rank.Nine, Rank.Ten, Rank.Jack, Rank.Queen, Rank.King, Rank.Ace };
         var results = ranks.Select(r => new Card { Suit = Suit.Spades, Rank = r }.ToDisplayString()).ToList();
 
-        results.Should().BeEquivalentTo("9♠", "10♠", "J♠", "Q♠", "K♠", "A♠");
+        results.Should().BeEquivalentTo("9♠ ", "10♠ ", "J♠ ", "Q♠ ", "K♠ ", "A♠ ");
     }
 
     [Fact]
@@ -155,7 +155,7 @@ public class CardExtensionsTests
         var suits = new[] { Suit.Spades, Suit.Hearts, Suit.Clubs, Suit.Diamonds };
         var results = suits.Select(s => new Card { Suit = s, Rank = Rank.Ace }.ToDisplayString()).ToList();
 
-        results.Should().BeEquivalentTo("A♠", "A♥", "A♣", "A♦");
+        results.Should().BeEquivalentTo("A♠ ", "A♥ ", "A♣ ", "A♦ ");
     }
 
     [Fact]
@@ -181,7 +181,7 @@ public class CardExtensionsTests
         var relativeCard = card.ToRelative(trump);
 
         relativeCard.Rank.Should().Be(rank);
-        relativeCard.Suit.Should().Be(cardSuit.ToRelativeSuit(trump));
+        relativeCard.Suit.Should().Be(cardSuit.ToRelativeSuit(trump, rank));
     }
 
     [Fact]

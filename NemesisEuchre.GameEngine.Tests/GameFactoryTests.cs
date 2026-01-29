@@ -1,10 +1,10 @@
 using FluentAssertions;
 
-using Microsoft.Extensions.Options;
-
-using NemesisEuchre.GameEngine.Constants;
-using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine.Options;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+
+using MsOptions = Microsoft.Extensions.Options;
 
 namespace NemesisEuchre.GameEngine.Tests;
 
@@ -13,7 +13,7 @@ public class GameFactoryTests
     [Fact]
     public async Task CreateGameAsync_WithValidOptions_ReturnsGameWithFourPlayers()
     {
-        var gameOptions = Options.Create(new GameOptions());
+        var gameOptions = MsOptions.Options.Create(new GameOptions());
         var gameInitializer = new GameFactory(gameOptions);
 
         var game = await gameInitializer.CreateGameAsync();
@@ -25,7 +25,7 @@ public class GameFactoryTests
     [Fact]
     public Task CreateGameAsync_WithNullTeam1ActorTypes_ThrowsArgumentNullException()
     {
-        var gameOptions = Options.Create(new GameOptions { Team1ActorTypes = null! });
+        var gameOptions = MsOptions.Options.Create(new GameOptions { Team1ActorTypes = null! });
         var gameInitializer = new GameFactory(gameOptions);
 
         var act = gameInitializer.CreateGameAsync;
@@ -36,7 +36,7 @@ public class GameFactoryTests
     [Fact]
     public Task CreateGameAsync_WithNullTeam2ActorTypes_ThrowsArgumentNullException()
     {
-        var gameOptions = Options.Create(new GameOptions { Team2ActorTypes = null! });
+        var gameOptions = MsOptions.Options.Create(new GameOptions { Team2ActorTypes = null! });
         var gameInitializer = new GameFactory(gameOptions);
 
         var act = gameInitializer.CreateGameAsync;
@@ -51,7 +51,7 @@ public class GameFactoryTests
     [InlineData(4)]
     public Task CreateGameAsync_WithInvalidTeam1ActorTypesLength_ThrowsArgumentException(int length)
     {
-        var gameOptions = Options.Create(new GameOptions
+        var gameOptions = MsOptions.Options.Create(new GameOptions
         {
             Team1ActorTypes = new ActorType[length],
         });
@@ -71,7 +71,7 @@ public class GameFactoryTests
     [InlineData(4)]
     public Task CreateGameAsync_WithInvalidTeam2ActorTypesLength_ThrowsArgumentException(int length)
     {
-        var gameOptions = Options.Create(new GameOptions
+        var gameOptions = MsOptions.Options.Create(new GameOptions
         {
             Team2ActorTypes = new ActorType[length],
         });
@@ -87,7 +87,7 @@ public class GameFactoryTests
     [Fact]
     public async Task CreateGameAsync_WithValidActorTypes_AssignsActorTypesToPlayers()
     {
-        var gameOptions = Options.Create(new GameOptions
+        var gameOptions = MsOptions.Options.Create(new GameOptions
         {
             Team1ActorTypes = [ActorType.Chaos, ActorType.Chaos],
             Team2ActorTypes = [ActorType.Chaos, ActorType.Chaos],
@@ -110,7 +110,7 @@ public class GameFactoryTests
             Team1ActorTypes = [ActorType.Chaos, ActorType.Chaos],
             Team2ActorTypes = [ActorType.Chaos, ActorType.Chaos],
         };
-        var gameOptions = Options.Create(gameOptionsValue);
+        var gameOptions = MsOptions.Options.Create(gameOptionsValue);
         var gameInitializer = new GameFactory(gameOptions);
 
         var game = await gameInitializer.CreateGameAsync();

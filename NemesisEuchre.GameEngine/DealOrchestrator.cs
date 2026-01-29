@@ -1,4 +1,4 @@
-﻿using NemesisEuchre.GameEngine.Constants;
+﻿using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.Validation;
@@ -23,7 +23,7 @@ public class DealOrchestrator(
     {
         validator.ValidateDealPreconditions(deal);
 
-        await ExecuteTrumpSelectionPhaseAsync(deal);
+        await ExecuteTrumpSelectionPhaseAsync(deal).ConfigureAwait(false);
 
         if (IsThrowIn(deal))
         {
@@ -31,7 +31,7 @@ public class DealOrchestrator(
             return;
         }
 
-        await ExecuteTrickPlayingPhaseAsync(deal);
+        await ExecuteTrickPlayingPhaseAsync(deal).ConfigureAwait(false);
 
         ExecuteScoringPhase(deal);
 
@@ -60,7 +60,7 @@ public class DealOrchestrator(
     {
         deal.DealStatus = DealStatus.Playing;
 
-        await PlayAllTricksAsync(deal);
+        await PlayAllTricksAsync(deal).ConfigureAwait(false);
 
         validator.ValidateAllTricksPlayed(deal);
     }
@@ -80,13 +80,14 @@ public class DealOrchestrator(
 
         for (int trickNumber = 0; trickNumber < TricksPerDeal; trickNumber++)
         {
-            leadPosition = await PlaySingleTrickAsync(deal, leadPosition);
+            leadPosition = await PlaySingleTrickAsync(deal, leadPosition).ConfigureAwait(false);
         }
     }
 
     private async Task<PlayerPosition> PlaySingleTrickAsync(Deal deal, PlayerPosition leadPosition)
     {
-        var trick = await trickPlayingOrchestrator.PlayTrickAsync(deal, leadPosition);
+        var trick = await trickPlayingOrchestrator.PlayTrickAsync(deal, leadPosition).ConfigureAwait(false);
+        trick.TrickNumber = (short)(deal.CompletedTricks.Count + 1);
 
         var winningPosition = trickWinnerCalculator.CalculateWinner(trick, deal.Trump!.Value);
 

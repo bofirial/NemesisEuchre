@@ -1,0 +1,492 @@
+using FluentAssertions;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+using Moq;
+
+using NemesisEuchre.Console.Services;
+using NemesisEuchre.DataAccess.Options;
+using NemesisEuchre.DataAccess.Repositories;
+using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine;
+using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Options;
+
+namespace NemesisEuchre.Console.Tests.Services;
+
+public class BatchGameOrchestratorTests
+{
+    private readonly Mock<IServiceScopeFactory> _serviceScopeFactoryMock;
+    private readonly Mock<IServiceScope> _serviceScopeMock;
+    private readonly Mock<IServiceProvider> _scopedServiceProviderMock;
+    private readonly Mock<IGameOrchestrator> _gameOrchestratorMock;
+    private readonly Mock<IGameRepository> _gameRepositoryMock;
+    private readonly Mock<IOptions<GameExecutionOptions>> _optionsMock;
+    private readonly Mock<IOptions<PersistenceOptions>> _persistenceOptionsMock;
+    private readonly Mock<ILogger<BatchGameOrchestrator>> _loggerMock;
+    private readonly BatchGameOrchestrator _sut;
+
+    public BatchGameOrchestratorTests()
+    {
+        _serviceScopeFactoryMock = new Mock<IServiceScopeFactory>();
+        _serviceScopeMock = new Mock<IServiceScope>();
+        _scopedServiceProviderMock = new Mock<IServiceProvider>();
+        _gameOrchestratorMock = new Mock<IGameOrchestrator>();
+        _gameRepositoryMock = new Mock<IGameRepository>();
+        _optionsMock = new Mock<IOptions<GameExecutionOptions>>();
+        _persistenceOptionsMock = new Mock<IOptions<PersistenceOptions>>();
+        _loggerMock = new Mock<ILogger<BatchGameOrchestrator>>();
+
+        _optionsMock.Setup(x => x.Value).Returns(new GameExecutionOptions
+        {
+            MaxDegreeOfParallelism = 4,
+        });
+
+        _persistenceOptionsMock.Setup(x => x.Value).Returns(new PersistenceOptions
+        {
+            BatchSize = 100,
+            MaxBatchSizeForChangeTracking = 50,
+        });
+
+        _serviceScopeFactoryMock.Setup(x => x.CreateScope())
+            .Returns(_serviceScopeMock.Object);
+
+        _serviceScopeMock.Setup(x => x.ServiceProvider)
+            .Returns(_scopedServiceProviderMock.Object);
+
+        _scopedServiceProviderMock.Setup(x => x.GetService(typeof(IGameOrchestrator)))
+            .Returns(_gameOrchestratorMock.Object);
+
+        _scopedServiceProviderMock.Setup(x => x.GetService(typeof(IGameRepository)))
+            .Returns(_gameRepositoryMock.Object);
+
+        _gameRepositoryMock.Setup(x => x.SaveCompletedGamesAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _sut = new BatchGameOrchestrator(
+            _serviceScopeFactoryMock.Object,
+            _optionsMock.Object,
+            _persistenceOptionsMock.Object,
+            _loggerMock.Object);
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_WithSingleGame_ReturnsCorrectResults()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(game);
+
+        var results = await _sut.RunBatchAsync(1);
+
+        results.TotalGames.Should().Be(1);
+        results.Team1Wins.Should().Be(1);
+        results.Team2Wins.Should().Be(0);
+        results.FailedGames.Should().Be(0);
+        results.TotalDeals.Should().Be(5);
+        results.ElapsedTime.Should().BeGreaterThan(TimeSpan.Zero);
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_WithMultipleGames_AggregatesWinsCorrectly()
+    {
+        var games = new[]
+        {
+            CreateGameWithWinner(Team.Team1),
+            CreateGameWithWinner(Team.Team2),
+            CreateGameWithWinner(Team.Team1),
+            CreateGameWithWinner(Team.Team2),
+            CreateGameWithWinner(Team.Team1),
+        };
+
+        var callCount = 0;
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(() => games[callCount++]);
+
+        var results = await _sut.RunBatchAsync(5);
+
+        results.TotalGames.Should().Be(5);
+        results.Team1Wins.Should().Be(3);
+        results.Team2Wins.Should().Be(2);
+        results.FailedGames.Should().Be(0);
+        results.TotalDeals.Should().Be(25);
+        results.Team1WinRate.Should().BeApproximately(0.6, 0.01);
+        results.Team2WinRate.Should().BeApproximately(0.4, 0.01);
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_CreatesCorrectNumberOfScopes()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(game);
+
+        await _sut.RunBatchAsync(5);
+
+        _serviceScopeFactoryMock.Verify(x => x.CreateScope(), Times.Exactly(6), "5 scopes for games + 1 scope for batch save");
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_DisposesAllScopes()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(game);
+
+        await _sut.RunBatchAsync(5);
+
+        _serviceScopeMock.Verify(x => x.Dispose(), Times.Exactly(6), "5 scopes for games + 1 scope for batch save");
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_WithProgressReporter_ReportsProgress()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(game);
+
+        var reportedValues = new List<int>();
+        var progress = new Progress<int>(reportedValues.Add);
+
+        await _sut.RunBatchAsync(3, progress: progress);
+
+        reportedValues.Should().HaveCount(3);
+        reportedValues.Should().Equal(1, 2, 3);
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_WithMaxDegreeOfParallelism_LimitsParallelism()
+    {
+        _optionsMock.Setup(x => x.Value).Returns(new GameExecutionOptions
+        {
+            MaxDegreeOfParallelism = 2,
+        });
+
+        var sut = new BatchGameOrchestrator(
+            _serviceScopeFactoryMock.Object,
+            _optionsMock.Object,
+            _persistenceOptionsMock.Object,
+            _loggerMock.Object);
+
+        var game = CreateGameWithWinner(Team.Team1);
+        int currentConcurrent = 0;
+        int maxConcurrent = 0;
+        var lockObject = new object();
+
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .Returns(async () =>
+            {
+                lock (lockObject)
+                {
+                    currentConcurrent++;
+                    maxConcurrent = Math.Max(maxConcurrent, currentConcurrent);
+                }
+
+                await Task.Delay(50);
+
+                lock (lockObject)
+                {
+                    currentConcurrent--;
+                }
+
+                return game;
+            });
+
+        await sut.RunBatchAsync(10);
+
+        maxConcurrent.Should().BeLessThanOrEqualTo(2);
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_WithFailedGame_ContinuesBatch()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        var callCount = 0;
+
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(() =>
+            {
+                if (callCount++ == 1)
+                {
+                    throw new InvalidOperationException("Test exception");
+                }
+
+                return game;
+            });
+
+        var results = await _sut.RunBatchAsync(3);
+
+        results.TotalGames.Should().Be(3);
+        results.Team1Wins.Should().Be(2);
+        results.Team2Wins.Should().Be(0);
+        results.FailedGames.Should().Be(1);
+        results.TotalDeals.Should().Be(10);
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_WithFailedGame_LogsError()
+    {
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ThrowsAsync(new InvalidOperationException("Test exception"));
+
+        _loggerMock.Setup(x => x.IsEnabled(LogLevel.Error)).Returns(true);
+
+        await _sut.RunBatchAsync(1);
+
+        _loggerMock.Verify(
+            x => x.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((_, _) => true),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(-10)]
+    public Task RunBatchAsync_WithInvalidNumberOfGames_ThrowsArgumentOutOfRangeException(int numberOfGames)
+    {
+        var act = async () => await _sut.RunBatchAsync(numberOfGames);
+
+        return act.Should().ThrowAsync<ArgumentOutOfRangeException>()
+            .WithParameterName(nameof(numberOfGames));
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_UsesConfiguredMaxDegreeOfParallelism()
+    {
+        _optionsMock.Setup(x => x.Value).Returns(new GameExecutionOptions
+        {
+            MaxDegreeOfParallelism = 3,
+        });
+
+        var sut = new BatchGameOrchestrator(
+            _serviceScopeFactoryMock.Object,
+            _optionsMock.Object,
+            _persistenceOptionsMock.Object,
+            _loggerMock.Object);
+
+        var game = CreateGameWithWinner(Team.Team1);
+        int currentConcurrent = 0;
+        int maxConcurrent = 0;
+        var lockObject = new object();
+
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .Returns(async () =>
+            {
+                lock (lockObject)
+                {
+                    currentConcurrent++;
+                    maxConcurrent = Math.Max(maxConcurrent, currentConcurrent);
+                }
+
+                await Task.Delay(50);
+
+                lock (lockObject)
+                {
+                    currentConcurrent--;
+                }
+
+                return game;
+            });
+
+        await sut.RunBatchAsync(10);
+
+        maxConcurrent.Should().BeLessThanOrEqualTo(3);
+    }
+
+    [Fact]
+    public Task RunBatchAsync_UsesDefaultOptionsWhenNotConfigured()
+    {
+        _optionsMock.Setup(x => x.Value).Returns(new GameExecutionOptions());
+
+        var sut = new BatchGameOrchestrator(
+            _serviceScopeFactoryMock.Object,
+            _optionsMock.Object,
+            _persistenceOptionsMock.Object,
+            _loggerMock.Object);
+
+        var game = CreateGameWithWinner(Team.Team1);
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(game);
+
+        var act = async () => await sut.RunBatchAsync(5);
+
+        return act.Should().NotThrowAsync();
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_WithCancellationToken_ThrowsOperationCanceledException()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .Returns(async () =>
+            {
+                await Task.Delay(100);
+                return game;
+            });
+
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+
+        var act = async () => await _sut.RunBatchAsync(5, cancellationToken: cts.Token);
+
+        await act.Should().ThrowAsync<OperationCanceledException>();
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_CalculatesWinRatesCorrectly()
+    {
+        var games = new[]
+        {
+            CreateGameWithWinner(Team.Team1),
+            CreateGameWithWinner(Team.Team1),
+            CreateGameWithWinner(Team.Team1),
+            CreateGameWithWinner(Team.Team2),
+        };
+
+        var callCount = 0;
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(() => games[callCount++]);
+
+        var results = await _sut.RunBatchAsync(4);
+
+        results.Team1WinRate.Should().BeApproximately(0.75, 0.01);
+        results.Team2WinRate.Should().BeApproximately(0.25, 0.01);
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_WithNoGamesCompleted_ReturnsZeroWinRates()
+    {
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ThrowsAsync(new InvalidOperationException("All games failed"));
+
+        var results = await _sut.RunBatchAsync(3);
+
+        results.Team1WinRate.Should().Be(0.0);
+        results.Team2WinRate.Should().Be(0.0);
+        results.FailedGames.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_Should_PersistCompletedGamesInBatches()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(game);
+
+        await _sut.RunBatchAsync(5);
+
+        _gameRepositoryMock.Verify(
+            x => x.SaveCompletedGamesBulkAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<CancellationToken>()),
+            Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_Should_PersistGamesWithCorrectData()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(game);
+
+        await _sut.RunBatchAsync(3);
+
+        _gameRepositoryMock.Verify(
+            x => x.SaveCompletedGamesBulkAsync(
+                It.Is<IEnumerable<Game>>(games =>
+                    games.All(g => g.WinningTeam == Team.Team1 && g.CompletedDeals.Count == 5)),
+                It.IsAny<CancellationToken>()),
+            Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_WithPersistenceFailure_ContinuesBatch()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(game);
+
+        _gameRepositoryMock.Setup(x => x.SaveCompletedGamesBulkAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("Database error"));
+
+        var results = await _sut.RunBatchAsync(3);
+
+        results.TotalGames.Should().Be(3);
+        results.Team1Wins.Should().Be(3);
+        results.FailedGames.Should().Be(0);
+        _gameRepositoryMock.Verify(
+            x => x.SaveCompletedGamesBulkAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<CancellationToken>()),
+            Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_WithPersistenceFailure_LogsError()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(game);
+
+        _gameRepositoryMock.Setup(x => x.SaveCompletedGamesBulkAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("Database error"));
+
+        _loggerMock.Setup(x => x.IsEnabled(LogLevel.Error)).Returns(true);
+
+        await _sut.RunBatchAsync(1);
+
+        _loggerMock.Verify(
+            x => x.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((_, _) => true),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_Should_NotPersist_FailedGames()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        var callCount = 0;
+
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(() =>
+            {
+                if (callCount++ == 1)
+                {
+                    throw new InvalidOperationException("Game failed");
+                }
+
+                return game;
+            });
+
+        var persistedGameCount = 0;
+        _gameRepositoryMock.Setup(x => x.SaveCompletedGamesBulkAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<CancellationToken>()))
+            .Callback<IEnumerable<Game>, CancellationToken>((games, _) => persistedGameCount += games.Count())
+            .Returns(Task.CompletedTask);
+
+        await _sut.RunBatchAsync(3);
+
+        persistedGameCount.Should().Be(2, "Only 2 games should be persisted (1 failed)");
+    }
+
+    private static Game CreateGameWithWinner(Team winningTeam, int numberOfDeals = 5)
+    {
+        var game = new Game
+        {
+            WinningTeam = winningTeam,
+        };
+
+        for (int i = 0; i < numberOfDeals; i++)
+        {
+            game.CompletedDeals.Add(new Deal());
+        }
+
+        return game;
+    }
+}

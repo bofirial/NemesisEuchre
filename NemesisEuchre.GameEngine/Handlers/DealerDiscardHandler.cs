@@ -1,7 +1,5 @@
-using NemesisEuchre.GameEngine.Constants;
-using NemesisEuchre.GameEngine.Extensions;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.GameEngine.Services;
 using NemesisEuchre.GameEngine.Validation;
 
@@ -15,7 +13,8 @@ public interface IDealerDiscardHandler
 public class DealerDiscardHandler(
     IPlayerActorResolver playerActorResolver,
     IPlayerContextBuilder contextBuilder,
-    ITrumpSelectionValidator validator) : IDealerDiscardHandler
+    ITrumpSelectionValidator validator,
+    IDecisionRecorder decisionRecorder) : IDealerDiscardHandler
 {
     public async Task HandleDealerDiscardAsync(Deal deal)
     {
@@ -24,12 +23,14 @@ public class DealerDiscardHandler(
 
         AddUpcardToDealerHand(dealer, deal.UpCard!);
 
-        var relativeHand = ConvertToRelativeCards(dealer.CurrentHand, deal.Trump!.Value);
-        var cardToDiscard = await GetDealerDiscardDecisionAsync(deal, dealerPosition, dealer, relativeHand);
+        var hand = dealer.CurrentHand.ToArray();
+        var cardToDiscard = await GetDealerDiscardDecisionAsync(deal, dealerPosition, dealer, hand);
 
-        validator.ValidateDiscard(cardToDiscard, relativeHand);
+        decisionRecorder.RecordDiscardDecision(deal, dealerPosition, hand, cardToDiscard);
 
-        dealer.CurrentHand.Remove(cardToDiscard.Card);
+        validator.ValidateDiscard(cardToDiscard, hand);
+
+        dealer.CurrentHand.Remove(cardToDiscard);
     }
 
     private static void AddUpcardToDealerHand(DealPlayer dealer, Card upCard)
@@ -37,25 +38,23 @@ public class DealerDiscardHandler(
         dealer.CurrentHand.Add(upCard);
     }
 
-    private static RelativeCard[] ConvertToRelativeCards(List<Card> cards, Suit trump)
-    {
-        return [.. cards.Select(c => c.ToRelative(trump))];
-    }
-
-    private Task<RelativeCard> GetDealerDiscardDecisionAsync(
+    private Task<Card> GetDealerDiscardDecisionAsync(
         Deal deal,
         PlayerPosition dealerPosition,
         DealPlayer dealer,
-        RelativeCard[] relativeHand)
+        Card[] hand)
     {
         var dealerActor = playerActorResolver.GetPlayerActor(dealer);
         var (teamScore, opponentScore) = contextBuilder.GetScores(deal, dealerPosition);
 
         return dealerActor.DiscardCardAsync(
-            [.. relativeHand],
-            deal.ToRelative(dealerPosition),
+            [.. hand],
+            dealerPosition,
             teamScore,
             opponentScore,
-            [.. relativeHand]);
+            deal.Trump!.Value,
+            deal.CallingPlayer!.Value,
+            deal.CallingPlayerIsGoingAlone,
+            [.. hand]);
     }
 }

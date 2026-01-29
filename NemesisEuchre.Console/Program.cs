@@ -6,8 +6,10 @@ using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Commands;
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.DataAccess.DependencyInjection;
+using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.GameEngine.DependencyInjection;
-using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Options;
 
 using Spectre.Console;
 
@@ -33,9 +35,20 @@ public static class Program
 
             services.AddScoped<IApplicationBanner, ApplicationBanner>();
             services.AddScoped<IGameResultsRenderer, GameResultsRenderer>();
+            services.AddScoped<ISingleGameRunner, SingleGameRunner>();
+            services.AddScoped<IBatchGameOrchestrator, BatchGameOrchestrator>();
 
             services.AddNemesisEuchreGameEngine();
             services.Configure<GameOptions>(_ => { });
+            services.AddOptions<GameExecutionOptions>()
+                .Bind(config.GetSection("GameExecution"))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+            services.AddOptions<PersistenceOptions>()
+                .Bind(config.GetSection("Persistence"))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+            services.AddNemesisEuchreDataAccess(config);
         });
 
         return Cli.RunAsync<DefaultCommand>(args, new CliSettings { EnableDefaultExceptionHandler = true });

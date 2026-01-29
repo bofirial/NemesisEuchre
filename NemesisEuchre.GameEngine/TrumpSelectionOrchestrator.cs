@@ -1,10 +1,11 @@
 using Microsoft.Extensions.Options;
 
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Handlers;
 using NemesisEuchre.GameEngine.Mappers;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Options;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.GameEngine.Services;
 using NemesisEuchre.GameEngine.Validation;
@@ -22,13 +23,17 @@ public class TrumpSelectionOrchestrator(
     ICallTrumpDecisionMapper decisionMapper,
     IDealerDiscardHandler dealerDiscardHandler,
     IPlayerContextBuilder contextBuilder,
-    IPlayerActorResolver actorResolver) : ITrumpSelectionOrchestrator
+    IPlayerActorResolver actorResolver,
+    IDecisionRecorder decisionRecorder) : ITrumpSelectionOrchestrator
 {
     private const int PlayersPerDeal = 4;
+    private byte _decisionOrder;
 
     public async Task SelectTrumpAsync(Deal deal)
     {
         validator.ValidatePreconditions(deal);
+
+        _decisionOrder = 0;
 
         bool trumpSelected = await ExecuteRound1Async(deal);
 
@@ -64,6 +69,8 @@ public class TrumpSelectionOrchestrator(
         {
             var decision = await GetAndValidatePlayerDecisionAsync(deal, currentPosition, validDecisions);
 
+            decisionRecorder.RecordCallTrumpDecision(deal, currentPosition, validDecisions, decision, ref _decisionOrder);
+
             if (decision != CallTrumpDecision.Pass)
             {
                 SetTrumpResult(deal, deal.UpCard!.Suit, currentPosition, decision);
@@ -88,6 +95,8 @@ public class TrumpSelectionOrchestrator(
             var validDecisions = decisionMapper.GetValidRound2Decisions(upcardSuit, isDealer, gameOptions.Value.StickTheDealer);
 
             var decision = await GetAndValidatePlayerDecisionAsync(deal, currentPosition, validDecisions);
+
+            decisionRecorder.RecordCallTrumpDecision(deal, currentPosition, validDecisions, decision, ref _decisionOrder);
 
             if (decision != CallTrumpDecision.Pass)
             {
@@ -117,11 +126,12 @@ public class TrumpSelectionOrchestrator(
 
         return playerActor.CallTrumpAsync(
             [.. player.CurrentHand],
-            deal.UpCard!,
-            contextBuilder.GetRelativeDealerPosition(deal, playerPosition),
+            playerPosition,
             teamScore,
             opponentScore,
-            validDecisions);
+            deal.DealerPosition!.Value,
+            deal.UpCard!,
+            [.. validDecisions]);
     }
 
     private async Task<CallTrumpDecision> GetAndValidatePlayerDecisionAsync(

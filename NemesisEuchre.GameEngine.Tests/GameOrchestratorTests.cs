@@ -1,11 +1,12 @@
 using FluentAssertions;
 
-using Microsoft.Extensions.Options;
-
 using Moq;
 
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Options;
+
+using MsOptions = Microsoft.Extensions.Options;
 
 namespace NemesisEuchre.GameEngine.Tests;
 
@@ -16,7 +17,7 @@ public class GameOrchestratorTests
     private readonly Mock<IDealOrchestrator> _dealOrchestratorMock;
     private readonly Mock<IGameScoreUpdater> _gameScoreUpdaterMock;
     private readonly Mock<IGameWinnerCalculator> _gameWinnerCalculatorMock;
-    private readonly IOptions<GameOptions> _gameOptions;
+    private readonly MsOptions.IOptions<GameOptions> _gameOptions;
     private readonly GameOrchestrator _sut;
 
     public GameOrchestratorTests()
@@ -26,7 +27,7 @@ public class GameOrchestratorTests
         _dealOrchestratorMock = new Mock<IDealOrchestrator>();
         _gameScoreUpdaterMock = new Mock<IGameScoreUpdater>();
         _gameWinnerCalculatorMock = new Mock<IGameWinnerCalculator>();
-        _gameOptions = Options.Create(new GameOptions { WinningScore = 10 });
+        _gameOptions = MsOptions.Options.Create(new GameOptions { WinningScore = 10 });
 
         _dealOrchestratorMock.Setup(x => x.OrchestrateDealAsync(It.IsAny<Deal>()))
             .Returns(Task.CompletedTask);
@@ -49,7 +50,7 @@ public class GameOrchestratorTests
     [InlineData(-10)]
     public Task OrchestrateGameAsync_WithInvalidWinningScore_ThrowsArgumentOutOfRangeException(short winningScore)
     {
-        var gameOptions = Options.Create(new GameOptions { WinningScore = winningScore });
+        var gameOptions = MsOptions.Options.Create(new GameOptions { WinningScore = winningScore });
         var sut = new GameOrchestrator(
             _gameFactoryMock.Object,
             _dealFactoryMock.Object,
@@ -269,7 +270,7 @@ public class GameOrchestratorTests
     [Fact]
     public async Task OrchestrateGameAsync_WithCustomWinningScore_StopsAtCorrectScore()
     {
-        var gameOptions = Options.Create(new GameOptions { WinningScore = 5 });
+        var gameOptions = MsOptions.Options.Create(new GameOptions { WinningScore = 5 });
         var sut = new GameOrchestrator(
             _gameFactoryMock.Object,
             _dealFactoryMock.Object,
@@ -315,7 +316,7 @@ public class GameOrchestratorTests
     [Fact]
     public Task OrchestrateGameAsync_WhenGameDoesNotCompleteWithin100Deals_ThrowsInvalidOperationException()
     {
-        var gameOptions = Options.Create(new GameOptions { WinningScore = 200 });
+        var gameOptions = MsOptions.Options.Create(new GameOptions { WinningScore = 200 });
         var sut = new GameOrchestrator(
             _gameFactoryMock.Object,
             _dealFactoryMock.Object,
@@ -340,6 +341,125 @@ public class GameOrchestratorTests
 
         return act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("Game did not complete within the maximum number of deals allowed (100)");
+    }
+
+    [Theory]
+    [InlineData(10, 0)]
+    [InlineData(0, 10)]
+    public async Task OrchestrateGameAsync_AfterDealCompletion_RecordsGameScoresOnDeal(short team1Score, short team2Score)
+    {
+        var game = new Game();
+        var deal = new Deal();
+
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
+            .ReturnsAsync(game);
+
+        _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
+            .ReturnsAsync(deal);
+
+        _gameScoreUpdaterMock.Setup(x => x.UpdateGameScoreAsync(game, deal))
+            .Callback<Game, Deal>((g, _) =>
+            {
+                g.Team1Score = team1Score;
+                g.Team2Score = team2Score;
+            });
+
+        var result = await _sut.OrchestrateGameAsync();
+
+        result.CompletedDeals.Should().HaveCount(1);
+        result.CompletedDeals[0].Team1Score.Should().Be(team1Score);
+        result.CompletedDeals[0].Team2Score.Should().Be(team2Score);
+    }
+
+    [Fact]
+    public async Task OrchestrateGameAsync_WithMultipleDeals_RecordsCumulativeScoresOnEachDeal()
+    {
+        var game = new Game();
+        var deals = new List<Deal>
+        {
+            new(),
+            new(),
+            new(),
+            new(),
+        };
+
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
+            .ReturnsAsync(game);
+
+        var dealIndex = 0;
+        _dealFactoryMock.Setup(x => x.CreateDealAsync(It.IsAny<Game>(), It.IsAny<Deal?>()))
+            .ReturnsAsync(() => deals[dealIndex++]);
+
+        var scoreIncrement = 0;
+        _gameScoreUpdaterMock.Setup(x => x.UpdateGameScoreAsync(game, It.IsAny<Deal>()))
+            .Callback<Game, Deal>((g, _) =>
+            {
+                scoreIncrement++;
+                g.Team1Score = (short)(scoreIncrement * 3);
+            });
+
+        var result = await _sut.OrchestrateGameAsync();
+
+        result.CompletedDeals.Should().HaveCount(4);
+        result.CompletedDeals[0].Team1Score.Should().Be(3);
+        result.CompletedDeals[0].Team2Score.Should().Be(0);
+        result.CompletedDeals[1].Team1Score.Should().Be(6);
+        result.CompletedDeals[1].Team2Score.Should().Be(0);
+        result.CompletedDeals[2].Team1Score.Should().Be(9);
+        result.CompletedDeals[2].Team2Score.Should().Be(0);
+        result.CompletedDeals[3].Team1Score.Should().Be(12);
+        result.CompletedDeals[3].Team2Score.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task OrchestrateGameAsync_WithBothTeamsScoring_RecordsCorrectScoresOnEachDeal()
+    {
+        var game = new Game();
+        var deals = new List<Deal>
+        {
+            new(),
+            new(),
+            new(),
+        };
+
+        _gameFactoryMock.Setup(x => x.CreateGameAsync())
+            .ReturnsAsync(game);
+
+        var dealIndex = 0;
+        _dealFactoryMock.Setup(x => x.CreateDealAsync(It.IsAny<Game>(), It.IsAny<Deal?>()))
+            .ReturnsAsync(() => deals[dealIndex++]);
+
+        var callCount = 0;
+        _gameScoreUpdaterMock.Setup(x => x.UpdateGameScoreAsync(game, It.IsAny<Deal>()))
+            .Callback<Game, Deal>((g, _) =>
+            {
+                callCount++;
+                if (callCount == 1)
+                {
+                    g.Team1Score = 2;
+                    g.Team2Score = 0;
+                }
+                else if (callCount == 2)
+                {
+                    g.Team1Score = 2;
+                    g.Team2Score = 4;
+                }
+                else if (callCount == 3)
+                {
+                    g.Team1Score = 6;
+                    g.Team2Score = 10;
+                }
+            });
+
+        var result = await _sut.OrchestrateGameAsync();
+
+        result.CompletedDeals.Should().HaveCount(3);
+        result.CompletedDeals[0].Team1Score.Should().Be(2);
+        result.CompletedDeals[0].Team2Score.Should().Be(0);
+        result.CompletedDeals[1].Team1Score.Should().Be(2);
+        result.CompletedDeals[1].Team2Score.Should().Be(4);
+        result.CompletedDeals[2].Team1Score.Should().Be(6);
+        result.CompletedDeals[2].Team2Score.Should().Be(10);
     }
 
     private void SetupGameToEndImmediately(Game game)

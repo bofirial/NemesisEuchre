@@ -1,8 +1,8 @@
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Handlers;
 using NemesisEuchre.GameEngine.Models;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Pooling;
 using NemesisEuchre.GameEngine.Services;
 using NemesisEuchre.GameEngine.Validation;
 
@@ -17,7 +17,9 @@ public class TrickPlayingOrchestrator(
     ITrickPlayingValidator validator,
     IGoingAloneHandler goingAloneHandler,
     IPlayerContextBuilder contextBuilder,
-    IPlayerActorResolver actorResolver) : ITrickPlayingOrchestrator
+    IPlayerActorResolver actorResolver,
+    ITrickWinnerCalculator trickWinnerCalculator,
+    IDecisionRecorder decisionRecorder) : ITrickPlayingOrchestrator
 {
     public async Task<Trick> PlayTrickAsync(Deal deal, PlayerPosition leadPosition)
     {
@@ -38,35 +40,30 @@ public class TrickPlayingOrchestrator(
         };
     }
 
-    private static RelativeCard[] GetValidCardsToPlay(
-        RelativeCard[] relativeHand,
+    private static Card[] GetValidCardsToPlay(
+        Card[] hand,
         Suit trump,
         Suit? leadSuit)
     {
         if (leadSuit == null)
         {
-            return relativeHand;
+            return hand;
         }
 
-        var cardsMatchingLeadSuit = relativeHand
-            .Where(rc => rc.Card.GetEffectiveSuit(trump) == leadSuit)
+        var cardsMatchingLeadSuit = hand
+            .Where(c => c.GetEffectiveSuit(trump) == leadSuit)
             .ToArray();
 
         return cardsMatchingLeadSuit.Length > 0
             ? cardsMatchingLeadSuit
-            : relativeHand;
+            : hand;
     }
 
-    private static RelativeCard[] ConvertToRelativeCards(List<Card> cards, Suit trump)
-    {
-        return [.. cards.Select(c => c.ToRelative(trump))];
-    }
-
-    private static void SetLeadSuitIfFirstCard(Trick trick, RelativeCard chosenCard, Suit trump, bool isFirstCard)
+    private static void SetLeadSuitIfFirstCard(Trick trick, Card chosenCard, Suit trump, bool isFirstCard)
     {
         if (isFirstCard)
         {
-            trick.LeadSuit = chosenCard.Card.GetEffectiveSuit(trump);
+            trick.LeadSuit = chosenCard.GetEffectiveSuit(trump);
         }
     }
 
@@ -106,32 +103,61 @@ public class TrickPlayingOrchestrator(
     private async Task PlaySingleCardAsync(Deal deal, Trick trick, PlayerPosition position, bool isFirstCard)
     {
         var player = deal.Players[position];
-        var relativeHand = ConvertToRelativeCards(player.CurrentHand, deal.Trump!.Value);
-        var validCards = GetValidCardsToPlay(relativeHand, deal.Trump!.Value, trick.LeadSuit);
+        var handCount = player.CurrentHand.Count;
+        var hand = GameEnginePoolManager.RentCardArray(handCount);
 
-        var chosenCard = await GetPlayerCardChoiceAsync(deal, position, relativeHand, validCards);
-        validator.ValidateCardChoice(chosenCard, validCards);
+        try
+        {
+            player.CurrentHand.CopyTo(hand, 0);
+            var handArray = new Card[handCount];
+            Array.Copy(hand, handArray, handCount);
+            var validCards = GetValidCardsToPlay(handArray, deal.Trump!.Value, trick.LeadSuit);
 
-        SetLeadSuitIfFirstCard(trick, chosenCard, deal.Trump!.Value, isFirstCard);
-        RecordPlayedCard(trick, chosenCard.Card, position);
-        UpdateHandAfterPlay(player, chosenCard.Card);
+            var chosenCard = await GetPlayerCardChoiceAsync(deal, trick, position, handArray, validCards).ConfigureAwait(false);
+            decisionRecorder.RecordPlayCardDecision(deal, trick, position, handArray, validCards, chosenCard, trickWinnerCalculator);
+            validator.ValidateCardChoice(chosenCard, validCards);
+
+            SetLeadSuitIfFirstCard(trick, chosenCard, deal.Trump!.Value, isFirstCard);
+            RecordPlayedCard(trick, chosenCard, position);
+            UpdateHandAfterPlay(player, chosenCard);
+        }
+        finally
+        {
+            GameEnginePoolManager.ReturnCardArray(hand);
+        }
     }
 
-    private Task<RelativeCard> GetPlayerCardChoiceAsync(
+    private Task<Card> GetPlayerCardChoiceAsync(
         Deal deal,
+        Trick trick,
         PlayerPosition playerPosition,
-        RelativeCard[] relativeHand,
-        RelativeCard[] validCards)
+        Card[] hand,
+        Card[] validCards)
     {
         var player = deal.Players[playerPosition];
         var playerActor = actorResolver.GetPlayerActor(player);
         var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
 
+        var playedCards = trick.CardsPlayed.ToDictionary(
+            pc => pc.PlayerPosition,
+            pc => pc.Card);
+
+        PlayerPosition? winningTrickPlayer = null;
+        if (trick.CardsPlayed.Count > 0 && trick.LeadSuit.HasValue)
+        {
+            winningTrickPlayer = trickWinnerCalculator.CalculateWinner(trick, deal.Trump!.Value);
+        }
+
         return playerActor.PlayCardAsync(
-            relativeHand,
-            deal.ToRelative(playerPosition),
+            [.. hand],
+            playerPosition,
             teamScore,
             opponentScore,
-            validCards);
+            deal.Trump!.Value,
+            trick.LeadPosition,
+            trick.LeadSuit,
+            playedCards,
+            winningTrickPlayer,
+            [.. validCards]);
     }
 }

@@ -5,9 +5,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 
 using NemesisEuchre.Console.Commands;
+using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
-using NemesisEuchre.GameEngine;
-using NemesisEuchre.GameEngine.Constants;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 
 using Spectre.Console.Testing;
@@ -22,8 +22,8 @@ public class DefaultCommandTests
         var testConsole = new TestConsole();
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
         var mockBanner = new Mock<IApplicationBanner>();
-        var mockGameOrchestrator = new Mock<IGameOrchestrator>();
-        var mockGameResultsRenderer = new Mock<IGameResultsRenderer>();
+        var mockSingleGameRunner = new Mock<ISingleGameRunner>();
+        var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
 
         var game = new Game
         {
@@ -32,9 +32,10 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockGameOrchestrator.Object, mockGameResultsRenderer.Object);
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
 
         await command.RunAsync();
 
@@ -47,8 +48,8 @@ public class DefaultCommandTests
         var testConsole = new TestConsole();
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
         var mockBanner = new Mock<IApplicationBanner>();
-        var mockGameOrchestrator = new Mock<IGameOrchestrator>();
-        var mockGameResultsRenderer = new Mock<IGameResultsRenderer>();
+        var mockSingleGameRunner = new Mock<ISingleGameRunner>();
+        var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
 
         var game = new Game
         {
@@ -57,9 +58,10 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockGameOrchestrator.Object, mockGameResultsRenderer.Object);
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
 
         await command.RunAsync();
 
@@ -72,7 +74,7 @@ public class DefaultCommandTests
         var testConsole = new TestConsole();
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
         var mockBanner = Mock.Of<IApplicationBanner>();
-        var mockGameOrchestrator = new Mock<IGameOrchestrator>();
+        var mockSingleGameRunner = new Mock<ISingleGameRunner>();
         var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
 
         var game = new Game
@@ -82,9 +84,10 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockGameOrchestrator.Object, mockGameResultsRenderer);
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
 
         var result = await command.RunAsync();
 
@@ -92,12 +95,12 @@ public class DefaultCommandTests
     }
 
     [Fact]
-    public async Task RunAsync_WhenExecuted_CallsGameOrchestrator()
+    public async Task RunAsync_WhenExecuted_CallsSingleGameRunner()
     {
         var testConsole = new TestConsole();
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
         var mockBanner = Mock.Of<IApplicationBanner>();
-        var mockGameOrchestrator = new Mock<IGameOrchestrator>();
+        var mockSingleGameRunner = new Mock<ISingleGameRunner>();
         var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
 
         var game = new Game
@@ -107,38 +110,14 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockGameOrchestrator.Object, mockGameResultsRenderer);
-
-        await command.RunAsync();
-
-        mockGameOrchestrator.Verify(o => o.OrchestrateGameAsync(), Times.Once);
-    }
-
-    [Fact]
-    public async Task RunAsync_WhenExecuted_RendersGameResults()
-    {
-        var testConsole = new TestConsole();
-        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
-        var mockBanner = Mock.Of<IApplicationBanner>();
-        var mockGameOrchestrator = new Mock<IGameOrchestrator>();
-        var mockGameResultsRenderer = new Mock<IGameResultsRenderer>();
-
-        var game = new Game
-        {
-            GameStatus = GameStatus.Complete,
-            Team1Score = 10,
-            Team2Score = 7,
-            WinningTeam = Team.Team1,
-        };
-        mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
-
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockGameOrchestrator.Object, mockGameResultsRenderer.Object);
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
 
         await command.RunAsync();
 
-        mockGameResultsRenderer.Verify(r => r.RenderResults(game), Times.Once);
+        mockSingleGameRunner.Verify(o => o.RunAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -147,7 +126,7 @@ public class DefaultCommandTests
         var testConsole = new TestConsole();
         var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
         var mockBanner = Mock.Of<IApplicationBanner>();
-        var mockGameOrchestrator = new Mock<IGameOrchestrator>();
+        var mockSingleGameRunner = new Mock<ISingleGameRunner>();
         var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
 
         var game = new Game
@@ -157,12 +136,245 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockGameOrchestrator.Setup(x => x.OrchestrateGameAsync()).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockGameOrchestrator.Object, mockGameResultsRenderer);
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
 
         await command.RunAsync();
 
         testConsole.Output.Should().Contain("Playing a game between 4 ChaosBots");
+    }
+
+    [Fact]
+    public void Count_Should_DefaultToOne()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockSingleGameRunner = Mock.Of<ISingleGameRunner>();
+        var mockBatchGameOrchestrator = Mock.Of<IBatchGameOrchestrator>();
+        var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
+
+        var command = new DefaultCommand(
+            mockLogger,
+            testConsole,
+            mockBanner,
+            mockSingleGameRunner,
+            mockBatchGameOrchestrator,
+            mockGameResultsRenderer);
+
+        command.Count.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task RunAsync_WithCountOne_UsesSingleGameRunner()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockSingleGameRunner = new Mock<ISingleGameRunner>();
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
+
+        var game = new Game
+        {
+            GameStatus = GameStatus.Complete,
+            Team1Score = 10,
+            Team2Score = 7,
+            WinningTeam = Team.Team1,
+        };
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<CancellationToken>())).ReturnsAsync(game);
+
+        var command = new DefaultCommand(
+            mockLogger,
+            testConsole,
+            mockBanner,
+            mockSingleGameRunner.Object,
+            mockBatchGameOrchestrator.Object,
+            mockGameResultsRenderer)
+        {
+            Count = 1,
+        };
+
+        await command.RunAsync();
+
+        mockSingleGameRunner.Verify(o => o.RunAsync(It.IsAny<CancellationToken>()), Times.Once);
+        mockBatchGameOrchestrator.Verify(
+            o => o.RunBatchAsync(It.IsAny<int>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task RunAsync_WithCountGreaterThanOne_UsesBatchGameOrchestrator()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockSingleGameRunner = new Mock<ISingleGameRunner>();
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
+
+        var batchResults = new BatchGameResults
+        {
+            TotalGames = 10,
+            Team1Wins = 6,
+            Team2Wins = 4,
+            FailedGames = 0,
+            TotalDeals = 50,
+            ElapsedTime = TimeSpan.FromSeconds(5),
+        };
+
+        mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
+                It.IsAny<int>(),
+                It.IsAny<IProgress<int>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(batchResults);
+
+        var command = new DefaultCommand(
+            mockLogger,
+            testConsole,
+            mockBanner,
+            mockSingleGameRunner.Object,
+            mockBatchGameOrchestrator.Object,
+            mockGameResultsRenderer)
+        {
+            Count = 10,
+        };
+
+        await command.RunAsync();
+
+        mockBatchGameOrchestrator.Verify(
+            o => o.RunBatchAsync(10, It.IsAny<IProgress<int>>(), default),
+            Times.Once);
+        mockSingleGameRunner.Verify(o => o.RunAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task RunAsync_WithBatchExecution_DisplaysBatchResults()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockSingleGameRunner = Mock.Of<ISingleGameRunner>();
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var mockGameResultsRenderer = new Mock<IGameResultsRenderer>();
+
+        var batchResults = new BatchGameResults
+        {
+            TotalGames = 10,
+            Team1Wins = 6,
+            Team2Wins = 4,
+            FailedGames = 0,
+            TotalDeals = 50,
+            ElapsedTime = TimeSpan.FromSeconds(5),
+        };
+
+        mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
+                It.IsAny<int>(),
+                It.IsAny<IProgress<int>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(batchResults);
+
+        var command = new DefaultCommand(
+            mockLogger,
+            testConsole,
+            mockBanner,
+            mockSingleGameRunner,
+            mockBatchGameOrchestrator.Object,
+            mockGameResultsRenderer.Object)
+        {
+            Count = 10,
+        };
+
+        await command.RunAsync();
+
+        mockGameResultsRenderer.Verify(r => r.RenderBatchResults(batchResults), Times.Once);
+    }
+
+    [Fact]
+    public async Task RunAsync_WithBatchExecution_DoesNotCallSingleGameRunner()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockSingleGameRunner = new Mock<ISingleGameRunner>();
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var mockGameResultsRenderer = new Mock<IGameResultsRenderer>();
+
+        var batchResults = new BatchGameResults
+        {
+            TotalGames = 10,
+            Team1Wins = 6,
+            Team2Wins = 4,
+            FailedGames = 0,
+            TotalDeals = 50,
+            ElapsedTime = TimeSpan.FromSeconds(5),
+        };
+
+        mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
+                It.IsAny<int>(),
+                It.IsAny<IProgress<int>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(batchResults);
+
+        var command = new DefaultCommand(
+            mockLogger,
+            testConsole,
+            mockBanner,
+            mockSingleGameRunner.Object,
+            mockBatchGameOrchestrator.Object,
+            mockGameResultsRenderer.Object)
+        {
+            Count = 10,
+        };
+
+        await command.RunAsync();
+
+        mockSingleGameRunner.Verify(o => o.RunAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task RunAsync_WithBatchExecution_PassesProgressReporter()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockSingleGameRunner = Mock.Of<ISingleGameRunner>();
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
+
+        var batchResults = new BatchGameResults
+        {
+            TotalGames = 5,
+            Team1Wins = 3,
+            Team2Wins = 2,
+            FailedGames = 0,
+            TotalDeals = 25,
+            ElapsedTime = TimeSpan.FromSeconds(2),
+        };
+
+        mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
+                It.IsAny<int>(),
+                It.IsAny<IProgress<int>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(batchResults);
+
+        var command = new DefaultCommand(
+            mockLogger,
+            testConsole,
+            mockBanner,
+            mockSingleGameRunner,
+            mockBatchGameOrchestrator.Object,
+            mockGameResultsRenderer)
+        {
+            Count = 5,
+        };
+
+        await command.RunAsync();
+
+        mockBatchGameOrchestrator.Verify(
+            o => o.RunBatchAsync(5, It.IsNotNull<IProgress<int>>(), default),
+            Times.Once);
     }
 }
