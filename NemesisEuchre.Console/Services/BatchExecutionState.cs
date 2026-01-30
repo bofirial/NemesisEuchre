@@ -18,6 +18,8 @@ internal sealed class BatchExecutionState(int batchSize) : IDisposable
 
     public int CompletedGames { get; set; }
 
+    public int SavedGames { get; set; }
+
     public int TotalDeals { get; set; }
 
     public async Task<T> ExecuteWithLockAsync<T>(Func<T> action, CancellationToken cancellationToken = default)

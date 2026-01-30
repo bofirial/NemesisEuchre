@@ -60,11 +60,12 @@ public class DefaultCommand(
         var results = await ansiConsole.Progress()
             .StartAsync(async ctx =>
             {
-                var task = ctx.AddTask($"[green]Playing {Count} games...[/]", maxValue: Count);
+                var playingTask = ctx.AddTask("[green]Playing " + Count + " games...[/]", maxValue: Count);
+                var savingTask = ctx.AddTask("[blue]Saving games...[/]", maxValue: Count);
 
-                var progress = new Progress<int>(completed => task.Value = completed);
+                var progressReporter = new BatchProgressReporter(playingTask, savingTask);
 
-                return await batchGameOrchestrator.RunBatchAsync(Count, progress: progress);
+                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter);
             });
 
         gameResultsRenderer.RenderBatchResults(results);

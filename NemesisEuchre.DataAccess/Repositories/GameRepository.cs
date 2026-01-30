@@ -14,7 +14,10 @@ public interface IGameRepository
 
     Task SaveCompletedGamesAsync(IEnumerable<Game> games, CancellationToken cancellationToken = default);
 
-    Task SaveCompletedGamesBulkAsync(IEnumerable<Game> games, CancellationToken cancellationToken = default);
+    Task SaveCompletedGamesBulkAsync(
+        IEnumerable<Game> games,
+        IProgress<int>? progress = null,
+        CancellationToken cancellationToken = default);
 }
 
 public class GameRepository(
@@ -95,6 +98,7 @@ public class GameRepository(
 
     public async Task SaveCompletedGamesBulkAsync(
         IEnumerable<Game> games,
+        IProgress<int>? progress = null,
         CancellationToken cancellationToken = default)
     {
         var gamesList = games as List<Game> ?? [.. games];
@@ -124,6 +128,7 @@ public class GameRepository(
                     context.ChangeTracker.DetectChanges();
                     await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     LoggerMessages.LogBatchGamesPersisted(logger, gamesList.Count);
+                    progress?.Report(gamesList.Count);
                 }
                 finally
                 {
@@ -134,6 +139,7 @@ public class GameRepository(
             else
             {
                 await SaveCompletedGamesAsync(games, cancellationToken).ConfigureAwait(false);
+                progress?.Report(gamesList.Count);
             }
         }
         catch (Exception ex)
