@@ -30,6 +30,7 @@
         <ProjectReference Include="..\NemesisEuchre.Foundation\NemesisEuchre.Foundation.csproj" />
         <ProjectReference Include="..\NemesisEuchre.GameEngine\NemesisEuchre.GameEngine.csproj" />
         <ProjectReference Include="..\NemesisEuchre.DataAccess\NemesisEuchre.DataAccess.csproj" />
+        <ProjectReference Include="..\NemesisEuchre.MachineLearning\NemesisEuchre.MachineLearning.csproj" />
     </ItemGroup>
 
     <ItemGroup>

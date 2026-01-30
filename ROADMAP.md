@@ -229,26 +229,25 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 
 ### Phase 1: Data Extraction & Feature Engineering (Steps 1-5)
 
-1. **Create NemesisEuchre.MachineLearning project**
-   - Create new class library: `NemesisEuchre.MachineLearning\NemesisEuchre.MachineLearning.csproj`
-   - Install NuGet packages:
-     - Microsoft.ML (core ML.NET package)
-     - Microsoft.ML.FastTree (optional: additional algorithms)
-   - Create project structure: Models/, Trainers/, DataAccess/, FeatureEngineering/
-   - Add project references to NemesisEuchre.DataAccess and NemesisEuchre.GameEngine
-   - Create DI registration extension method for ML services
+1. ~~**Create NemesisEuchre.MachineLearning project**~~
+   - ~~Create new class library: `NemesisEuchre.MachineLearning\NemesisEuchre.MachineLearning.csproj`~~
+   - ~~Install NuGet packages:~~
+     - ~~Microsoft.ML (core ML.NET package)~~
+     - ~~Microsoft.ML.FastTree (optional: additional algorithms)~~
+   - ~~Create project structure: Models/, Trainers/, DataAccess/, FeatureEngineering/~~
+   - ~~Add project references to NemesisEuchre.DataAccess and NemesisEuchre.GameEngine~~
+   - ~~Create DI registration extension method for ML services~~
 
-2. **Create ML training data DTOs**
-   - Create `NemesisEuchre.MachineLearning\Models\CallTrumpTrainingData.cs`
-     - Feature properties: encoded hand (RelativeCard arrays as rank/suit integers), upcard, dealer position, team/opponent scores, decision order
-     - Label property: ChosenDecisionIndex (0-based integer for multiclass classification)
-   - Create `NemesisEuchre.MachineLearning\Models\DiscardCardTrainingData.cs`
-     - Feature properties: encoded hand, team/opponent scores, calling player position
-     - Label property: ChosenCardIndex (0-5, representing which card to discard)
-   - Create `NemesisEuchre.MachineLearning\Models\PlayCardTrainingData.cs`
-     - Feature properties: encoded hand, lead player, lead suit, played cards, team/opponent scores, trick state
-     - Label property: ChosenCardIndex (0-based index into valid cards array)
-   - Include unit tests for DTO instantiation
+2. ~~**Create ML training data DTOs**~~
+   - ~~Create `NemesisEuchre.MachineLearning\Models\CallTrumpTrainingData.cs`~~
+     - ~~Feature properties: encoded hand (RelativeCard arrays as rank/suit integers), upcard, dealer position, team/opponent scores, decision order~~
+     - ~~Label property: ChosenDecisionIndex (0-based integer for multiclass classification)~~
+   - ~~Create `NemesisEuchre.MachineLearning\Models\DiscardCardTrainingData.cs`~~
+     - ~~Feature properties: encoded hand, team/opponent scores, calling player position~~
+     - ~~Label property: ChosenCardIndex (0-5, representing which card to discard)~~
+   - ~~Create `NemesisEuchre.MachineLearning\Models\PlayCardTrainingData.cs`~~
+     - ~~Feature properties: encoded hand, lead player, lead suit, played cards, team/opponent scores, trick state~~
+     - ~~Label property: ChosenCardIndex (0-based index into valid cards array)~~
 
 3. **Implement feature engineering**
    - Create `NemesisEuchre.MachineLearning\FeatureEngineering\IFeatureEngineer.cs` interface

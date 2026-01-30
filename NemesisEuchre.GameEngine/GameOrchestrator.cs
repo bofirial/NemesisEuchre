@@ -19,10 +19,6 @@ public class GameOrchestrator(
     IGameWinnerCalculator gameWinnerCalculator,
     IOptions<GameOptions> gameOptions) : IGameOrchestrator
 {
-    /// <summary>
-    /// Maximum number of deals allowed per game to prevent infinite loops.
-    /// This safety limit ensures the game terminates even in edge cases.
-    /// </summary>
     private const int MaxDealsPerGame = 100;
 
     public async Task<Game> OrchestrateGameAsync()

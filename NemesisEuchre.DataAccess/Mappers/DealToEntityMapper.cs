@@ -2,6 +2,7 @@ using System.Text.Json;
 
 using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Entities;
+using NemesisEuchre.DataAccess.Extensions;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
@@ -45,7 +46,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
             Team1Score = deal.Team1Score,
             Team2Score = deal.Team2Score,
             PlayersJson = JsonSerializer.Serialize(deal.Players, JsonSerializationOptions.Default),
-            Tricks = [.. deal.CompletedTricks.Select((trick, index) => trickMapper.Map(trick, index + 1, gamePlayers, didTeam1WinGame, didTeam2WinGame, deal.WinningTeam))],
+            Tricks = [.. deal.CompletedTricks.Select((trick, index) => trickMapper.Map(trick, index + 1, gamePlayers, didTeam1WinGame, didTeam2WinGame, deal.WinningTeam, deal.DealResult))],
         };
 
         MapCallTrumpDecisions(deal, dealEntity, gamePlayers, didTeam1WinGame, didTeam2WinGame);
@@ -72,8 +73,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
             {
                 CardsInHandJson = JsonSerializer.Serialize(decision.CardsInHand.SortByTrump(null), JsonSerializationOptions.Default),
                 UpCardJson = JsonSerializer.Serialize(decision.UpCard, JsonSerializationOptions.Default),
-                DealerPosition = decision.DealerPosition,
-                DecidingPlayerPosition = decision.PlayerPosition,
+                DealerPosition = decision.DealerPosition.ToRelativePosition(decision.PlayerPosition),
                 TeamScore = decision.TeamScore,
                 OpponentScore = decision.OpponentScore,
                 ValidDecisionsJson = JsonSerializer.Serialize(decision.ValidCallTrumpDecisions, JsonSerializationOptions.Default),
@@ -81,6 +81,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
                 DecisionOrder = (byte)decision.DecisionOrder,
                 ActorType = actorType,
                 DidTeamWinDeal = didTeamWinDeal,
+                RelativeDealPoints = deal.DealResult.CalculateRelativeDealPoints(decision.PlayerPosition, deal.WinningTeam),
                 DidTeamWinGame = didTeamWinGame,
             };
         })];
@@ -104,10 +105,11 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
                 CallingPlayer = deal.CallingPlayer!.Value.ToRelativePosition(decision.PlayerPosition),
                 TeamScore = decision.TeamScore,
                 OpponentScore = decision.OpponentScore,
-                ValidCardsToDiscardJson = JsonSerializer.Serialize(decision.ValidCardsToDiscard.SortByTrump(deal.Trump!.Value).Select(c => c.ToRelative(deal.Trump!.Value)), JsonSerializationOptions.Default),
                 ChosenCardJson = JsonSerializer.Serialize(decision.ChosenCard.ToRelative(deal.Trump!.Value), JsonSerializationOptions.Default),
+                CallingPlayerGoingAlone = deal.CallingPlayerIsGoingAlone,
                 ActorType = actorType,
                 DidTeamWinDeal = didTeamWinDeal,
+                RelativeDealPoints = deal.DealResult.CalculateRelativeDealPoints(decision.PlayerPosition, deal.WinningTeam),
                 DidTeamWinGame = didTeamWinGame,
             };
         })];

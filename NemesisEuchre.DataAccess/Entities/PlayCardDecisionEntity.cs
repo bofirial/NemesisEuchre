@@ -30,6 +30,10 @@ public class PlayCardDecisionEntity
 
     public string ValidCardsToPlayJson { get; set; } = null!;
 
+    public RelativePlayerPosition CallingPlayer { get; set; }
+
+    public bool CallingPlayerGoingAlone { get; set; }
+
     public string ChosenCardJson { get; set; } = null!;
 
     public ActorType? ActorType { get; set; }
@@ -37,6 +41,8 @@ public class PlayCardDecisionEntity
     public bool? DidTeamWinTrick { get; set; }
 
     public bool? DidTeamWinDeal { get; set; }
+
+    public short? RelativeDealPoints { get; set; }
 
     public bool? DidTeamWinGame { get; set; }
 
@@ -90,6 +96,14 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
         builder.Property(e => e.ValidCardsToPlayJson)
             .IsRequired();
 
+        builder.Property(e => e.CallingPlayer)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(25);
+
+        builder.Property(e => e.CallingPlayerGoingAlone)
+            .IsRequired();
+
         builder.Property(e => e.ChosenCardJson)
             .IsRequired()
             .HasMaxLength(200);
@@ -101,6 +115,8 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
         builder.Property(e => e.DidTeamWinTrick);
 
         builder.Property(e => e.DidTeamWinDeal);
+
+        builder.Property(e => e.RelativeDealPoints);
 
         builder.Property(e => e.DidTeamWinGame);
 

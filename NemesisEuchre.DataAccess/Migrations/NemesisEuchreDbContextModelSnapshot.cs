@@ -17,7 +17,7 @@ namespace NemesisEuchre.DataAccess.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.1")
+                .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -47,13 +47,8 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     b.Property<string>("DealerPosition")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("DecidingPlayerPosition")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
 
                     b.Property<byte>("DecisionOrder")
                         .HasColumnType("tinyint");
@@ -65,6 +60,9 @@ namespace NemesisEuchre.DataAccess.Migrations
                         .HasColumnType("bit");
 
                     b.Property<short>("OpponentScore")
+                        .HasColumnType("smallint");
+
+                    b.Property<short?>("RelativeDealPoints")
                         .HasColumnType("smallint");
 
                     b.Property<short>("TeamScore")
@@ -199,12 +197,11 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<short>("OpponentScore")
                         .HasColumnType("smallint");
 
-                    b.Property<short>("TeamScore")
+                    b.Property<short?>("RelativeDealPoints")
                         .HasColumnType("smallint");
 
-                    b.Property<string>("ValidCardsToDiscardJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<short>("TeamScore")
+                        .HasColumnType("smallint");
 
                     b.HasKey("DiscardCardDecisionId");
 
@@ -273,6 +270,14 @@ namespace NemesisEuchre.DataAccess.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
+                    b.Property<string>("CallingPlayer")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.Property<bool>("CallingPlayerGoingAlone")
+                        .HasColumnType("bit");
+
                     b.Property<string>("CardsInHandJson")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -309,6 +314,9 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<string>("PlayedCardsJson")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<short?>("RelativeDealPoints")
+                        .HasColumnType("smallint");
 
                     b.Property<short>("TeamScore")
                         .HasColumnType("smallint");

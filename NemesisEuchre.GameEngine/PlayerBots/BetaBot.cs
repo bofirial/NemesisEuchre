@@ -4,10 +4,6 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.PlayerBots;
 
-/// <summary>
-/// Conservative bot that avoids trump and plays lowest cards.
-/// Always passes on calling trump when possible.
-/// </summary>
 public class BetaBot : BotBase
 {
     public override ActorType ActorType => ActorType.Beta;
@@ -24,7 +20,7 @@ public class BetaBot : BotBase
         return Task.FromResult(SelectLowestNonTrumpCardOrLowest(validCardsToDiscard));
     }
 
-    public override Task<RelativeCard> PlayCardAsync(RelativeCard[] cardsInHand, short teamScore, short opponentScore, RelativePlayerPosition leadPlayer, RelativeSuit? leadSuit, Dictionary<RelativePlayerPosition, RelativeCard> playedCards, RelativePlayerPosition? winningTrickPlayer, RelativeCard[] validCardsToPlay)
+    public override Task<RelativeCard> PlayCardAsync(RelativeCard[] cardsInHand, short teamScore, short opponentScore, RelativePlayerPosition callingPlayer, bool callingPlayerGoingAlone, RelativePlayerPosition leadPlayer, RelativeSuit? leadSuit, Dictionary<RelativePlayerPosition, RelativeCard> playedCards, RelativePlayerPosition? winningTrickPlayer, RelativeCard[] validCardsToPlay)
     {
         return Task.FromResult(SelectLowestNonTrumpCardOrLowest(validCardsToPlay));
     }

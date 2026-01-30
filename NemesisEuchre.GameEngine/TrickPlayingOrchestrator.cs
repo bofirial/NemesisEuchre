@@ -154,6 +154,8 @@ public class TrickPlayingOrchestrator(
             teamScore,
             opponentScore,
             deal.Trump!.Value,
+            deal.CallingPlayer!.Value,
+            deal.CallingPlayerIsGoingAlone,
             trick.LeadPosition,
             trick.LeadSuit,
             playedCards,

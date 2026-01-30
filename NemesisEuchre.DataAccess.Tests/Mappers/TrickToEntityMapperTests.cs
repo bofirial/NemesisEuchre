@@ -19,7 +19,7 @@ public class TrickToEntityMapperTests
         var trick = CreateSampleTrick();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 3, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1);
+        var entity = mapper.Map(trick, trickNumber: 3, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         entity.TrickNumber.Should().Be(3);
         entity.LeadPosition.Should().Be(PlayerPosition.North);
@@ -36,7 +36,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         entity.PlayCardDecisions.Should().NotBeNull();
         entity.PlayCardDecisions.Should().HaveCount(4);
@@ -49,7 +49,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: true, didTeam2WinGame: false, dealWinningTeam: Team.Team1);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: true, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
         decision.CardsInHandJson.Should().NotBeNullOrEmpty();
@@ -67,7 +67,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var northDecision = entity.PlayCardDecisions[0];
         northDecision.LeadPlayer.Should().Be(RelativePlayerPosition.Self);
@@ -83,7 +83,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
         decision.LeadSuit.Should().Be(RelativeSuit.Trump);
@@ -96,7 +96,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
         var cardsInHand = JsonSerializer.Deserialize<List<RelativeCard>>(decision.CardsInHandJson, JsonSerializationOptions.Default);
@@ -119,7 +119,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
         var playedCards = JsonSerializer.Deserialize<Dictionary<RelativePlayerPosition, RelativeCard>>(decision.PlayedCardsJson, JsonSerializationOptions.Default);
@@ -137,7 +137,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: true, didTeam2WinGame: false, dealWinningTeam: Team.Team1);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: true, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         entity.PlayCardDecisions.Should().HaveCount(4);
 
@@ -160,7 +160,7 @@ public class TrickToEntityMapperTests
         trick.WinningPosition = PlayerPosition.East;
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: true, dealWinningTeam: Team.Team2);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: true, dealWinningTeam: Team.Team2, dealResult: DealResult.WonStandardBid);
 
         entity.PlayCardDecisions.Should().HaveCount(4);
 
@@ -187,7 +187,7 @@ public class TrickToEntityMapperTests
             { PlayerPosition.West, new Player { Position = PlayerPosition.West, ActorType = ActorType.Chaos } },
         };
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decisions = entity.PlayCardDecisions.ToList();
         foreach (var decision in decisions)

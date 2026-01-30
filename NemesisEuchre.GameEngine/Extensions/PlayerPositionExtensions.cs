@@ -5,10 +5,6 @@ namespace NemesisEuchre.GameEngine.Extensions;
 
 public static class PlayerPositionExtensions
 {
-    /// <summary>
-    /// Total number of player positions in a Euchre game.
-    /// Used for relative position calculations.
-    /// </summary>
     private const int TotalPlayerPositions = 4;
 
     public static Team GetTeam(this PlayerPosition position)
