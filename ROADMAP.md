@@ -229,14 +229,14 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 
 ### Phase 1: Data Extraction & Feature Engineering (Steps 1-5)
 
-1. **Create NemesisEuchre.MachineLearning project**
-   - Create new class library: `NemesisEuchre.MachineLearning\NemesisEuchre.MachineLearning.csproj`
-   - Install NuGet packages:
-     - Microsoft.ML (core ML.NET package)
-     - Microsoft.ML.FastTree (optional: additional algorithms)
-   - Create project structure: Models/, Trainers/, DataAccess/, FeatureEngineering/
-   - Add project references to NemesisEuchre.DataAccess and NemesisEuchre.GameEngine
-   - Create DI registration extension method for ML services
+1. ~~**Create NemesisEuchre.MachineLearning project**~~
+   - ~~Create new class library: `NemesisEuchre.MachineLearning\NemesisEuchre.MachineLearning.csproj`~~
+   - ~~Install NuGet packages:~~
+     - ~~Microsoft.ML (core ML.NET package)~~
+     - ~~Microsoft.ML.FastTree (optional: additional algorithms)~~
+   - ~~Create project structure: Models/, Trainers/, DataAccess/, FeatureEngineering/~~
+   - ~~Add project references to NemesisEuchre.DataAccess and NemesisEuchre.GameEngine~~
+   - ~~Create DI registration extension method for ML services~~
 
 2. **Create ML training data DTOs**
    - Create `NemesisEuchre.MachineLearning\Models\CallTrumpTrainingData.cs`
