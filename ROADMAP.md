@@ -256,15 +256,15 @@ This version introduces ML.NET-powered bots that learn from game data, establish
    - ~~Create `NemesisEuchre.MachineLearning\FeatureEngineering\PlayCardFeatureEngineer.cs`~~
    - ~~Include unit tests verifying correct encoding and label mapping~~
 
-4. **Add repository methods for ML data queries**
-   - Extend `NemesisEuchre.DataAccess\IGameRepository.cs` with ML-specific queries:
-     - `IAsyncEnumerable<CallTrumpDecisionEntity> GetCallTrumpTrainingDataAsync(ActorType actorType, int limit = 0, bool winningTeamOnly = false)`
-     - `IAsyncEnumerable<DiscardCardDecisionEntity> GetDiscardCardTrainingDataAsync(ActorType actorType, int limit = 0, bool winningTeamOnly = false)`
-     - `IAsyncEnumerable<PlayCardDecisionEntity> GetPlayCardTrainingDataAsync(ActorType actorType, int limit = 0, bool winningTeamOnly = false)`
-   - Use IAsyncEnumerable for streaming large datasets without loading all into memory
-   - Filter by ActorType to get decisions from specific bot generations
-   - Optional winningTeamOnly parameter to train only on successful strategies
-   - Include unit tests using EF Core in-memory database with sample decision records
+4. ~~**Add repository methods for ML data queries**~~
+   - ~~Extend `NemesisEuchre.DataAccess\IGameRepository.cs` with ML-specific queries:~~
+     - ~~`IAsyncEnumerable<CallTrumpDecisionEntity> GetCallTrumpTrainingDataAsync(ActorType actorType, int limit = 0, bool winningTeamOnly = false)`~~
+     - ~~`IAsyncEnumerable<DiscardCardDecisionEntity> GetDiscardCardTrainingDataAsync(ActorType actorType, int limit = 0, bool winningTeamOnly = false)`~~
+     - ~~`IAsyncEnumerable<PlayCardDecisionEntity> GetPlayCardTrainingDataAsync(ActorType actorType, int limit = 0, bool winningTeamOnly = false)`~~
+   - ~~Use IAsyncEnumerable for streaming large datasets without loading all into memory~~
+   - ~~Filter by ActorType to get decisions from specific bot generations~~
+   - ~~Optional winningTeamOnly parameter to train only on successful strategies~~
+   - ~~Include unit tests using EF Core in-memory database with sample decision records~~
 
 5. **Implement train/validation/test splitting**
    - Create `NemesisEuchre.MachineLearning\DataAccess\DataSplitter.cs` utility class

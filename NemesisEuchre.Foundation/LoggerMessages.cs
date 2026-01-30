@@ -56,4 +56,25 @@ public static partial class LoggerMessages
         Level = LogLevel.Error,
         Message = "Failed to persist batch of {BatchSize} games. Games will not be saved.")]
     public static partial void LogBatchGamePersistenceFailed(ILogger logger, int batchSize, Exception exception);
+
+    [LoggerMessage(
+        EventId = 9,
+        Level = LogLevel.Debug,
+        Message = "Retrieving {DecisionType} training data for {ActorType} (limit: {Limit}, winningTeamOnly: {WinningTeamOnly})")]
+    public static partial void LogRetrievingTrainingData(
+        ILogger logger,
+        string decisionType,
+        string actorType,
+        int limit,
+        bool winningTeamOnly);
+
+    [LoggerMessage(
+        EventId = 10,
+        Level = LogLevel.Error,
+        Message = "Failed to retrieve {DecisionType} training data for {ActorType}")]
+    public static partial void LogTrainingDataRetrievalFailed(
+        ILogger logger,
+        string decisionType,
+        string actorType,
+        Exception exception);
 }
