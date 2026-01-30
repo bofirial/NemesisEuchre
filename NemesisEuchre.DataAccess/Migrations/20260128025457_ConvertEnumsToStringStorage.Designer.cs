@@ -15,7 +15,6 @@ namespace NemesisEuchre.DataAccess.Migrations
     [Migration("20260128025457_ConvertEnumsToStringStorage")]
     partial class ConvertEnumsToStringStorage
     {
-        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

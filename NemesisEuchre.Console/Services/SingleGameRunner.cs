@@ -7,13 +7,11 @@ using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.Console.Services;
 
-/// <summary>
-/// Orchestrates single game execution including game play, persistence, and result rendering.
-/// </summary>
-/// <param name="gameOrchestrator">The game orchestrator for executing games.</param>
-/// <param name="gameRepository">The repository for persisting completed games.</param>
-/// <param name="gameResultsRenderer">The renderer for displaying game results.</param>
-/// <param name="logger">The logger for recording execution details.</param>
+public interface ISingleGameRunner
+{
+    Task<Game> RunAsync(CancellationToken cancellationToken = default);
+}
+
 public class SingleGameRunner(
     IGameOrchestrator gameOrchestrator,
     IGameRepository gameRepository,

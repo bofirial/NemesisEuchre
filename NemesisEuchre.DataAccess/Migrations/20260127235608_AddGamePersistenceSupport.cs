@@ -4,10 +4,8 @@
 
 namespace NemesisEuchre.DataAccess.Migrations;
 
-/// <inheritdoc />
 public partial class AddGamePersistenceSupport : Migration
 {
-    /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.DropForeignKey(
@@ -102,7 +100,6 @@ public partial class AddGamePersistenceSupport : Migration
             onDelete: ReferentialAction.Cascade);
     }
 
-    /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.DropForeignKey(

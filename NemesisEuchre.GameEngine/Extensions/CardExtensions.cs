@@ -6,21 +6,10 @@ namespace NemesisEuchre.GameEngine.Extensions;
 
 public static class CardExtensions
 {
-    /// <summary>
-    /// Trump value for the right bower (Jack of trump suit).
-    /// Highest trump card in Euchre.
-    /// </summary>
     private const int RightBowerValue = 16;
 
-    /// <summary>
-    /// Trump value for the left bower (Jack of same color as trump).
-    /// Second-highest trump card in Euchre.
-    /// </summary>
     private const int LeftBowerValue = 15;
 
-    /// <summary>
-    /// Return value indicating a card is not trump.
-    /// </summary>
     private const int InvalidTrumpValue = -1;
 
     public static bool IsRightBower(this Card card, Suit trump)

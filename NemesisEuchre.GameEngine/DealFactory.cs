@@ -11,24 +11,12 @@ public interface IDealFactory
 
 public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
 {
-    /// <summary>
-    /// Number of cards dealt to each player in Euchre.
-    /// </summary>
     private const int CardsPerPlayer = 5;
 
-    /// <summary>
-    /// Total number of players in a Euchre game.
-    /// </summary>
     private const int PlayersPerGame = 4;
 
-    /// <summary>
-    /// Index of the up card in the shuffled deck.
-    /// </summary>
     private const int UpCardIndex = 20;
 
-    /// <summary>
-    /// Starting index of the remaining deck (kitty) after dealing.
-    /// </summary>
     private const int RemainingDeckStart = 21;
 
     public Task<Deal> CreateDealAsync(Game game, Deal? previousDeal = null)

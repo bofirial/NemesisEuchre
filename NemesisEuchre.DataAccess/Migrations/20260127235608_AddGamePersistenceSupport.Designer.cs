@@ -15,7 +15,6 @@ namespace NemesisEuchre.DataAccess.Migrations
     [Migration("20260127235608_AddGamePersistenceSupport")]
     partial class AddGamePersistenceSupport
     {
-        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

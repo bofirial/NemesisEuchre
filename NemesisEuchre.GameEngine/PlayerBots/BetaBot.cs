@@ -4,10 +4,6 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.PlayerBots;
 
-/// <summary>
-/// Conservative bot that avoids trump and plays lowest cards.
-/// Always passes on calling trump when possible.
-/// </summary>
 public class BetaBot : BotBase
 {
     public override ActorType ActorType => ActorType.Beta;
