@@ -1,0 +1,74 @@
+using System.Text.Json;
+
+using NemesisEuchre.DataAccess.Configuration;
+using NemesisEuchre.DataAccess.Entities;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.MachineLearning.Models;
+
+namespace NemesisEuchre.MachineLearning.FeatureEngineering;
+
+public class CallTrumpFeatureEngineer : IFeatureEngineer<CallTrumpDecisionEntity, CallTrumpTrainingData>
+{
+    public CallTrumpTrainingData Transform(CallTrumpDecisionEntity entity)
+    {
+        var cards = JsonSerializer.Deserialize<RelativeCard[]>(
+            entity.CardsInHandJson,
+            JsonSerializationOptions.Default)!;
+
+        var upCard = JsonSerializer.Deserialize<RelativeCard>(
+            entity.UpCardJson,
+            JsonSerializationOptions.Default)!;
+
+        var validDecisions = JsonSerializer.Deserialize<CallTrumpDecision[]>(
+            entity.ValidDecisionsJson,
+            JsonSerializationOptions.Default)!;
+
+        var chosenDecision = JsonSerializer.Deserialize<CallTrumpDecision>(
+            entity.ChosenDecisionJson,
+            JsonSerializationOptions.Default);
+
+        var validityArray = new float[11];
+        foreach (var decision in validDecisions)
+        {
+            validityArray[(int)decision] = 1.0f;
+        }
+
+        if (!validDecisions.Contains(chosenDecision))
+        {
+            throw new InvalidOperationException(
+                $"Chosen decision {chosenDecision} is not in the valid decisions array");
+        }
+
+        return new CallTrumpTrainingData
+        {
+            Card1Rank = (float)cards[0].Rank,
+            Card1Suit = (float)cards[0].Suit,
+            Card2Rank = (float)cards[1].Rank,
+            Card2Suit = (float)cards[1].Suit,
+            Card3Rank = (float)cards[2].Rank,
+            Card3Suit = (float)cards[2].Suit,
+            Card4Rank = (float)cards[3].Rank,
+            Card4Suit = (float)cards[3].Suit,
+            Card5Rank = (float)cards[4].Rank,
+            Card5Suit = (float)cards[4].Suit,
+            UpCardRank = (float)upCard.Rank,
+            UpCardSuit = (float)upCard.Suit,
+            DealerPosition = (float)entity.DealerPosition,
+            TeamScore = entity.TeamScore,
+            OpponentScore = entity.OpponentScore,
+            DecisionOrder = entity.DecisionOrder,
+            Decision0IsValid = validityArray[0],
+            Decision1IsValid = validityArray[1],
+            Decision2IsValid = validityArray[2],
+            Decision3IsValid = validityArray[3],
+            Decision4IsValid = validityArray[4],
+            Decision5IsValid = validityArray[5],
+            Decision6IsValid = validityArray[6],
+            Decision7IsValid = validityArray[7],
+            Decision8IsValid = validityArray[8],
+            Decision9IsValid = validityArray[9],
+            Decision10IsValid = validityArray[10],
+            ChosenDecisionIndex = (uint)chosenDecision,
+        };
+    }
+}

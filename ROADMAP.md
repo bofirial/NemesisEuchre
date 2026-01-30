@@ -249,21 +249,12 @@ This version introduces ML.NET-powered bots that learn from game data, establish
      - ~~Feature properties: encoded hand, lead player, lead suit, played cards, team/opponent scores, trick state~~
      - ~~Label property: ChosenCardIndex (0-based index into valid cards array)~~
 
-3. **Implement feature engineering**
-   - Create `NemesisEuchre.MachineLearning\FeatureEngineering\IFeatureEngineer.cs` interface
-   - Create `NemesisEuchre.MachineLearning\FeatureEngineering\CallTrumpFeatureEngineer.cs`
-     - Transform CallTrumpDecisionEntity → CallTrumpTrainingData
-     - Encoding: RelativeCard → (Rank: 0-5, Suit: 0-1), PlayerPosition → 0-3, scores as-is
-     - Map chosen decision to index (0-10 for 11 possible decisions)
-   - Create `NemesisEuchre.MachineLearning\FeatureEngineering\DiscardCardFeatureEngineer.cs`
-     - Transform DiscardCardDecisionEntity → DiscardCardTrainingData
-     - Encode 6-card hand as 12 integers (6 cards × 2 values: rank, suit)
-     - Map chosen card to index (0-5)
-   - Create `NemesisEuchre.MachineLearning\FeatureEngineering\PlayCardFeatureEngineer.cs`
-     - Transform PlayCardDecisionEntity → PlayCardTrainingData
-     - Encode variable-length hand (1-5 cards), played cards, lead suit
-     - Map chosen card to index within valid cards list
-   - Include unit tests verifying correct encoding and label mapping
+3. ~~**Implement feature engineering**~~
+   - ~~Create `NemesisEuchre.MachineLearning\FeatureEngineering\IFeatureEngineer.cs` interface~~
+   - ~~Create `NemesisEuchre.MachineLearning\FeatureEngineering\CallTrumpFeatureEngineer.cs`~~
+   - ~~Create `NemesisEuchre.MachineLearning\FeatureEngineering\DiscardCardFeatureEngineer.cs`~~
+   - ~~Create `NemesisEuchre.MachineLearning\FeatureEngineering\PlayCardFeatureEngineer.cs`~~
+   - ~~Include unit tests verifying correct encoding and label mapping~~
 
 4. **Add repository methods for ML data queries**
    - Extend `NemesisEuchre.DataAccess\IGameRepository.cs` with ML-specific queries:
