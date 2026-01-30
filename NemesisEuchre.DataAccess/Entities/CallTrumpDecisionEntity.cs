@@ -18,13 +18,11 @@ public class CallTrumpDecisionEntity
 
     public short OpponentScore { get; set; }
 
-    public PlayerPosition DealerPosition { get; set; }
+    public RelativePlayerPosition DealerPosition { get; set; }
 
     public string UpCardJson { get; set; } = null!;
 
     public string ValidDecisionsJson { get; set; } = null!;
-
-    public PlayerPosition DecidingPlayerPosition { get; set; }
 
     public string ChosenDecisionJson { get; set; } = null!;
 
@@ -33,6 +31,8 @@ public class CallTrumpDecisionEntity
     public ActorType? ActorType { get; set; }
 
     public bool? DidTeamWinDeal { get; set; }
+
+    public short? RelativeDealPoints { get; set; }
 
     public bool? DidTeamWinGame { get; set; }
 
@@ -65,7 +65,7 @@ public class CallTrumpDecisionEntityConfiguration : IEntityTypeConfiguration<Cal
         builder.Property(e => e.DealerPosition)
             .IsRequired()
             .HasConversion<string>()
-            .HasMaxLength(10);
+            .HasMaxLength(25);
 
         builder.Property(e => e.UpCardJson)
             .IsRequired()
@@ -73,11 +73,6 @@ public class CallTrumpDecisionEntityConfiguration : IEntityTypeConfiguration<Cal
 
         builder.Property(e => e.ValidDecisionsJson)
             .IsRequired();
-
-        builder.Property(e => e.DecidingPlayerPosition)
-            .IsRequired()
-            .HasConversion<string>()
-            .HasMaxLength(10);
 
         builder.Property(e => e.ChosenDecisionJson)
             .IsRequired();
@@ -90,6 +85,8 @@ public class CallTrumpDecisionEntityConfiguration : IEntityTypeConfiguration<Cal
             .HasMaxLength(10);
 
         builder.Property(e => e.DidTeamWinDeal);
+
+        builder.Property(e => e.RelativeDealPoints);
 
         builder.Property(e => e.DidTeamWinGame);
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NemesisEuchre.DataAccess;
 
@@ -11,9 +12,11 @@ using NemesisEuchre.DataAccess;
 namespace NemesisEuchre.DataAccess.Migrations
 {
     [DbContext(typeof(NemesisEuchreDbContext))]
-    partial class NemesisEuchreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260130135445_RefactorTrainingDataSchema")]
+    partial class RefactorTrainingDataSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,9 +63,6 @@ namespace NemesisEuchre.DataAccess.Migrations
                         .HasColumnType("bit");
 
                     b.Property<short>("OpponentScore")
-                        .HasColumnType("smallint");
-
-                    b.Property<short?>("RelativeDealPoints")
                         .HasColumnType("smallint");
 
                     b.Property<short>("TeamScore")
@@ -197,9 +197,6 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<short>("OpponentScore")
                         .HasColumnType("smallint");
 
-                    b.Property<short?>("RelativeDealPoints")
-                        .HasColumnType("smallint");
-
                     b.Property<short>("TeamScore")
                         .HasColumnType("smallint");
 
@@ -270,14 +267,6 @@ namespace NemesisEuchre.DataAccess.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<string>("CallingPlayer")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
-
-                    b.Property<bool>("CallingPlayerGoingAlone")
-                        .HasColumnType("bit");
-
                     b.Property<string>("CardsInHandJson")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -314,9 +303,6 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<string>("PlayedCardsJson")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<short?>("RelativeDealPoints")
-                        .HasColumnType("smallint");
 
                     b.Property<short>("TeamScore")
                         .HasColumnType("smallint");

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NemesisEuchre.DataAccess;
 
@@ -11,9 +12,11 @@ using NemesisEuchre.DataAccess;
 namespace NemesisEuchre.DataAccess.Migrations
 {
     [DbContext(typeof(NemesisEuchreDbContext))]
-    partial class NemesisEuchreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260130141852_AddRelativeDealPoints")]
+    partial class AddRelativeDealPoints
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -269,14 +272,6 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<string>("ActorType")
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("CallingPlayer")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
-
-                    b.Property<bool>("CallingPlayerGoingAlone")
-                        .HasColumnType("bit");
 
                     b.Property<string>("CardsInHandJson")
                         .IsRequired()

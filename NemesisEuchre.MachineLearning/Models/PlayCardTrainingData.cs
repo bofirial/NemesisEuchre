@@ -89,6 +89,12 @@ public class PlayCardTrainingData
     public float Card5IsValid { get; set; }
 
     [LoadColumn(28)]
+    public float CallingPlayerPosition { get; set; }
+
+    [LoadColumn(29)]
+    public float CallingPlayerGoingAlone { get; set; }
+
+    [LoadColumn(30)]
     [ColumnName("Label")]
     public uint ChosenCardIndex { get; set; }
 }

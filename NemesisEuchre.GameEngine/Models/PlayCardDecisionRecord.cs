@@ -24,5 +24,9 @@ public class PlayCardDecisionRecord
 
     public Card[] ValidCardsToPlay { get; set; } = [];
 
+    public PlayerPosition CallingPlayer { get; set; }
+
+    public bool CallingPlayerGoingAlone { get; set; }
+
     public Card ChosenCard { get; set; } = null!;
 }

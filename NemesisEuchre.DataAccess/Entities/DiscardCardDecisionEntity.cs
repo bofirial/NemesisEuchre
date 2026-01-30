@@ -22,13 +22,13 @@ public class DiscardCardDecisionEntity
 
     public bool CallingPlayerGoingAlone { get; set; }
 
-    public string ValidCardsToDiscardJson { get; set; } = null!;
-
     public string ChosenCardJson { get; set; } = null!;
 
     public ActorType? ActorType { get; set; }
 
     public bool? DidTeamWinDeal { get; set; }
+
+    public short? RelativeDealPoints { get; set; }
 
     public bool? DidTeamWinGame { get; set; }
 
@@ -63,9 +63,6 @@ public class DiscardCardDecisionEntityConfiguration : IEntityTypeConfiguration<D
         builder.Property(e => e.OpponentScore)
             .IsRequired();
 
-        builder.Property(e => e.ValidCardsToDiscardJson)
-            .IsRequired();
-
         builder.Property(e => e.ChosenCardJson)
             .IsRequired()
             .HasMaxLength(200);
@@ -75,6 +72,8 @@ public class DiscardCardDecisionEntityConfiguration : IEntityTypeConfiguration<D
             .HasMaxLength(10);
 
         builder.Property(e => e.DidTeamWinDeal);
+
+        builder.Property(e => e.RelativeDealPoints);
 
         builder.Property(e => e.DidTeamWinGame);
 
