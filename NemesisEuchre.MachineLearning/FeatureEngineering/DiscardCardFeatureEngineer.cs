@@ -9,13 +9,15 @@ namespace NemesisEuchre.MachineLearning.FeatureEngineering;
 
 public class DiscardCardFeatureEngineer : IFeatureEngineer<DiscardCardDecisionEntity, DiscardCardTrainingData>
 {
+    private const int ExpectedCardsInHand = 6;
+
     public DiscardCardTrainingData Transform(DiscardCardDecisionEntity entity)
     {
         var cards = JsonSerializer.Deserialize<RelativeCard[]>(
             entity.CardsInHandJson,
             JsonSerializationOptions.Default)!;
 
-        if (cards.Length != 6)
+        if (cards.Length != ExpectedCardsInHand)
         {
             throw new InvalidOperationException(
                 $"Expected 6 cards in hand but found {cards.Length}");

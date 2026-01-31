@@ -9,6 +9,8 @@ namespace NemesisEuchre.MachineLearning.FeatureEngineering;
 
 public class CallTrumpFeatureEngineer : IFeatureEngineer<CallTrumpDecisionEntity, CallTrumpTrainingData>
 {
+    private const int NumberOfDecisionClasses = 11;
+
     public CallTrumpTrainingData Transform(CallTrumpDecisionEntity entity)
     {
         var cards = JsonSerializer.Deserialize<RelativeCard[]>(
@@ -27,7 +29,7 @@ public class CallTrumpFeatureEngineer : IFeatureEngineer<CallTrumpDecisionEntity
             entity.ChosenDecisionJson,
             JsonSerializationOptions.Default);
 
-        var validityArray = new float[11];
+        var validityArray = new float[NumberOfDecisionClasses];
         foreach (var decision in validDecisions)
         {
             validityArray[(int)decision] = 1.0f;

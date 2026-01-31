@@ -24,8 +24,20 @@ public record DataSplit(
     int ValidationRowCount,
     int TestRowCount);
 
-public class DataSplitter(MLContext mlContext, IOptions<MachineLearningOptions> options) : IDataSplitter
+public class DataSplitter : IDataSplitter
 {
+    private readonly MLContext _mlContext;
+    private readonly MachineLearningOptions _options;
+
+    public DataSplitter(MLContext mlContext, IOptions<MachineLearningOptions> options)
+    {
+        ArgumentNullException.ThrowIfNull(mlContext);
+        ArgumentNullException.ThrowIfNull(options);
+
+        _mlContext = mlContext;
+        _options = options.Value ?? throw new ArgumentNullException(nameof(options), "Options value cannot be null");
+    }
+
     public DataSplit Split<T>(
         IEnumerable<T> data,
         double trainRatio = 0.7,
@@ -37,7 +49,7 @@ public class DataSplitter(MLContext mlContext, IOptions<MachineLearningOptions> 
 
         ValidateRatios(trainRatio, validationRatio, testRatio);
 
-        var dataView = mlContext.Data.LoadFromEnumerable(data);
+        var dataView = _mlContext.Data.LoadFromEnumerable(data);
 
         var rowCount = (int)(dataView.GetRowCount() ?? 0);
 
@@ -51,15 +63,15 @@ public class DataSplitter(MLContext mlContext, IOptions<MachineLearningOptions> 
             throw new InvalidOperationException($"Dataset must contain at least 3 samples for splitting. Found {rowCount} samples.");
         }
 
-        var shuffledData = mlContext.Data.ShuffleRows(dataView, seed: options!.Value!.RandomSeed);
+        var shuffledData = _mlContext.Data.ShuffleRows(dataView, seed: _options.RandomSeed);
 
         var trainFraction = trainRatio;
-        var firstSplit = mlContext.Data.TrainTestSplit(shuffledData, testFraction: 1.0 - trainFraction, seed: options!.Value!.RandomSeed);
+        var firstSplit = _mlContext.Data.TrainTestSplit(shuffledData, testFraction: 1.0 - trainFraction, seed: _options.RandomSeed);
         var trainDataView = firstSplit.TrainSet;
         var remaining = firstSplit.TestSet;
 
         var validationFractionOfRemaining = validationRatio / (validationRatio + testRatio);
-        var secondSplit = mlContext.Data.TrainTestSplit(remaining, testFraction: 1.0 - validationFractionOfRemaining, seed: options!.Value!.RandomSeed);
+        var secondSplit = _mlContext.Data.TrainTestSplit(remaining, testFraction: 1.0 - validationFractionOfRemaining, seed: _options.RandomSeed);
         var validationDataView = secondSplit.TrainSet;
         var testDataView = secondSplit.TestSet;
 
@@ -104,7 +116,7 @@ public class DataSplitter(MLContext mlContext, IOptions<MachineLearningOptions> 
 
     private static int CountRows(IDataView dataView)
     {
-        var cursor = dataView.GetRowCursor(dataView.Schema);
+        using var cursor = dataView.GetRowCursor(dataView.Schema);
         int count = 0;
         while (cursor.MoveNext())
         {

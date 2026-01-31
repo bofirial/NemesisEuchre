@@ -66,7 +66,8 @@ public abstract class MulticlassModelTrainerBase<TData>(
             validationMetrics.MacroAccuracy,
             validationMetrics.LogLoss);
 
-        LogPerClassMetrics(validationMetrics);
+        var evaluationReport = CreateEvaluationReport(validationMetrics, dataSplit.ValidationRowCount);
+        LogPerClassMetrics(validationMetrics, evaluationReport);
 
         return new TrainingResult(
             TrainedModel,
@@ -119,83 +120,17 @@ public abstract class MulticlassModelTrainerBase<TData>(
         TrainingResult trainingResult,
         CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(modelsDirectory);
-        ArgumentNullException.ThrowIfNull(trainingResult);
+        ValidateSaveModelParameters(modelsDirectory, generation, trainingResult);
 
-        if (generation < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(generation), "Generation must be at least 1");
-        }
-
-        if (TrainedModel == null)
-        {
-            throw new InvalidOperationException("No trained model to save. Call TrainAsync first.");
-        }
-
-        if (!Directory.Exists(modelsDirectory))
-        {
-            Directory.CreateDirectory(modelsDirectory);
-        }
+        EnsureDirectoryExists(modelsDirectory);
 
         var decisionType = GetModelType().ToLowerInvariant();
-
-        LoggerMessages.LogDeterminingNextVersion(Logger, generation, decisionType);
-        var version = VersionManager.GetNextVersion(modelsDirectory, generation, decisionType);
-        LoggerMessages.LogExistingVersionsFound(Logger, version - 1, generation, decisionType);
-
+        var version = DetermineNextVersion(modelsDirectory, generation, decisionType);
         var modelPath = VersionManager.GetModelPath(modelsDirectory, generation, decisionType, version);
 
-        LoggerMessages.LogSavingModelWithVersion(Logger, generation, decisionType, version);
-
-        var schema = MlContext.Data.LoadFromEnumerable([new TData()]).Schema;
-
-        await Task.Run(
-            () =>
-        {
-            MlContext.Model.Save(TrainedModel, schema, modelPath);
-            LoggerMessages.LogModelSaved(Logger, modelPath);
-        }, cancellationToken);
-
-        var metadataPath = Path.ChangeExtension(modelPath, ".json");
-        var metadata = new ModelMetadata(
-            GetModelType(),
-            actorType,
-            generation,
-            version,
-            DateTime.UtcNow,
-            trainingResult.TrainingSamples,
-            trainingResult.ValidationSamples,
-            trainingResult.TestSamples,
-            new HyperparametersMetadata(
-                "LightGbm",
-                Options.NumberOfLeaves,
-                Options.NumberOfIterations,
-                Options.LearningRate,
-                Options.RandomSeed),
-            new MetricsMetadata(
-                trainingResult.ValidationMetrics.MicroAccuracy,
-                trainingResult.ValidationMetrics.MacroAccuracy,
-                trainingResult.ValidationMetrics.LogLoss,
-                trainingResult.ValidationMetrics.LogLossReduction),
-            "1.0");
-
-        var jsonOptions = JsonSerializationOptions.Default;
-        var json = JsonSerializer.Serialize(metadata, jsonOptions);
-
-        await File.WriteAllTextAsync(metadataPath, json, cancellationToken);
-
-        LoggerMessages.LogMetadataSaved(Logger, metadataPath);
-
-        var evaluationPath = Path.ChangeExtension(modelPath, ".evaluation.json");
-        var evaluationReport = CreateEvaluationReport(
-            trainingResult.ValidationMetrics,
-            trainingResult.ValidationSamples);
-
-        var reportJson = JsonSerializer.Serialize(evaluationReport, JsonSerializationOptions.WithNaNHandling);
-
-        await File.WriteAllTextAsync(evaluationPath, reportJson, cancellationToken);
-
-        LoggerMessages.LogEvaluationReportSaved(Logger, evaluationPath);
+        await SaveModelFileAsync(modelPath, generation, decisionType, version, cancellationToken);
+        await SaveMetadataAsync(modelPath, generation, actorType, trainingResult, version, cancellationToken);
+        await SaveEvaluationReportAsync(modelPath, trainingResult, cancellationToken);
     }
 
     protected abstract IEstimator<ITransformer> BuildPipeline(IDataView trainingData);
@@ -203,6 +138,14 @@ public abstract class MulticlassModelTrainerBase<TData>(
     protected abstract string GetModelType();
 
     protected abstract int GetNumberOfClasses();
+
+    private static void EnsureDirectoryExists(string directory)
+    {
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+    }
 
     private static double[] ExtractPerClassMetric(IReadOnlyList<double> metrics, int numberOfClasses)
     {
@@ -278,7 +221,110 @@ public abstract class MulticlassModelTrainerBase<TData>(
         return totalWeight > 0 ? weightedSum / totalWeight : double.NaN;
     }
 
-    private void LogPerClassMetrics(EvaluationMetrics metrics)
+    private void ValidateSaveModelParameters(string modelsDirectory, int generation, TrainingResult trainingResult)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(modelsDirectory);
+        ArgumentNullException.ThrowIfNull(trainingResult);
+
+        if (generation < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(generation), "Generation must be at least 1");
+        }
+
+        if (TrainedModel == null)
+        {
+            throw new InvalidOperationException("No trained model to save. Call TrainAsync first.");
+        }
+    }
+
+    private int DetermineNextVersion(string modelsDirectory, int generation, string decisionType)
+    {
+        LoggerMessages.LogDeterminingNextVersion(Logger, generation, decisionType);
+        var version = VersionManager.GetNextVersion(modelsDirectory, generation, decisionType);
+        LoggerMessages.LogExistingVersionsFound(Logger, version - 1, generation, decisionType);
+        return version;
+    }
+
+    private Task SaveModelFileAsync(
+        string modelPath,
+        int generation,
+        string decisionType,
+        int version,
+        CancellationToken cancellationToken)
+    {
+        var schema = MlContext.Data.LoadFromEnumerable([new TData()]).Schema;
+
+        LoggerMessages.LogSavingModelWithVersion(Logger, generation, decisionType, version);
+
+        return Task.Run(
+            () =>
+        {
+            MlContext.Model.Save(TrainedModel!, schema, modelPath);
+            LoggerMessages.LogModelSaved(Logger, modelPath);
+        }, cancellationToken);
+    }
+
+    private async Task SaveMetadataAsync(
+        string modelPath,
+        int generation,
+        ActorType actorType,
+        TrainingResult trainingResult,
+        int version,
+        CancellationToken cancellationToken)
+    {
+        var metadataPath = Path.ChangeExtension(modelPath, ".json");
+        var metadata = CreateModelMetadata(generation, actorType, trainingResult, version);
+        var json = JsonSerializer.Serialize(metadata, JsonSerializationOptions.Default);
+
+        await File.WriteAllTextAsync(metadataPath, json, cancellationToken);
+        LoggerMessages.LogMetadataSaved(Logger, metadataPath);
+    }
+
+    private async Task SaveEvaluationReportAsync(
+        string modelPath,
+        TrainingResult trainingResult,
+        CancellationToken cancellationToken)
+    {
+        var evaluationPath = Path.ChangeExtension(modelPath, ".evaluation.json");
+        var evaluationReport = CreateEvaluationReport(
+            trainingResult.ValidationMetrics,
+            trainingResult.ValidationSamples);
+        var reportJson = JsonSerializer.Serialize(evaluationReport, JsonSerializationOptions.WithNaNHandling);
+
+        await File.WriteAllTextAsync(evaluationPath, reportJson, cancellationToken);
+        LoggerMessages.LogEvaluationReportSaved(Logger, evaluationPath);
+    }
+
+    private ModelMetadata CreateModelMetadata(
+        int generation,
+        ActorType actorType,
+        TrainingResult trainingResult,
+        int version)
+    {
+        return new ModelMetadata(
+            GetModelType(),
+            actorType,
+            generation,
+            version,
+            DateTime.UtcNow,
+            trainingResult.TrainingSamples,
+            trainingResult.ValidationSamples,
+            trainingResult.TestSamples,
+            new HyperparametersMetadata(
+                "LightGbm",
+                Options.NumberOfLeaves,
+                Options.NumberOfIterations,
+                Options.LearningRate,
+                Options.RandomSeed),
+            new MetricsMetadata(
+                trainingResult.ValidationMetrics.MicroAccuracy,
+                trainingResult.ValidationMetrics.MacroAccuracy,
+                trainingResult.ValidationMetrics.LogLoss,
+                trainingResult.ValidationMetrics.LogLossReduction),
+            "1.0");
+    }
+
+    private void LogPerClassMetrics(EvaluationMetrics metrics, EvaluationReport report)
     {
         LoggerMessages.LogPerClassMetricsHeader(Logger, GetModelType());
 
@@ -292,8 +338,6 @@ public abstract class MulticlassModelTrainerBase<TData>(
                 classMetric.F1Score,
                 classMetric.Support);
         }
-
-        var report = CreateEvaluationReport(metrics, metrics.PerClassMetrics.Sum(m => m.Support));
 
         LoggerMessages.LogWeightedAverages(
             Logger,

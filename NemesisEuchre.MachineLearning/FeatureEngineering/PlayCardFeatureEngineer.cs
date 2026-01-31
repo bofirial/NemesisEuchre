@@ -10,6 +10,8 @@ namespace NemesisEuchre.MachineLearning.FeatureEngineering;
 
 public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, PlayCardTrainingData>
 {
+    private const int MaxCardsInHand = 5;
+
     public PlayCardTrainingData Transform(PlayCardDecisionEntity entity)
     {
         var cards = JsonSerializer.Deserialize<RelativeCard[]>(
@@ -29,7 +31,7 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
             entity.ValidCardsToPlayJson,
             JsonSerializationOptions.Default)!;
 
-        var validityArray = new float[5];
+        var validityArray = new float[MaxCardsInHand];
         foreach (var validCard in validCards)
         {
             var index = Array.FindIndex(cards, c =>
