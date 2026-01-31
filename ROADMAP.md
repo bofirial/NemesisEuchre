@@ -303,14 +303,14 @@ This version introduces ML.NET-powered bots that learn from game data, establish
    - ~~Document alternative algorithms in comments: FastTree, LightGbm, OneVersusAll~~
    - ~~Configure hyperparameters (learning rate, max iterations)~~
 
-8. **Implement training workflow**
-   - Load training data from IGameRepository using feature engineers
-   - Convert IEnumerable<TrainingData> to IDataView
-   - Split into train/validation sets using DataSplitter
-   - Fit ML.NET pipeline on training data
-   - Cache trained PredictionEngine for fast inference
-   - Log training metrics: elapsed time, sample count, memory usage
-   - Include unit tests verifying pipeline execution
+8. ~~**Implement training workflow**~~
+   - ~~Load training data from IGameRepository using feature engineers~~
+   - ~~Convert IEnumerable<TrainingData> to IDataView~~
+   - ~~Split into train/validation sets using DataSplitter~~
+   - ~~Fit ML.NET pipeline on training data~~
+   - ~~Cache trained PredictionEngine for fast inference~~
+   - ~~Log training metrics: elapsed time, sample count, memory usage~~
+   - ~~Include unit tests verifying pipeline execution~~
 
 9. **Add model evaluation**
    - Evaluate trained model on validation set
