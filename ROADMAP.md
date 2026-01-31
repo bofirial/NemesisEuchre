@@ -312,17 +312,17 @@ This version introduces ML.NET-powered bots that learn from game data, establish
    - ~~Log training metrics: elapsed time, sample count, memory usage~~
    - ~~Include unit tests verifying pipeline execution~~
 
-9. **Add model evaluation**
-   - Evaluate trained model on validation set
-   - Calculate multiclass metrics:
-     - MacroAccuracy (average accuracy across all classes)
-     - MicroAccuracy (overall accuracy)
-     - LogLoss (lower is better)
-     - PerClassPrecision, PerClassRecall, PerClassF1
-   - Generate confusion matrix for error analysis
-   - Log evaluation report to console and file
-   - Return EvaluationReport DTO with all metrics
-   - Include unit tests verifying metric calculation
+9. ~~**Add model evaluation**~~
+   - ~~Evaluate trained model on validation set~~
+   - ~~Calculate multiclass metrics:~~
+     - ~~MacroAccuracy (average accuracy across all classes)~~
+     -~~ MicroAccuracy (overall accuracy)~~
+     - ~~LogLoss (lower is better)~~
+     - ~~PerClassPrecision, PerClassRecall, PerClassF1~~
+   - ~~Generate confusion matrix for error analysis~~
+   - ~~Log evaluation report to console and file~~
+   - ~~Return EvaluationReport DTO with all metrics~~
+   - ~~Include unit tests verifying metric calculation~~
 
 10. **Implement model serialization**
     - Save trained ML.NET models to `Models/gen{N}_{decisionType}_v{version}.zip`
