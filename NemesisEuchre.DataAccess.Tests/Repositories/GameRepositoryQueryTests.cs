@@ -17,94 +17,6 @@ namespace NemesisEuchre.DataAccess.Tests.Repositories;
 
 public class GameRepositoryQueryTests
 {
-    private static NemesisEuchreDbContext CreateInMemoryContext()
-    {
-        var options = new DbContextOptionsBuilder<NemesisEuchreDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-        return new NemesisEuchreDbContext(options);
-    }
-
-    private static GameRepository CreateRepository(NemesisEuchreDbContext context)
-    {
-        var mockLogger = new Mock<ILogger<GameRepository>>();
-        var mockMapper = new Mock<IGameToEntityMapper>();
-        var mockOptions = new Mock<IOptions<PersistenceOptions>>();
-        mockOptions.Setup(x => x.Value).Returns(new PersistenceOptions());
-        return new GameRepository(context, mockLogger.Object, mockMapper.Object, mockOptions.Object);
-    }
-
-    private static DealEntity CreateDealEntity()
-    {
-        return new DealEntity
-        {
-            GameId = 1,
-            DealNumber = 1,
-            DealStatus = DealStatus.Complete,
-            DealerPosition = PlayerPosition.North,
-            DeckJson = "[]",
-            PlayersJson = "[]",
-            Team1Score = 0,
-            Team2Score = 0,
-        };
-    }
-
-    private static CallTrumpDecisionEntity CreateCallTrumpDecision(ActorType actorType, bool? didTeamWinGame)
-    {
-        return new CallTrumpDecisionEntity
-        {
-            ActorType = actorType,
-            DidTeamWinGame = didTeamWinGame,
-            DidTeamWinDeal = didTeamWinGame,
-            CardsInHandJson = /*lang=json,strict*/ "[{\"Suit\":\"Hearts\",\"Rank\":\"Nine\"}]",
-            TeamScore = 0,
-            OpponentScore = 0,
-            DealerPosition = RelativePlayerPosition.Self,
-            UpCardJson = /*lang=json,strict*/ "{\"Suit\":\"Hearts\",\"Rank\":\"Jack\"}",
-            ValidDecisionsJson = "[\"Pass\",\"OrderItUp\"]",
-            ChosenDecisionJson = "\"OrderItUp\"",
-            DecisionOrder = 1,
-        };
-    }
-
-    private static DiscardCardDecisionEntity CreateDiscardCardDecision(ActorType actorType, bool? didTeamWinGame)
-    {
-        return new DiscardCardDecisionEntity
-        {
-            ActorType = actorType,
-            DidTeamWinGame = didTeamWinGame,
-            DidTeamWinDeal = didTeamWinGame,
-            CardsInHandJson = /*lang=json,strict*/ "[{\"Suit\":\"Hearts\",\"Rank\":\"Nine\"}]",
-            TeamScore = 0,
-            OpponentScore = 0,
-            CallingPlayer = RelativePlayerPosition.Self,
-            CallingPlayerGoingAlone = false,
-            ChosenCardJson = /*lang=json,strict*/ "{\"Suit\":\"Hearts\",\"Rank\":\"Nine\"}",
-        };
-    }
-
-    private static PlayCardDecisionEntity CreatePlayCardDecision(ActorType actorType, bool? didTeamWinGame)
-    {
-        return new PlayCardDecisionEntity
-        {
-            ActorType = actorType,
-            DidTeamWinGame = didTeamWinGame,
-            DidTeamWinDeal = didTeamWinGame,
-            DidTeamWinTrick = didTeamWinGame,
-            CardsInHandJson = /*lang=json,strict*/ "[{\"Suit\":\"Hearts\",\"Rank\":\"Nine\"}]",
-            TeamScore = 0,
-            OpponentScore = 0,
-            LeadPlayer = RelativePlayerPosition.Self,
-            LeadSuit = RelativeSuit.Trump,
-            PlayedCardsJson = "[]",
-            WinningTrickPlayer = RelativePlayerPosition.Self,
-            ValidCardsToPlayJson = /*lang=json,strict*/ "[{\"Suit\":\"Hearts\",\"Rank\":\"Nine\"}]",
-            CallingPlayer = RelativePlayerPosition.Self,
-            CallingPlayerGoingAlone = false,
-            ChosenCardJson = /*lang=json,strict*/ "{\"Suit\":\"Hearts\",\"Rank\":\"Nine\"}",
-        };
-    }
-
     [Fact]
     public async Task GetCallTrumpTrainingDataAsync_WithMatchingActorType_ReturnsFilteredDecisions()
     {
@@ -815,5 +727,93 @@ public class GameRepositoryQueryTests
         results.Should().HaveCount(3);
         results.Should().OnlyContain(d => d.ActorType == ActorType.Chaos);
         results.Should().OnlyContain(d => d.DidTeamWinGame == true);
+    }
+
+    private static NemesisEuchreDbContext CreateInMemoryContext()
+    {
+        var options = new DbContextOptionsBuilder<NemesisEuchreDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+        return new NemesisEuchreDbContext(options);
+    }
+
+    private static GameRepository CreateRepository(NemesisEuchreDbContext context)
+    {
+        var mockLogger = new Mock<ILogger<GameRepository>>();
+        var mockMapper = new Mock<IGameToEntityMapper>();
+        var mockOptions = new Mock<IOptions<PersistenceOptions>>();
+        mockOptions.Setup(x => x.Value).Returns(new PersistenceOptions());
+        return new GameRepository(context, mockLogger.Object, mockMapper.Object, mockOptions.Object);
+    }
+
+    private static DealEntity CreateDealEntity()
+    {
+        return new DealEntity
+        {
+            GameId = 1,
+            DealNumber = 1,
+            DealStatus = DealStatus.Complete,
+            DealerPosition = PlayerPosition.North,
+            DeckJson = "[]",
+            PlayersJson = "[]",
+            Team1Score = 0,
+            Team2Score = 0,
+        };
+    }
+
+    private static CallTrumpDecisionEntity CreateCallTrumpDecision(ActorType actorType, bool? didTeamWinGame)
+    {
+        return new CallTrumpDecisionEntity
+        {
+            ActorType = actorType,
+            DidTeamWinGame = didTeamWinGame,
+            DidTeamWinDeal = didTeamWinGame,
+            CardsInHandJson = /*lang=json,strict*/ "[{\"Suit\":\"Hearts\",\"Rank\":\"Nine\"}]",
+            TeamScore = 0,
+            OpponentScore = 0,
+            DealerPosition = RelativePlayerPosition.Self,
+            UpCardJson = /*lang=json,strict*/ "{\"Suit\":\"Hearts\",\"Rank\":\"Jack\"}",
+            ValidDecisionsJson = "[\"Pass\",\"OrderItUp\"]",
+            ChosenDecisionJson = "\"OrderItUp\"",
+            DecisionOrder = 1,
+        };
+    }
+
+    private static DiscardCardDecisionEntity CreateDiscardCardDecision(ActorType actorType, bool? didTeamWinGame)
+    {
+        return new DiscardCardDecisionEntity
+        {
+            ActorType = actorType,
+            DidTeamWinGame = didTeamWinGame,
+            DidTeamWinDeal = didTeamWinGame,
+            CardsInHandJson = /*lang=json,strict*/ "[{\"Suit\":\"Hearts\",\"Rank\":\"Nine\"}]",
+            TeamScore = 0,
+            OpponentScore = 0,
+            CallingPlayer = RelativePlayerPosition.Self,
+            CallingPlayerGoingAlone = false,
+            ChosenCardJson = /*lang=json,strict*/ "{\"Suit\":\"Hearts\",\"Rank\":\"Nine\"}",
+        };
+    }
+
+    private static PlayCardDecisionEntity CreatePlayCardDecision(ActorType actorType, bool? didTeamWinGame)
+    {
+        return new PlayCardDecisionEntity
+        {
+            ActorType = actorType,
+            DidTeamWinGame = didTeamWinGame,
+            DidTeamWinDeal = didTeamWinGame,
+            DidTeamWinTrick = didTeamWinGame,
+            CardsInHandJson = /*lang=json,strict*/ "[{\"Suit\":\"Hearts\",\"Rank\":\"Nine\"}]",
+            TeamScore = 0,
+            OpponentScore = 0,
+            LeadPlayer = RelativePlayerPosition.Self,
+            LeadSuit = RelativeSuit.Trump,
+            PlayedCardsJson = "[]",
+            WinningTrickPlayer = RelativePlayerPosition.Self,
+            ValidCardsToPlayJson = /*lang=json,strict*/ "[{\"Suit\":\"Hearts\",\"Rank\":\"Nine\"}]",
+            CallingPlayer = RelativePlayerPosition.Self,
+            CallingPlayerGoingAlone = false,
+            ChosenCardJson = /*lang=json,strict*/ "{\"Suit\":\"Hearts\",\"Rank\":\"Nine\"}",
+        };
     }
 }

@@ -12,4 +12,7 @@ public class MachineLearningOptions
 
     [Range(0.0001, 1.0)]
     public double LearningRate { get; set; } = 0.1;
+
+    [Range(0, int.MaxValue)]
+    public int RandomSeed { get; set; } = 42;
 }
