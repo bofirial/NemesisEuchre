@@ -20,7 +20,10 @@ public static class MachineLearningServiceCollectionExtensions
         services.AddSingleton<MLContext>();
         services.AddScoped<IDataSplitter, DataSplitter>();
         services.AddScoped<ITrainingDataLoader, TrainingDataLoader>();
-        services.AddScoped<IModelTrainer, ModelTrainer>();
+
+        services.AddScoped<IModelTrainer<CallTrumpTrainingData>, CallTrumpModelTrainer>();
+        services.AddScoped<IModelTrainer<DiscardCardTrainingData>, DiscardCardModelTrainer>();
+        services.AddScoped<IModelTrainer<PlayCardTrainingData>, PlayCardModelTrainer>();
 
         services.AddSingleton<IFeatureEngineer<CallTrumpDecisionEntity, CallTrumpTrainingData>, CallTrumpFeatureEngineer>();
         services.AddSingleton<IFeatureEngineer<DiscardCardDecisionEntity, DiscardCardTrainingData>, DiscardCardFeatureEngineer>();

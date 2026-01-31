@@ -266,13 +266,13 @@ This version introduces ML.NET-powered bots that learn from game data, establish
    - ~~Optional winningTeamOnly parameter to train only on successful strategies~~
    - ~~Include unit tests using EF Core in-memory database with sample decision records~~
 
-5. **Implement train/validation/test splitting**
-   - Create `NemesisEuchre.MachineLearning\DataAccess\DataSplitter.cs` utility class
-   - Split data into: 70% train, 15% validation, 15% test (configurable ratios)
-   - Support stratified sampling by outcome (DidTeamWinDeal) if needed
-   - Shuffle with configurable seed for reproducibility
-   - Return three IDataView instances for ML.NET consumption
-   - Include unit tests verifying split ratios and shuffling
+5. ~~**Implement train/validation/test splitting**~~
+   - ~~Create `NemesisEuchre.MachineLearning\DataAccess\DataSplitter.cs` utility class~~
+   - ~~Split data into: 70% train, 15% validation, 15% test (configurable ratios)~~
+   - ~~Support stratified sampling by outcome (DidTeamWinDeal) if needed~~
+   - ~~Shuffle with configurable seed for reproducibility~~
+   - ~~Return three IDataView instances for ML.NET consumption~~
+   - ~~Include unit tests verifying split ratios and shuffling~~
 
 ### Phase 2: ML Model Training (Steps 6-10)
 
