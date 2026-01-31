@@ -324,18 +324,18 @@ This version introduces ML.NET-powered bots that learn from game data, establish
    - ~~Return EvaluationReport DTO with all metrics~~
    - ~~Include unit tests verifying metric calculation~~
 
-10. **Implement model serialization**
-    - Save trained ML.NET models to `Models/gen{N}_{decisionType}_v{version}.zip`
-      - Example: `Models/gen1_calltrump_v1.zip`
-    - Store model metadata in accompanying JSON file:
-      - Training date/time
-      - ActorType (which bot's data was used)
-      - Sample count (train/validation/test)
-      - Evaluation metrics (accuracy, log loss)
-      - Feature schema version
-    - Version management: increment version on each training run
-    - Create ModelLoader utility for loading models at runtime
-    - Include unit tests for save/load roundtrip
+10. ~~**Implement model serialization**~~
+    - ~~Save trained ML.NET models to `Models/gen{N}_{decisionType}_v{version}.zip`~~
+      - ~~Example: `Models/gen1_calltrump_v1.zip`~~
+    - ~~Store model metadata in accompanying JSON file:~~
+      - ~~Training date/time~~
+      - ~~ActorType (which bot's data was used)~~
+      - ~~Sample count (train/validation/test)~~
+      - ~~Evaluation metrics (accuracy, log loss)~~
+      - ~~Feature schema version~~
+    - ~~Version management: increment version on each training run~~
+    - ~~Create ModelLoader utility for loading models at runtime~~
+    - ~~Include unit tests for save/load roundtrip~~
 
 ### Phase 3: Gen1Bot Implementation (Steps 11-14)
 
