@@ -37,32 +37,35 @@ public class DataSplitter(MLContext mlContext, IOptions<MachineLearningOptions> 
 
         ValidateRatios(trainRatio, validationRatio, testRatio);
 
-        var dataList = data.ToList();
+        var dataView = mlContext.Data.LoadFromEnumerable(data);
 
-        if (dataList.Count == 0)
+        var rowCount = (int)(dataView.GetRowCount() ?? 0);
+
+        if (rowCount == 0)
         {
             throw new InvalidOperationException("Cannot split empty dataset.");
         }
 
-        if (dataList.Count < 3)
+        if (rowCount < 3)
         {
-            throw new InvalidOperationException($"Dataset must contain at least 3 samples for splitting. Found {dataList.Count} samples.");
+            throw new InvalidOperationException($"Dataset must contain at least 3 samples for splitting. Found {rowCount} samples.");
         }
 
-        Shuffle(dataList, options!.Value!.RandomSeed);
+        var shuffledData = mlContext.Data.ShuffleRows(dataView, seed: options!.Value!.RandomSeed);
 
-        var totalCount = dataList.Count;
-        var trainCount = (int)Math.Floor(totalCount * trainRatio);
-        var validationCount = (int)Math.Floor(totalCount * validationRatio);
-        var testCount = totalCount - trainCount - validationCount;
+        var trainFraction = trainRatio;
+        var firstSplit = mlContext.Data.TrainTestSplit(shuffledData, testFraction: 1.0 - trainFraction, seed: options!.Value!.RandomSeed);
+        var trainDataView = firstSplit.TrainSet;
+        var remaining = firstSplit.TestSet;
 
-        var trainData = dataList.Take(trainCount).ToList();
-        var validationData = dataList.Skip(trainCount).Take(validationCount).ToList();
-        var testData = dataList.Skip(trainCount + validationCount).Take(testCount).ToList();
+        var validationFractionOfRemaining = validationRatio / (validationRatio + testRatio);
+        var secondSplit = mlContext.Data.TrainTestSplit(remaining, testFraction: 1.0 - validationFractionOfRemaining, seed: options!.Value!.RandomSeed);
+        var validationDataView = secondSplit.TrainSet;
+        var testDataView = secondSplit.TestSet;
 
-        var trainDataView = mlContext.Data.LoadFromEnumerable(trainData);
-        var validationDataView = mlContext.Data.LoadFromEnumerable(validationData);
-        var testDataView = mlContext.Data.LoadFromEnumerable(testData);
+        var trainCount = CountRows(trainDataView);
+        var validationCount = CountRows(validationDataView);
+        var testCount = CountRows(testDataView);
 
         return new DataSplit(
             trainDataView,
@@ -99,15 +102,15 @@ public class DataSplitter(MLContext mlContext, IOptions<MachineLearningOptions> 
         }
     }
 
-    private static void Shuffle<T>(List<T> list, int seed)
+    private static int CountRows(IDataView dataView)
     {
-        var random = new Random(seed);
-        var n = list.Count;
-
-        for (var i = n - 1; i > 0; i--)
+        var cursor = dataView.GetRowCursor(dataView.Schema);
+        int count = 0;
+        while (cursor.MoveNext())
         {
-            var j = random.Next(i + 1);
-            (list[i], list[j]) = (list[j], list[i]);
+            count++;
         }
+
+        return count;
     }
 }

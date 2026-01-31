@@ -55,11 +55,16 @@ public class PlayCardModelTrainer(
             .Concatenate("Features", featureColumns)
             .Append(MlContext.Transforms.Conversion.MapValueToKey("Label", "Label"))
             .AppendCacheCheckpoint(MlContext)
-            .Append(MlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy(
+
+            // Using LightGbm for maximum accuracy on large datasets (82.5M+ samples).
+            // LightGbm excels with complex feature interactions in card play decisions.
+            .Append(MlContext.MulticlassClassification.Trainers.LightGbm(
                 labelColumnName: "Label",
                 featureColumnName: "Features",
-                l2Regularization: (float)Options.LearningRate,
-                maximumNumberOfIterations: Options.TrainingIterations))
+                numberOfLeaves: Options.NumberOfLeaves,
+                minimumExampleCountPerLeaf: Options.MinimumExampleCountPerLeaf,
+                learningRate: Options.LearningRate,
+                numberOfIterations: Options.NumberOfIterations))
             .Append(MlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
     }
 

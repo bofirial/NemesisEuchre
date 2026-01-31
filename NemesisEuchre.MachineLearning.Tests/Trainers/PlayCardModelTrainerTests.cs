@@ -28,8 +28,10 @@ public class PlayCardModelTrainerTests
         var mlOptions = new MachineLearningOptions
         {
             ModelOutputPath = "./models",
-            TrainingIterations = 50,
+            NumberOfLeaves = 20,
+            NumberOfIterations = 25,
             LearningRate = 0.1,
+            MinimumExampleCountPerLeaf = 10,
             RandomSeed = 42,
         };
         _options = Microsoft.Extensions.Options.Options.Create(mlOptions);
@@ -188,7 +190,7 @@ public class PlayCardModelTrainerTests
 
             var metadataContent = await File.ReadAllTextAsync(metadataPath);
             metadataContent.Should().Contain("PlayCard");
-            metadataContent.Should().Contain("SdcaMaximumEntropy");
+            metadataContent.Should().Contain("LightGbm");
         }
         finally
         {
@@ -270,6 +272,6 @@ public class PlayCardModelTrainerTests
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S3459:Unassigned members should be removed", Justification = "Test Class")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Test Class")]
-        public uint PredictedLabel;
+        public uint PredictedLabel = 1;
     }
 }

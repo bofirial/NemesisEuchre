@@ -47,7 +47,7 @@ public abstract class MulticlassModelTrainerBase<TData>(
 
         var pipeline = BuildPipeline(dataSplit.Train);
 
-        LoggerMessages.LogTrainingModel(Logger, Options.TrainingIterations);
+        LoggerMessages.LogTrainingModel(Logger, Options.NumberOfIterations);
 
         TrainedModel = await Task.Run(() => pipeline.Fit(dataSplit.Train), cancellationToken);
 
@@ -139,8 +139,9 @@ public abstract class MulticlassModelTrainerBase<TData>(
             trainingResult.ValidationSamples,
             trainingResult.TestSamples,
             new HyperparametersMetadata(
-                "SdcaMaximumEntropy",
-                Options.TrainingIterations,
+                "LightGbm",
+                Options.NumberOfLeaves,
+                Options.NumberOfIterations,
                 Options.LearningRate,
                 Options.RandomSeed),
             new MetricsMetadata(

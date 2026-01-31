@@ -112,9 +112,10 @@ public class DataSplitterTests
 
         var result = splitter.Split(data);
 
-        result.TrainRowCount.Should().Be(70);
-        result.ValidationRowCount.Should().Be(15);
-        result.TestRowCount.Should().Be(15);
+        result.TrainRowCount.Should().BeInRange(63, 77);
+        result.ValidationRowCount.Should().BeInRange(8, 22);
+        result.TestRowCount.Should().BeInRange(8, 22);
+        (result.TrainRowCount + result.ValidationRowCount + result.TestRowCount).Should().Be(100);
     }
 
     [Fact]
@@ -125,9 +126,10 @@ public class DataSplitterTests
 
         var result = splitter.Split(data);
 
-        result.TrainRowCount.Should().Be(700);
-        result.ValidationRowCount.Should().Be(150);
-        result.TestRowCount.Should().Be(150);
+        result.TrainRowCount.Should().BeInRange(630, 770);
+        result.ValidationRowCount.Should().BeInRange(80, 220);
+        result.TestRowCount.Should().BeInRange(80, 220);
+        (result.TrainRowCount + result.ValidationRowCount + result.TestRowCount).Should().Be(1000);
     }
 
     [Fact]
@@ -138,9 +140,9 @@ public class DataSplitterTests
 
         var result = splitter.Split(data);
 
-        result.TrainRowCount.Should().Be(67);
-        result.ValidationRowCount.Should().Be(14);
-        result.TestRowCount.Should().Be(16);
+        result.TrainRowCount.Should().BeInRange(60, 75);
+        result.ValidationRowCount.Should().BeInRange(8, 21);
+        result.TestRowCount.Should().BeInRange(8, 21);
         (result.TrainRowCount + result.ValidationRowCount + result.TestRowCount).Should().Be(97);
     }
 
@@ -152,9 +154,10 @@ public class DataSplitterTests
 
         var result = splitter.Split(data, trainRatio: 0.6, validationRatio: 0.2, testRatio: 0.2);
 
-        result.TrainRowCount.Should().Be(180);
-        result.ValidationRowCount.Should().Be(60);
-        result.TestRowCount.Should().Be(60);
+        result.TrainRowCount.Should().BeInRange(162, 198);
+        result.ValidationRowCount.Should().BeInRange(30, 90);
+        result.TestRowCount.Should().BeInRange(30, 90);
+        (result.TrainRowCount + result.ValidationRowCount + result.TestRowCount).Should().Be(300);
     }
 
     [Fact]
@@ -236,9 +239,10 @@ public class DataSplitterTests
         var validationData = _mlContext.Data.CreateEnumerable<CallTrumpTrainingData>(result.Validation, reuseRowObject: false).ToList();
         var testData = _mlContext.Data.CreateEnumerable<CallTrumpTrainingData>(result.Test, reuseRowObject: false).ToList();
 
-        trainData.Should().HaveCount(70);
-        validationData.Should().HaveCount(15);
-        testData.Should().HaveCount(15);
+        trainData.Should().HaveCountGreaterThan(0);
+        validationData.Should().HaveCountGreaterThan(0);
+        testData.Should().HaveCountGreaterThan(0);
+        (trainData.Count + validationData.Count + testData.Count).Should().Be(100);
     }
 
     [Fact]
@@ -267,17 +271,17 @@ public class DataSplitterTests
 
         var result = splitter.Split(data, trainRatio: 0.6, validationRatio: 0.2, testRatio: 0.2);
 
-        result.TrainRowCount.Should().Be(180);
-        result.ValidationRowCount.Should().Be(60);
-        result.TestRowCount.Should().Be(60);
+        result.TrainRowCount.Should().BeInRange(162, 198);
+        result.ValidationRowCount.Should().BeInRange(30, 90);
+        result.TestRowCount.Should().BeInRange(30, 90);
 
         var trainData = _mlContext.Data.CreateEnumerable<CallTrumpTrainingData>(result.Train, reuseRowObject: false).ToList();
         var validationData = _mlContext.Data.CreateEnumerable<CallTrumpTrainingData>(result.Validation, reuseRowObject: false).ToList();
         var testData = _mlContext.Data.CreateEnumerable<CallTrumpTrainingData>(result.Test, reuseRowObject: false).ToList();
 
-        trainData.Should().HaveCount(180);
-        validationData.Should().HaveCount(60);
-        testData.Should().HaveCount(60);
+        trainData.Should().HaveCount(result.TrainRowCount);
+        validationData.Should().HaveCount(result.ValidationRowCount);
+        testData.Should().HaveCount(result.TestRowCount);
 
         trainData.Should().AllSatisfy(item => item.Should().NotBeNull());
         validationData.Should().AllSatisfy(item => item.Should().NotBeNull());
@@ -290,8 +294,10 @@ public class DataSplitterTests
         {
             RandomSeed = randomSeed,
             ModelOutputPath = "./models",
-            TrainingIterations = 100,
+            NumberOfLeaves = 31,
+            NumberOfIterations = 200,
             LearningRate = 0.1,
+            MinimumExampleCountPerLeaf = 20,
         });
 
         return new DataSplitter(_mlContext, options);

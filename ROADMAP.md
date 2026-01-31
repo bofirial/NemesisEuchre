@@ -276,32 +276,32 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 
 ### Phase 2: ML Model Training (Steps 6-10)
 
-6. **Create model trainer interfaces and implementations**
-   - Create `NemesisEuchre.MachineLearning\Trainers\IModelTrainer<TData, TLabel>.cs` generic interface
-     - Methods: TrainAsync, EvaluateAsync, SaveModelAsync
-   - Create `NemesisEuchre.MachineLearning\Trainers\CallTrumpModelTrainer.cs`
-     - Implements IModelTrainer<CallTrumpTrainingData, int>
-     - Trains 11-class multiclass classification model
-   - Create `NemesisEuchre.MachineLearning\Trainers\DiscardCardModelTrainer.cs`
-     - Implements IModelTrainer<DiscardCardTrainingData, int>
-     - Trains 6-class multiclass classification model
-   - Create `NemesisEuchre.MachineLearning\Trainers\PlayCardModelTrainer.cs`
-     - Implements IModelTrainer<PlayCardTrainingData, int>
-     - Trains variable-class model (1-13 possible cards to play)
-   - Include unit tests using small synthetic datasets
+6. ~~**Create model trainer interfaces and implementations**~~
+   - ~~Create `NemesisEuchre.MachineLearning\Trainers\IModelTrainer<TData, TLabel>.cs` generic interface~~
+     - ~~Methods: TrainAsync, EvaluateAsync, SaveModelAsync~~
+   - ~~Create `NemesisEuchre.MachineLearning\Trainers\CallTrumpModelTrainer.cs`~~
+     - ~~Implements IModelTrainer<CallTrumpTrainingData, int>~~
+     - ~~Trains 11-class multiclass classification model~~
+   - ~~Create `NemesisEuchre.MachineLearning\Trainers\DiscardCardModelTrainer.cs`~~
+     - ~~Implements IModelTrainer<DiscardCardTrainingData, int>~~
+     - ~~Trains 6-class multiclass classification model~~
+   - ~~Create `NemesisEuchre.MachineLearning\Trainers\PlayCardModelTrainer.cs`~~
+     - ~~Implements IModelTrainer<PlayCardTrainingData, int>~~
+     - ~~Trains variable-class model (1-13 possible cards to play)~~
+   - ~~Include unit tests using small synthetic datasets~~
 
-7. **Build ML.NET pipelines**
-   - Define feature columns and transformations in each trainer
-   - Use ML.NET's `Concatenate` to combine all features into single "Features" vector
-   - Example pipeline:
+7. ~~**Build ML.NET pipelines**~~
+   - ~~Define feature columns and transformations in each trainer~~
+   - ~~Use ML.NET's `Concatenate` to combine all features into single "Features" vector~~
+   - ~~Example pipeline:~~
      ```
      .Append(mlContext.Transforms.Concatenate("Features", "Hand_Rank1", "Hand_Suit1", ..., "TeamScore", "OpponentScore"))
      .Append(mlContext.Transforms.Conversion.MapValueToKey("Label", "ChosenDecisionIndex"))
      .Append(mlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy())
      .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"))
      ```
-   - Document alternative algorithms in comments: FastTree, LightGbm, OneVersusAll
-   - Configure hyperparameters (learning rate, max iterations)
+   - ~~Document alternative algorithms in comments: FastTree, LightGbm, OneVersusAll~~
+   - ~~Configure hyperparameters (learning rate, max iterations)~~
 
 8. **Implement training workflow**
    - Load training data from IGameRepository using feature engineers

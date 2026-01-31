@@ -41,11 +41,16 @@ public class DiscardCardModelTrainer(
             .Concatenate("Features", featureColumns)
             .Append(MlContext.Transforms.Conversion.MapValueToKey("Label", "Label"))
             .AppendCacheCheckpoint(MlContext)
-            .Append(MlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy(
+
+            // Using LightGbm for maximum accuracy on large datasets (4.5M+ samples).
+            // See class documentation for algorithm trade-offs and alternatives.
+            .Append(MlContext.MulticlassClassification.Trainers.LightGbm(
                 labelColumnName: "Label",
                 featureColumnName: "Features",
-                l2Regularization: (float)Options.LearningRate,
-                maximumNumberOfIterations: Options.TrainingIterations))
+                numberOfLeaves: Options.NumberOfLeaves,
+                minimumExampleCountPerLeaf: Options.MinimumExampleCountPerLeaf,
+                learningRate: Options.LearningRate,
+                numberOfIterations: Options.NumberOfIterations))
             .Append(MlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
     }
 
