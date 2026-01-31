@@ -108,4 +108,38 @@ public static partial class LoggerMessages
         Level = LogLevel.Information,
         Message = "All model caches cleared")]
     public static partial void LogModelCacheCleared(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 16,
+        Level = LogLevel.Information,
+        Message = "Evaluation report saved to {EvaluationPath}")]
+    public static partial void LogEvaluationReportSaved(ILogger logger, string evaluationPath);
+
+    [LoggerMessage(
+        EventId = 17,
+        Level = LogLevel.Information,
+        Message = "Per-class validation metrics for {ModelType}:")]
+    public static partial void LogPerClassMetricsHeader(ILogger logger, string modelType);
+
+    [LoggerMessage(
+        EventId = 18,
+        Level = LogLevel.Information,
+        Message = "  Class {ClassLabel}: Precision={Precision:P2}, Recall={Recall:P2}, F1={F1Score:P2}, Support={Support}")]
+    public static partial void LogPerClassMetric(
+        ILogger logger,
+        int classLabel,
+        double precision,
+        double recall,
+        double f1Score,
+        int support);
+
+    [LoggerMessage(
+        EventId = 19,
+        Level = LogLevel.Information,
+        Message = "Weighted averages: Precision={WeightedPrecision:P2}, Recall={WeightedRecall:P2}, F1={WeightedF1Score:P2}")]
+    public static partial void LogWeightedAverages(
+        ILogger logger,
+        double weightedPrecision,
+        double weightedRecall,
+        double weightedF1Score);
 }

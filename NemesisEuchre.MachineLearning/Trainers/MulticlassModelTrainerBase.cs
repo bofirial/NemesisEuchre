@@ -61,6 +61,8 @@ public abstract class MulticlassModelTrainerBase<TData>(
             validationMetrics.MacroAccuracy,
             validationMetrics.LogLoss);
 
+        LogPerClassMetrics(validationMetrics);
+
         return new TrainingResult(
             TrainedModel,
             validationMetrics,
@@ -92,6 +94,7 @@ public abstract class MulticlassModelTrainerBase<TData>(
             var numberOfClasses = GetNumberOfClasses();
             var perClassLogLoss = ExtractPerClassMetric(mlMetrics.PerClassLogLoss, numberOfClasses);
             var confusionMatrix = ConvertConfusionMatrix(mlMetrics.ConfusionMatrix, numberOfClasses);
+            var perClassMetrics = MetricsCalculator.CalculatePerClassMetrics(confusionMatrix);
 
             return new EvaluationMetrics(
                 mlMetrics.MicroAccuracy,
@@ -99,7 +102,8 @@ public abstract class MulticlassModelTrainerBase<TData>(
                 mlMetrics.LogLoss,
                 mlMetrics.LogLossReduction,
                 perClassLogLoss,
-                confusionMatrix);
+                confusionMatrix,
+                perClassMetrics);
         }, cancellationToken);
     }
 
@@ -157,6 +161,17 @@ public abstract class MulticlassModelTrainerBase<TData>(
         await File.WriteAllTextAsync(metadataPath, json, cancellationToken);
 
         LoggerMessages.LogMetadataSaved(Logger, metadataPath);
+
+        var evaluationPath = Path.ChangeExtension(modelPath, ".evaluation.json");
+        var evaluationReport = CreateEvaluationReport(
+            trainingResult.ValidationMetrics,
+            trainingResult.ValidationSamples);
+
+        var reportJson = JsonSerializer.Serialize(evaluationReport, JsonSerializationOptions.WithNaNHandling);
+
+        await File.WriteAllTextAsync(evaluationPath, reportJson, cancellationToken);
+
+        LoggerMessages.LogEvaluationReportSaved(Logger, evaluationPath);
     }
 
     protected abstract IEstimator<ITransformer> BuildPipeline(IDataView trainingData);
@@ -215,5 +230,77 @@ public abstract class MulticlassModelTrainerBase<TData>(
         }
 
         return matrix;
+    }
+
+    private static double CalculateWeightedAverage(
+        PerClassMetrics[] metrics,
+        Func<PerClassMetrics, double> valueSelector,
+        Func<PerClassMetrics, int> weightSelector)
+    {
+        double weightedSum = 0;
+        int totalWeight = 0;
+
+        foreach (var metric in metrics)
+        {
+            var value = valueSelector(metric);
+            if (!double.IsNaN(value))
+            {
+                var weight = weightSelector(metric);
+                weightedSum += value * weight;
+                totalWeight += weight;
+            }
+        }
+
+        return totalWeight > 0 ? weightedSum / totalWeight : double.NaN;
+    }
+
+    private void LogPerClassMetrics(EvaluationMetrics metrics)
+    {
+        LoggerMessages.LogPerClassMetricsHeader(Logger, GetModelType());
+
+        foreach (var classMetric in metrics.PerClassMetrics)
+        {
+            LoggerMessages.LogPerClassMetric(
+                Logger,
+                classMetric.ClassLabel,
+                classMetric.Precision,
+                classMetric.Recall,
+                classMetric.F1Score,
+                classMetric.Support);
+        }
+
+        var report = CreateEvaluationReport(metrics, metrics.PerClassMetrics.Sum(m => m.Support));
+
+        LoggerMessages.LogWeightedAverages(
+            Logger,
+            report.Overall.WeightedPrecision,
+            report.Overall.WeightedRecall,
+            report.Overall.WeightedF1Score);
+    }
+
+    private EvaluationReport CreateEvaluationReport(
+        EvaluationMetrics metrics,
+        int testSamples)
+    {
+        var weightedPrecision = CalculateWeightedAverage(metrics.PerClassMetrics, m => m.Precision, m => m.Support);
+        var weightedRecall = CalculateWeightedAverage(metrics.PerClassMetrics, m => m.Recall, m => m.Support);
+        var weightedF1Score = CalculateWeightedAverage(metrics.PerClassMetrics, m => m.F1Score, m => m.Support);
+
+        var overallMetrics = new OverallMetrics(
+            metrics.MicroAccuracy,
+            metrics.MacroAccuracy,
+            metrics.LogLoss,
+            metrics.LogLossReduction,
+            weightedPrecision,
+            weightedRecall,
+            weightedF1Score);
+
+        return new EvaluationReport(
+            GetModelType(),
+            DateTime.UtcNow,
+            testSamples,
+            overallMetrics,
+            metrics.PerClassMetrics,
+            metrics.ConfusionMatrix);
     }
 }

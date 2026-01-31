@@ -151,6 +151,12 @@ public class CallTrumpModelTrainerTests
         metrics.LogLoss.Should().BeGreaterThan(0);
         metrics.PerClassLogLoss.Should().HaveCount(11);
         metrics.ConfusionMatrix.Should().HaveCount(11);
+        metrics.PerClassMetrics.Should().HaveCount(11);
+        foreach (var classMetric in metrics.PerClassMetrics)
+        {
+            classMetric.ClassLabel.Should().BeInRange(0, 10);
+            classMetric.Support.Should().BeGreaterThanOrEqualTo(0);
+        }
     }
 
     [Fact]
@@ -158,7 +164,7 @@ public class CallTrumpModelTrainerTests
     {
         var result = new TrainingResult(
             null!,
-            new EvaluationMetrics(0.5, 0.5, 1.0, 0.5, new double[11], new int[11][]),
+            new EvaluationMetrics(0.5, 0.5, 1.0, 0.5, new double[11], new int[11][], []),
             70,
             15,
             15);
@@ -196,6 +202,48 @@ public class CallTrumpModelTrainerTests
                 File.Delete(modelPath);
             }
 
+            if (File.Exists(metadataPath))
+            {
+                File.Delete(metadataPath);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task SaveModelAsync_AfterTraining_CreatesEvaluationReportFile()
+    {
+        var trainingData = _faker.Generate(100);
+        var result = await _trainer.TrainAsync(trainingData);
+
+        var modelPath = Path.Combine(Path.GetTempPath(), $"calltrump_test_{Guid.NewGuid()}.zip");
+        var evaluationPath = Path.ChangeExtension(modelPath, ".evaluation.json");
+
+        try
+        {
+            await _trainer.SaveModelAsync(modelPath, result);
+
+            File.Exists(evaluationPath).Should().BeTrue();
+
+            var reportContent = await File.ReadAllTextAsync(evaluationPath);
+            reportContent.Should().Contain("CallTrump");
+            reportContent.Should().Contain("PerClass");
+            reportContent.Should().Contain("Precision");
+            reportContent.Should().Contain("Recall");
+            reportContent.Should().Contain("F1Score");
+        }
+        finally
+        {
+            if (File.Exists(modelPath))
+            {
+                File.Delete(modelPath);
+            }
+
+            if (File.Exists(evaluationPath))
+            {
+                File.Delete(evaluationPath);
+            }
+
+            var metadataPath = Path.ChangeExtension(modelPath, ".json");
             if (File.Exists(metadataPath))
             {
                 File.Delete(metadataPath);

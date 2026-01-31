@@ -32,13 +32,13 @@ public class CallTrumpTrainingDataLoaderTests
         _entityFaker = new Faker<CallTrumpDecisionEntity>()
             .RuleFor(x => x.CallTrumpDecisionId, f => f.IndexFaker)
             .RuleFor(x => x.DealId, f => f.Random.Int(1, 1000))
-            .RuleFor(x => x.CardsInHandJson, f => "[1,2,3,4,5]")
+            .RuleFor(x => x.CardsInHandJson, _ => "[1,2,3,4,5]")
             .RuleFor(x => x.TeamScore, f => (short)f.Random.Int(0, 10))
             .RuleFor(x => x.OpponentScore, f => (short)f.Random.Int(0, 10))
             .RuleFor(x => x.DealerPosition, f => f.PickRandom(RelativePlayerPosition.Self, RelativePlayerPosition.LeftHandOpponent, RelativePlayerPosition.Partner, RelativePlayerPosition.RightHandOpponent))
-            .RuleFor(x => x.UpCardJson, f => "{\"Rank\":0,\"Suit\":0}")
-            .RuleFor(x => x.ValidDecisionsJson, f => "[0,1,2,3,4,5,6,7,8,9,10]")
-            .RuleFor(x => x.ChosenDecisionJson, f => "{\"Decision\":0}")
+            .RuleFor(x => x.UpCardJson, _ => /*lang=json,strict*/ "{\"Rank\":0,\"Suit\":0}")
+            .RuleFor(x => x.ValidDecisionsJson, _ => "[0,1,2,3,4,5,6,7,8,9,10]")
+            .RuleFor(x => x.ChosenDecisionJson, _ => /*lang=json,strict*/ "{\"Decision\":0}")
             .RuleFor(x => x.DecisionOrder, f => (byte)f.Random.Int(0, 7))
             .RuleFor(x => x.ActorType, f => f.PickRandom(ActorType.Chaos, ActorType.Chad, ActorType.Beta))
             .RuleFor(x => x.DidTeamWinDeal, f => f.Random.Bool())
@@ -150,7 +150,7 @@ public class CallTrumpTrainingDataLoaderTests
     [Fact]
     public async Task LoadTrainingDataAsync_WithCancellation_ThrowsOperationCanceledException()
     {
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
         var entities = _entityFaker.Generate(1000);
         var processedCount = 0;
 
@@ -217,7 +217,7 @@ public class CallTrumpTrainingDataLoaderTests
             x => x.Log(
                 LogLevel.Debug,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((o, t) => o.ToString()!.Contains("10000")),
+                It.Is<It.IsAnyType>((o, _) => o.ToString()!.Contains("10000")),
                 null,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.AtLeastOnce);
@@ -226,7 +226,7 @@ public class CallTrumpTrainingDataLoaderTests
             x => x.Log(
                 LogLevel.Debug,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((o, t) => o.ToString()!.Contains("20000")),
+                It.Is<It.IsAnyType>((o, _) => o.ToString()!.Contains("20000")),
                 null,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.AtLeastOnce);

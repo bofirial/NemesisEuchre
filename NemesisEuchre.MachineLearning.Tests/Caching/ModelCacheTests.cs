@@ -28,16 +28,6 @@ public class ModelCacheTests : IDisposable
         CreateTestModel();
     }
 
-    public void Dispose()
-    {
-        if (Directory.Exists(_tempDirectory))
-        {
-            Directory.Delete(_tempDirectory, true);
-        }
-
-        GC.SuppressFinalize(this);
-    }
-
     [Fact]
     public void GetOrCreatePredictionEngine_FirstCall_CreatesNewEngine()
     {
@@ -115,6 +105,20 @@ public class ModelCacheTests : IDisposable
         engine1.Should().NotBeSameAs(engine2);
     }
 
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing && Directory.Exists(_tempDirectory))
+        {
+            Directory.Delete(_tempDirectory, true);
+        }
+    }
+
     private void CreateTestModel()
     {
         var trainingData = new List<CallTrumpTrainingData>();
@@ -156,7 +160,8 @@ public class ModelCacheTests : IDisposable
         var dataView = _mlContext.Data.LoadFromEnumerable(trainingData);
 
         var pipeline = _mlContext.Transforms.Conversion.MapValueToKey("Label")
-            .Append(_mlContext.Transforms.Concatenate("Features",
+            .Append(_mlContext.Transforms.Concatenate(
+                "Features",
                 nameof(CallTrumpTrainingData.Card1Rank),
                 nameof(CallTrumpTrainingData.Card1Suit),
                 nameof(CallTrumpTrainingData.Card2Rank),

@@ -10,4 +10,11 @@ public static class JsonSerializationOptions
         Converters = { new JsonStringEnumConverter() },
         WriteIndented = false,
     };
+
+    public static JsonSerializerOptions WithNaNHandling { get; } = new()
+    {
+        Converters = { new JsonStringEnumConverter() },
+        WriteIndented = true,
+        NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals,
+    };
 }

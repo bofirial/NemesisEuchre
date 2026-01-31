@@ -32,12 +32,12 @@ public class DiscardCardTrainingDataLoaderTests
         _entityFaker = new Faker<DiscardCardDecisionEntity>()
             .RuleFor(x => x.DiscardCardDecisionId, f => f.IndexFaker)
             .RuleFor(x => x.DealId, f => f.Random.Int(1, 1000))
-            .RuleFor(x => x.CardsInHandJson, f => "[1,2,3,4,5,6]")
+            .RuleFor(x => x.CardsInHandJson, _ => "[1,2,3,4,5,6]")
             .RuleFor(x => x.TeamScore, f => (short)f.Random.Int(0, 10))
             .RuleFor(x => x.OpponentScore, f => (short)f.Random.Int(0, 10))
             .RuleFor(x => x.CallingPlayer, f => f.PickRandom(RelativePlayerPosition.Self, RelativePlayerPosition.LeftHandOpponent, RelativePlayerPosition.Partner, RelativePlayerPosition.RightHandOpponent))
             .RuleFor(x => x.CallingPlayerGoingAlone, f => f.Random.Bool())
-            .RuleFor(x => x.ChosenCardJson, f => "{\"Rank\":1,\"Suit\":1}")
+            .RuleFor(x => x.ChosenCardJson, _ => /*lang=json,strict*/ "{\"Rank\":1,\"Suit\":1}")
             .RuleFor(x => x.ActorType, f => f.PickRandom(ActorType.Chaos, ActorType.Chad, ActorType.Beta))
             .RuleFor(x => x.DidTeamWinDeal, f => f.Random.Bool())
             .RuleFor(x => x.RelativeDealPoints, f => (short)f.Random.Int(-2, 4))
@@ -148,7 +148,7 @@ public class DiscardCardTrainingDataLoaderTests
     [Fact]
     public async Task LoadTrainingDataAsync_WithCancellation_ThrowsOperationCanceledException()
     {
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
         var entities = _entityFaker.Generate(1000);
         var processedCount = 0;
 
@@ -215,7 +215,7 @@ public class DiscardCardTrainingDataLoaderTests
             x => x.Log(
                 LogLevel.Debug,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((o, t) => o.ToString()!.Contains("10000")),
+                It.Is<It.IsAnyType>((o, _) => o.ToString()!.Contains("10000")),
                 null,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.AtLeastOnce);
@@ -224,7 +224,7 @@ public class DiscardCardTrainingDataLoaderTests
             x => x.Log(
                 LogLevel.Debug,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((o, t) => o.ToString()!.Contains("20000")),
+                It.Is<It.IsAnyType>((o, _) => o.ToString()!.Contains("20000")),
                 null,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.AtLeastOnce);

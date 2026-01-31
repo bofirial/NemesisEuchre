@@ -8,4 +8,5 @@ public record EvaluationMetrics(
     double LogLoss,
     double LogLossReduction,
     double[] PerClassLogLoss,
-    int[][] ConfusionMatrix);
+    int[][] ConfusionMatrix,
+    PerClassMetrics[] PerClassMetrics);

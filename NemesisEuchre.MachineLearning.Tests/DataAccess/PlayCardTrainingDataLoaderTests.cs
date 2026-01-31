@@ -33,17 +33,17 @@ public class PlayCardTrainingDataLoaderTests
             .RuleFor(x => x.PlayCardDecisionId, f => f.IndexFaker)
             .RuleFor(x => x.DealId, f => f.Random.Int(1, 1000))
             .RuleFor(x => x.TrickId, f => f.Random.Int(1, 1000))
-            .RuleFor(x => x.CardsInHandJson, f => "[1,2,3,4,5]")
+            .RuleFor(x => x.CardsInHandJson, _ => "[1,2,3,4,5]")
             .RuleFor(x => x.TeamScore, f => (short)f.Random.Int(0, 10))
             .RuleFor(x => x.OpponentScore, f => (short)f.Random.Int(0, 10))
             .RuleFor(x => x.LeadPlayer, f => f.PickRandom(RelativePlayerPosition.Self, RelativePlayerPosition.LeftHandOpponent, RelativePlayerPosition.Partner, RelativePlayerPosition.RightHandOpponent))
             .RuleFor(x => x.LeadSuit, f => f.PickRandom(RelativeSuit.Trump, RelativeSuit.NonTrumpSameColor, RelativeSuit.NonTrumpOppositeColor1, RelativeSuit.NonTrumpOppositeColor2))
-            .RuleFor(x => x.PlayedCardsJson, f => "[]")
+            .RuleFor(x => x.PlayedCardsJson, _ => "[]")
             .RuleFor(x => x.WinningTrickPlayer, f => f.PickRandom(RelativePlayerPosition.Self, RelativePlayerPosition.LeftHandOpponent, RelativePlayerPosition.Partner, RelativePlayerPosition.RightHandOpponent))
-            .RuleFor(x => x.ValidCardsToPlayJson, f => "[1,2,3]")
+            .RuleFor(x => x.ValidCardsToPlayJson, _ => "[1,2,3]")
             .RuleFor(x => x.CallingPlayer, f => f.PickRandom(RelativePlayerPosition.Self, RelativePlayerPosition.LeftHandOpponent, RelativePlayerPosition.Partner, RelativePlayerPosition.RightHandOpponent))
             .RuleFor(x => x.CallingPlayerGoingAlone, f => f.Random.Bool())
-            .RuleFor(x => x.ChosenCardJson, f => "{\"Rank\":0,\"Suit\":0}")
+            .RuleFor(x => x.ChosenCardJson, _ => /*lang=json,strict*/ "{\"Rank\":0,\"Suit\":0}")
             .RuleFor(x => x.ActorType, f => f.PickRandom(ActorType.Chaos, ActorType.Chad, ActorType.Beta))
             .RuleFor(x => x.DidTeamWinTrick, f => f.Random.Bool())
             .RuleFor(x => x.DidTeamWinDeal, f => f.Random.Bool())
@@ -155,7 +155,7 @@ public class PlayCardTrainingDataLoaderTests
     [Fact]
     public async Task LoadTrainingDataAsync_WithCancellation_ThrowsOperationCanceledException()
     {
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
         var entities = _entityFaker.Generate(1000);
         var processedCount = 0;
 
@@ -222,7 +222,7 @@ public class PlayCardTrainingDataLoaderTests
             x => x.Log(
                 LogLevel.Debug,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((o, t) => o.ToString()!.Contains("10000")),
+                It.Is<It.IsAnyType>((o, _) => o.ToString()!.Contains("10000")),
                 null,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.AtLeastOnce);
@@ -231,7 +231,7 @@ public class PlayCardTrainingDataLoaderTests
             x => x.Log(
                 LogLevel.Debug,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((o, t) => o.ToString()!.Contains("20000")),
+                It.Is<It.IsAnyType>((o, _) => o.ToString()!.Contains("20000")),
                 null,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.AtLeastOnce);
