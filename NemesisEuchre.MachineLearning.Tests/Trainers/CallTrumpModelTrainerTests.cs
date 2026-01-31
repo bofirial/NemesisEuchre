@@ -6,9 +6,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.ML;
 
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Options;
+using NemesisEuchre.MachineLearning.Services;
 using NemesisEuchre.MachineLearning.Trainers;
 
 namespace NemesisEuchre.MachineLearning.Tests.Trainers;
@@ -17,6 +19,7 @@ public class CallTrumpModelTrainerTests
 {
     private readonly MLContext _mlContext;
     private readonly IDataSplitter _dataSplitter;
+    private readonly IModelVersionManager _versionManager;
     private readonly IOptions<MachineLearningOptions> _options;
     private readonly ILogger<CallTrumpModelTrainer> _logger;
     private readonly CallTrumpModelTrainer _trainer;
@@ -36,8 +39,9 @@ public class CallTrumpModelTrainerTests
         };
         _options = Microsoft.Extensions.Options.Options.Create(mlOptions);
         _dataSplitter = new DataSplitter(_mlContext, _options);
+        _versionManager = new ModelVersionManager();
         _logger = new LoggerFactory().CreateLogger<CallTrumpModelTrainer>();
-        _trainer = new CallTrumpModelTrainer(_mlContext, _dataSplitter, _options, _logger);
+        _trainer = new CallTrumpModelTrainer(_mlContext, _dataSplitter, _versionManager, _options, _logger);
 
         _faker = new Faker<CallTrumpTrainingData>()
             .RuleFor(x => x.Card1Rank, f => f.Random.Float(0, 5))
@@ -169,7 +173,7 @@ public class CallTrumpModelTrainerTests
             15,
             15);
 
-        var act = async () => await _trainer.SaveModelAsync("./test_model.zip", result);
+        var act = async () => await _trainer.SaveModelAsync("./models", 1, ActorType.Chaos, result);
 
         return act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("No trained model to save. Call TrainAsync first.");
@@ -181,12 +185,14 @@ public class CallTrumpModelTrainerTests
         var trainingData = _faker.Generate(100);
         var result = await _trainer.TrainAsync(trainingData);
 
-        var modelPath = Path.Combine(Path.GetTempPath(), $"calltrump_test_{Guid.NewGuid()}.zip");
-        var metadataPath = Path.ChangeExtension(modelPath, ".json");
+        var modelsDirectory = Path.Combine(Path.GetTempPath(), $"test_models_{Guid.NewGuid()}");
 
         try
         {
-            await _trainer.SaveModelAsync(modelPath, result);
+            await _trainer.SaveModelAsync(modelsDirectory, 1, ActorType.Chaos, result);
+
+            var modelPath = Path.Combine(modelsDirectory, "gen1_calltrump_v1.zip");
+            var metadataPath = Path.Combine(modelsDirectory, "gen1_calltrump_v1.json");
 
             File.Exists(modelPath).Should().BeTrue();
             File.Exists(metadataPath).Should().BeTrue();
@@ -194,17 +200,13 @@ public class CallTrumpModelTrainerTests
             var metadataContent = await File.ReadAllTextAsync(metadataPath);
             metadataContent.Should().Contain("CallTrump");
             metadataContent.Should().Contain("LightGbm");
+            metadataContent.Should().Contain("Chaos");
         }
         finally
         {
-            if (File.Exists(modelPath))
+            if (Directory.Exists(modelsDirectory))
             {
-                File.Delete(modelPath);
-            }
-
-            if (File.Exists(metadataPath))
-            {
-                File.Delete(metadataPath);
+                Directory.Delete(modelsDirectory, true);
             }
         }
     }
@@ -215,13 +217,13 @@ public class CallTrumpModelTrainerTests
         var trainingData = _faker.Generate(100);
         var result = await _trainer.TrainAsync(trainingData);
 
-        var modelPath = Path.Combine(Path.GetTempPath(), $"calltrump_test_{Guid.NewGuid()}.zip");
-        var evaluationPath = Path.ChangeExtension(modelPath, ".evaluation.json");
+        var modelsDirectory = Path.Combine(Path.GetTempPath(), $"test_models_{Guid.NewGuid()}");
 
         try
         {
-            await _trainer.SaveModelAsync(modelPath, result);
+            await _trainer.SaveModelAsync(modelsDirectory, 1, ActorType.Chaos, result);
 
+            var evaluationPath = Path.Combine(modelsDirectory, "gen1_calltrump_v1.evaluation.json");
             File.Exists(evaluationPath).Should().BeTrue();
 
             var reportContent = await File.ReadAllTextAsync(evaluationPath);
@@ -233,20 +235,9 @@ public class CallTrumpModelTrainerTests
         }
         finally
         {
-            if (File.Exists(modelPath))
+            if (Directory.Exists(modelsDirectory))
             {
-                File.Delete(modelPath);
-            }
-
-            if (File.Exists(evaluationPath))
-            {
-                File.Delete(evaluationPath);
-            }
-
-            var metadataPath = Path.ChangeExtension(modelPath, ".json");
-            if (File.Exists(metadataPath))
-            {
-                File.Delete(metadataPath);
+                Directory.Delete(modelsDirectory, true);
             }
         }
     }
@@ -257,7 +248,7 @@ public class CallTrumpModelTrainerTests
         var trainingData = _faker.Generate(100);
         var result = await _trainer.TrainAsync(trainingData);
 
-        var act = async () => await _trainer.SaveModelAsync(null!, result);
+        var act = async () => await _trainer.SaveModelAsync(null!, 1, ActorType.Chaos, result);
 
         await act.Should().ThrowAsync<ArgumentException>();
     }

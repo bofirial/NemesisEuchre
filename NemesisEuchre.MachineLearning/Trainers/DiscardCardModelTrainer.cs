@@ -5,15 +5,17 @@ using Microsoft.ML;
 using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Options;
+using NemesisEuchre.MachineLearning.Services;
 
 namespace NemesisEuchre.MachineLearning.Trainers;
 
 public class DiscardCardModelTrainer(
     MLContext mlContext,
     IDataSplitter dataSplitter,
+    IModelVersionManager versionManager,
     IOptions<MachineLearningOptions> options,
     ILogger<DiscardCardModelTrainer> logger)
-    : MulticlassModelTrainerBase<DiscardCardTrainingData>(mlContext, dataSplitter, options, logger)
+    : MulticlassModelTrainerBase<DiscardCardTrainingData>(mlContext, dataSplitter, versionManager, options, logger)
 {
     protected override IEstimator<ITransformer> BuildPipeline(IDataView trainingData)
     {

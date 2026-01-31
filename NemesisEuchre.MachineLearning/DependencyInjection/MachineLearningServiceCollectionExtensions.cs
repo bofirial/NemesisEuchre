@@ -6,8 +6,10 @@ using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.MachineLearning.Caching;
 using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
+using NemesisEuchre.MachineLearning.Loading;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Options;
+using NemesisEuchre.MachineLearning.Services;
 using NemesisEuchre.MachineLearning.Trainers;
 
 namespace NemesisEuchre.MachineLearning.DependencyInjection;
@@ -21,6 +23,8 @@ public static class MachineLearningServiceCollectionExtensions
         services.AddSingleton<MLContext>();
         services.AddScoped<IDataSplitter, DataSplitter>();
         services.AddSingleton<IModelCache, ModelCache>();
+        services.AddSingleton<IModelVersionManager, ModelVersionManager>();
+        services.AddSingleton<IModelLoader, ModelLoader>();
 
         services.AddScoped<ITrainingDataLoader<CallTrumpTrainingData>, CallTrumpTrainingDataLoader>();
         services.AddScoped<ITrainingDataLoader<DiscardCardTrainingData>, DiscardCardTrainingDataLoader>();

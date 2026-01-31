@@ -1,5 +1,6 @@
 using Microsoft.ML;
 
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.Trainers;
@@ -16,7 +17,9 @@ public interface IModelTrainer<TData>
         CancellationToken cancellationToken = default);
 
     Task SaveModelAsync(
-        string modelPath,
+        string modelsDirectory,
+        int generation,
+        ActorType actorType,
         TrainingResult trainingResult,
         CancellationToken cancellationToken = default);
 }

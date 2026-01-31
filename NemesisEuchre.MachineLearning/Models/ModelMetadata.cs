@@ -1,8 +1,13 @@
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+
 namespace NemesisEuchre.MachineLearning.Models;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Records")]
 public record ModelMetadata(
     string ModelType,
+    ActorType ActorType,
+    int Generation,
+    int Version,
     DateTime TrainingDate,
     int TrainingSamples,
     int ValidationSamples,

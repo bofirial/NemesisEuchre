@@ -6,9 +6,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.ML;
 
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Options;
+using NemesisEuchre.MachineLearning.Services;
 using NemesisEuchre.MachineLearning.Trainers;
 
 namespace NemesisEuchre.MachineLearning.Tests.Trainers;
@@ -17,6 +19,7 @@ public class DiscardCardModelTrainerTests
 {
     private readonly MLContext _mlContext;
     private readonly IDataSplitter _dataSplitter;
+    private readonly IModelVersionManager _versionManager;
     private readonly IOptions<MachineLearningOptions> _options;
     private readonly ILogger<DiscardCardModelTrainer> _logger;
     private readonly DiscardCardModelTrainer _trainer;
@@ -36,8 +39,9 @@ public class DiscardCardModelTrainerTests
         };
         _options = Microsoft.Extensions.Options.Options.Create(mlOptions);
         _dataSplitter = new DataSplitter(_mlContext, _options);
+        _versionManager = new ModelVersionManager();
         _logger = new LoggerFactory().CreateLogger<DiscardCardModelTrainer>();
-        _trainer = new DiscardCardModelTrainer(_mlContext, _dataSplitter, _options, _logger);
+        _trainer = new DiscardCardModelTrainer(_mlContext, _dataSplitter, _versionManager, _options, _logger);
 
         _faker = new Faker<DiscardCardTrainingData>()
             .RuleFor(x => x.Card1Rank, f => f.Random.Float(0, 5))
@@ -158,7 +162,7 @@ public class DiscardCardModelTrainerTests
             15,
             15);
 
-        var act = async () => await _trainer.SaveModelAsync("./test_model.zip", result);
+        var act = async () => await _trainer.SaveModelAsync("./models", 1, ActorType.Chaos, result);
 
         return act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("No trained model to save. Call TrainAsync first.");
@@ -170,12 +174,14 @@ public class DiscardCardModelTrainerTests
         var trainingData = _faker.Generate(100);
         var result = await _trainer.TrainAsync(trainingData);
 
-        var modelPath = Path.Combine(Path.GetTempPath(), $"discardcard_test_{Guid.NewGuid()}.zip");
-        var metadataPath = Path.ChangeExtension(modelPath, ".json");
+        var modelsDirectory = Path.Combine(Path.GetTempPath(), $"test_models_{Guid.NewGuid()}");
 
         try
         {
-            await _trainer.SaveModelAsync(modelPath, result);
+            await _trainer.SaveModelAsync(modelsDirectory, 1, ActorType.Chaos, result);
+
+            var modelPath = Path.Combine(modelsDirectory, "gen1_discardcard_v1.zip");
+            var metadataPath = Path.Combine(modelsDirectory, "gen1_discardcard_v1.json");
 
             File.Exists(modelPath).Should().BeTrue();
             File.Exists(metadataPath).Should().BeTrue();
@@ -183,17 +189,13 @@ public class DiscardCardModelTrainerTests
             var metadataContent = await File.ReadAllTextAsync(metadataPath);
             metadataContent.Should().Contain("DiscardCard");
             metadataContent.Should().Contain("LightGbm");
+            metadataContent.Should().Contain("Chaos");
         }
         finally
         {
-            if (File.Exists(modelPath))
+            if (Directory.Exists(modelsDirectory))
             {
-                File.Delete(modelPath);
-            }
-
-            if (File.Exists(metadataPath))
-            {
-                File.Delete(metadataPath);
+                Directory.Delete(modelsDirectory, true);
             }
         }
     }
@@ -204,13 +206,13 @@ public class DiscardCardModelTrainerTests
         var trainingData = _faker.Generate(100);
         var result = await _trainer.TrainAsync(trainingData);
 
-        var modelPath = Path.Combine(Path.GetTempPath(), $"discardcard_test_{Guid.NewGuid()}.zip");
-        var evaluationPath = Path.ChangeExtension(modelPath, ".evaluation.json");
+        var modelsDirectory = Path.Combine(Path.GetTempPath(), $"test_models_{Guid.NewGuid()}");
 
         try
         {
-            await _trainer.SaveModelAsync(modelPath, result);
+            await _trainer.SaveModelAsync(modelsDirectory, 1, ActorType.Chaos, result);
 
+            var evaluationPath = Path.Combine(modelsDirectory, "gen1_discardcard_v1.evaluation.json");
             File.Exists(evaluationPath).Should().BeTrue();
 
             var reportContent = await File.ReadAllTextAsync(evaluationPath);
@@ -222,20 +224,9 @@ public class DiscardCardModelTrainerTests
         }
         finally
         {
-            if (File.Exists(modelPath))
+            if (Directory.Exists(modelsDirectory))
             {
-                File.Delete(modelPath);
-            }
-
-            if (File.Exists(evaluationPath))
-            {
-                File.Delete(evaluationPath);
-            }
-
-            var metadataPath = Path.ChangeExtension(modelPath, ".json");
-            if (File.Exists(metadataPath))
-            {
-                File.Delete(metadataPath);
+                Directory.Delete(modelsDirectory, true);
             }
         }
     }
@@ -246,7 +237,7 @@ public class DiscardCardModelTrainerTests
         var trainingData = _faker.Generate(100);
         var result = await _trainer.TrainAsync(trainingData);
 
-        var act = async () => await _trainer.SaveModelAsync(null!, result);
+        var act = async () => await _trainer.SaveModelAsync(null!, 1, ActorType.Chaos, result);
 
         await act.Should().ThrowAsync<ArgumentException>();
     }

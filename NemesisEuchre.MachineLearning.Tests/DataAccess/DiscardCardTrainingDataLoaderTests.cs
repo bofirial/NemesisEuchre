@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 using Bogus;
 
 using FluentAssertions;
@@ -242,7 +244,7 @@ public class DiscardCardTrainingDataLoaderTests
 
     private static async IAsyncEnumerable<T> CreateAsyncEnumerableWithCancellation<T>(
         IEnumerable<T> items,
-        CancellationToken cancellationToken)
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         foreach (var item in items)
         {

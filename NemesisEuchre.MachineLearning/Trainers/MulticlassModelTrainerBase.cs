@@ -6,15 +6,18 @@ using Microsoft.ML;
 using Microsoft.ML.Data;
 
 using NemesisEuchre.DataAccess.Configuration;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Options;
+using NemesisEuchre.MachineLearning.Services;
 
 namespace NemesisEuchre.MachineLearning.Trainers;
 
 public abstract class MulticlassModelTrainerBase<TData>(
     MLContext mlContext,
     IDataSplitter dataSplitter,
+    IModelVersionManager versionManager,
     IOptions<MachineLearningOptions> options,
     ILogger logger) : IModelTrainer<TData>
     where TData : class, new()
@@ -22,6 +25,8 @@ public abstract class MulticlassModelTrainerBase<TData>(
     protected MLContext MlContext { get; } = mlContext ?? throw new ArgumentNullException(nameof(mlContext));
 
     protected IDataSplitter DataSplitter { get; } = dataSplitter ?? throw new ArgumentNullException(nameof(dataSplitter));
+
+    protected IModelVersionManager VersionManager { get; } = versionManager ?? throw new ArgumentNullException(nameof(versionManager));
 
     protected MachineLearningOptions Options { get; } = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
@@ -108,23 +113,39 @@ public abstract class MulticlassModelTrainerBase<TData>(
     }
 
     public async Task SaveModelAsync(
-        string modelPath,
+        string modelsDirectory,
+        int generation,
+        ActorType actorType,
         TrainingResult trainingResult,
         CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(modelPath);
+        ArgumentException.ThrowIfNullOrWhiteSpace(modelsDirectory);
         ArgumentNullException.ThrowIfNull(trainingResult);
+
+        if (generation < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(generation), "Generation must be at least 1");
+        }
 
         if (TrainedModel == null)
         {
             throw new InvalidOperationException("No trained model to save. Call TrainAsync first.");
         }
 
-        var directory = Path.GetDirectoryName(modelPath);
-        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        if (!Directory.Exists(modelsDirectory))
         {
-            Directory.CreateDirectory(directory);
+            Directory.CreateDirectory(modelsDirectory);
         }
+
+        var decisionType = GetModelType().ToLowerInvariant();
+
+        LoggerMessages.LogDeterminingNextVersion(Logger, generation, decisionType);
+        var version = VersionManager.GetNextVersion(modelsDirectory, generation, decisionType);
+        LoggerMessages.LogExistingVersionsFound(Logger, version - 1, generation, decisionType);
+
+        var modelPath = VersionManager.GetModelPath(modelsDirectory, generation, decisionType, version);
+
+        LoggerMessages.LogSavingModelWithVersion(Logger, generation, decisionType, version);
 
         var schema = MlContext.Data.LoadFromEnumerable([new TData()]).Schema;
 
@@ -138,6 +159,9 @@ public abstract class MulticlassModelTrainerBase<TData>(
         var metadataPath = Path.ChangeExtension(modelPath, ".json");
         var metadata = new ModelMetadata(
             GetModelType(),
+            actorType,
+            generation,
+            version,
             DateTime.UtcNow,
             trainingResult.TrainingSamples,
             trainingResult.ValidationSamples,

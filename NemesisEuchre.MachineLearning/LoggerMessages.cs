@@ -142,4 +142,28 @@ public static partial class LoggerMessages
         double weightedPrecision,
         double weightedRecall,
         double weightedF1Score);
+
+    [LoggerMessage(
+        EventId = 20,
+        Level = LogLevel.Information,
+        Message = "Determining next version for gen{Generation} {DecisionType}")]
+    public static partial void LogDeterminingNextVersion(ILogger logger, int generation, string decisionType);
+
+    [LoggerMessage(
+        EventId = 21,
+        Level = LogLevel.Information,
+        Message = "Saving model as gen{Generation}_{DecisionType}_v{Version}.zip")]
+    public static partial void LogSavingModelWithVersion(ILogger logger, int generation, string decisionType, int version);
+
+    [LoggerMessage(
+        EventId = 22,
+        Level = LogLevel.Information,
+        Message = "Loading model gen{Generation} {DecisionType} v{Version}")]
+    public static partial void LogLoadingModelWithVersion(ILogger logger, int generation, string decisionType, int version);
+
+    [LoggerMessage(
+        EventId = 23,
+        Level = LogLevel.Information,
+        Message = "Found {Count} existing versions for gen{Generation} {DecisionType}")]
+    public static partial void LogExistingVersionsFound(ILogger logger, int count, int generation, string decisionType);
 }
