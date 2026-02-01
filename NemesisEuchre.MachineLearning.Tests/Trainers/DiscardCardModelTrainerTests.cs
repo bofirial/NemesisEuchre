@@ -41,7 +41,9 @@ public class DiscardCardModelTrainerTests
         _dataSplitter = new DataSplitter(_mlContext, _options);
         _versionManager = new ModelVersionManager();
         _logger = new LoggerFactory().CreateLogger<DiscardCardModelTrainer>();
-        _trainer = new DiscardCardModelTrainer(_mlContext, _dataSplitter, _versionManager, _options, _logger);
+        var persistenceLogger = new LoggerFactory().CreateLogger<ModelPersistenceService>();
+        var persistenceService = new ModelPersistenceService(_versionManager, persistenceLogger);
+        _trainer = new DiscardCardModelTrainer(_mlContext, _dataSplitter, _versionManager, persistenceService, _options, _logger);
 
         _faker = new Faker<DiscardCardTrainingData>()
             .RuleFor(x => x.Card1Rank, f => f.Random.Float(0, 5))

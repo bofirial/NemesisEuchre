@@ -41,7 +41,9 @@ public class PlayCardModelTrainerTests
         _dataSplitter = new DataSplitter(_mlContext, _options);
         _versionManager = new ModelVersionManager();
         _logger = new LoggerFactory().CreateLogger<PlayCardModelTrainer>();
-        _trainer = new PlayCardModelTrainer(_mlContext, _dataSplitter, _versionManager, _options, _logger);
+        var persistenceLogger = new LoggerFactory().CreateLogger<ModelPersistenceService>();
+        var persistenceService = new ModelPersistenceService(_versionManager, persistenceLogger);
+        _trainer = new PlayCardModelTrainer(_mlContext, _dataSplitter, _versionManager, persistenceService, _options, _logger);
 
         _faker = new Faker<PlayCardTrainingData>()
             .RuleFor(x => x.Card1Rank, f => f.Random.Float(0, 5))

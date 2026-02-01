@@ -14,9 +14,10 @@ public class CallTrumpRegressionModelTrainer(
     MLContext mlContext,
     IDataSplitter dataSplitter,
     IModelVersionManager versionManager,
+    IModelPersistenceService persistenceService,
     IOptions<MachineLearningOptions> options,
     ILogger<CallTrumpRegressionModelTrainer> logger)
-    : RegressionModelTrainerBase<CallTrumpTrainingData>(mlContext, dataSplitter, versionManager, options, logger)
+    : RegressionModelTrainerBase<CallTrumpTrainingData>(mlContext, dataSplitter, versionManager, persistenceService, options, logger)
 {
     protected override IEstimator<ITransformer> BuildPipeline(IDataView trainingData)
     {

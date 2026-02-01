@@ -14,9 +14,10 @@ public class DiscardCardModelTrainer(
     MLContext mlContext,
     IDataSplitter dataSplitter,
     IModelVersionManager versionManager,
+    IModelPersistenceService persistenceService,
     IOptions<MachineLearningOptions> options,
     ILogger<DiscardCardModelTrainer> logger)
-    : MulticlassModelTrainerBase<DiscardCardTrainingData>(mlContext, dataSplitter, versionManager, options, logger)
+    : MulticlassModelTrainerBase<DiscardCardTrainingData>(mlContext, dataSplitter, versionManager, persistenceService, options, logger)
 {
     protected override IEstimator<ITransformer> BuildPipeline(IDataView trainingData)
     {

@@ -14,9 +14,10 @@ public class PlayCardModelTrainer(
     MLContext mlContext,
     IDataSplitter dataSplitter,
     IModelVersionManager versionManager,
+    IModelPersistenceService persistenceService,
     IOptions<MachineLearningOptions> options,
     ILogger<PlayCardModelTrainer> logger)
-    : MulticlassModelTrainerBase<PlayCardTrainingData>(mlContext, dataSplitter, versionManager, options, logger)
+    : MulticlassModelTrainerBase<PlayCardTrainingData>(mlContext, dataSplitter, versionManager, persistenceService, options, logger)
 {
     protected override IEstimator<ITransformer> BuildPipeline(IDataView trainingData)
     {
