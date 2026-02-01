@@ -5,7 +5,7 @@ namespace NemesisEuchre.MachineLearning.Models;
 public class CallTrumpPrediction
 {
     [ColumnName("PredictedLabel")]
-    public uint PredictedDecisionIndex { get; set; }
+    public float PredictedDealPoints { get; set; }
 
     [ColumnName("Score")]
     public float[] Score { get; set; } = [];

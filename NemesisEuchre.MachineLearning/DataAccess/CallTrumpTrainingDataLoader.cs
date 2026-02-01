@@ -29,6 +29,11 @@ public class CallTrumpTrainingDataLoader(
         await foreach (var entity in gameRepository.GetCallTrumpTrainingDataAsync(
             actorType, limit, winningTeamOnly, cancellationToken))
         {
+            if (entity.RelativeDealPoints == null)
+            {
+                continue;
+            }
+
             try
             {
                 var transformed = featureEngineer.Transform(entity);

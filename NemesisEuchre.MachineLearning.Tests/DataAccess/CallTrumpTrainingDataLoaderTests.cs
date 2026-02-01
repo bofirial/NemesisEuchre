@@ -59,7 +59,7 @@ public class CallTrumpTrainingDataLoaderTests
             var trainingData = new CallTrumpTrainingData
             {
                 Card1Rank = entity.CallTrumpDecisionId % 6,
-                ChosenDecisionIndex = (uint)(entity.CallTrumpDecisionId % 11),
+                ExpectedDealPoints = (short)((entity.CallTrumpDecisionId % 5) - 2),
             };
             expectedTrainingData.Add(trainingData);
             _mockFeatureEngineer.Setup(x => x.Transform(entity)).Returns(trainingData);
@@ -100,7 +100,7 @@ public class CallTrumpTrainingDataLoaderTests
 
                 return new CallTrumpTrainingData
                 {
-                    ChosenDecisionIndex = (uint)(entity.CallTrumpDecisionId % 11),
+                    ExpectedDealPoints = (short)((entity.CallTrumpDecisionId % 5) - 2),
                 };
             });
 
@@ -129,7 +129,7 @@ public class CallTrumpTrainingDataLoaderTests
         _mockFeatureEngineer.Setup(x => x.Transform(It.IsAny<CallTrumpDecisionEntity>()))
             .Returns<CallTrumpDecisionEntity>(entity => new CallTrumpTrainingData
             {
-                ChosenDecisionIndex = (uint)(entity.CallTrumpDecisionId % 11),
+                ExpectedDealPoints = (short)((entity.CallTrumpDecisionId % 5) - 2),
             });
 
         _mockGameRepository.Setup(x => x.GetCallTrumpTrainingDataAsync(
@@ -167,7 +167,7 @@ public class CallTrumpTrainingDataLoaderTests
 
                 return new CallTrumpTrainingData
                 {
-                    ChosenDecisionIndex = (uint)(entity.CallTrumpDecisionId % 11),
+                    ExpectedDealPoints = (short)((entity.CallTrumpDecisionId % 5) - 2),
                 };
             });
 
@@ -198,7 +198,7 @@ public class CallTrumpTrainingDataLoaderTests
         _mockFeatureEngineer.Setup(x => x.Transform(It.IsAny<CallTrumpDecisionEntity>()))
             .Returns<CallTrumpDecisionEntity>(entity => new CallTrumpTrainingData
             {
-                ChosenDecisionIndex = (uint)(entity.CallTrumpDecisionId % 11),
+                ExpectedDealPoints = (short)((entity.CallTrumpDecisionId % 5) - 2),
             });
 
         _mockGameRepository.Setup(x => x.GetCallTrumpTrainingDataAsync(

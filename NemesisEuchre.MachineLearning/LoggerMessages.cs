@@ -166,4 +166,14 @@ public static partial class LoggerMessages
         Level = LogLevel.Information,
         Message = "Found {Count} existing versions for gen{Generation} {DecisionType}")]
     public static partial void LogExistingVersionsFound(ILogger logger, int count, int generation, string decisionType);
+
+    [LoggerMessage(
+        EventId = 24,
+        Level = LogLevel.Information,
+        Message = "Validation metrics - R²: {RSquared:F4}, MAE: {MeanAbsoluteError:F4}, RMSE: {RootMeanSquaredError:F4}")]
+    public static partial void LogRegressionValidationMetrics(
+        ILogger logger,
+        double rSquared,
+        double meanAbsoluteError,
+        double rootMeanSquaredError);
 }

@@ -3,7 +3,6 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.ML;
-using Microsoft.ML.Data;
 
 using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
@@ -14,7 +13,7 @@ using NemesisEuchre.MachineLearning.Services;
 
 namespace NemesisEuchre.MachineLearning.Trainers;
 
-public abstract class MulticlassModelTrainerBase<TData>(
+public abstract class RegressionModelTrainerBase<TData>(
     MLContext mlContext,
     IDataSplitter dataSplitter,
     IModelVersionManager versionManager,
@@ -60,14 +59,11 @@ public abstract class MulticlassModelTrainerBase<TData>(
 
         var validationMetrics = await EvaluateAsync(dataSplit.Validation, cancellationToken);
 
-        LoggerMessages.LogValidationMetrics(
+        LoggerMessages.LogRegressionValidationMetrics(
             Logger,
-            validationMetrics.MicroAccuracy,
-            validationMetrics.MacroAccuracy,
-            validationMetrics.LogLoss);
-
-        var evaluationReport = CreateEvaluationReport(validationMetrics, dataSplit.ValidationRowCount);
-        LogPerClassMetrics(validationMetrics, evaluationReport);
+            validationMetrics.RSquared,
+            validationMetrics.MeanAbsoluteError,
+            validationMetrics.RootMeanSquaredError);
 
         return new TrainingResult(
             TrainedModel,
@@ -77,7 +73,14 @@ public abstract class MulticlassModelTrainerBase<TData>(
             dataSplit.TestRowCount);
     }
 
-    public Task<EvaluationMetrics> EvaluateAsync(
+    Task<EvaluationMetrics> IModelTrainer<TData>.EvaluateAsync(
+        IDataView testData,
+        CancellationToken cancellationToken)
+    {
+        throw new NotSupportedException("Use EvaluateRegressionAsync for regression models");
+    }
+
+    public Task<RegressionEvaluationMetrics> EvaluateAsync(
         IDataView testData,
         CancellationToken cancellationToken = default)
     {
@@ -92,24 +95,17 @@ public abstract class MulticlassModelTrainerBase<TData>(
             () =>
         {
             var predictions = TrainedModel.Transform(testData);
-            var mlMetrics = MlContext.MulticlassClassification.Evaluate(
+            var mlMetrics = MlContext.Regression.Evaluate(
                 predictions,
                 labelColumnName: "Label",
-                predictedLabelColumnName: "PredictedLabel");
+                scoreColumnName: "Score");
 
-            var numberOfClasses = GetNumberOfClasses();
-            var perClassLogLoss = ExtractPerClassMetric(mlMetrics.PerClassLogLoss, numberOfClasses);
-            var confusionMatrix = ConvertConfusionMatrix(mlMetrics.ConfusionMatrix, numberOfClasses);
-            var perClassMetrics = MetricsCalculator.CalculatePerClassMetrics(confusionMatrix);
-
-            return new EvaluationMetrics(
-                mlMetrics.MicroAccuracy,
-                mlMetrics.MacroAccuracy,
-                mlMetrics.LogLoss,
-                mlMetrics.LogLossReduction,
-                perClassLogLoss,
-                confusionMatrix,
-                perClassMetrics);
+            return new RegressionEvaluationMetrics(
+                mlMetrics.RSquared,
+                mlMetrics.MeanAbsoluteError,
+                mlMetrics.RootMeanSquaredError,
+                mlMetrics.MeanSquaredError,
+                mlMetrics.LossFunction);
         }, cancellationToken);
     }
 
@@ -137,88 +133,12 @@ public abstract class MulticlassModelTrainerBase<TData>(
 
     protected abstract string GetModelType();
 
-    protected abstract int GetNumberOfClasses();
-
     private static void EnsureDirectoryExists(string directory)
     {
         if (!Directory.Exists(directory))
         {
             Directory.CreateDirectory(directory);
         }
-    }
-
-    private static double[] ExtractPerClassMetric(IReadOnlyList<double> metrics, int numberOfClasses)
-    {
-        if (metrics == null || metrics.Count == 0)
-        {
-            return new double[numberOfClasses];
-        }
-
-        var result = new double[numberOfClasses];
-        for (var i = 0; i < Math.Min(metrics.Count, numberOfClasses); i++)
-        {
-            result[i] = metrics[i];
-        }
-
-        return result;
-    }
-
-    private static int[][] ConvertConfusionMatrix(ConfusionMatrix confusionMatrix, int numberOfClasses)
-    {
-        if (confusionMatrix == null)
-        {
-            return CreateEmptyConfusionMatrix(numberOfClasses);
-        }
-
-        var counts = confusionMatrix.Counts;
-        var matrix = new int[numberOfClasses][];
-
-        for (var i = 0; i < numberOfClasses; i++)
-        {
-            matrix[i] = new int[numberOfClasses];
-            for (var j = 0; j < numberOfClasses; j++)
-            {
-                if (i < counts.Count && j < counts[i].Count)
-                {
-                    matrix[i][j] = (int)counts[i][j];
-                }
-            }
-        }
-
-        return matrix;
-    }
-
-    private static int[][] CreateEmptyConfusionMatrix(int numberOfClasses)
-    {
-        var matrix = new int[numberOfClasses][];
-        for (var i = 0; i < numberOfClasses; i++)
-        {
-            matrix[i] = new int[numberOfClasses];
-        }
-
-        return matrix;
-    }
-
-    private static double CalculateWeightedAverage(
-        PerClassMetrics[] metrics,
-        Func<PerClassMetrics, double> valueSelector,
-        Func<PerClassMetrics, int> weightSelector)
-    {
-        double weightedSum = 0;
-        int totalWeight = 0;
-
-        foreach (var metric in metrics)
-        {
-            var value = valueSelector(metric);
-            if (!double.IsNaN(value))
-            {
-                var weight = weightSelector(metric);
-                weightedSum += value * weight;
-                totalWeight += weight;
-            }
-        }
-
-        return totalWeight > 0 ? weightedSum / totalWeight : double.NaN;
     }
 
     private void ValidateSaveModelParameters(string modelsDirectory, int generation, TrainingResult trainingResult)
@@ -287,7 +207,7 @@ public abstract class MulticlassModelTrainerBase<TData>(
     {
         var evaluationPath = Path.ChangeExtension(modelPath, ".evaluation.json");
         var evaluationReport = CreateEvaluationReport(
-            trainingResult.ValidationMetrics as EvaluationMetrics ?? throw new InvalidOperationException("Expected EvaluationMetrics"),
+            trainingResult.ValidationMetrics as RegressionEvaluationMetrics ?? throw new InvalidOperationException("Expected RegressionEvaluationMetrics"),
             trainingResult.ValidationSamples);
         var reportJson = JsonSerializer.Serialize(evaluationReport, JsonSerializationOptions.WithNaNHandling);
 
@@ -301,8 +221,8 @@ public abstract class MulticlassModelTrainerBase<TData>(
         TrainingResult trainingResult,
         int version)
     {
-        var metrics = trainingResult.ValidationMetrics as EvaluationMetrics
-            ?? throw new InvalidOperationException("Expected EvaluationMetrics");
+        var regressionMetrics = trainingResult.ValidationMetrics as RegressionEvaluationMetrics
+            ?? throw new InvalidOperationException("Expected RegressionEvaluationMetrics");
 
         return new ModelMetadata(
             GetModelType(),
@@ -319,59 +239,26 @@ public abstract class MulticlassModelTrainerBase<TData>(
                 Options.NumberOfIterations,
                 Options.LearningRate,
                 Options.RandomSeed),
-            new MetricsMetadata(
-                metrics.MicroAccuracy,
-                metrics.MacroAccuracy,
-                metrics.LogLoss,
-                metrics.LogLossReduction),
+            new RegressionMetricsMetadata(
+                regressionMetrics.RSquared,
+                regressionMetrics.MeanAbsoluteError,
+                regressionMetrics.RootMeanSquaredError,
+                regressionMetrics.MeanSquaredError),
             "1.0");
     }
 
-    private void LogPerClassMetrics(EvaluationMetrics metrics, EvaluationReport report)
-    {
-        LoggerMessages.LogPerClassMetricsHeader(Logger, GetModelType());
-
-        foreach (var classMetric in metrics.PerClassMetrics)
-        {
-            LoggerMessages.LogPerClassMetric(
-                Logger,
-                classMetric.ClassLabel,
-                classMetric.Precision,
-                classMetric.Recall,
-                classMetric.F1Score,
-                classMetric.Support);
-        }
-
-        LoggerMessages.LogWeightedAverages(
-            Logger,
-            report.Overall.WeightedPrecision,
-            report.Overall.WeightedRecall,
-            report.Overall.WeightedF1Score);
-    }
-
-    private EvaluationReport CreateEvaluationReport(
-        EvaluationMetrics metrics,
+    private RegressionEvaluationReport CreateEvaluationReport(
+        RegressionEvaluationMetrics metrics,
         int testSamples)
     {
-        var weightedPrecision = CalculateWeightedAverage(metrics.PerClassMetrics, m => m.Precision, m => m.Support);
-        var weightedRecall = CalculateWeightedAverage(metrics.PerClassMetrics, m => m.Recall, m => m.Support);
-        var weightedF1Score = CalculateWeightedAverage(metrics.PerClassMetrics, m => m.F1Score, m => m.Support);
-
-        var overallMetrics = new OverallMetrics(
-            metrics.MicroAccuracy,
-            metrics.MacroAccuracy,
-            metrics.LogLoss,
-            metrics.LogLossReduction,
-            weightedPrecision,
-            weightedRecall,
-            weightedF1Score);
-
-        return new EvaluationReport(
+        return new RegressionEvaluationReport(
             GetModelType(),
             DateTime.UtcNow,
             testSamples,
-            overallMetrics,
-            metrics.PerClassMetrics,
-            metrics.ConfusionMatrix);
+            metrics.RSquared,
+            metrics.MeanAbsoluteError,
+            metrics.RootMeanSquaredError,
+            metrics.MeanSquaredError,
+            metrics.LossFunction);
     }
 }

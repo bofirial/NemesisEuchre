@@ -73,13 +73,13 @@ public class DiscardCardFeatureEngineerTests
     }
 
     [Theory]
-    [InlineData(0, 0u)]
-    [InlineData(1, 1u)]
-    [InlineData(2, 2u)]
-    [InlineData(3, 3u)]
-    [InlineData(4, 4u)]
-    [InlineData(5, 5u)]
-    public void Transform_WithChosenCard_MapsToCorrectIndex(int chosenCardIndex, uint expectedIndex)
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    public void Transform_WithChosenCard_SetsCorrectDecisionFlag(int chosenCardIndex)
     {
         var cards = CreateRelativeCards(6);
         var chosenCard = cards[chosenCardIndex];
@@ -87,7 +87,12 @@ public class DiscardCardFeatureEngineerTests
 
         var result = _engineer.Transform(entity);
 
-        result.ChosenCardIndex.Should().Be(expectedIndex);
+        result.Card1Chosen.Should().Be(chosenCardIndex == 0 ? 1.0f : 0.0f);
+        result.Card2Chosen.Should().Be(chosenCardIndex == 1 ? 1.0f : 0.0f);
+        result.Card3Chosen.Should().Be(chosenCardIndex == 2 ? 1.0f : 0.0f);
+        result.Card4Chosen.Should().Be(chosenCardIndex == 3 ? 1.0f : 0.0f);
+        result.Card5Chosen.Should().Be(chosenCardIndex == 4 ? 1.0f : 0.0f);
+        result.Card6Chosen.Should().Be(chosenCardIndex == 5 ? 1.0f : 0.0f);
     }
 
     [Fact]
@@ -138,6 +143,26 @@ public class DiscardCardFeatureEngineerTests
             .WithMessage("*Expected 6 cards*");
     }
 
+    [Fact]
+    public void Transform_WithValidEntity_MapsExpectedDealPoints()
+    {
+        var cards = CreateRelativeCards(6);
+        var entity = new DiscardCardDecisionEntity
+        {
+            CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
+            CallingPlayer = _faker.PickRandom<RelativePlayerPosition>(),
+            CallingPlayerGoingAlone = _faker.Random.Bool(),
+            TeamScore = (short)_faker.Random.Int(0, 9),
+            OpponentScore = (short)_faker.Random.Int(0, 9),
+            ChosenCardJson = JsonSerializer.Serialize(cards[0], JsonSerializationOptions.Default),
+            RelativeDealPoints = -1,
+        };
+
+        var result = _engineer.Transform(entity);
+
+        result.ExpectedDealPoints.Should().Be(-1);
+    }
+
     private RelativeCard CreateRelativeCard(Rank? rank = null, RelativeSuit? suit = null)
     {
         return new RelativeCard
@@ -184,6 +209,7 @@ public class DiscardCardFeatureEngineerTests
             TeamScore = teamScore ?? (short)_faker.Random.Int(0, 9),
             OpponentScore = opponentScore ?? (short)_faker.Random.Int(0, 9),
             ChosenCardJson = JsonSerializer.Serialize(chosenCard, JsonSerializationOptions.Default),
+            RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
         };
     }
 }

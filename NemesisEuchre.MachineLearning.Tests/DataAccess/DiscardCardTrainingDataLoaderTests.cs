@@ -57,7 +57,7 @@ public class DiscardCardTrainingDataLoaderTests
             var trainingData = new DiscardCardTrainingData
             {
                 CallingPlayerPosition = entity.DiscardCardDecisionId % 4,
-                ChosenCardIndex = (uint)(entity.DiscardCardDecisionId % 6),
+                ExpectedDealPoints = (short)((entity.DiscardCardDecisionId % 5) - 2),
             };
             expectedTrainingData.Add(trainingData);
             _mockFeatureEngineer.Setup(x => x.Transform(entity)).Returns(trainingData);
@@ -98,7 +98,7 @@ public class DiscardCardTrainingDataLoaderTests
 
                 return new DiscardCardTrainingData
                 {
-                    ChosenCardIndex = (uint)(entity.DiscardCardDecisionId % 6),
+                    ExpectedDealPoints = (short)((entity.DiscardCardDecisionId % 5) - 2),
                 };
             });
 
@@ -127,7 +127,7 @@ public class DiscardCardTrainingDataLoaderTests
         _mockFeatureEngineer.Setup(x => x.Transform(It.IsAny<DiscardCardDecisionEntity>()))
             .Returns<DiscardCardDecisionEntity>(entity => new DiscardCardTrainingData
             {
-                ChosenCardIndex = (uint)(entity.DiscardCardDecisionId % 6),
+                ExpectedDealPoints = (short)((entity.DiscardCardDecisionId % 5) - 2),
             });
 
         _mockGameRepository.Setup(x => x.GetDiscardCardTrainingDataAsync(
@@ -165,7 +165,7 @@ public class DiscardCardTrainingDataLoaderTests
 
                 return new DiscardCardTrainingData
                 {
-                    ChosenCardIndex = (uint)(entity.DiscardCardDecisionId % 6),
+                    ExpectedDealPoints = (short)((entity.DiscardCardDecisionId % 5) - 2),
                 };
             });
 
@@ -196,7 +196,7 @@ public class DiscardCardTrainingDataLoaderTests
         _mockFeatureEngineer.Setup(x => x.Transform(It.IsAny<DiscardCardDecisionEntity>()))
             .Returns<DiscardCardDecisionEntity>(entity => new DiscardCardTrainingData
             {
-                ChosenCardIndex = (uint)(entity.DiscardCardDecisionId % 6),
+                ExpectedDealPoints = (short)((entity.DiscardCardDecisionId % 5) - 2),
             });
 
         _mockGameRepository.Setup(x => x.GetDiscardCardTrainingDataAsync(

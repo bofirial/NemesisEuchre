@@ -114,6 +114,7 @@ public class PlayCardFeatureEngineerTests
             OpponentScore = (short)_faker.Random.Int(0, 9),
             CallingPlayer = _faker.PickRandom<RelativePlayerPosition>(),
             CallingPlayerGoingAlone = _faker.Random.Bool(),
+            RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
             Trick = new TrickEntity { TrickNumber = (byte)_faker.Random.Int(1, 5) },
         };
 
@@ -139,6 +140,7 @@ public class PlayCardFeatureEngineerTests
             OpponentScore = (short)_faker.Random.Int(0, 9),
             CallingPlayer = _faker.PickRandom<RelativePlayerPosition>(),
             CallingPlayerGoingAlone = _faker.Random.Bool(),
+            RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
             Trick = new TrickEntity { TrickNumber = (byte)_faker.Random.Int(1, 5) },
         };
 
@@ -184,12 +186,12 @@ public class PlayCardFeatureEngineerTests
     }
 
     [Theory]
-    [InlineData(0, 0u)]
-    [InlineData(1, 1u)]
-    [InlineData(2, 2u)]
-    [InlineData(3, 3u)]
-    [InlineData(4, 4u)]
-    public void Transform_WithChosenCard_MapsToCorrectIndex(int chosenCardIndex, uint expectedIndex)
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public void Transform_WithChosenCard_SetsCorrectDecisionFlag(int chosenCardIndex)
     {
         var cards = CreateRelativeCards(5);
         var chosenCard = cards[chosenCardIndex];
@@ -197,7 +199,11 @@ public class PlayCardFeatureEngineerTests
 
         var result = _engineer.Transform(entity);
 
-        result.ChosenCardIndex.Should().Be(expectedIndex);
+        result.Card1Chosen.Should().Be(chosenCardIndex == 0 ? 1.0f : 0.0f);
+        result.Card2Chosen.Should().Be(chosenCardIndex == 1 ? 1.0f : 0.0f);
+        result.Card3Chosen.Should().Be(chosenCardIndex == 2 ? 1.0f : 0.0f);
+        result.Card4Chosen.Should().Be(chosenCardIndex == 3 ? 1.0f : 0.0f);
+        result.Card5Chosen.Should().Be(chosenCardIndex == 4 ? 1.0f : 0.0f);
     }
 
     [Fact]
@@ -222,6 +228,32 @@ public class PlayCardFeatureEngineerTests
 
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("*not found in hand*");
+    }
+
+    [Fact]
+    public void Transform_WithValidEntity_MapsExpectedDealPoints()
+    {
+        var cards = CreateRelativeCards(5);
+        var entity = new PlayCardDecisionEntity
+        {
+            CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
+            PlayedCardsJson = JsonSerializer.Serialize(CreatePlayedCardsDict(1), JsonSerializationOptions.Default),
+            ValidCardsToPlayJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
+            ChosenCardJson = JsonSerializer.Serialize(cards[0], JsonSerializationOptions.Default),
+            LeadPlayer = _faker.PickRandom<RelativePlayerPosition>(),
+            LeadSuit = _faker.PickRandom<RelativeSuit>(),
+            WinningTrickPlayer = _faker.PickRandom<RelativePlayerPosition>(),
+            TeamScore = (short)_faker.Random.Int(0, 9),
+            OpponentScore = (short)_faker.Random.Int(0, 9),
+            CallingPlayer = _faker.PickRandom<RelativePlayerPosition>(),
+            CallingPlayerGoingAlone = _faker.Random.Bool(),
+            RelativeDealPoints = 2,
+            Trick = new TrickEntity { TrickNumber = (byte)_faker.Random.Int(1, 5) },
+        };
+
+        var result = _engineer.Transform(entity);
+
+        result.ExpectedDealPoints.Should().Be(2);
     }
 
     [Fact]
@@ -332,6 +364,7 @@ public class PlayCardFeatureEngineerTests
             OpponentScore = opponentScore ?? (short)_faker.Random.Int(0, 9),
             CallingPlayer = callingPlayer ?? _faker.PickRandom<RelativePlayerPosition>(),
             CallingPlayerGoingAlone = callingPlayerGoingAlone ?? _faker.Random.Bool(),
+            RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
             Trick = new TrickEntity
             {
                 TrickNumber = trickNumber ?? (byte)_faker.Random.Int(1, 5),

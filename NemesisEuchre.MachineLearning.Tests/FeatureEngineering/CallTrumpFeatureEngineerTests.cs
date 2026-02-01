@@ -108,11 +108,15 @@ public class CallTrumpFeatureEngineerTests
     }
 
     [Theory]
-    [InlineData(CallTrumpDecision.Pass, 0)]
-    [InlineData(CallTrumpDecision.CallSpades, 1)]
-    [InlineData(CallTrumpDecision.OrderItUp, 9)]
-    [InlineData(CallTrumpDecision.OrderItUpAndGoAlone, 10)]
-    public void Transform_WithChosenDecision_MapsToCorrectIndex(CallTrumpDecision chosenDecision, uint expectedIndex)
+    [InlineData(CallTrumpDecision.Pass)]
+    [InlineData(CallTrumpDecision.CallSpades)]
+    [InlineData(CallTrumpDecision.CallHearts)]
+    [InlineData(CallTrumpDecision.CallClubs)]
+    [InlineData(CallTrumpDecision.CallDiamonds)]
+    [InlineData(CallTrumpDecision.CallSpadesAndGoAlone)]
+    [InlineData(CallTrumpDecision.OrderItUp)]
+    [InlineData(CallTrumpDecision.OrderItUpAndGoAlone)]
+    public void Transform_WithChosenDecision_SetsCorrectDecisionFlag(CallTrumpDecision chosenDecision)
     {
         var entity = CreateCallTrumpDecisionEntity(
             validDecisions: [chosenDecision],
@@ -120,7 +124,17 @@ public class CallTrumpFeatureEngineerTests
 
         var result = _engineer.Transform(entity);
 
-        result.ChosenDecisionIndex.Should().Be(expectedIndex);
+        result.Decision0Chosen.Should().Be(chosenDecision == CallTrumpDecision.Pass ? 1.0f : 0.0f);
+        result.Decision1Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallSpades ? 1.0f : 0.0f);
+        result.Decision2Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallHearts ? 1.0f : 0.0f);
+        result.Decision3Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallClubs ? 1.0f : 0.0f);
+        result.Decision4Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallDiamonds ? 1.0f : 0.0f);
+        result.Decision5Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallSpadesAndGoAlone ? 1.0f : 0.0f);
+        result.Decision6Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallHeartsAndGoAlone ? 1.0f : 0.0f);
+        result.Decision7Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallClubsAndGoAlone ? 1.0f : 0.0f);
+        result.Decision8Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallDiamondsAndGoAlone ? 1.0f : 0.0f);
+        result.Decision9Chosen.Should().Be(chosenDecision == CallTrumpDecision.OrderItUp ? 1.0f : 0.0f);
+        result.Decision10Chosen.Should().Be(chosenDecision == CallTrumpDecision.OrderItUpAndGoAlone ? 1.0f : 0.0f);
     }
 
     [Fact]
@@ -134,6 +148,29 @@ public class CallTrumpFeatureEngineerTests
 
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("*not in the valid decisions array*");
+    }
+
+    [Fact]
+    public void Transform_WithValidEntity_MapsExpectedDealPoints()
+    {
+        var cards = CreateRelativeCards(5);
+        var upCard = CreateRelativeCard();
+        var entity = new CallTrumpDecisionEntity
+        {
+            CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
+            UpCardJson = JsonSerializer.Serialize(upCard, JsonSerializationOptions.Default),
+            DealerPosition = _faker.PickRandom<RelativePlayerPosition>(),
+            TeamScore = (short)_faker.Random.Int(0, 9),
+            OpponentScore = (short)_faker.Random.Int(0, 9),
+            DecisionOrder = (byte)_faker.Random.Int(0, 7),
+            ValidDecisionsJson = JsonSerializer.Serialize(new[] { CallTrumpDecision.Pass }, JsonSerializationOptions.Default),
+            ChosenDecisionJson = JsonSerializer.Serialize(CallTrumpDecision.Pass, JsonSerializationOptions.Default),
+            RelativeDealPoints = 4,
+        };
+
+        var result = _engineer.Transform(entity);
+
+        result.ExpectedDealPoints.Should().Be(4);
     }
 
     private RelativeCard CreateRelativeCard(Rank? rank = null, RelativeSuit? suit = null)
@@ -175,6 +212,7 @@ public class CallTrumpFeatureEngineerTests
             DecisionOrder = decisionOrder ?? (byte)_faker.Random.Int(0, 7),
             ValidDecisionsJson = JsonSerializer.Serialize(validDecisions, JsonSerializationOptions.Default),
             ChosenDecisionJson = JsonSerializer.Serialize(chosenDecision, JsonSerializationOptions.Default),
+            RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
         };
     }
 }

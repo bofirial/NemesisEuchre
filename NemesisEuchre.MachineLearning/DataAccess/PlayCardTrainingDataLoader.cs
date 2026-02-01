@@ -29,6 +29,11 @@ public class PlayCardTrainingDataLoader(
         await foreach (var entity in gameRepository.GetPlayCardTrainingDataAsync(
             actorType, limit, winningTeamOnly, cancellationToken))
         {
+            if (entity.RelativeDealPoints == null)
+            {
+                continue;
+            }
+
             try
             {
                 var transformed = featureEngineer.Transform(entity);

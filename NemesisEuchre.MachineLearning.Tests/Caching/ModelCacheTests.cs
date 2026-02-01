@@ -153,7 +153,7 @@ public class ModelCacheTests : IDisposable
                 Decision8IsValid = 1,
                 Decision9IsValid = 1,
                 Decision10IsValid = 1,
-                ChosenDecisionIndex = (uint)(i % 11),
+                ExpectedDealPoints = (short)((i % 5) - 2),
             });
         }
 

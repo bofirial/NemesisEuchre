@@ -87,7 +87,13 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
             Card5IsValid = validityArray[4],
             CallingPlayerPosition = (float)entity.CallingPlayer,
             CallingPlayerGoingAlone = entity.CallingPlayerGoingAlone ? 1.0f : 0.0f,
-            ChosenCardIndex = (uint)chosenCardIndex,
+            Card1Chosen = chosenCardIndex == 0 ? 1.0f : 0.0f,
+            Card2Chosen = chosenCardIndex == 1 ? 1.0f : 0.0f,
+            Card3Chosen = chosenCardIndex == 2 ? 1.0f : 0.0f,
+            Card4Chosen = chosenCardIndex == 3 ? 1.0f : 0.0f,
+            Card5Chosen = chosenCardIndex == 4 ? 1.0f : 0.0f,
+            ExpectedDealPoints = entity.RelativeDealPoints ?? throw new InvalidOperationException(
+                "RelativeDealPoints is required for regression training"),
         };
     }
 }

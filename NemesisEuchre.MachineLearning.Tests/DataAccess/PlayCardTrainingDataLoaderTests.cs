@@ -64,7 +64,7 @@ public class PlayCardTrainingDataLoaderTests
             var trainingData = new PlayCardTrainingData
             {
                 LeadPlayer = entity.PlayCardDecisionId % 4,
-                ChosenCardIndex = (uint)(entity.PlayCardDecisionId % 24),
+                ExpectedDealPoints = (short)((entity.PlayCardDecisionId % 5) - 2),
             };
             expectedTrainingData.Add(trainingData);
             _mockFeatureEngineer.Setup(x => x.Transform(entity)).Returns(trainingData);
@@ -105,7 +105,7 @@ public class PlayCardTrainingDataLoaderTests
 
                 return new PlayCardTrainingData
                 {
-                    ChosenCardIndex = (uint)(entity.PlayCardDecisionId % 24),
+                    ExpectedDealPoints = (short)((entity.PlayCardDecisionId % 5) - 2),
                 };
             });
 
@@ -134,7 +134,7 @@ public class PlayCardTrainingDataLoaderTests
         _mockFeatureEngineer.Setup(x => x.Transform(It.IsAny<PlayCardDecisionEntity>()))
             .Returns<PlayCardDecisionEntity>(entity => new PlayCardTrainingData
             {
-                ChosenCardIndex = (uint)(entity.PlayCardDecisionId % 24),
+                ExpectedDealPoints = (short)((entity.PlayCardDecisionId % 5) - 2),
             });
 
         _mockGameRepository.Setup(x => x.GetPlayCardTrainingDataAsync(
@@ -172,7 +172,7 @@ public class PlayCardTrainingDataLoaderTests
 
                 return new PlayCardTrainingData
                 {
-                    ChosenCardIndex = (uint)(entity.PlayCardDecisionId % 24),
+                    ExpectedDealPoints = (short)((entity.PlayCardDecisionId % 5) - 2),
                 };
             });
 
@@ -203,7 +203,7 @@ public class PlayCardTrainingDataLoaderTests
         _mockFeatureEngineer.Setup(x => x.Transform(It.IsAny<PlayCardDecisionEntity>()))
             .Returns<PlayCardDecisionEntity>(entity => new PlayCardTrainingData
             {
-                ChosenCardIndex = (uint)(entity.PlayCardDecisionId % 24),
+                ExpectedDealPoints = (short)((entity.PlayCardDecisionId % 5) - 2),
             });
 
         _mockGameRepository.Setup(x => x.GetPlayCardTrainingDataAsync(

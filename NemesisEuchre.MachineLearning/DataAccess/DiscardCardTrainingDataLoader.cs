@@ -29,6 +29,11 @@ public class DiscardCardTrainingDataLoader(
         await foreach (var entity in gameRepository.GetDiscardCardTrainingDataAsync(
             actorType, limit, winningTeamOnly, cancellationToken))
         {
+            if (entity.RelativeDealPoints == null)
+            {
+                continue;
+            }
+
             try
             {
                 var transformed = featureEngineer.Transform(entity);

@@ -46,7 +46,7 @@ public class DataSplitterTests
             .RuleFor(x => x.Decision8IsValid, f => f.Random.Float(0, 1))
             .RuleFor(x => x.Decision9IsValid, f => f.Random.Float(0, 1))
             .RuleFor(x => x.Decision10IsValid, f => f.Random.Float(0, 1))
-            .RuleFor(x => x.ChosenDecisionIndex, f => f.Random.UInt(0, 10));
+            .RuleFor(x => x.ExpectedDealPoints, f => (short)f.Random.Int(-2, 4));
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public class DataSplitterTests
         for (int i = 0; i < train1.Count; i++)
         {
             train1[i].Card1Rank.Should().Be(train2[i].Card1Rank);
-            train1[i].ChosenDecisionIndex.Should().Be(train2[i].ChosenDecisionIndex);
+            train1[i].ExpectedDealPoints.Should().Be(train2[i].ExpectedDealPoints);
         }
     }
 
@@ -200,7 +200,7 @@ public class DataSplitterTests
         for (int i = 0; i < train1.Count; i++)
         {
             if (!train1[i].Card1Rank.Equals(train2[i].Card1Rank) ||
-                train1[i].ChosenDecisionIndex != train2[i].ChosenDecisionIndex)
+                !train1[i].ExpectedDealPoints.Equals(train2[i].ExpectedDealPoints))
             {
                 isDifferent = true;
                 break;
@@ -259,7 +259,7 @@ public class DataSplitterTests
         {
             item.Card1Rank.Should().BeInRange(0, 5);
             item.Card1Suit.Should().BeInRange(0, 3);
-            item.ChosenDecisionIndex.Should().BeInRange(0u, 10u);
+            item.ExpectedDealPoints.Should().BeInRange(-2, 4);
         });
     }
 

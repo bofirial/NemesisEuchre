@@ -71,7 +71,7 @@ public class CallTrumpModelTrainerTests
             .RuleFor(x => x.Decision8IsValid, f => f.Random.Float(0, 1))
             .RuleFor(x => x.Decision9IsValid, f => f.Random.Float(0, 1))
             .RuleFor(x => x.Decision10IsValid, f => f.Random.Float(0, 1))
-            .RuleFor(x => x.ChosenDecisionIndex, f => f.Random.UInt(0, 10));
+            .RuleFor(x => x.ExpectedDealPoints, f => (short)f.Random.Int(-2, 4));
     }
 
     [Fact]
@@ -96,9 +96,9 @@ public class CallTrumpModelTrainerTests
 
         var result = await _trainer.TrainAsync(trainingData);
 
-        result.ValidationMetrics.MicroAccuracy.Should().BeGreaterThanOrEqualTo(0);
-        result.ValidationMetrics.MacroAccuracy.Should().BeGreaterThanOrEqualTo(0);
-        result.ValidationMetrics.LogLoss.Should().BeGreaterThan(0);
+        ((EvaluationMetrics)result.ValidationMetrics).MicroAccuracy.Should().BeGreaterThanOrEqualTo(0);
+        ((EvaluationMetrics)result.ValidationMetrics).MacroAccuracy.Should().BeGreaterThanOrEqualTo(0);
+        ((EvaluationMetrics)result.ValidationMetrics).LogLoss.Should().BeGreaterThan(0);
     }
 
     [Fact]
@@ -265,7 +265,7 @@ public class CallTrumpModelTrainerTests
 
         foreach (var prediction in _mlContext.Data.CreateEnumerable<PredictionOutput>(predictions, reuseRowObject: false))
         {
-            prediction.PredictedLabel.Should().BeInRange(0u, 10u);
+            prediction.PredictedLabel.Should().BeInRange(-4.0f, 4.0f);
         }
     }
 
@@ -275,13 +275,13 @@ public class CallTrumpModelTrainerTests
         var trainingData = _faker.Generate(100);
         for (var i = 0; i < trainingData.Count; i++)
         {
-            trainingData[i].ChosenDecisionIndex = (uint)(i % 2);
+            trainingData[i].ExpectedDealPoints = (short)(i % 2);
         }
 
         var result = await _trainer.TrainAsync(trainingData);
 
         result.Should().NotBeNull();
-        result.ValidationMetrics.MicroAccuracy.Should().BeGreaterThanOrEqualTo(0);
+        ((EvaluationMetrics)result.ValidationMetrics).MicroAccuracy.Should().BeGreaterThanOrEqualTo(0);
     }
 
     [Fact]
@@ -308,6 +308,6 @@ public class CallTrumpModelTrainerTests
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S3459:Unassigned members should be removed", Justification = "Test Class")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Test Class")]
-        public uint PredictedLabel = 1;
+        public float PredictedLabel;
     }
 }

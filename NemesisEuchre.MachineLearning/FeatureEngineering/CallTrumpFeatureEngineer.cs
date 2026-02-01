@@ -70,7 +70,19 @@ public class CallTrumpFeatureEngineer : IFeatureEngineer<CallTrumpDecisionEntity
             Decision8IsValid = validityArray[8],
             Decision9IsValid = validityArray[9],
             Decision10IsValid = validityArray[10],
-            ChosenDecisionIndex = (uint)chosenDecision,
+            Decision0Chosen = chosenDecision == CallTrumpDecision.Pass ? 1.0f : 0.0f,
+            Decision1Chosen = chosenDecision == CallTrumpDecision.CallSpades ? 1.0f : 0.0f,
+            Decision2Chosen = chosenDecision == CallTrumpDecision.CallHearts ? 1.0f : 0.0f,
+            Decision3Chosen = chosenDecision == CallTrumpDecision.CallClubs ? 1.0f : 0.0f,
+            Decision4Chosen = chosenDecision == CallTrumpDecision.CallDiamonds ? 1.0f : 0.0f,
+            Decision5Chosen = chosenDecision == CallTrumpDecision.CallSpadesAndGoAlone ? 1.0f : 0.0f,
+            Decision6Chosen = chosenDecision == CallTrumpDecision.CallHeartsAndGoAlone ? 1.0f : 0.0f,
+            Decision7Chosen = chosenDecision == CallTrumpDecision.CallClubsAndGoAlone ? 1.0f : 0.0f,
+            Decision8Chosen = chosenDecision == CallTrumpDecision.CallDiamondsAndGoAlone ? 1.0f : 0.0f,
+            Decision9Chosen = chosenDecision == CallTrumpDecision.OrderItUp ? 1.0f : 0.0f,
+            Decision10Chosen = chosenDecision == CallTrumpDecision.OrderItUpAndGoAlone ? 1.0f : 0.0f,
+            ExpectedDealPoints = entity.RelativeDealPoints ?? throw new InvalidOperationException(
+                "RelativeDealPoints is required for regression training"),
         };
     }
 }
