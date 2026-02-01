@@ -10,6 +10,7 @@ using NemesisEuchre.DataAccess.DependencyInjection;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.GameEngine.DependencyInjection;
 using NemesisEuchre.GameEngine.Options;
+using NemesisEuchre.MachineLearning.Bots.DependencyInjection;
 using NemesisEuchre.MachineLearning.DependencyInjection;
 
 using Spectre.Console;
@@ -51,6 +52,7 @@ public static class Program
                 .ValidateOnStart();
             services.AddNemesisEuchreDataAccess(config);
             services.AddNemesisEuchreMachineLearning(config);
+            services.AddNemesisEuchreMachineLearningBots();
         });
 
         return Cli.RunAsync<DefaultCommand>(args, new CliSettings { EnableDefaultExceptionHandler = true });
