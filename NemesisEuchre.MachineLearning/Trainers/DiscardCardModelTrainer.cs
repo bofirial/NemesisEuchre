@@ -6,6 +6,7 @@ using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Options;
 using NemesisEuchre.MachineLearning.Services;
+using NemesisEuchre.MachineLearning.Utilities;
 
 namespace NemesisEuchre.MachineLearning.Trainers;
 
@@ -19,25 +20,8 @@ public class DiscardCardModelTrainer(
 {
     protected override IEstimator<ITransformer> BuildPipeline(IDataView trainingData)
     {
-        var featureColumns = new[]
-        {
-            nameof(DiscardCardTrainingData.Card1Rank),
-            nameof(DiscardCardTrainingData.Card1Suit),
-            nameof(DiscardCardTrainingData.Card2Rank),
-            nameof(DiscardCardTrainingData.Card2Suit),
-            nameof(DiscardCardTrainingData.Card3Rank),
-            nameof(DiscardCardTrainingData.Card3Suit),
-            nameof(DiscardCardTrainingData.Card4Rank),
-            nameof(DiscardCardTrainingData.Card4Suit),
-            nameof(DiscardCardTrainingData.Card5Rank),
-            nameof(DiscardCardTrainingData.Card5Suit),
-            nameof(DiscardCardTrainingData.Card6Rank),
-            nameof(DiscardCardTrainingData.Card6Suit),
-            nameof(DiscardCardTrainingData.CallingPlayerPosition),
-            nameof(DiscardCardTrainingData.CallingPlayerGoingAlone),
-            nameof(DiscardCardTrainingData.TeamScore),
-            nameof(DiscardCardTrainingData.OpponentScore),
-        };
+        var featureColumns = FeatureColumnProvider.GetFeatureColumns<DiscardCardTrainingData>(
+            col => !col.Contains("Chosen"));
 
         return MlContext.Transforms
             .Concatenate("Features", featureColumns)

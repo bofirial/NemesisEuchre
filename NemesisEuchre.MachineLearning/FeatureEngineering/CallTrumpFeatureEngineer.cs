@@ -1,6 +1,3 @@
-using System.Text.Json;
-
-using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.Models;
@@ -13,21 +10,10 @@ public class CallTrumpFeatureEngineer : IFeatureEngineer<CallTrumpDecisionEntity
 
     public CallTrumpTrainingData Transform(CallTrumpDecisionEntity entity)
     {
-        var cards = JsonSerializer.Deserialize<RelativeCard[]>(
-            entity.CardsInHandJson,
-            JsonSerializationOptions.Default)!;
-
-        var upCard = JsonSerializer.Deserialize<RelativeCard>(
-            entity.UpCardJson,
-            JsonSerializationOptions.Default)!;
-
-        var validDecisions = JsonSerializer.Deserialize<CallTrumpDecision[]>(
-            entity.ValidDecisionsJson,
-            JsonSerializationOptions.Default)!;
-
-        var chosenDecision = JsonSerializer.Deserialize<CallTrumpDecision>(
-            entity.ChosenDecisionJson,
-            JsonSerializationOptions.Default);
+        var cards = JsonDeserializationHelper.DeserializeCards(entity.CardsInHandJson);
+        var upCard = JsonDeserializationHelper.DeserializeCard(entity.UpCardJson);
+        var validDecisions = JsonDeserializationHelper.DeserializeCallTrumpDecisions(entity.ValidDecisionsJson);
+        var chosenDecision = JsonDeserializationHelper.DeserializeCallTrumpDecision(entity.ChosenDecisionJson);
 
         var validityArray = new float[NumberOfDecisionClasses];
         foreach (var decision in validDecisions)

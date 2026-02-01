@@ -25,20 +25,11 @@ public static class MetricsCalculator
             int falseNegatives = 0;
             int falsePositives = 0;
 
-            // Calculate FN: sum of row i excluding diagonal
             for (int j = 0; j < numClasses; j++)
             {
                 if (j != i)
                 {
                     falseNegatives += confusionMatrix[i][j];
-                }
-            }
-
-            // Calculate FP: sum of column i excluding diagonal
-            for (int j = 0; j < numClasses; j++)
-            {
-                if (j != i)
-                {
                     falsePositives += confusionMatrix[j][i];
                 }
             }

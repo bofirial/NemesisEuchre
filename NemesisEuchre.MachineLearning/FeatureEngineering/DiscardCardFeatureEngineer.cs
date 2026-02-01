@@ -1,8 +1,4 @@
-using System.Text.Json;
-
-using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Entities;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.FeatureEngineering;
@@ -13,9 +9,7 @@ public class DiscardCardFeatureEngineer : IFeatureEngineer<DiscardCardDecisionEn
 
     public DiscardCardTrainingData Transform(DiscardCardDecisionEntity entity)
     {
-        var cards = JsonSerializer.Deserialize<RelativeCard[]>(
-            entity.CardsInHandJson,
-            JsonSerializationOptions.Default)!;
+        var cards = JsonDeserializationHelper.DeserializeCards(entity.CardsInHandJson);
 
         if (cards.Length != ExpectedCardsInHand)
         {
@@ -23,9 +17,7 @@ public class DiscardCardFeatureEngineer : IFeatureEngineer<DiscardCardDecisionEn
                 $"Expected 6 cards in hand but found {cards.Length}");
         }
 
-        var chosenCard = JsonSerializer.Deserialize<RelativeCard>(
-            entity.ChosenCardJson,
-            JsonSerializationOptions.Default)!;
+        var chosenCard = JsonDeserializationHelper.DeserializeCard(entity.ChosenCardJson);
 
         var chosenCardIndex = Array.FindIndex(cards, c =>
             c.Rank == chosenCard.Rank && c.Suit == chosenCard.Suit);

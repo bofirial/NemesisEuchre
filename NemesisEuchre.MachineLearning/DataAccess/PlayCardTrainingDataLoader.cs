@@ -12,47 +12,20 @@ public class PlayCardTrainingDataLoader(
     IGameRepository gameRepository,
     IFeatureEngineer<PlayCardDecisionEntity, PlayCardTrainingData> featureEngineer,
     ILogger<PlayCardTrainingDataLoader> logger)
-    : ITrainingDataLoader<PlayCardTrainingData>
+    : TrainingDataLoaderBase<PlayCardDecisionEntity, PlayCardTrainingData>(gameRepository, featureEngineer, logger)
 {
-    public async Task<IEnumerable<PlayCardTrainingData>> LoadTrainingDataAsync(
+    protected override IAsyncEnumerable<PlayCardDecisionEntity> GetTrainingDataEntitiesAsync(
+        IGameRepository repository,
         ActorType actorType,
-        int limit = 0,
-        bool winningTeamOnly = false,
-        CancellationToken cancellationToken = default)
+        int limit,
+        bool winningTeamOnly,
+        CancellationToken cancellationToken)
     {
-        LoggerMessages.LogLoadingTrainingData(logger, actorType.ToString(), limit, winningTeamOnly);
+        return repository.GetPlayCardTrainingDataAsync(actorType, limit, winningTeamOnly, cancellationToken);
+    }
 
-        var trainingData = new List<PlayCardTrainingData>();
-        var entityCount = 0;
-        var transformErrorCount = 0;
-
-        await foreach (var entity in gameRepository.GetPlayCardTrainingDataAsync(
-            actorType, limit, winningTeamOnly, cancellationToken))
-        {
-            if (entity.RelativeDealPoints == null)
-            {
-                continue;
-            }
-
-            try
-            {
-                var transformed = featureEngineer.Transform(entity);
-                trainingData.Add(transformed);
-                entityCount++;
-
-                if (entityCount % 10000 == 0)
-                {
-                    LoggerMessages.LogTrainingDataProgress(logger, entityCount);
-                }
-            }
-            catch (Exception ex)
-            {
-                transformErrorCount++;
-                LoggerMessages.LogFeatureEngineeringError(logger, ex);
-            }
-        }
-
-        LoggerMessages.LogTrainingDataLoadComplete(logger, entityCount, transformErrorCount);
-        return trainingData;
+    protected override bool IsEntityValid(PlayCardDecisionEntity entity)
+    {
+        return entity.RelativeDealPoints != null;
     }
 }

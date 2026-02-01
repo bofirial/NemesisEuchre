@@ -77,7 +77,7 @@ public class DataSplitter : IDataSplitter
 
         var trainCount = CountRows(trainDataView);
         var validationCount = CountRows(validationDataView);
-        var testCount = CountRows(testDataView);
+        var testCount = rowCount - trainCount - validationCount;
 
         return new DataSplit(
             trainDataView,

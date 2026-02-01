@@ -1,9 +1,4 @@
-using System.Text.Json;
-
-using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Entities;
-using NemesisEuchre.Foundation.Constants;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.FeatureEngineering;
@@ -14,22 +9,15 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
 
     public PlayCardTrainingData Transform(PlayCardDecisionEntity entity)
     {
-        var cards = JsonSerializer.Deserialize<RelativeCard[]>(
-            entity.CardsInHandJson,
-            JsonSerializationOptions.Default)!;
-
-        var playedCardsDict = JsonSerializer.Deserialize<Dictionary<RelativePlayerPosition, RelativeCard>>(
-            entity.PlayedCardsJson,
-            JsonSerializationOptions.Default)!;
+        var cards = JsonDeserializationHelper.DeserializeCards(entity.CardsInHandJson);
+        var playedCardsDict = JsonDeserializationHelper.DeserializePlayedCards(entity.PlayedCardsJson);
 
         var playedCards = playedCardsDict
             .OrderBy(kvp => kvp.Key)
             .Select(kvp => kvp.Value)
             .ToArray();
 
-        var validCards = JsonSerializer.Deserialize<RelativeCard[]>(
-            entity.ValidCardsToPlayJson,
-            JsonSerializationOptions.Default)!;
+        var validCards = JsonDeserializationHelper.DeserializeCards(entity.ValidCardsToPlayJson);
 
         var validityArray = new float[MaxCardsInHand];
         foreach (var validCard in validCards)
@@ -42,9 +30,7 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
             }
         }
 
-        var chosenCard = JsonSerializer.Deserialize<RelativeCard>(
-            entity.ChosenCardJson,
-            JsonSerializationOptions.Default)!;
+        var chosenCard = JsonDeserializationHelper.DeserializeCard(entity.ChosenCardJson);
 
         var chosenCardIndex = Array.FindIndex(cards, c =>
             c.Rank == chosenCard.Rank && c.Suit == chosenCard.Suit);

@@ -308,6 +308,6 @@ public class CallTrumpModelTrainerTests
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S3459:Unassigned members should be removed", Justification = "Test Class")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Test Class")]
-        public float PredictedLabel;
+        public float PredictedLabel = 1;
     }
 }

@@ -12,47 +12,20 @@ public class DiscardCardTrainingDataLoader(
     IGameRepository gameRepository,
     IFeatureEngineer<DiscardCardDecisionEntity, DiscardCardTrainingData> featureEngineer,
     ILogger<DiscardCardTrainingDataLoader> logger)
-    : ITrainingDataLoader<DiscardCardTrainingData>
+    : TrainingDataLoaderBase<DiscardCardDecisionEntity, DiscardCardTrainingData>(gameRepository, featureEngineer, logger)
 {
-    public async Task<IEnumerable<DiscardCardTrainingData>> LoadTrainingDataAsync(
+    protected override IAsyncEnumerable<DiscardCardDecisionEntity> GetTrainingDataEntitiesAsync(
+        IGameRepository repository,
         ActorType actorType,
-        int limit = 0,
-        bool winningTeamOnly = false,
-        CancellationToken cancellationToken = default)
+        int limit,
+        bool winningTeamOnly,
+        CancellationToken cancellationToken)
     {
-        LoggerMessages.LogLoadingTrainingData(logger, actorType.ToString(), limit, winningTeamOnly);
+        return repository.GetDiscardCardTrainingDataAsync(actorType, limit, winningTeamOnly, cancellationToken);
+    }
 
-        var trainingData = new List<DiscardCardTrainingData>();
-        var entityCount = 0;
-        var transformErrorCount = 0;
-
-        await foreach (var entity in gameRepository.GetDiscardCardTrainingDataAsync(
-            actorType, limit, winningTeamOnly, cancellationToken))
-        {
-            if (entity.RelativeDealPoints == null)
-            {
-                continue;
-            }
-
-            try
-            {
-                var transformed = featureEngineer.Transform(entity);
-                trainingData.Add(transformed);
-                entityCount++;
-
-                if (entityCount % 10000 == 0)
-                {
-                    LoggerMessages.LogTrainingDataProgress(logger, entityCount);
-                }
-            }
-            catch (Exception ex)
-            {
-                transformErrorCount++;
-                LoggerMessages.LogFeatureEngineeringError(logger, ex);
-            }
-        }
-
-        LoggerMessages.LogTrainingDataLoadComplete(logger, entityCount, transformErrorCount);
-        return trainingData;
+    protected override bool IsEntityValid(DiscardCardDecisionEntity entity)
+    {
+        return entity.RelativeDealPoints != null;
     }
 }

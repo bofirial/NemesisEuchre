@@ -6,6 +6,7 @@ using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Options;
 using NemesisEuchre.MachineLearning.Services;
+using NemesisEuchre.MachineLearning.Utilities;
 
 namespace NemesisEuchre.MachineLearning.Trainers;
 
@@ -19,36 +20,8 @@ public class CallTrumpModelTrainer(
 {
     protected override IEstimator<ITransformer> BuildPipeline(IDataView trainingData)
     {
-        var featureColumns = new[]
-        {
-            nameof(CallTrumpTrainingData.Card1Rank),
-            nameof(CallTrumpTrainingData.Card1Suit),
-            nameof(CallTrumpTrainingData.Card2Rank),
-            nameof(CallTrumpTrainingData.Card2Suit),
-            nameof(CallTrumpTrainingData.Card3Rank),
-            nameof(CallTrumpTrainingData.Card3Suit),
-            nameof(CallTrumpTrainingData.Card4Rank),
-            nameof(CallTrumpTrainingData.Card4Suit),
-            nameof(CallTrumpTrainingData.Card5Rank),
-            nameof(CallTrumpTrainingData.Card5Suit),
-            nameof(CallTrumpTrainingData.UpCardRank),
-            nameof(CallTrumpTrainingData.UpCardSuit),
-            nameof(CallTrumpTrainingData.DealerPosition),
-            nameof(CallTrumpTrainingData.TeamScore),
-            nameof(CallTrumpTrainingData.OpponentScore),
-            nameof(CallTrumpTrainingData.DecisionOrder),
-            nameof(CallTrumpTrainingData.Decision0IsValid),
-            nameof(CallTrumpTrainingData.Decision1IsValid),
-            nameof(CallTrumpTrainingData.Decision2IsValid),
-            nameof(CallTrumpTrainingData.Decision3IsValid),
-            nameof(CallTrumpTrainingData.Decision4IsValid),
-            nameof(CallTrumpTrainingData.Decision5IsValid),
-            nameof(CallTrumpTrainingData.Decision6IsValid),
-            nameof(CallTrumpTrainingData.Decision7IsValid),
-            nameof(CallTrumpTrainingData.Decision8IsValid),
-            nameof(CallTrumpTrainingData.Decision9IsValid),
-            nameof(CallTrumpTrainingData.Decision10IsValid),
-        };
+        var featureColumns = FeatureColumnProvider.GetFeatureColumns<CallTrumpTrainingData>(
+            col => !col.Contains("Chosen"));
 
         return MlContext.Transforms
             .Concatenate("Features", featureColumns)
