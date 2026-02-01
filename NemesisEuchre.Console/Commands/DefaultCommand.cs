@@ -3,7 +3,6 @@
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Services;
-using NemesisEuchre.Foundation;
 using NemesisEuchre.GameEngine.Models;
 
 using Spectre.Console;
@@ -24,7 +23,7 @@ public class DefaultCommand(
 
     public async Task<int> RunAsync()
     {
-        LoggerMessages.LogStartingUp(logger);
+        Foundation.LoggerMessages.LogStartingUp(logger);
 
         applicationBanner.Display();
 

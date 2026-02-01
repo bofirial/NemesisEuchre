@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Commands;
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.Console.Services.TrainerExecutors;
 using NemesisEuchre.DataAccess.DependencyInjection;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.GameEngine.DependencyInjection;
@@ -39,6 +40,13 @@ public static class Program
             services.AddScoped<IGameResultsRenderer, GameResultsRenderer>();
             services.AddScoped<ISingleGameRunner, SingleGameRunner>();
             services.AddScoped<IBatchGameOrchestrator, BatchGameOrchestrator>();
+
+            services.AddScoped<IModelTrainingOrchestrator, ModelTrainingOrchestrator>();
+            services.AddScoped<ITrainerFactory, TrainerFactory>();
+            services.AddScoped<ITrainingResultsRenderer, TrainingResultsRenderer>();
+            services.AddScoped<ITrainerExecutor, CallTrumpRegressionTrainerExecutor>();
+            services.AddScoped<ITrainerExecutor, DiscardCardRegressionTrainerExecutor>();
+            services.AddScoped<ITrainerExecutor, PlayCardRegressionTrainerExecutor>();
 
             services.AddNemesisEuchreGameEngine();
             services.Configure<GameOptions>(_ => { });

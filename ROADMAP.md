@@ -339,42 +339,42 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 
 ### Phase 3: Gen1Bot Implementation (Steps 11-14)
 
-11. **Create Gen1Bot class**
-    - Create `NemesisEuchre.GameEngine\PlayerBots\Gen1Bot.cs`
-    - Inherit from BotBase (same pattern as ChaosBot)
-    - Add ActorType.Gen1 to `NemesisEuchre.Foundation.Constants\ActorType` enum
-    - Override ActorType property to return ActorType.Gen1
-    - Constructor: accepts three model file paths (CallTrump, Discard, PlayCard)
-    - Load ML.NET PredictionEngines for each model in constructor
-    - Implement IDisposable to clean up PredictionEngines
-    - Include unit tests with mock PredictionEngines
+11. ~~**Create Gen1Bot class**~~
+    - ~~Create `NemesisEuchre.GameEngine\PlayerBots\Gen1Bot.cs`~~
+    - ~~Inherit from BotBase (same pattern as ChaosBot)~~
+    - ~~Add ActorType.Gen1 to `NemesisEuchre.Foundation.Constants\ActorType` enum~~
+    - ~~Override ActorType property to return ActorType.Gen1~~
+    - ~~Constructor: accepts three model file paths (CallTrump, Discard, PlayCard)~~
+    - ~~Load ML.NET PredictionEngines for each model in constructor~~
+    - ~~Implement IDisposable to clean up PredictionEngines~~
+    - ~~Include unit tests with mock PredictionEngines~~
 
-12. **Implement CallTrumpAsync prediction**
-    - Override `CallTrumpAsync` protected method from BotBase
-    - Convert input parameters to CallTrumpTrainingData features
-    - Use ML.NET PredictionEngine to predict decision index
-    - Map prediction index back to CallTrumpDecision (0 → Pass, 1-4 → OrderUp/CallSuit, etc.)
-    - Validate prediction is in validCallTrumpDecisions array
-    - Fallback to random selection if prediction is invalid
-    - Include unit tests verifying correct prediction and fallback
+12. ~~**Implement CallTrumpAsync prediction**~~
+    - ~~Override `CallTrumpAsync` protected method from BotBase~~
+    - ~~Convert input parameters to CallTrumpTrainingData features~~
+    - ~~Use ML.NET PredictionEngine to predict decision index~~
+    - ~~Map prediction index back to CallTrumpDecision (0 → Pass, 1-4 → OrderUp/CallSuit, etc.)~~
+    - ~~Validate prediction is in validCallTrumpDecisions array~~
+    - ~~Fallback to random selection if prediction is invalid~~
+    - ~~Include unit tests verifying correct prediction and fallback~~
 
-13. **Implement DiscardCardAsync prediction**
-    - Override `DiscardCardAsync` protected method from BotBase
-    - Convert RelativeCard[] hand to DiscardCardTrainingData features
-    - Use ML.NET PredictionEngine to predict card index (0-5)
-    - Map prediction index to specific RelativeCard in hand
-    - Validate predicted card is in validCardsToDiscard array
-    - Fallback to random selection if prediction is invalid
-    - Include unit tests
+13. ~~**Implement DiscardCardAsync prediction**~~
+    - ~~Override `DiscardCardAsync` protected method from BotBase~~
+    - ~~Convert RelativeCard[] hand to DiscardCardTrainingData features~~
+    - ~~Use ML.NET PredictionEngine to predict card index (0-5)~~
+    - ~~Map prediction index to specific RelativeCard in hand~~
+    - ~~Validate predicted card is in validCardsToDiscard array~~
+    - ~~Fallback to random selection if prediction is invalid~~
+    - ~~Include unit tests~~
 
-14. **Implement PlayCardAsync prediction**
-    - Override `PlayCardAsync` protected method from BotBase
-    - Convert game state to PlayCardTrainingData features
-    - Use ML.NET PredictionEngine to predict card index
-    - Map prediction index to RelativeCard in validCardsToPlay array
-    - Handle variable-length valid cards list (1-13 possible cards)
-    - Fallback to random selection if prediction is out of bounds or invalid
-    - Include unit tests with various trick scenarios
+14. ~~**Implement PlayCardAsync prediction**~~
+    - ~~Override `PlayCardAsync` protected method from BotBase~~
+    - ~~Convert game state to PlayCardTrainingData features~~
+    - ~~Use ML.NET PredictionEngine to predict card index~~
+    - ~~Map prediction index to RelativeCard in validCardsToPlay array~~
+    - ~~Handle variable-length valid cards list (1-13 possible cards)~~
+    - ~~Fallback to random selection if prediction is out of bounds or invalid~~
+    - ~~Include unit tests with various trick scenarios~~
 
 ### Phase 4: Evaluation & Iteration (Steps 15-18)
 
@@ -423,35 +423,35 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 
 ### Phase 5: Infrastructure & Tooling (Steps 19-22)
 
-19. **Add ML training console command**
-    - Create `NemesisEuchre.Console\Commands\TrainCommand.cs`
-    - Parameters:
-      - `--actor-type` (Chaos, Gen1, Gen2, etc.) - which bot's data to train on
-      - `--decision-type` (CallTrump, Discard, PlayCard, All) - which model(s) to train
-      - `--output-path` (optional) - where to save models (default: Models/)
-      - `--sample-limit` (optional) - max training samples (default: all available)
-    - Use DI to get IModelTrainer implementations
-    - Display training progress with Spectre.Console:
-      - Loading data... (with count)
-      - Training model... (with progress bar if possible)
-      - Evaluating model... (show accuracy metrics)
-    - Output model paths and evaluation metrics to console
-    - Example:
+19. ~~**Add ML training console command**~~
+    - ~~Create `NemesisEuchre.Console\Commands\TrainCommand.cs`~~
+    - ~~Parameters:~~
+      - ~~`--actor-type` (Chaos, Gen1, Gen2, etc.) - which bot's data to train on~~
+      - ~~`--decision-type` (CallTrump, Discard, PlayCard, All) - which model(s) to train~~
+      - ~~`--output-path` (optional) - where to save models (default: Models/)~~
+      - ~~`--sample-limit` (optional) - max training samples (default: all available)~~
+    - ~~Use DI to get IModelTrainer implementations~~
+    - ~~Display training progress with Spectre.Console:~~
+      - ~~Loading data... (with count)~~
+      - ~~Training model... (with progress bar if possible)~~
+      - ~~Evaluating model... (show accuracy metrics)~~
+    - ~~Output model paths and evaluation metrics to console~~
+    - ~~Example:~~
       ```bash
       dotnet run --project NemesisEuchre.Console -- train --actor-type Chaos --decision-type All --sample-limit 50000
       ```
-    - Include unit tests for command parsing and execution
+    - ~~Include unit tests for command parsing and execution~~
 
-20. **Add model version management**
-    - Create `NemesisEuchre.MachineLearning\Models\IModelRepository.cs` interface
-    - Create `NemesisEuchre.MachineLearning\Models\ModelRepository.cs` implementation
+20. ~~**Add model version management**~~
+    - ~~Create `NemesisEuchre.MachineLearning\Models\IModelRepository.cs` interface~~
+    - ~~Create `NemesisEuchre.MachineLearning\Models\ModelRepository.cs` implementation~~
     - Methods:
-      - `ListAvailableModelsAsync(ActorType?, DecisionType?)` - list all models
-      - `GetLatestModelPathAsync(ActorType, DecisionType)` - get most recent model
-      - `LoadModelMetadataAsync(string modelPath)` - read JSON metadata
-      - `DeleteModelAsync(string modelPath)` - remove obsolete models
-    - Store models with timestamp: `gen1_calltrump_20260129_143052_v1.zip`
-    - Include unit tests with temporary file system
+      - ~~`ListAvailableModelsAsync(ActorType?, DecisionType?)` - list all models~~
+      - ~~`GetLatestModelPathAsync(ActorType, DecisionType)` - get most recent model~~
+      - ~~`LoadModelMetadataAsync(string modelPath)` - read JSON metadata~~
+      - ~~`DeleteModelAsync(string modelPath)` - remove obsolete models~~
+    - ~~Store models with timestamp: `gen1_calltrump_20260129_143052_v1.zip`~~
+    - ~~Include unit tests with temporary file system~~
 
 21. **Create evaluation/benchmarking command**
     - Create `NemesisEuchre.Console\Commands\BenchmarkCommand.cs`
@@ -474,20 +474,6 @@ This version introduces ML.NET-powered bots that learn from game data, establish
       ```bash
       dotnet run --project NemesisEuchre.Console -- benchmark --team1-actor Gen2 --team2-actor Gen1 --game-count 5000 --output-format Markdown
       ```
-    - Include unit tests
-
-22. **Add model comparison analytics**
-    - Create `NemesisEuchre.Console\Commands\CompareModelsCommand.cs`
-    - Compare evaluation metrics across multiple model versions
-    - Load metadata from all models in Models/ directory
-    - Display comparison table:
-      - Model name | Training date | Accuracy | LogLoss | Sample count
-    - Show accuracy trends over generations (Gen1 → Gen2 → Gen3)
-    - Identify decision types with best/worst performance
-    - Suggest next training focus areas:
-      - "CallTrump model has lowest accuracy (42%) - consider more training data"
-      - "Gen3 only improved 0.5% over Gen2 - approaching diminishing returns"
-    - Export comparison to CSV for further analysis
     - Include unit tests
 
 ## Suggested Prompts for v0.4 Implementation

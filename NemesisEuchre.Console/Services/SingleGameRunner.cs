@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.DataAccess.Repositories;
-using NemesisEuchre.Foundation;
 using NemesisEuchre.GameEngine;
 using NemesisEuchre.GameEngine.Models;
 
@@ -28,7 +27,7 @@ public class SingleGameRunner(
         }
         catch (Exception ex)
         {
-            LoggerMessages.LogGamePersistenceFailed(logger, ex);
+            Foundation.LoggerMessages.LogGamePersistenceFailed(logger, ex);
         }
 
         gameResultsRenderer.RenderResults(game);

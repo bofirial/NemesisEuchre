@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
-using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine;
 using NemesisEuchre.GameEngine.Models;
@@ -197,7 +196,7 @@ public class BatchGameOrchestrator(
         }
         catch (Exception ex)
         {
-            LoggerMessages.LogGameFailed(logger, gameNumber, ex);
+            Foundation.LoggerMessages.LogGameFailed(logger, gameNumber, ex);
             await state.ExecuteWithLockAsync(
                 () =>
             {
@@ -244,7 +243,7 @@ public class BatchGameOrchestrator(
             }
             catch (Exception ex)
             {
-                LoggerMessages.LogGamePersistenceFailed(logger, ex);
+                Foundation.LoggerMessages.LogGamePersistenceFailed(logger, ex);
             }
         }
     }
