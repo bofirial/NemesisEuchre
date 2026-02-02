@@ -19,14 +19,14 @@ namespace NemesisEuchre.MachineLearning.Tests.DataAccess;
 
 public class DiscardCardTrainingDataLoaderTests
 {
-    private readonly Mock<IGameRepository> _mockGameRepository;
+    private readonly Mock<ITrainingDataRepository> _mockTrainingDataRepository;
     private readonly Mock<IFeatureEngineer<DiscardCardDecisionEntity, DiscardCardTrainingData>> _mockFeatureEngineer;
     private readonly Mock<ILogger<DiscardCardTrainingDataLoader>> _mockLogger;
     private readonly Faker<DiscardCardDecisionEntity> _entityFaker;
 
     public DiscardCardTrainingDataLoaderTests()
     {
-        _mockGameRepository = new Mock<IGameRepository>();
+        _mockTrainingDataRepository = new Mock<ITrainingDataRepository>();
         _mockFeatureEngineer = new Mock<IFeatureEngineer<DiscardCardDecisionEntity, DiscardCardTrainingData>>();
         _mockLogger = new Mock<ILogger<DiscardCardTrainingDataLoader>>();
 
@@ -62,7 +62,7 @@ public class DiscardCardTrainingDataLoaderTests
             _mockFeatureEngineer.Setup(x => x.Transform(entity)).Returns(trainingData);
         }
 
-        _mockGameRepository.Setup(x => x.GetDiscardCardTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<DiscardCardDecisionEntity>(
             It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
@@ -70,7 +70,7 @@ public class DiscardCardTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerable(entities));
 
         var loader = new DiscardCardTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
@@ -101,7 +101,7 @@ public class DiscardCardTrainingDataLoaderTests
                 };
             });
 
-        _mockGameRepository.Setup(x => x.GetDiscardCardTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<DiscardCardDecisionEntity>(
             It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
@@ -109,7 +109,7 @@ public class DiscardCardTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerable(entities));
 
         var loader = new DiscardCardTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
@@ -129,7 +129,7 @@ public class DiscardCardTrainingDataLoaderTests
                 ExpectedDealPoints = (short)((entity.DiscardCardDecisionId % 5) - 2),
             });
 
-        _mockGameRepository.Setup(x => x.GetDiscardCardTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<DiscardCardDecisionEntity>(
             It.IsAny<ActorType>(),
             50,
             It.IsAny<bool>(),
@@ -137,7 +137,7 @@ public class DiscardCardTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerable(entities.Take(50)));
 
         var loader = new DiscardCardTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
@@ -168,7 +168,7 @@ public class DiscardCardTrainingDataLoaderTests
                 };
             });
 
-        _mockGameRepository.Setup(x => x.GetDiscardCardTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<DiscardCardDecisionEntity>(
             It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
@@ -176,7 +176,7 @@ public class DiscardCardTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerableWithCancellation(entities, cts.Token));
 
         var loader = new DiscardCardTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
@@ -198,7 +198,7 @@ public class DiscardCardTrainingDataLoaderTests
                 ExpectedDealPoints = (short)((entity.DiscardCardDecisionId % 5) - 2),
             });
 
-        _mockGameRepository.Setup(x => x.GetDiscardCardTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<DiscardCardDecisionEntity>(
             It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
@@ -206,7 +206,7 @@ public class DiscardCardTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerable(entities));
 
         var loader = new DiscardCardTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 

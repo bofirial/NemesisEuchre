@@ -8,7 +8,7 @@ namespace NemesisEuchre.Console.Services;
 
 public interface ISingleGameRunner
 {
-    Task<Game> RunAsync(CancellationToken cancellationToken = default);
+    Task<Game> RunAsync(bool doNotPersist = false, CancellationToken cancellationToken = default);
 }
 
 public class SingleGameRunner(
@@ -17,17 +17,24 @@ public class SingleGameRunner(
     IGameResultsRenderer gameResultsRenderer,
     ILogger<SingleGameRunner> logger) : ISingleGameRunner
 {
-    public async Task<Game> RunAsync(CancellationToken cancellationToken = default)
+    public async Task<Game> RunAsync(bool doNotPersist = false, CancellationToken cancellationToken = default)
     {
         var game = await gameOrchestrator.OrchestrateGameAsync();
 
-        try
+        if (!doNotPersist)
         {
-            await gameRepository.SaveCompletedGameAsync(game, cancellationToken);
+            try
+            {
+                await gameRepository.SaveCompletedGameAsync(game, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Foundation.LoggerMessages.LogGamePersistenceFailed(logger, ex);
+            }
         }
-        catch (Exception ex)
+        else
         {
-            Foundation.LoggerMessages.LogGamePersistenceFailed(logger, ex);
+            Foundation.LoggerMessages.LogGamePersistenceSkipped(logger);
         }
 
         gameResultsRenderer.RenderResults(game);

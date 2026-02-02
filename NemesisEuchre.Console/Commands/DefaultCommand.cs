@@ -21,6 +21,9 @@ public class DefaultCommand(
     [CliOption(Description = "Number of games to play")]
     public int Count { get; set; } = 1;
 
+    [CliOption(Description = "Skip saving games to the database")]
+    public bool DoNotPersist { get; set; }
+
     public async Task<int> RunAsync()
     {
         Foundation.LoggerMessages.LogStartingUp(logger);
@@ -48,7 +51,7 @@ public class DefaultCommand(
 
         return ansiConsole.Status()
             .Spinner(Spinner.Known.Dots)
-            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync());
+            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(doNotPersist: DoNotPersist));
     }
 
     private async Task RunBatchGamesAsync()
@@ -64,7 +67,7 @@ public class DefaultCommand(
 
                 var progressReporter = new BatchProgressReporter(playingTask, savingTask);
 
-                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter);
+                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, doNotPersist: DoNotPersist);
             });
 
         gameResultsRenderer.RenderBatchResults(results);

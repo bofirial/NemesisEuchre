@@ -24,18 +24,21 @@ public interface IGameRepository
         IProgress<int>? progress = null,
         CancellationToken cancellationToken = default);
 
+    [Obsolete("Use ITrainingDataRepository.GetDecisionDataAsync<CallTrumpDecisionEntity> instead")]
     IAsyncEnumerable<CallTrumpDecisionEntity> GetCallTrumpTrainingDataAsync(
         ActorType actorType,
         int limit = 0,
         bool winningTeamOnly = false,
         CancellationToken cancellationToken = default);
 
+    [Obsolete("Use ITrainingDataRepository.GetDecisionDataAsync<DiscardCardDecisionEntity> instead")]
     IAsyncEnumerable<DiscardCardDecisionEntity> GetDiscardCardTrainingDataAsync(
         ActorType actorType,
         int limit = 0,
         bool winningTeamOnly = false,
         CancellationToken cancellationToken = default);
 
+    [Obsolete("Use ITrainingDataRepository.GetDecisionDataAsync<PlayCardDecisionEntity> instead")]
     IAsyncEnumerable<PlayCardDecisionEntity> GetPlayCardTrainingDataAsync(
         ActorType actorType,
         int limit = 0,
@@ -171,6 +174,7 @@ public class GameRepository(
         }
     }
 
+    [Obsolete("Use ITrainingDataRepository.GetDecisionDataAsync<CallTrumpDecisionEntity> instead")]
     public async IAsyncEnumerable<CallTrumpDecisionEntity> GetCallTrumpTrainingDataAsync(
         ActorType actorType,
         int limit = 0,
@@ -204,6 +208,7 @@ public class GameRepository(
         }
     }
 
+    [Obsolete("Use ITrainingDataRepository.GetDecisionDataAsync<DiscardCardDecisionEntity> instead")]
     public async IAsyncEnumerable<DiscardCardDecisionEntity> GetDiscardCardTrainingDataAsync(
         ActorType actorType,
         int limit = 0,
@@ -237,6 +242,7 @@ public class GameRepository(
         }
     }
 
+    [Obsolete("Use ITrainingDataRepository.GetDecisionDataAsync<PlayCardDecisionEntity> instead")]
     public async IAsyncEnumerable<PlayCardDecisionEntity> GetPlayCardTrainingDataAsync(
         ActorType actorType,
         int limit = 0,

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 
+using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
@@ -8,11 +9,11 @@ using NemesisEuchre.MachineLearning.FeatureEngineering;
 namespace NemesisEuchre.MachineLearning.DataAccess;
 
 public abstract class TrainingDataLoaderBase<TEntity, TTrainingData>(
-    IGameRepository gameRepository,
+    ITrainingDataRepository trainingDataRepository,
     IFeatureEngineer<TEntity, TTrainingData> featureEngineer,
     ILogger logger)
     : ITrainingDataLoader<TTrainingData>
-    where TEntity : class
+    where TEntity : class, IDecisionEntity
     where TTrainingData : class, new()
 {
     public async Task<IEnumerable<TTrainingData>> LoadTrainingDataAsync(
@@ -27,8 +28,8 @@ public abstract class TrainingDataLoaderBase<TEntity, TTrainingData>(
         var entityCount = 0;
         var transformErrorCount = 0;
 
-        await foreach (var entity in GetTrainingDataEntitiesAsync(
-            gameRepository, actorType, limit, winningTeamOnly, cancellationToken))
+        await foreach (var entity in trainingDataRepository.GetDecisionDataAsync<TEntity>(
+            actorType, limit, winningTeamOnly, cancellationToken))
         {
             if (!IsEntityValid(entity))
             {
@@ -56,13 +57,6 @@ public abstract class TrainingDataLoaderBase<TEntity, TTrainingData>(
         LoggerMessages.LogTrainingDataLoadComplete(logger, entityCount, transformErrorCount);
         return trainingData;
     }
-
-    protected abstract IAsyncEnumerable<TEntity> GetTrainingDataEntitiesAsync(
-        IGameRepository repository,
-        ActorType actorType,
-        int limit,
-        bool winningTeamOnly,
-        CancellationToken cancellationToken);
 
     protected abstract bool IsEntityValid(TEntity entity);
 }

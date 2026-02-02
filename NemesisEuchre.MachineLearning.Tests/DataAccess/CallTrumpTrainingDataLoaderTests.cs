@@ -19,14 +19,14 @@ namespace NemesisEuchre.MachineLearning.Tests.DataAccess;
 
 public class CallTrumpTrainingDataLoaderTests
 {
-    private readonly Mock<IGameRepository> _mockGameRepository;
+    private readonly Mock<ITrainingDataRepository> _mockTrainingDataRepository;
     private readonly Mock<IFeatureEngineer<CallTrumpDecisionEntity, CallTrumpTrainingData>> _mockFeatureEngineer;
     private readonly Mock<ILogger<CallTrumpTrainingDataLoader>> _mockLogger;
     private readonly Faker<CallTrumpDecisionEntity> _entityFaker;
 
     public CallTrumpTrainingDataLoaderTests()
     {
-        _mockGameRepository = new Mock<IGameRepository>();
+        _mockTrainingDataRepository = new Mock<ITrainingDataRepository>();
         _mockFeatureEngineer = new Mock<IFeatureEngineer<CallTrumpDecisionEntity, CallTrumpTrainingData>>();
         _mockLogger = new Mock<ILogger<CallTrumpTrainingDataLoader>>();
 
@@ -64,7 +64,7 @@ public class CallTrumpTrainingDataLoaderTests
             _mockFeatureEngineer.Setup(x => x.Transform(entity)).Returns(trainingData);
         }
 
-        _mockGameRepository.Setup(x => x.GetCallTrumpTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<CallTrumpDecisionEntity>(
             It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
@@ -72,7 +72,7 @@ public class CallTrumpTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerable(entities));
 
         var loader = new CallTrumpTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
@@ -103,7 +103,7 @@ public class CallTrumpTrainingDataLoaderTests
                 };
             });
 
-        _mockGameRepository.Setup(x => x.GetCallTrumpTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<CallTrumpDecisionEntity>(
             It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
@@ -111,7 +111,7 @@ public class CallTrumpTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerable(entities));
 
         var loader = new CallTrumpTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
@@ -131,7 +131,7 @@ public class CallTrumpTrainingDataLoaderTests
                 ExpectedDealPoints = (short)((entity.CallTrumpDecisionId % 5) - 2),
             });
 
-        _mockGameRepository.Setup(x => x.GetCallTrumpTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<CallTrumpDecisionEntity>(
             It.IsAny<ActorType>(),
             50,
             It.IsAny<bool>(),
@@ -139,7 +139,7 @@ public class CallTrumpTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerable(entities.Take(50)));
 
         var loader = new CallTrumpTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
@@ -170,7 +170,7 @@ public class CallTrumpTrainingDataLoaderTests
                 };
             });
 
-        _mockGameRepository.Setup(x => x.GetCallTrumpTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<CallTrumpDecisionEntity>(
             It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
@@ -178,7 +178,7 @@ public class CallTrumpTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerableWithCancellation(entities, cts.Token));
 
         var loader = new CallTrumpTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
@@ -200,7 +200,7 @@ public class CallTrumpTrainingDataLoaderTests
                 ExpectedDealPoints = (short)((entity.CallTrumpDecisionId % 5) - 2),
             });
 
-        _mockGameRepository.Setup(x => x.GetCallTrumpTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<CallTrumpDecisionEntity>(
             It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
@@ -208,7 +208,7 @@ public class CallTrumpTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerable(entities));
 
         var loader = new CallTrumpTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 

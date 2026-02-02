@@ -19,14 +19,14 @@ namespace NemesisEuchre.MachineLearning.Tests.DataAccess;
 
 public class PlayCardTrainingDataLoaderTests
 {
-    private readonly Mock<IGameRepository> _mockGameRepository;
+    private readonly Mock<ITrainingDataRepository> _mockTrainingDataRepository;
     private readonly Mock<IFeatureEngineer<PlayCardDecisionEntity, PlayCardTrainingData>> _mockFeatureEngineer;
     private readonly Mock<ILogger<PlayCardTrainingDataLoader>> _mockLogger;
     private readonly Faker<PlayCardDecisionEntity> _entityFaker;
 
     public PlayCardTrainingDataLoaderTests()
     {
-        _mockGameRepository = new Mock<IGameRepository>();
+        _mockTrainingDataRepository = new Mock<ITrainingDataRepository>();
         _mockFeatureEngineer = new Mock<IFeatureEngineer<PlayCardDecisionEntity, PlayCardTrainingData>>();
         _mockLogger = new Mock<ILogger<PlayCardTrainingDataLoader>>();
 
@@ -69,7 +69,7 @@ public class PlayCardTrainingDataLoaderTests
             _mockFeatureEngineer.Setup(x => x.Transform(entity)).Returns(trainingData);
         }
 
-        _mockGameRepository.Setup(x => x.GetPlayCardTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<PlayCardDecisionEntity>(
             It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
@@ -77,7 +77,7 @@ public class PlayCardTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerable(entities));
 
         var loader = new PlayCardTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
@@ -108,7 +108,7 @@ public class PlayCardTrainingDataLoaderTests
                 };
             });
 
-        _mockGameRepository.Setup(x => x.GetPlayCardTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<PlayCardDecisionEntity>(
             It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
@@ -116,7 +116,7 @@ public class PlayCardTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerable(entities));
 
         var loader = new PlayCardTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
@@ -136,7 +136,7 @@ public class PlayCardTrainingDataLoaderTests
                 ExpectedDealPoints = (short)((entity.PlayCardDecisionId % 5) - 2),
             });
 
-        _mockGameRepository.Setup(x => x.GetPlayCardTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<PlayCardDecisionEntity>(
             It.IsAny<ActorType>(),
             50,
             It.IsAny<bool>(),
@@ -144,7 +144,7 @@ public class PlayCardTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerable(entities.Take(50)));
 
         var loader = new PlayCardTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
@@ -175,7 +175,7 @@ public class PlayCardTrainingDataLoaderTests
                 };
             });
 
-        _mockGameRepository.Setup(x => x.GetPlayCardTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<PlayCardDecisionEntity>(
             It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
@@ -183,7 +183,7 @@ public class PlayCardTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerableWithCancellation(entities, cts.Token));
 
         var loader = new PlayCardTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
@@ -205,7 +205,7 @@ public class PlayCardTrainingDataLoaderTests
                 ExpectedDealPoints = (short)((entity.PlayCardDecisionId % 5) - 2),
             });
 
-        _mockGameRepository.Setup(x => x.GetPlayCardTrainingDataAsync(
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<PlayCardDecisionEntity>(
             It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
@@ -213,7 +213,7 @@ public class PlayCardTrainingDataLoaderTests
             .Returns(CreateAsyncEnumerable(entities));
 
         var loader = new PlayCardTrainingDataLoader(
-            _mockGameRepository.Object,
+            _mockTrainingDataRepository.Object,
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 

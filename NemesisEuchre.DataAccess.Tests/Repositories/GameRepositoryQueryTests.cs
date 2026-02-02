@@ -17,6 +17,7 @@ namespace NemesisEuchre.DataAccess.Tests.Repositories;
 public class GameRepositoryQueryTests
 {
     [Fact]
+    [Obsolete]
     public async Task GetCallTrumpTrainingDataAsync_WithMatchingActorType_ReturnsFilteredDecisions()
     {
         await using var context = CreateInMemoryContext();
@@ -45,6 +46,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetCallTrumpTrainingDataAsync_WithWinningTeamOnlyTrue_ReturnsOnlyWinningDecisions()
     {
         await using var context = CreateInMemoryContext();
@@ -73,6 +75,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetCallTrumpTrainingDataAsync_WithLimit_ReturnsLimitedResults()
     {
         await using var context = CreateInMemoryContext();
@@ -101,6 +104,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetCallTrumpTrainingDataAsync_WithLimitZero_ReturnsAllResults()
     {
         await using var context = CreateInMemoryContext();
@@ -129,6 +133,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetCallTrumpTrainingDataAsync_WithNoMatchingData_ReturnsEmptyEnumerable()
     {
         await using var context = CreateInMemoryContext();
@@ -144,6 +149,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetCallTrumpTrainingDataAsync_WithCancellationToken_StopsEnumeration()
     {
         await using var context = CreateInMemoryContext();
@@ -187,6 +193,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetCallTrumpTrainingDataAsync_WithAllFilters_ReturnsCorrectResults()
     {
         await using var context = CreateInMemoryContext();
@@ -231,6 +238,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetDiscardCardTrainingDataAsync_WithMatchingActorType_ReturnsFilteredDecisions()
     {
         await using var context = CreateInMemoryContext();
@@ -259,6 +267,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetDiscardCardTrainingDataAsync_WithWinningTeamOnlyTrue_ReturnsOnlyWinningDecisions()
     {
         await using var context = CreateInMemoryContext();
@@ -287,6 +296,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetDiscardCardTrainingDataAsync_WithLimit_ReturnsLimitedResults()
     {
         await using var context = CreateInMemoryContext();
@@ -315,6 +325,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetDiscardCardTrainingDataAsync_WithLimitZero_ReturnsAllResults()
     {
         await using var context = CreateInMemoryContext();
@@ -343,6 +354,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetDiscardCardTrainingDataAsync_WithNoMatchingData_ReturnsEmptyEnumerable()
     {
         await using var context = CreateInMemoryContext();
@@ -358,6 +370,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetDiscardCardTrainingDataAsync_WithCancellationToken_StopsEnumeration()
     {
         await using var context = CreateInMemoryContext();
@@ -401,6 +414,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetDiscardCardTrainingDataAsync_WithAllFilters_ReturnsCorrectResults()
     {
         await using var context = CreateInMemoryContext();
@@ -445,6 +459,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetPlayCardTrainingDataAsync_WithMatchingActorType_ReturnsFilteredDecisions()
     {
         await using var context = CreateInMemoryContext();
@@ -485,6 +500,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetPlayCardTrainingDataAsync_WithWinningTeamOnlyTrue_ReturnsOnlyWinningDecisions()
     {
         await using var context = CreateInMemoryContext();
@@ -525,6 +541,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetPlayCardTrainingDataAsync_WithLimit_ReturnsLimitedResults()
     {
         await using var context = CreateInMemoryContext();
@@ -564,6 +581,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetPlayCardTrainingDataAsync_WithLimitZero_ReturnsAllResults()
     {
         await using var context = CreateInMemoryContext();
@@ -603,6 +621,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetPlayCardTrainingDataAsync_WithNoMatchingData_ReturnsEmptyEnumerable()
     {
         await using var context = CreateInMemoryContext();
@@ -618,6 +637,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetPlayCardTrainingDataAsync_WithCancellationToken_StopsEnumeration()
     {
         await using var context = CreateInMemoryContext();
@@ -672,6 +692,7 @@ public class GameRepositoryQueryTests
     }
 
     [Fact]
+    [Obsolete]
     public async Task GetPlayCardTrainingDataAsync_WithAllFilters_ReturnsCorrectResults()
     {
         await using var context = CreateInMemoryContext();

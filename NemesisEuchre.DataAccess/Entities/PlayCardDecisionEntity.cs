@@ -5,7 +5,7 @@ using NemesisEuchre.Foundation.Constants;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class PlayCardDecisionEntity
+public class PlayCardDecisionEntity : IDecisionEntity
 {
     public int PlayCardDecisionId { get; set; }
 

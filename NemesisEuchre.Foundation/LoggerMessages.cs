@@ -383,4 +383,17 @@ public static partial class LoggerMessages
         Exception exception,
         string modelType,
         ActorType actorType);
+
+    // EventID 51-52: Persistence control
+    [LoggerMessage(
+        EventId = 51,
+        Level = LogLevel.Information,
+        Message = "Game persistence skipped (--do-not-persist flag enabled)")]
+    public static partial void LogGamePersistenceSkipped(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 52,
+        Level = LogLevel.Information,
+        Message = "Batch of {BatchSize} games persistence skipped (--do-not-persist flag enabled)")]
+    public static partial void LogBatchGamePersistenceSkipped(ILogger logger, int batchSize);
 }

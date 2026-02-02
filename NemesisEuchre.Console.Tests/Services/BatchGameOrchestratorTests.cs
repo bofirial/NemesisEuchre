@@ -483,6 +483,82 @@ public class BatchGameOrchestratorTests
         persistedGameCount.Should().Be(2, "Only 2 games should be persisted (1 failed)");
     }
 
+    [Fact]
+    public async Task RunBatchAsync_WithDoNotPersist_SkipsPersistence()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(game);
+
+        await _sut.RunBatchAsync(5, doNotPersist: true);
+
+        _gameRepositoryMock.Verify(
+            x => x.SaveCompletedGamesBulkAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),
+            Times.Never,
+            "Repository should not be called when doNotPersist is true");
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_WithDoNotPersist_StillReportsProgress()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(game);
+
+        var progressReporter = new Mock<IBatchProgressReporter>();
+
+        await _sut.RunBatchAsync(3, progressReporter: progressReporter.Object, doNotPersist: true);
+
+        progressReporter.Verify(x => x.ReportGameCompleted(It.IsAny<int>()), Times.Exactly(3));
+        progressReporter.Verify(
+            x => x.ReportGamesSaved(It.IsAny<int>()),
+            Times.AtLeastOnce(),
+            "Progress should still be reported even when not persisting");
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_WithDoNotPersist_ReturnsCorrectResults()
+    {
+        var games = new[]
+        {
+            CreateGameWithWinner(Team.Team1),
+            CreateGameWithWinner(Team.Team2),
+            CreateGameWithWinner(Team.Team1),
+        };
+
+        var callCount = 0;
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(() => games[callCount++]);
+
+        var results = await _sut.RunBatchAsync(3, doNotPersist: true);
+
+        results.TotalGames.Should().Be(3);
+        results.Team1Wins.Should().Be(2);
+        results.Team2Wins.Should().Be(1);
+        results.FailedGames.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task RunBatchAsync_WithDoNotPersist_LogsSkippedMessage()
+    {
+        var game = CreateGameWithWinner(Team.Team1);
+        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
+            .ReturnsAsync(game);
+
+        _loggerMock.Setup(x => x.IsEnabled(LogLevel.Information)).Returns(true);
+
+        await _sut.RunBatchAsync(3, doNotPersist: true);
+
+        _loggerMock.Verify(
+            x => x.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((_, _) => true),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.AtLeastOnce);
+    }
+
     private static Game CreateGameWithWinner(Team winningTeam, int numberOfDeals = 5)
     {
         var game = new Game

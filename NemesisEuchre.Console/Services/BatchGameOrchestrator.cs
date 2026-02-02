@@ -19,6 +19,7 @@ public interface IBatchGameOrchestrator
     Task<BatchGameResults> RunBatchAsync(
         int numberOfGames,
         IBatchProgressReporter? progressReporter = null,
+        bool doNotPersist = false,
         CancellationToken cancellationToken = default);
 }
 
@@ -34,6 +35,7 @@ public class BatchGameOrchestrator(
     public async Task<BatchGameResults> RunBatchAsync(
         int numberOfGames,
         IBatchProgressReporter? progressReporter = null,
+        bool doNotPersist = false,
         CancellationToken cancellationToken = default)
     {
         if (numberOfGames <= 0)
@@ -44,15 +46,15 @@ public class BatchGameOrchestrator(
         const int maxGamesPerSubBatch = 10000;
         if (numberOfGames > maxGamesPerSubBatch)
         {
-            return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, cancellationToken).ConfigureAwait(false);
+            return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, doNotPersist, cancellationToken).ConfigureAwait(false);
         }
 
         var stopwatch = Stopwatch.StartNew();
         using var state = new BatchExecutionState(_persistenceOptions.BatchSize);
-        var tasks = CreateGameExecutionTasks(numberOfGames, state, progressReporter, cancellationToken);
+        var tasks = CreateGameExecutionTasks(numberOfGames, state, progressReporter, doNotPersist, cancellationToken);
 
         await Task.WhenAll(tasks).ConfigureAwait(false);
-        await SavePendingGamesAsync(state, progressReporter, force: true, cancellationToken).ConfigureAwait(false);
+        await SavePendingGamesAsync(state, progressReporter, doNotPersist, force: true, cancellationToken).ConfigureAwait(false);
         stopwatch.Stop();
 
         return AggregateResults(numberOfGames, state, stopwatch.Elapsed);
@@ -78,6 +80,7 @@ public class BatchGameOrchestrator(
         int totalGames,
         int subBatchSize,
         IBatchProgressReporter? progressReporter,
+        bool doNotPersist,
         CancellationToken cancellationToken)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -98,10 +101,10 @@ public class BatchGameOrchestrator(
                 savedSoFar);
 
             using var state = new BatchExecutionState(_persistenceOptions.BatchSize);
-            var tasks = CreateGameExecutionTasks(gamesInThisBatch, state, subProgressReporter, cancellationToken);
+            var tasks = CreateGameExecutionTasks(gamesInThisBatch, state, subProgressReporter, doNotPersist, cancellationToken);
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
-            await SavePendingGamesAsync(state, subProgressReporter, force: true, cancellationToken).ConfigureAwait(false);
+            await SavePendingGamesAsync(state, subProgressReporter, doNotPersist, force: true, cancellationToken).ConfigureAwait(false);
 
             totalTeam1Wins += state.Team1Wins;
             totalTeam2Wins += state.Team2Wins;
@@ -128,6 +131,7 @@ public class BatchGameOrchestrator(
         int numberOfGames,
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
+        bool doNotPersist,
         CancellationToken cancellationToken)
     {
         var effectiveParallelism = CalculateEffectiveParallelism();
@@ -138,7 +142,7 @@ public class BatchGameOrchestrator(
             await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                await RunSingleGameAsync(gameNumber, state, progressReporter, cancellationToken).ConfigureAwait(false);
+                await RunSingleGameAsync(gameNumber, state, progressReporter, doNotPersist, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -166,6 +170,7 @@ public class BatchGameOrchestrator(
         int gameNumber,
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
+        bool doNotPersist,
         CancellationToken cancellationToken = default)
     {
         try
@@ -192,7 +197,7 @@ public class BatchGameOrchestrator(
                 progressReporter?.ReportGameCompleted(state.CompletedGames);
             }, cancellationToken).ConfigureAwait(false);
 
-            await SavePendingGamesAsync(state, progressReporter, force: false, cancellationToken).ConfigureAwait(false);
+            await SavePendingGamesAsync(state, progressReporter, doNotPersist, force: false, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -210,6 +215,7 @@ public class BatchGameOrchestrator(
     private async Task SavePendingGamesAsync(
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
+        bool doNotPersist,
         bool force,
         CancellationToken cancellationToken = default)
     {
@@ -229,21 +235,31 @@ public class BatchGameOrchestrator(
 
         if (gamesToSave?.Count > 0)
         {
-            try
+            if (doNotPersist)
             {
-                var saveProgress = new Progress<int>(count =>
-                {
-                    state.SavedGames += count;
-                    progressReporter?.ReportGamesSaved(state.SavedGames);
-                });
+                Foundation.LoggerMessages.LogBatchGamePersistenceSkipped(logger, gamesToSave.Count);
 
-                using var scope = serviceScopeFactory.CreateScope();
-                var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
-                await gameRepository.SaveCompletedGamesBulkAsync(gamesToSave, saveProgress, cancellationToken).ConfigureAwait(false);
+                state.SavedGames += gamesToSave.Count;
+                progressReporter?.ReportGamesSaved(state.SavedGames);
             }
-            catch (Exception ex)
+            else
             {
-                Foundation.LoggerMessages.LogGamePersistenceFailed(logger, ex);
+                try
+                {
+                    var saveProgress = new Progress<int>(count =>
+                    {
+                        state.SavedGames += count;
+                        progressReporter?.ReportGamesSaved(state.SavedGames);
+                    });
+
+                    using var scope = serviceScopeFactory.CreateScope();
+                    var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
+                    await gameRepository.SaveCompletedGamesBulkAsync(gamesToSave, saveProgress, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    Foundation.LoggerMessages.LogGamePersistenceFailed(logger, ex);
+                }
             }
         }
     }

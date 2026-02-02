@@ -5,7 +5,7 @@ using NemesisEuchre.Foundation.Constants;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class CallTrumpDecisionEntity
+public class CallTrumpDecisionEntity : IDecisionEntity
 {
     public int CallTrumpDecisionId { get; set; }
 
