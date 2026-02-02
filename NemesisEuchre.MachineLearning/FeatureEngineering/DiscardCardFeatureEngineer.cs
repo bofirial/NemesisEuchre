@@ -9,7 +9,7 @@ public class DiscardCardFeatureEngineer : IFeatureEngineer<DiscardCardDecisionEn
 
     public DiscardCardTrainingData Transform(DiscardCardDecisionEntity entity)
     {
-        var cards = JsonDeserializationHelper.DeserializeCards(entity.CardsInHandJson);
+        var cards = JsonDeserializationHelper.DeserializeRelativeCards(entity.CardsInHandJson);
 
         if (cards.Length != ExpectedCardsInHand)
         {
@@ -17,7 +17,7 @@ public class DiscardCardFeatureEngineer : IFeatureEngineer<DiscardCardDecisionEn
                 $"Expected 6 cards in hand but found {cards.Length}");
         }
 
-        var chosenCard = JsonDeserializationHelper.DeserializeCard(entity.ChosenCardJson);
+        var chosenCard = JsonDeserializationHelper.DeserializeRelativeCard(entity.ChosenCardJson);
 
         var chosenCardIndex = Array.FindIndex(cards, c =>
             c.Rank == chosenCard.Rank && c.Suit == chosenCard.Suit);

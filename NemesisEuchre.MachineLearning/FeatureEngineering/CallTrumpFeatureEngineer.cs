@@ -10,8 +10,8 @@ public class CallTrumpFeatureEngineer : IFeatureEngineer<CallTrumpDecisionEntity
 
     public CallTrumpTrainingData Transform(CallTrumpDecisionEntity entity)
     {
-        var cards = JsonDeserializationHelper.DeserializeCards(entity.CardsInHandJson);
-        var upCard = JsonDeserializationHelper.DeserializeCard(entity.UpCardJson);
+        var cards = JsonDeserializationHelper.DeserializeRelativeCards(entity.CardsInHandJson);
+        var upCard = JsonDeserializationHelper.DeserializeRelativeCard(entity.UpCardJson);
         var validDecisions = JsonDeserializationHelper.DeserializeCallTrumpDecisions(entity.ValidDecisionsJson);
         var chosenDecision = JsonDeserializationHelper.DeserializeCallTrumpDecision(entity.ChosenDecisionJson);
 

@@ -9,6 +9,7 @@ using NemesisEuchre.Console.Services;
 using NemesisEuchre.Console.Services.Orchestration;
 using NemesisEuchre.Console.Services.Persistence;
 using NemesisEuchre.Console.Services.TrainerExecutors;
+using NemesisEuchre.Console.Services.Training;
 using NemesisEuchre.DataAccess.DependencyInjection;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.GameEngine.DependencyInjection;
@@ -48,6 +49,7 @@ public static class Program
 
             services.AddScoped<IModelTrainingOrchestrator, ModelTrainingOrchestrator>();
             services.AddScoped<ITrainerFactory, TrainerFactory>();
+            services.AddScoped<ITrainingProgressCoordinator, TrainingProgressCoordinator>();
             services.AddScoped<ITrainingResultsRenderer, TrainingResultsRenderer>();
             services.AddScoped<ITrainerExecutor, CallTrumpRegressionTrainerExecutor>();
             services.AddScoped<ITrainerExecutor, DiscardCardRegressionTrainerExecutor>();

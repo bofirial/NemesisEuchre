@@ -9,7 +9,7 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
 
     public PlayCardTrainingData Transform(PlayCardDecisionEntity entity)
     {
-        var cards = JsonDeserializationHelper.DeserializeCards(entity.CardsInHandJson);
+        var cards = JsonDeserializationHelper.DeserializeRelativeCards(entity.CardsInHandJson);
         var playedCardsDict = JsonDeserializationHelper.DeserializePlayedCards(entity.PlayedCardsJson);
 
         var playedCards = playedCardsDict
@@ -17,7 +17,7 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
             .Select(kvp => kvp.Value)
             .ToArray();
 
-        var validCards = JsonDeserializationHelper.DeserializeCards(entity.ValidCardsToPlayJson);
+        var validCards = JsonDeserializationHelper.DeserializeRelativeCards(entity.ValidCardsToPlayJson);
 
         var validityArray = new float[MaxCardsInHand];
         foreach (var validCard in validCards)
@@ -30,7 +30,7 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
             }
         }
 
-        var chosenCard = JsonDeserializationHelper.DeserializeCard(entity.ChosenCardJson);
+        var chosenCard = JsonDeserializationHelper.DeserializeRelativeCard(entity.ChosenCardJson);
 
         var chosenCardIndex = Array.FindIndex(cards, c =>
             c.Rank == chosenCard.Rank && c.Suit == chosenCard.Suit);
@@ -63,7 +63,7 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
             PlayedCard3Suit = playedCards.Length > 2 ? (float)playedCards[2].Suit : 0.0f,
             TeamScore = entity.TeamScore,
             OpponentScore = entity.OpponentScore,
-            TrickNumber = entity.Trick.TrickNumber,
+            TrickNumber = entity.Trick?.TrickNumber ?? 0.0f,
             CardsPlayedInTrick = playedCards.Length,
             WinningTrickPlayer = entity.WinningTrickPlayer.HasValue ? (float)entity.WinningTrickPlayer.Value : -1.0f,
             Card1IsValid = validityArray[0],

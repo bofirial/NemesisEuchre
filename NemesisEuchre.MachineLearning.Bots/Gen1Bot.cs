@@ -6,6 +6,7 @@ using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerBots;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Utilities;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Loading;
 using NemesisEuchre.MachineLearning.Models;
@@ -17,7 +18,8 @@ public class Gen1Bot(
     ICallTrumpInferenceFeatureBuilder callTrumpFeatureBuilder,
     IDiscardCardInferenceFeatureBuilder discardCardFeatureBuilder,
     IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
-    ILogger<Gen1Bot> logger) : BotBase
+    IRandomNumberGenerator random,
+    ILogger<Gen1Bot> logger) : BotBase(random)
 {
     private readonly ILogger<Gen1Bot> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ICallTrumpInferenceFeatureBuilder _callTrumpFeatureBuilder = callTrumpFeatureBuilder ?? throw new ArgumentNullException(nameof(callTrumpFeatureBuilder));

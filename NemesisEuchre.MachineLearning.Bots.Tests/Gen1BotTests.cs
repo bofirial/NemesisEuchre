@@ -10,6 +10,7 @@ using Moq;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Utilities;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Loading;
 using NemesisEuchre.MachineLearning.Models;
@@ -25,6 +26,7 @@ public class Gen1BotTests
     private readonly Mock<ICallTrumpInferenceFeatureBuilder> _mockCallTrumpFeatureBuilder = new();
     private readonly Mock<IDiscardCardInferenceFeatureBuilder> _mockDiscardCardFeatureBuilder = new();
     private readonly Mock<IPlayCardInferenceFeatureBuilder> _mockPlayCardFeatureBuilder = new();
+    private readonly Mock<IRandomNumberGenerator> _mockRandom = new();
     private readonly Mock<ILogger<Gen1Bot>> _mockLogger = new();
 
     [Fact]
@@ -45,6 +47,7 @@ public class Gen1BotTests
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
+            _mockRandom.Object,
             _mockLogger.Object);
 
         _mockEngineProvider.Verify(
@@ -70,6 +73,7 @@ public class Gen1BotTests
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
+            _mockRandom.Object,
             _mockLogger.Object);
 
         bot.Should().NotBeNull();
@@ -84,6 +88,7 @@ public class Gen1BotTests
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
+            _mockRandom.Object,
             _mockLogger.Object);
 
         bot.ActorType.Should().Be(ActorType.Gen1);
@@ -101,6 +106,7 @@ public class Gen1BotTests
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
+            _mockRandom.Object,
             _mockLogger.Object);
         var cardsInHand = GenerateCards(5);
         var upCard = GenerateCard();
@@ -126,6 +132,7 @@ public class Gen1BotTests
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
+            _mockRandom.Object,
             _mockLogger.Object);
         var cardsInHand = GenerateRelativeCards(5);
         var validCardsToDiscard = new[] { cardsInHand[0] };
@@ -154,6 +161,7 @@ public class Gen1BotTests
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
+            _mockRandom.Object,
             _mockLogger.Object);
         var cardsInHand = GenerateRelativeCards(6);
         var validCardsToDiscard = new[] { cardsInHand[0], cardsInHand[1] };
@@ -181,6 +189,7 @@ public class Gen1BotTests
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
+            _mockRandom.Object,
             _mockLogger.Object);
         var cardsInHand = GenerateRelativeCards(5);
         var validCardsToPlay = new[] { cardsInHand[0], cardsInHand[1] };

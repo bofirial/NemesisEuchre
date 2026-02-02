@@ -8,6 +8,7 @@ using Moq;
 using NemesisEuchre.Console.Commands;
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.Console.Services.Training;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Options;
 
@@ -22,7 +23,7 @@ public class TrainCommandTests
     {
         var testConsole = new TestConsole();
         var mockLogger = Mock.Of<ILogger<TrainCommand>>();
-        var mockOrchestrator = new Mock<IModelTrainingOrchestrator>();
+        var mockProgressCoordinator = new Mock<ITrainingProgressCoordinator>();
         var mockRenderer = new Mock<ITrainingResultsRenderer>();
 
         var options = Options.Create(new MachineLearningOptions { ModelOutputPath = string.Empty });
@@ -30,7 +31,7 @@ public class TrainCommandTests
         var command = new TrainCommand(
             mockLogger,
             testConsole,
-            mockOrchestrator.Object,
+            mockProgressCoordinator.Object,
             mockRenderer.Object,
             options)
         {
@@ -50,7 +51,7 @@ public class TrainCommandTests
     {
         var testConsole = new TestConsole();
         var mockLogger = Mock.Of<ILogger<TrainCommand>>();
-        var mockOrchestrator = new Mock<IModelTrainingOrchestrator>();
+        var mockProgressCoordinator = new Mock<ITrainingProgressCoordinator>();
         var mockRenderer = new Mock<ITrainingResultsRenderer>();
 
         var trainingResults = new TrainingResults(
@@ -59,13 +60,13 @@ public class TrainCommandTests
             Results: [],
             TotalDuration: TimeSpan.FromSeconds(10));
 
-        mockOrchestrator.Setup(o => o.TrainModelsAsync(
+        mockProgressCoordinator.Setup(o => o.CoordinateTrainingWithProgressAsync(
             It.IsAny<ActorType>(),
             It.IsAny<DecisionType>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
             It.IsAny<int>(),
-            It.IsAny<IProgress<TrainingProgress>>(),
+            It.IsAny<Spectre.Console.IAnsiConsole>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(trainingResults);
 
@@ -74,7 +75,7 @@ public class TrainCommandTests
         var command = new TrainCommand(
             mockLogger,
             testConsole,
-            mockOrchestrator.Object,
+            mockProgressCoordinator.Object,
             mockRenderer.Object,
             options)
         {
@@ -98,7 +99,7 @@ public class TrainCommandTests
     {
         var testConsole = new TestConsole();
         var mockLogger = Mock.Of<ILogger<TrainCommand>>();
-        var mockOrchestrator = new Mock<IModelTrainingOrchestrator>();
+        var mockProgressCoordinator = new Mock<ITrainingProgressCoordinator>();
         var mockRenderer = new Mock<ITrainingResultsRenderer>();
 
         var trainingResults = new TrainingResults(
@@ -107,13 +108,13 @@ public class TrainCommandTests
             Results: [],
             TotalDuration: TimeSpan.FromSeconds(10));
 
-        mockOrchestrator.Setup(o => o.TrainModelsAsync(
+        mockProgressCoordinator.Setup(o => o.CoordinateTrainingWithProgressAsync(
             It.IsAny<ActorType>(),
             It.IsAny<DecisionType>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
             It.IsAny<int>(),
-            It.IsAny<IProgress<TrainingProgress>>(),
+            It.IsAny<Spectre.Console.IAnsiConsole>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(trainingResults);
 
@@ -122,7 +123,7 @@ public class TrainCommandTests
         var command = new TrainCommand(
             mockLogger,
             testConsole,
-            mockOrchestrator.Object,
+            mockProgressCoordinator.Object,
             mockRenderer.Object,
             options)
         {
@@ -141,18 +142,18 @@ public class TrainCommandTests
     {
         var testConsole = new TestConsole();
         var mockLogger = Mock.Of<ILogger<TrainCommand>>();
-        var mockOrchestrator = new Mock<IModelTrainingOrchestrator>();
+        var mockProgressCoordinator = new Mock<ITrainingProgressCoordinator>();
         var mockRenderer = new Mock<ITrainingResultsRenderer>();
 
         var trainingResults = new TrainingResults(1, 0, [], TimeSpan.FromSeconds(5));
 
-        mockOrchestrator.Setup(o => o.TrainModelsAsync(
+        mockProgressCoordinator.Setup(o => o.CoordinateTrainingWithProgressAsync(
             ActorType.Gen1,
             DecisionType.CallTrump,
             "./custom-models",
             1000,
             2,
-            It.IsAny<IProgress<TrainingProgress>>(),
+            It.IsAny<Spectre.Console.IAnsiConsole>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(trainingResults);
 
@@ -161,7 +162,7 @@ public class TrainCommandTests
         var command = new TrainCommand(
             mockLogger,
             testConsole,
-            mockOrchestrator.Object,
+            mockProgressCoordinator.Object,
             mockRenderer.Object,
             options)
         {
@@ -174,14 +175,14 @@ public class TrainCommandTests
 
         await command.RunAsync();
 
-        mockOrchestrator.Verify(
-            o => o.TrainModelsAsync(
+        mockProgressCoordinator.Verify(
+            o => o.CoordinateTrainingWithProgressAsync(
             ActorType.Gen1,
             DecisionType.CallTrump,
             "./custom-models",
             1000,
             2,
-            It.IsAny<IProgress<TrainingProgress>>(),
+            It.IsAny<Spectre.Console.IAnsiConsole>(),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 }

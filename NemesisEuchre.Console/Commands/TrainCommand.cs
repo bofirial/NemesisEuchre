@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.Console.Services.Training;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Options;
@@ -19,7 +20,7 @@ namespace NemesisEuchre.Console.Commands;
 public class TrainCommand(
     ILogger<TrainCommand> logger,
     IAnsiConsole ansiConsole,
-    IModelTrainingOrchestrator trainingOrchestrator,
+    ITrainingProgressCoordinator progressCoordinator,
     ITrainingResultsRenderer resultsRenderer,
     IOptions<MachineLearningOptions> options) : ICliRunAsyncWithReturn
 {
@@ -29,7 +30,7 @@ public class TrainCommand(
     [CliOption(Description = "Decision type to train (CallTrump, Discard, Play, All)")]
     public DecisionType DecisionType { get; set; } = DecisionType.All;
 
-    [CliOption(Description = "Output path for trained models")]
+    [CliOption(Description = "Output path for trained models", Required = false)]
     public string? OutputPath { get; set; }
 
     [CliOption(Description = "Maximum training samples (0 = unlimited)")]
@@ -42,12 +43,35 @@ public class TrainCommand(
     {
         LoggerMessages.LogTrainingStarting(logger, ActorType, DecisionType, Generation);
 
+        var outputPath = ValidateAndPrepareOutputPath();
+        if (outputPath == null)
+        {
+            return 1;
+        }
+
+        DisplayTrainingConfiguration(outputPath);
+
+        var results = await progressCoordinator.CoordinateTrainingWithProgressAsync(
+            ActorType,
+            DecisionType,
+            outputPath,
+            SampleLimit,
+            Generation,
+            ansiConsole);
+
+        resultsRenderer.RenderTrainingResults(results, ActorType, DecisionType);
+
+        return DetermineExitCode(results);
+    }
+
+    private string? ValidateAndPrepareOutputPath()
+    {
         var outputPath = OutputPath ?? options.Value.ModelOutputPath;
 
         if (string.IsNullOrWhiteSpace(outputPath))
         {
             ansiConsole.MarkupLine("[red]Error: Model output path is not configured[/]");
-            return 1;
+            return null;
         }
 
         if (!Directory.Exists(outputPath))
@@ -56,6 +80,11 @@ public class TrainCommand(
             Directory.CreateDirectory(outputPath);
         }
 
+        return outputPath;
+    }
+
+    private void DisplayTrainingConfiguration(string outputPath)
+    {
         ansiConsole.WriteLine();
         ansiConsole.MarkupLine($"[dim]Output: {outputPath}[/]");
         ansiConsole.MarkupLine($"[dim]Generation: {Generation}[/]");
@@ -66,60 +95,10 @@ public class TrainCommand(
         }
 
         ansiConsole.WriteLine();
+    }
 
-        var results = await ansiConsole.Progress()
-            .StartAsync(async ctx =>
-            {
-                var overallTask = ctx.AddTask(
-                    $"[green]Training {DecisionType} models for {ActorType}[/]",
-                    maxValue: 100);
-
-                var modelTasks = new Dictionary<string, ProgressTask>();
-
-                var progress = new Progress<TrainingProgress>(p =>
-                {
-                    if (!modelTasks.TryGetValue(p.ModelType, out var task))
-                    {
-                        task = ctx.AddTask($"[blue]{p.ModelType}[/]", maxValue: 100);
-                        modelTasks[p.ModelType] = task;
-                    }
-
-                    task.Value = p.PercentComplete;
-
-                    var statusEmoji = p.Phase switch
-                    {
-                        TrainingPhase.LoadingData => "📊",
-                        TrainingPhase.Training => "🔄",
-                        TrainingPhase.Saving => "💾",
-                        TrainingPhase.Complete => "✓",
-                        TrainingPhase.Failed => "✗",
-                        _ => string.Empty
-                    };
-
-                    var message = p.Message ?? p.Phase.ToString();
-                    task.Description = $"[blue]{p.ModelType}[/] {statusEmoji} {message}";
-
-                    if (p.Phase is TrainingPhase.Complete or TrainingPhase.Failed)
-                    {
-                        task.StopTask();
-                    }
-
-                    var completedModels = modelTasks.Values.Count(t => t.IsFinished);
-                    var totalModels = DecisionType == DecisionType.All ? 3 : 1;
-                    overallTask.Value = completedModels * 100.0 / totalModels;
-                });
-
-                return await trainingOrchestrator.TrainModelsAsync(
-                    ActorType,
-                    DecisionType,
-                    outputPath,
-                    SampleLimit,
-                    Generation,
-                    progress);
-            });
-
-        resultsRenderer.RenderTrainingResults(results, ActorType, DecisionType);
-
+    private int DetermineExitCode(TrainingResults results)
+    {
         if (results.FailedModels > 0)
         {
             LoggerMessages.LogTrainingCompletedWithFailures(logger, results.FailedModels);

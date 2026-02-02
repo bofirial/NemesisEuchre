@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "NemesisEuchre.Console": {
+      "commandName": "Project",
+      "commandLineArgs": " --do-not-persist --count 10000",
+      "commandLineArgs-TRAIN": "train --actor-type Chaos --decision-type All --sample-limit 10000"
+    }
+  }
+}

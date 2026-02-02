@@ -21,28 +21,6 @@ public class GameFactoryTests
         game.Players.Should().HaveCount(4);
     }
 
-    [Fact]
-    public Task CreateGameAsync_WithNullTeam1ActorTypes_ThrowsArgumentNullException()
-    {
-        var gameOptions = MsOptions.Options.Create(new GameOptions { Team1ActorTypes = null! });
-        var gameInitializer = new GameFactory(gameOptions);
-
-        var act = gameInitializer.CreateGameAsync;
-
-        return act.Should().ThrowAsync<ArgumentNullException>();
-    }
-
-    [Fact]
-    public Task CreateGameAsync_WithNullTeam2ActorTypes_ThrowsArgumentNullException()
-    {
-        var gameOptions = MsOptions.Options.Create(new GameOptions { Team2ActorTypes = null! });
-        var gameInitializer = new GameFactory(gameOptions);
-
-        var act = gameInitializer.CreateGameAsync;
-
-        return act.Should().ThrowAsync<ArgumentNullException>();
-    }
-
     [Theory]
     [InlineData(0)]
     [InlineData(1)]
@@ -50,16 +28,13 @@ public class GameFactoryTests
     [InlineData(4)]
     public Task CreateGameAsync_WithInvalidTeam1ActorTypesLength_ThrowsArgumentException(int length)
     {
-        var gameOptions = MsOptions.Options.Create(new GameOptions
-        {
-            Team1ActorTypes = new ActorType[length],
-        });
+        var gameOptions = MsOptions.Options.Create(new GameOptions());
         var gameInitializer = new GameFactory(gameOptions);
 
-        var act = gameInitializer.CreateGameAsync;
+        var act = async () => await gameInitializer.CreateGameAsync(team1ActorTypes: new ActorType[length]);
 
         return act.Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("gameOptions")
+            .WithParameterName("team1ActorTypes")
             .WithMessage("Team1ActorTypes must contain exactly 2 actor types.*");
     }
 
@@ -70,16 +45,13 @@ public class GameFactoryTests
     [InlineData(4)]
     public Task CreateGameAsync_WithInvalidTeam2ActorTypesLength_ThrowsArgumentException(int length)
     {
-        var gameOptions = MsOptions.Options.Create(new GameOptions
-        {
-            Team2ActorTypes = new ActorType[length],
-        });
+        var gameOptions = MsOptions.Options.Create(new GameOptions());
         var gameInitializer = new GameFactory(gameOptions);
 
-        var act = gameInitializer.CreateGameAsync;
+        var act = async () => await gameInitializer.CreateGameAsync(team2ActorTypes: new ActorType[length]);
 
         return act.Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("gameOptions")
+            .WithParameterName("team2ActorTypes")
             .WithMessage("Team2ActorTypes must contain exactly 2 actor types.*");
     }
 
