@@ -143,7 +143,7 @@ public class DefaultCommandTests
 
         await command.RunAsync();
 
-        testConsole.Output.Should().Contain("Playing a game between 4 ChaosBots");
+        testConsole.Output.Should().Contain("Playing a game between 2 ChaosBots and 2 ChaosBots");
     }
 
     [Fact]

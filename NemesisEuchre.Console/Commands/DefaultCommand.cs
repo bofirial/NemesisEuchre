@@ -53,7 +53,7 @@ public class DefaultCommand(
 
     private Task<Game> RunSingleGameAsync()
     {
-        ansiConsole.MarkupLine("[dim]Playing a game between 4 ChaosBots...[/]");
+        ansiConsole.MarkupLine($"[dim]Playing a game between 2 {Team1 ?? ActorType.Chaos}Bots and 2 {Team2 ?? ActorType.Chaos}Bots...[/]");
         ansiConsole.WriteLine();
 
         var team1ActorTypes = Team1.HasValue ? new[] { Team1.Value, Team1.Value } : null;
@@ -66,7 +66,7 @@ public class DefaultCommand(
 
     private async Task RunBatchGamesAsync()
     {
-        ansiConsole.MarkupLine($"[dim]Playing {Count} games between 4 ChaosBots...[/]");
+        ansiConsole.MarkupLine($"[dim]Playing a game between 2 {Team1 ?? ActorType.Chaos}Bots and 2 {Team2 ?? ActorType.Chaos}Bots...[/]");
         ansiConsole.WriteLine();
 
         var results = await ansiConsole.Progress()
