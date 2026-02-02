@@ -5,7 +5,8 @@ using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.Foundation;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Options;
 
 using Spectre.Console;

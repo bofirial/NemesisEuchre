@@ -2,9 +2,9 @@ using FluentAssertions;
 
 using Moq;
 
-using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.Console.Services.TrainerExecutors;
+using NemesisEuchre.Foundation.Constants;
 
 namespace NemesisEuchre.Console.Tests.Services;
 

@@ -11,7 +11,6 @@ using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation.Constants;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.DataAccess.Tests.Repositories;
 

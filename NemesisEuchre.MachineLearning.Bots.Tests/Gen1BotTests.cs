@@ -75,7 +75,7 @@ public class Gen1BotTests
         _mockLogger.Verify(
             x => x.Log(
                 LogLevel.Warning,
-                It.Is<EventId>(e => e.Id == 1),
+                It.Is<EventId>(e => e.Id == 35),
                 It.Is<It.IsAnyType>((o, _) => o.ToString()!.Contains("CallTrump")),
                 It.IsAny<FileNotFoundException>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),

@@ -11,7 +11,6 @@ using Moq;
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation.Constants;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Models;

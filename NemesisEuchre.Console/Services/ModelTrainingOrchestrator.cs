@@ -3,7 +3,8 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Models;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.Foundation;
+using NemesisEuchre.Foundation.Constants;
 
 namespace NemesisEuchre.Console.Services;
 
@@ -51,7 +52,7 @@ public class ModelTrainingOrchestrator(
 
         foreach (var trainer in trainers)
         {
-            LoggerMessages.LogTrainingModel(logger, trainer.ModelType);
+            LoggerMessages.LogTrainingModelType(logger, trainer.ModelType);
 
             var result = await trainer.ExecuteAsync(
                 actorType,
@@ -74,7 +75,7 @@ public class ModelTrainingOrchestrator(
         var successCount = results.Count(r => r.Success);
         var failCount = results.Count(r => !r.Success);
 
-        LoggerMessages.LogTrainingComplete(logger, successCount, failCount, stopwatch.Elapsed);
+        LoggerMessages.LogTrainingCompleteWithResults(logger, successCount, failCount, stopwatch.Elapsed);
 
         return new TrainingResults(successCount, failCount, results, stopwatch.Elapsed);
     }

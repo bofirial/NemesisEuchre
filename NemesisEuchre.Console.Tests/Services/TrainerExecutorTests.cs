@@ -6,7 +6,7 @@ using Moq;
 
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services.TrainerExecutors;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Trainers;

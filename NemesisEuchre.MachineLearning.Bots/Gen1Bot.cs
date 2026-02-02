@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.ML;
 
+using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerBots;

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.ML;
 
 using NemesisEuchre.DataAccess.Configuration;
+using NemesisEuchre.Foundation;
 using NemesisEuchre.MachineLearning.Caching;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Services;

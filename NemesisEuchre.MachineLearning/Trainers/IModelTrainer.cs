@@ -1,6 +1,6 @@
 using Microsoft.ML;
 
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.Trainers;

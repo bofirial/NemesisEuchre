@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Microsoft.ML;
 
+using NemesisEuchre.Foundation;
+
 namespace NemesisEuchre.MachineLearning.Caching;
 
 public interface IModelCache

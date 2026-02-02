@@ -1,4 +1,4 @@
-namespace NemesisEuchre.Console.Models;
+namespace NemesisEuchre.Foundation.Constants;
 
 public enum DecisionType
 {

@@ -1,5 +1,5 @@
 using NemesisEuchre.Console.Models;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.Foundation.Constants;
 
 using Spectre.Console;
 

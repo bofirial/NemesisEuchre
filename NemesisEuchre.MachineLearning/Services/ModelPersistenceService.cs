@@ -4,7 +4,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.ML;
 
 using NemesisEuchre.DataAccess.Configuration;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.Foundation;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.Services;

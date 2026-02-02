@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.DataAccess.Repositories;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Models;
 

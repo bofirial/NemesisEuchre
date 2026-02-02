@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.ML;
 
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Options;
