@@ -31,6 +31,8 @@ public class DealOrchestrator(
             return;
         }
 
+        SortPlayerHandsByTrump(deal);
+
         await ExecuteTrickPlayingPhaseAsync(deal).ConfigureAwait(false);
 
         ExecuteScoringPhase(deal);
@@ -47,6 +49,22 @@ public class DealOrchestrator(
     {
         deal.DealResult = DealResult.ThrowIn;
         deal.DealStatus = DealStatus.Complete;
+    }
+
+    private static void SortPlayerHandsByTrump(Deal deal)
+    {
+        var sortedHands = deal.Players.Values
+            .Select(player => new
+            {
+                Hand = player.CurrentHand,
+                Sorted = player.CurrentHand.SortByTrump(deal.Trump),
+            });
+
+        foreach (var entry in sortedHands)
+        {
+            entry.Hand.Clear();
+            entry.Hand.AddRange(entry.Sorted);
+        }
     }
 
     private Task ExecuteTrumpSelectionPhaseAsync(Deal deal)

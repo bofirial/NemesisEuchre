@@ -63,13 +63,13 @@ public class DealFactory(ICardShuffler cardShuffler, IRandomNumberGenerator rand
 
         for (int playerIndex = 0; playerIndex < PlayersPerGame; playerIndex++)
         {
-            var cardsForPlayer = DealCardsToPlayer(deck, playerIndex);
+            var sortedCards = DealCardsToPlayer(deck, playerIndex).SortByTrump(null);
 
             dealPlayers[currentPosition] = new DealPlayer
             {
                 Position = currentPosition,
-                StartingHand = cardsForPlayer,
-                CurrentHand = [.. cardsForPlayer],
+                StartingHand = sortedCards,
+                CurrentHand = [.. sortedCards],
                 ActorType = gamePlayers[currentPosition].ActorType,
             };
 
