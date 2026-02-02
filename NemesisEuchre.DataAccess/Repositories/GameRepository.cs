@@ -1,14 +1,9 @@
-using System.Runtime.CompilerServices;
-
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.Foundation;
-using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.DataAccess.Repositories;
@@ -22,27 +17,6 @@ public interface IGameRepository
     Task SaveCompletedGamesBulkAsync(
         IEnumerable<Game> games,
         IProgress<int>? progress = null,
-        CancellationToken cancellationToken = default);
-
-    [Obsolete("Use ITrainingDataRepository.GetDecisionDataAsync<CallTrumpDecisionEntity> instead")]
-    IAsyncEnumerable<CallTrumpDecisionEntity> GetCallTrumpTrainingDataAsync(
-        ActorType actorType,
-        int limit = 0,
-        bool winningTeamOnly = false,
-        CancellationToken cancellationToken = default);
-
-    [Obsolete("Use ITrainingDataRepository.GetDecisionDataAsync<DiscardCardDecisionEntity> instead")]
-    IAsyncEnumerable<DiscardCardDecisionEntity> GetDiscardCardTrainingDataAsync(
-        ActorType actorType,
-        int limit = 0,
-        bool winningTeamOnly = false,
-        CancellationToken cancellationToken = default);
-
-    [Obsolete("Use ITrainingDataRepository.GetDecisionDataAsync<PlayCardDecisionEntity> instead")]
-    IAsyncEnumerable<PlayCardDecisionEntity> GetPlayCardTrainingDataAsync(
-        ActorType actorType,
-        int limit = 0,
-        bool winningTeamOnly = false,
         CancellationToken cancellationToken = default);
 }
 
@@ -171,108 +145,6 @@ public class GameRepository(
         catch (Exception ex)
         {
             LoggerMessages.LogBatchGamePersistenceFailed(logger, gamesList.Count, ex);
-        }
-    }
-
-    [Obsolete("Use ITrainingDataRepository.GetDecisionDataAsync<CallTrumpDecisionEntity> instead")]
-    public async IAsyncEnumerable<CallTrumpDecisionEntity> GetCallTrumpTrainingDataAsync(
-        ActorType actorType,
-        int limit = 0,
-        bool winningTeamOnly = false,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        LoggerMessages.LogRetrievingTrainingData(
-            logger,
-            nameof(CallTrumpDecisionEntity),
-            actorType.ToString(),
-            limit,
-            winningTeamOnly);
-
-        var query = context.CallTrumpDecisions!
-            .AsNoTracking()
-            .Where(d => d.ActorType == actorType);
-
-        if (winningTeamOnly)
-        {
-            query = query.Where(d => d.DidTeamWinGame == true);
-        }
-
-        if (limit > 0)
-        {
-            query = query.Take(limit);
-        }
-
-        await foreach (var decision in query.AsAsyncEnumerable().WithCancellation(cancellationToken))
-        {
-            yield return decision;
-        }
-    }
-
-    [Obsolete("Use ITrainingDataRepository.GetDecisionDataAsync<DiscardCardDecisionEntity> instead")]
-    public async IAsyncEnumerable<DiscardCardDecisionEntity> GetDiscardCardTrainingDataAsync(
-        ActorType actorType,
-        int limit = 0,
-        bool winningTeamOnly = false,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        LoggerMessages.LogRetrievingTrainingData(
-            logger,
-            nameof(DiscardCardDecisionEntity),
-            actorType.ToString(),
-            limit,
-            winningTeamOnly);
-
-        var query = context.DiscardCardDecisions!
-            .AsNoTracking()
-            .Where(d => d.ActorType == actorType);
-
-        if (winningTeamOnly)
-        {
-            query = query.Where(d => d.DidTeamWinGame == true);
-        }
-
-        if (limit > 0)
-        {
-            query = query.Take(limit);
-        }
-
-        await foreach (var decision in query.AsAsyncEnumerable().WithCancellation(cancellationToken))
-        {
-            yield return decision;
-        }
-    }
-
-    [Obsolete("Use ITrainingDataRepository.GetDecisionDataAsync<PlayCardDecisionEntity> instead")]
-    public async IAsyncEnumerable<PlayCardDecisionEntity> GetPlayCardTrainingDataAsync(
-        ActorType actorType,
-        int limit = 0,
-        bool winningTeamOnly = false,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    {
-        LoggerMessages.LogRetrievingTrainingData(
-            logger,
-            nameof(PlayCardDecisionEntity),
-            actorType.ToString(),
-            limit,
-            winningTeamOnly);
-
-        var query = context.PlayCardDecisions!
-            .AsNoTracking()
-            .Where(d => d.ActorType == actorType);
-
-        if (winningTeamOnly)
-        {
-            query = query.Where(d => d.DidTeamWinGame == true);
-        }
-
-        if (limit > 0)
-        {
-            query = query.Take(limit);
-        }
-
-        await foreach (var decision in query.AsAsyncEnumerable().WithCancellation(cancellationToken))
-        {
-            yield return decision;
         }
     }
 }
