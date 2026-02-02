@@ -19,6 +19,8 @@ public interface IBatchGameOrchestrator
         int numberOfGames,
         IBatchProgressReporter? progressReporter = null,
         bool doNotPersist = false,
+        ActorType[]? team1ActorTypes = null,
+        ActorType[]? team2ActorTypes = null,
         CancellationToken cancellationToken = default);
 }
 
@@ -36,6 +38,8 @@ public class BatchGameOrchestrator(
         int numberOfGames,
         IBatchProgressReporter? progressReporter = null,
         bool doNotPersist = false,
+        ActorType[]? team1ActorTypes = null,
+        ActorType[]? team2ActorTypes = null,
         CancellationToken cancellationToken = default)
     {
         if (numberOfGames <= 0)
@@ -46,7 +50,7 @@ public class BatchGameOrchestrator(
         const int maxGamesPerSubBatch = 10000;
         if (subBatchStrategy.ShouldUseSubBatches(numberOfGames, maxGamesPerSubBatch))
         {
-            return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, doNotPersist, cancellationToken).ConfigureAwait(false);
+            return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, doNotPersist, cancellationToken, team1ActorTypes, team2ActorTypes).ConfigureAwait(false);
         }
 
         var stopwatch = Stopwatch.StartNew();
@@ -54,7 +58,7 @@ public class BatchGameOrchestrator(
         var tasks = parallelismCoordinator.CreateParallelTasks(
             numberOfGames,
             state,
-            (gameNumber, s, ct) => RunSingleGameAsync(gameNumber, s, progressReporter, doNotPersist, ct),
+            (gameNumber, s, ct) => RunSingleGameAsync(gameNumber, s, progressReporter, doNotPersist, team1ActorTypes, team2ActorTypes, ct),
             cancellationToken);
 
         await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -85,7 +89,9 @@ public class BatchGameOrchestrator(
         int subBatchSize,
         IBatchProgressReporter? progressReporter,
         bool doNotPersist,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        ActorType[]? team1ActorTypes = null,
+        ActorType[]? team2ActorTypes = null)
     {
         var stopwatch = Stopwatch.StartNew();
         var completedSoFar = 0;
@@ -108,7 +114,7 @@ public class BatchGameOrchestrator(
             var tasks = parallelismCoordinator.CreateParallelTasks(
                 gamesInThisBatch,
                 state,
-                (gameNumber, s, ct) => RunSingleGameAsync(gameNumber, s, subProgressReporter, doNotPersist, ct),
+                (gameNumber, s, ct) => RunSingleGameAsync(gameNumber, s, subProgressReporter, doNotPersist, team1ActorTypes, team2ActorTypes, ct),
                 cancellationToken);
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -140,13 +146,15 @@ public class BatchGameOrchestrator(
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
         bool doNotPersist,
+        ActorType[]? team1ActorTypes = null,
+        ActorType[]? team2ActorTypes = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
             using var scope = serviceScopeFactory.CreateScope();
             var gameOrchestrator = scope.ServiceProvider.GetRequiredService<IGameOrchestrator>();
-            var game = await gameOrchestrator.OrchestrateGameAsync().ConfigureAwait(false);
+            var game = await gameOrchestrator.OrchestrateGameAsync(team1ActorTypes, team2ActorTypes).ConfigureAwait(false);
 
             await state.ExecuteWithLockAsync(
                 () =>

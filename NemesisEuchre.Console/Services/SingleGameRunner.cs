@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.DataAccess.Repositories;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine;
 using NemesisEuchre.GameEngine.Models;
 
@@ -8,7 +9,7 @@ namespace NemesisEuchre.Console.Services;
 
 public interface ISingleGameRunner
 {
-    Task<Game> RunAsync(bool doNotPersist = false, CancellationToken cancellationToken = default);
+    Task<Game> RunAsync(bool doNotPersist = false, ActorType[]? team1ActorTypes = null, ActorType[]? team2ActorTypes = null, CancellationToken cancellationToken = default);
 }
 
 public class SingleGameRunner(
@@ -17,9 +18,9 @@ public class SingleGameRunner(
     IGameResultsRenderer gameResultsRenderer,
     ILogger<SingleGameRunner> logger) : ISingleGameRunner
 {
-    public async Task<Game> RunAsync(bool doNotPersist = false, CancellationToken cancellationToken = default)
+    public async Task<Game> RunAsync(bool doNotPersist = false, ActorType[]? team1ActorTypes = null, ActorType[]? team2ActorTypes = null, CancellationToken cancellationToken = default)
     {
-        var game = await gameOrchestrator.OrchestrateGameAsync();
+        var game = await gameOrchestrator.OrchestrateGameAsync(team1ActorTypes, team2ActorTypes);
 
         if (!doNotPersist)
         {

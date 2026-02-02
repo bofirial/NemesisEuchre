@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 
 using Spectre.Console;
@@ -23,6 +24,12 @@ public class DefaultCommand(
 
     [CliOption(Description = "Skip saving games to the database")]
     public bool DoNotPersist { get; set; }
+
+    [CliOption(Description = "ActorType for Team1")]
+    public ActorType? Team1 { get; set; }
+
+    [CliOption(Description = "ActorType for Team2")]
+    public ActorType? Team2 { get; set; }
 
     public async Task<int> RunAsync()
     {
@@ -49,9 +56,12 @@ public class DefaultCommand(
         ansiConsole.MarkupLine("[dim]Playing a game between 4 ChaosBots...[/]");
         ansiConsole.WriteLine();
 
+        var team1ActorTypes = Team1.HasValue ? new[] { Team1.Value, Team1.Value } : null;
+        var team2ActorTypes = Team2.HasValue ? new[] { Team2.Value, Team2.Value } : null;
+
         return ansiConsole.Status()
             .Spinner(Spinner.Known.Dots)
-            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(doNotPersist: DoNotPersist));
+            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(doNotPersist: DoNotPersist, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes));
     }
 
     private async Task RunBatchGamesAsync()
@@ -67,7 +77,10 @@ public class DefaultCommand(
 
                 var progressReporter = new BatchProgressReporter(playingTask, savingTask);
 
-                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, doNotPersist: DoNotPersist);
+                var team1ActorTypes = Team1.HasValue ? new[] { Team1.Value, Team1.Value } : null;
+                var team2ActorTypes = Team2.HasValue ? new[] { Team2.Value, Team2.Value } : null;
+
+                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, doNotPersist: DoNotPersist, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes);
             });
 
         gameResultsRenderer.RenderBatchResults(results);
