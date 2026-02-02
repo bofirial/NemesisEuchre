@@ -1,6 +1,7 @@
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Utilities;
 
 namespace NemesisEuchre.GameEngine;
 
@@ -9,7 +10,7 @@ public interface IDealFactory
     Task<Deal> CreateDealAsync(Game game, Deal? previousDeal = null);
 }
 
-public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
+public class DealFactory(ICardShuffler cardShuffler, IRandomNumberGenerator randomNumberGenerator) : IDealFactory
 {
     private const int CardsPerPlayer = 5;
 
@@ -50,11 +51,6 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
         {
             throw new InvalidOperationException("Previous deal must have a dealer position.");
         }
-    }
-
-    private static PlayerPosition CalculateDealerPosition(Deal? previousDeal)
-    {
-        return previousDeal?.DealerPosition!.Value.GetNextPosition() ?? PlayerPosition.North;
     }
 
     private static Dictionary<PlayerPosition, DealPlayer> DistributeCardsToPlayers(
@@ -125,6 +121,17 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
         }
 
         return deck;
+    }
+
+    private PlayerPosition CalculateDealerPosition(Deal? previousDeal)
+    {
+        if (previousDeal?.DealerPosition != null)
+        {
+            return previousDeal.DealerPosition.Value.GetNextPosition();
+        }
+
+        int randomPosition = randomNumberGenerator.NextInt(4);
+        return (PlayerPosition)randomPosition;
     }
 
     private Card[] PrepareShuffledDeck()
