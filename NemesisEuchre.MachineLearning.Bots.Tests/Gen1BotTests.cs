@@ -10,6 +10,7 @@ using Moq;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Loading;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Options;
@@ -22,6 +23,9 @@ public class Gen1BotTests
 {
     private readonly Faker _faker = new();
     private readonly Mock<IModelLoader> _mockModelLoader = new();
+    private readonly Mock<ICallTrumpInferenceFeatureBuilder> _mockCallTrumpFeatureBuilder = new();
+    private readonly Mock<IDiscardCardInferenceFeatureBuilder> _mockDiscardCardFeatureBuilder = new();
+    private readonly Mock<IPlayCardInferenceFeatureBuilder> _mockPlayCardFeatureBuilder = new();
     private readonly Mock<ILogger<Gen1Bot>> _mockLogger = new();
     private readonly IOptions<MachineLearningOptions> _options = Microsoft.Extensions.Options.Options.Create(new MachineLearningOptions
     {
@@ -44,7 +48,13 @@ public class Gen1BotTests
                 It.IsAny<string>(), 1, "PlayCard", null))
             .Throws(new FileNotFoundException());
 
-        _ = new Gen1Bot(_mockModelLoader.Object, _options, _mockLogger.Object);
+        _ = new Gen1Bot(
+            _mockModelLoader.Object,
+            _options,
+            _mockCallTrumpFeatureBuilder.Object,
+            _mockDiscardCardFeatureBuilder.Object,
+            _mockPlayCardFeatureBuilder.Object,
+            _mockLogger.Object);
 
         _mockModelLoader.Verify(
             x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
@@ -70,7 +80,13 @@ public class Gen1BotTests
 
         _mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
 
-        _ = new Gen1Bot(_mockModelLoader.Object, _options, _mockLogger.Object);
+        _ = new Gen1Bot(
+            _mockModelLoader.Object,
+            _options,
+            _mockCallTrumpFeatureBuilder.Object,
+            _mockDiscardCardFeatureBuilder.Object,
+            _mockPlayCardFeatureBuilder.Object,
+            _mockLogger.Object);
 
         _mockLogger.Verify(
             x => x.Log(
@@ -85,7 +101,13 @@ public class Gen1BotTests
     [Fact]
     public void ActorType_ShouldReturnGen1()
     {
-        var bot = new Gen1Bot(_mockModelLoader.Object, _options, _mockLogger.Object);
+        var bot = new Gen1Bot(
+            _mockModelLoader.Object,
+            _options,
+            _mockCallTrumpFeatureBuilder.Object,
+            _mockDiscardCardFeatureBuilder.Object,
+            _mockPlayCardFeatureBuilder.Object,
+            _mockLogger.Object);
 
         bot.ActorType.Should().Be(ActorType.Gen1);
     }
@@ -98,7 +120,13 @@ public class Gen1BotTests
                 It.IsAny<string>(), 1, "CallTrump", null))
             .Throws(new FileNotFoundException());
 
-        var bot = new Gen1Bot(_mockModelLoader.Object, _options, _mockLogger.Object);
+        var bot = new Gen1Bot(
+            _mockModelLoader.Object,
+            _options,
+            _mockCallTrumpFeatureBuilder.Object,
+            _mockDiscardCardFeatureBuilder.Object,
+            _mockPlayCardFeatureBuilder.Object,
+            _mockLogger.Object);
         var cardsInHand = GenerateCards(5);
         var upCard = GenerateCard();
         var validDecisions = new[] { CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp };
@@ -118,7 +146,13 @@ public class Gen1BotTests
     [Fact]
     public Task DiscardCardAsync_ShouldThrowException_WhenHandIsNot6Cards()
     {
-        var bot = new Gen1Bot(_mockModelLoader.Object, _options, _mockLogger.Object);
+        var bot = new Gen1Bot(
+            _mockModelLoader.Object,
+            _options,
+            _mockCallTrumpFeatureBuilder.Object,
+            _mockDiscardCardFeatureBuilder.Object,
+            _mockPlayCardFeatureBuilder.Object,
+            _mockLogger.Object);
         var cardsInHand = GenerateRelativeCards(5);
         var validCardsToDiscard = new[] { cardsInHand[0] };
 
@@ -142,7 +176,13 @@ public class Gen1BotTests
                 It.IsAny<string>(), 1, "DiscardCard", null))
             .Throws(new FileNotFoundException());
 
-        var bot = new Gen1Bot(_mockModelLoader.Object, _options, _mockLogger.Object);
+        var bot = new Gen1Bot(
+            _mockModelLoader.Object,
+            _options,
+            _mockCallTrumpFeatureBuilder.Object,
+            _mockDiscardCardFeatureBuilder.Object,
+            _mockPlayCardFeatureBuilder.Object,
+            _mockLogger.Object);
         var cardsInHand = GenerateRelativeCards(6);
         var validCardsToDiscard = new[] { cardsInHand[0], cardsInHand[1] };
 
@@ -165,7 +205,13 @@ public class Gen1BotTests
                 It.IsAny<string>(), 1, "PlayCard", null))
             .Throws(new FileNotFoundException());
 
-        var bot = new Gen1Bot(_mockModelLoader.Object, _options, _mockLogger.Object);
+        var bot = new Gen1Bot(
+            _mockModelLoader.Object,
+            _options,
+            _mockCallTrumpFeatureBuilder.Object,
+            _mockDiscardCardFeatureBuilder.Object,
+            _mockPlayCardFeatureBuilder.Object,
+            _mockLogger.Object);
         var cardsInHand = GenerateRelativeCards(5);
         var validCardsToPlay = new[] { cardsInHand[0], cardsInHand[1] };
         var playedCards = new Dictionary<RelativePlayerPosition, RelativeCard>();

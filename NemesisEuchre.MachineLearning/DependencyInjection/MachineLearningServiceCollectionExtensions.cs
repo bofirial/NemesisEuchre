@@ -39,6 +39,10 @@ public static class MachineLearningServiceCollectionExtensions
         services.AddSingleton<IFeatureEngineer<DiscardCardDecisionEntity, DiscardCardTrainingData>, DiscardCardFeatureEngineer>();
         services.AddSingleton<IFeatureEngineer<PlayCardDecisionEntity, PlayCardTrainingData>, PlayCardFeatureEngineer>();
 
+        services.AddSingleton<ICallTrumpInferenceFeatureBuilder, CallTrumpInferenceFeatureBuilder>();
+        services.AddSingleton<IDiscardCardInferenceFeatureBuilder, DiscardCardInferenceFeatureBuilder>();
+        services.AddSingleton<IPlayCardInferenceFeatureBuilder, PlayCardInferenceFeatureBuilder>();
+
         services.AddOptions<MachineLearningOptions>()
             .Bind(configuration.GetSection("MachineLearning"))
             .ValidateDataAnnotations()
