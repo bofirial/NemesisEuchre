@@ -91,7 +91,7 @@ public partial class ModelVersionManager : IModelVersionManager
 
         var files = Directory.GetFiles(modelsDirectory, "*.zip");
         var regex = ModelFileRegex();
-        var normalizedDecisionType = decisionType?.ToLowerInvariant();
+        var normalizedDecisionType = $"{decisionType?.ToLowerInvariant()}regression";
 
         var models = new List<ModelFileInfo>();
 
