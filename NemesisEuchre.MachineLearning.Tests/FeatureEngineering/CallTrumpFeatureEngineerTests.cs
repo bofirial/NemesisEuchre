@@ -7,6 +7,7 @@ using FluentAssertions;
 using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 
@@ -26,7 +27,7 @@ public class CallTrumpFeatureEngineerTests
     [Fact]
     public void Transform_WithValidEntity_MapsAllHandCards()
     {
-        var cards = CreateRelativeCards(5);
+        var cards = CreateCards(5);
         var entity = CreateCallTrumpDecisionEntity(cards);
 
         var result = _engineer.Transform(entity);
@@ -46,7 +47,7 @@ public class CallTrumpFeatureEngineerTests
     [Fact]
     public void Transform_WithValidEntity_MapsUpCard()
     {
-        var upCard = CreateRelativeCard();
+        var upCard = CreateCard();
         var entity = CreateCallTrumpDecisionEntity(upCard: upCard);
 
         var result = _engineer.Transform(entity);
@@ -153,8 +154,8 @@ public class CallTrumpFeatureEngineerTests
     [Fact]
     public void Transform_WithValidEntity_MapsExpectedDealPoints()
     {
-        var cards = CreateRelativeCards(5);
-        var upCard = CreateRelativeCard();
+        var cards = CreateCards(5);
+        var upCard = CreateCard();
         var entity = new CallTrumpDecisionEntity
         {
             CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
@@ -173,23 +174,23 @@ public class CallTrumpFeatureEngineerTests
         result.ExpectedDealPoints.Should().Be(4);
     }
 
-    private RelativeCard CreateRelativeCard(Rank? rank = null, RelativeSuit? suit = null)
+    private Card CreateCard(Rank? rank = null, Suit? suit = null)
     {
-        return new RelativeCard
+        return new Card
         {
             Rank = rank ?? _faker.PickRandom<Rank>(),
-            Suit = suit ?? _faker.PickRandom<RelativeSuit>(),
+            Suit = suit ?? _faker.PickRandom<Suit>(),
         };
     }
 
-    private RelativeCard[] CreateRelativeCards(int count)
+    private Card[] CreateCards(int count)
     {
-        return [.. Enumerable.Range(0, count).Select(_ => CreateRelativeCard())];
+        return [.. Enumerable.Range(0, count).Select(_ => CreateCard())];
     }
 
     private CallTrumpDecisionEntity CreateCallTrumpDecisionEntity(
-        RelativeCard[]? cards = null,
-        RelativeCard? upCard = null,
+        Card[]? cards = null,
+        Card? upCard = null,
         RelativePlayerPosition? dealerPosition = null,
         short? teamScore = null,
         short? opponentScore = null,
@@ -197,8 +198,8 @@ public class CallTrumpFeatureEngineerTests
         CallTrumpDecision[]? validDecisions = null,
         CallTrumpDecision? chosenDecision = null)
     {
-        cards ??= CreateRelativeCards(5);
-        upCard ??= CreateRelativeCard();
+        cards ??= CreateCards(5);
+        upCard ??= CreateCard();
         validDecisions ??= [CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp];
         chosenDecision ??= validDecisions[0];
 
