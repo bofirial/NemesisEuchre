@@ -3,7 +3,7 @@ using Bogus;
 using FluentAssertions;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Microsoft.ML;
 
 using Moq;
 
@@ -13,7 +13,6 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Loading;
 using NemesisEuchre.MachineLearning.Models;
-using NemesisEuchre.MachineLearning.Options;
 
 using Xunit;
 
@@ -22,88 +21,66 @@ namespace NemesisEuchre.MachineLearning.Bots.Tests;
 public class Gen1BotTests
 {
     private readonly Faker _faker = new();
-    private readonly Mock<IModelLoader> _mockModelLoader = new();
+    private readonly Mock<IPredictionEngineProvider> _mockEngineProvider = new();
     private readonly Mock<ICallTrumpInferenceFeatureBuilder> _mockCallTrumpFeatureBuilder = new();
     private readonly Mock<IDiscardCardInferenceFeatureBuilder> _mockDiscardCardFeatureBuilder = new();
     private readonly Mock<IPlayCardInferenceFeatureBuilder> _mockPlayCardFeatureBuilder = new();
     private readonly Mock<ILogger<Gen1Bot>> _mockLogger = new();
-    private readonly IOptions<MachineLearningOptions> _options = Microsoft.Extensions.Options.Options.Create(new MachineLearningOptions
-    {
-        ModelOutputPath = "./models",
-    });
 
     [Fact]
-    public void Constructor_ShouldCallModelLoader_ForAllThreeModels()
+    public void Constructor_ShouldCallEngineProvider_ForAllThreeModels()
     {
-        _mockModelLoader
-            .Setup(x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                It.IsAny<string>(), 1, "CallTrump", null))
-            .Throws(new FileNotFoundException());
-        _mockModelLoader
-            .Setup(x => x.LoadModel<DiscardCardTrainingData, DiscardCardRegressionPrediction>(
-                It.IsAny<string>(), 1, "DiscardCard", null))
-            .Throws(new FileNotFoundException());
-        _mockModelLoader
-            .Setup(x => x.LoadModel<PlayCardTrainingData, PlayCardRegressionPrediction>(
-                It.IsAny<string>(), 1, "PlayCard", null))
-            .Throws(new FileNotFoundException());
+        _mockEngineProvider
+            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1))
+            .Returns((PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>?)null);
+        _mockEngineProvider
+            .Setup(x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", 1))
+            .Returns((PredictionEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>?)null);
+        _mockEngineProvider
+            .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", 1))
+            .Returns((PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>?)null);
 
         _ = new Gen1Bot(
-            _mockModelLoader.Object,
-            _options,
+            _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockLogger.Object);
 
-        _mockModelLoader.Verify(
-            x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./models", 1, "CallTrump", null),
+        _mockEngineProvider.Verify(
+            x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1),
             Times.Once);
-        _mockModelLoader.Verify(
-            x => x.LoadModel<DiscardCardTrainingData, DiscardCardRegressionPrediction>(
-                "./models", 1, "DiscardCard", null),
+        _mockEngineProvider.Verify(
+            x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", 1),
             Times.Once);
-        _mockModelLoader.Verify(
-            x => x.LoadModel<PlayCardTrainingData, PlayCardRegressionPrediction>(
-                "./models", 1, "PlayCard", null),
+        _mockEngineProvider.Verify(
+            x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", 1),
             Times.Once);
     }
 
     [Fact]
-    public void Constructor_ShouldLogWarning_WhenModelNotFound()
+    public void Constructor_ShouldSucceed_WhenEngineProviderReturnsNull()
     {
-        _mockModelLoader
-            .Setup(x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                It.IsAny<string>(), 1, "CallTrump", null))
-            .Throws(new FileNotFoundException("Model not found"));
+        _mockEngineProvider
+            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1))
+            .Returns((PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>?)null);
 
-        _mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
-
-        _ = new Gen1Bot(
-            _mockModelLoader.Object,
-            _options,
+        var bot = new Gen1Bot(
+            _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockLogger.Object);
 
-        _mockLogger.Verify(
-            x => x.Log(
-                LogLevel.Warning,
-                It.Is<EventId>(e => e.Id == 35),
-                It.Is<It.IsAnyType>((o, _) => o.ToString()!.Contains("CallTrump")),
-                It.IsAny<FileNotFoundException>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Once);
+        bot.Should().NotBeNull();
+        bot.ActorType.Should().Be(ActorType.Gen1);
     }
 
     [Fact]
     public void ActorType_ShouldReturnGen1()
     {
         var bot = new Gen1Bot(
-            _mockModelLoader.Object,
-            _options,
+            _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
@@ -113,16 +90,14 @@ public class Gen1BotTests
     }
 
     [Fact]
-    public async Task CallTrumpAsync_ShouldFallbackToRandom_WhenModelNotLoaded()
+    public async Task CallTrumpAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
     {
-        _mockModelLoader
-            .Setup(x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                It.IsAny<string>(), 1, "CallTrump", null))
-            .Throws(new FileNotFoundException());
+        _mockEngineProvider
+            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1))
+            .Returns((PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>?)null);
 
         var bot = new Gen1Bot(
-            _mockModelLoader.Object,
-            _options,
+            _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
@@ -147,8 +122,7 @@ public class Gen1BotTests
     public Task DiscardCardAsync_ShouldThrowException_WhenHandIsNot6Cards()
     {
         var bot = new Gen1Bot(
-            _mockModelLoader.Object,
-            _options,
+            _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
@@ -169,16 +143,14 @@ public class Gen1BotTests
     }
 
     [Fact]
-    public async Task DiscardCardAsync_ShouldFallbackToRandom_WhenModelNotLoaded()
+    public async Task DiscardCardAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
     {
-        _mockModelLoader
-            .Setup(x => x.LoadModel<DiscardCardTrainingData, DiscardCardRegressionPrediction>(
-                It.IsAny<string>(), 1, "DiscardCard", null))
-            .Throws(new FileNotFoundException());
+        _mockEngineProvider
+            .Setup(x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", 1))
+            .Returns((PredictionEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>?)null);
 
         var bot = new Gen1Bot(
-            _mockModelLoader.Object,
-            _options,
+            _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
@@ -198,16 +170,14 @@ public class Gen1BotTests
     }
 
     [Fact]
-    public async Task PlayCardAsync_ShouldFallbackToRandom_WhenModelNotLoaded()
+    public async Task PlayCardAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
     {
-        _mockModelLoader
-            .Setup(x => x.LoadModel<PlayCardTrainingData, PlayCardRegressionPrediction>(
-                It.IsAny<string>(), 1, "PlayCard", null))
-            .Throws(new FileNotFoundException());
+        _mockEngineProvider
+            .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", 1))
+            .Returns((PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>?)null);
 
         var bot = new Gen1Bot(
-            _mockModelLoader.Object,
-            _options,
+            _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,

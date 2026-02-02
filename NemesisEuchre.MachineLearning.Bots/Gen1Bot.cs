@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.ML;
 
 using NemesisEuchre.Foundation;
@@ -10,39 +9,23 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Loading;
 using NemesisEuchre.MachineLearning.Models;
-using NemesisEuchre.MachineLearning.Options;
 
 namespace NemesisEuchre.MachineLearning.Bots;
 
-public class Gen1Bot : BotBase
+public class Gen1Bot(
+    IPredictionEngineProvider engineProvider,
+    ICallTrumpInferenceFeatureBuilder callTrumpFeatureBuilder,
+    IDiscardCardInferenceFeatureBuilder discardCardFeatureBuilder,
+    IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
+    ILogger<Gen1Bot> logger) : BotBase
 {
-    private readonly ILogger<Gen1Bot> _logger;
-    private readonly ICallTrumpInferenceFeatureBuilder _callTrumpFeatureBuilder;
-    private readonly IDiscardCardInferenceFeatureBuilder _discardCardFeatureBuilder;
-    private readonly IPlayCardInferenceFeatureBuilder _playCardFeatureBuilder;
-    private readonly PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>? _callTrumpEngine;
-    private readonly PredictionEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>? _discardCardEngine;
-    private readonly PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>? _playCardEngine;
-
-    public Gen1Bot(
-        IModelLoader modelLoader,
-        IOptions<MachineLearningOptions> options,
-        ICallTrumpInferenceFeatureBuilder callTrumpFeatureBuilder,
-        IDiscardCardInferenceFeatureBuilder discardCardFeatureBuilder,
-        IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
-        ILogger<Gen1Bot> logger)
-    {
-        _logger = logger;
-        _callTrumpFeatureBuilder = callTrumpFeatureBuilder ?? throw new ArgumentNullException(nameof(callTrumpFeatureBuilder));
-        _discardCardFeatureBuilder = discardCardFeatureBuilder ?? throw new ArgumentNullException(nameof(discardCardFeatureBuilder));
-        _playCardFeatureBuilder = playCardFeatureBuilder ?? throw new ArgumentNullException(nameof(playCardFeatureBuilder));
-
-        var modelsDirectory = options.Value.ModelOutputPath;
-
-        _callTrumpEngine = TryLoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(modelLoader, modelsDirectory, "CallTrump");
-        _discardCardEngine = TryLoadModel<DiscardCardTrainingData, DiscardCardRegressionPrediction>(modelLoader, modelsDirectory, "DiscardCard");
-        _playCardEngine = TryLoadModel<PlayCardTrainingData, PlayCardRegressionPrediction>(modelLoader, modelsDirectory, "PlayCard");
-    }
+    private readonly ILogger<Gen1Bot> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ICallTrumpInferenceFeatureBuilder _callTrumpFeatureBuilder = callTrumpFeatureBuilder ?? throw new ArgumentNullException(nameof(callTrumpFeatureBuilder));
+    private readonly IDiscardCardInferenceFeatureBuilder _discardCardFeatureBuilder = discardCardFeatureBuilder ?? throw new ArgumentNullException(nameof(discardCardFeatureBuilder));
+    private readonly IPlayCardInferenceFeatureBuilder _playCardFeatureBuilder = playCardFeatureBuilder ?? throw new ArgumentNullException(nameof(playCardFeatureBuilder));
+    private readonly PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>? _callTrumpEngine = engineProvider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", generation: 1);
+    private readonly PredictionEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>? _discardCardEngine = engineProvider.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", generation: 1);
+    private readonly PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>? _playCardEngine = engineProvider.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", generation: 1);
 
     public override ActorType ActorType => ActorType.Gen1;
 
@@ -197,33 +180,6 @@ public class Gen1Bot : BotBase
         {
             LoggerMessages.LogPlayCardPredictionError(_logger, ex);
             return await SelectRandomAsync(validCardsToPlay);
-        }
-    }
-
-    private PredictionEngine<TData, TPrediction>? TryLoadModel<TData, TPrediction>(
-        IModelLoader modelLoader,
-        string modelsDirectory,
-        string decisionType)
-        where TData : class
-        where TPrediction : class, new()
-    {
-        try
-        {
-            return modelLoader.LoadModel<TData, TPrediction>(
-                modelsDirectory,
-                generation: 1,
-                decisionType,
-                version: null);
-        }
-        catch (FileNotFoundException ex)
-        {
-            LoggerMessages.LogModelNotFound(_logger, decisionType, ex);
-            return null;
-        }
-        catch (Exception ex)
-        {
-            LoggerMessages.LogModelLoadFailed(_logger, decisionType, ex);
-            return null;
         }
     }
 }
