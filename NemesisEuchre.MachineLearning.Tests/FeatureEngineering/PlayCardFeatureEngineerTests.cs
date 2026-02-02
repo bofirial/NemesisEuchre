@@ -362,13 +362,10 @@ public class PlayCardFeatureEngineerTests
             WinningTrickPlayer = winningTrickPlayer,
             TeamScore = teamScore ?? (short)_faker.Random.Int(0, 9),
             OpponentScore = opponentScore ?? (short)_faker.Random.Int(0, 9),
+            TrickNumber = trickNumber ?? (short)_faker.Random.Int(1, 5),
             CallingPlayer = callingPlayer ?? _faker.PickRandom<RelativePlayerPosition>(),
             CallingPlayerGoingAlone = callingPlayerGoingAlone ?? _faker.Random.Bool(),
             RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
-            Trick = new TrickEntity
-            {
-                TrickNumber = trickNumber ?? (byte)_faker.Random.Int(1, 5),
-            },
         };
     }
 }

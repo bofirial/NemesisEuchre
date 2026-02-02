@@ -22,6 +22,8 @@ public class PlayCardDecisionRecord
 
     public PlayerPosition? WinningTrickPlayer { get; set; }
 
+    public short TrickNumber { get; set; }
+
     public Card[] ValidCardsToPlay { get; set; } = [];
 
     public PlayerPosition CallingPlayer { get; set; }

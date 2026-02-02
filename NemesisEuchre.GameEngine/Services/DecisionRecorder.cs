@@ -83,6 +83,7 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder) : IDecisionR
             WinningTrickPlayer = trick.CardsPlayed.Count > 0 && trick.LeadSuit.HasValue
                 ? trickWinnerCalculator.CalculateWinner(trick, deal.Trump!.Value)
                 : null,
+            TrickNumber = trick.TrickNumber,
             ValidCardsToPlay = [.. validCards],
             CallingPlayer = deal.CallingPlayer!.Value,
             CallingPlayerGoingAlone = deal.CallingPlayerIsGoingAlone,

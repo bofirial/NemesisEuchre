@@ -27,6 +27,8 @@ public class PlayCardDecisionEntity : IDecisionEntity
 
     public RelativePlayerPosition? WinningTrickPlayer { get; set; }
 
+    public short TrickNumber { get; set; }
+
     public string ValidCardsToPlayJson { get; set; } = null!;
 
     public RelativePlayerPosition CallingPlayer { get; set; }
@@ -91,6 +93,9 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
         builder.Property(e => e.WinningTrickPlayer)
             .HasConversion<string>()
             .HasMaxLength(25);
+
+        builder.Property(e => e.TrickNumber)
+            .IsRequired();
 
         builder.Property(e => e.ValidCardsToPlayJson)
             .IsRequired();
