@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Commands;
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.Console.Services.Orchestration;
+using NemesisEuchre.Console.Services.Persistence;
 using NemesisEuchre.Console.Services.TrainerExecutors;
 using NemesisEuchre.DataAccess.DependencyInjection;
 using NemesisEuchre.DataAccess.Options;
@@ -39,6 +41,9 @@ public static class Program
             services.AddScoped<IApplicationBanner, ApplicationBanner>();
             services.AddScoped<IGameResultsRenderer, GameResultsRenderer>();
             services.AddScoped<ISingleGameRunner, SingleGameRunner>();
+            services.AddScoped<IParallelismCoordinator, ParallelismCoordinator>();
+            services.AddScoped<ISubBatchStrategy, SubBatchStrategy>();
+            services.AddScoped<IPersistenceCoordinator, BatchPersistenceCoordinator>();
             services.AddScoped<IBatchGameOrchestrator, BatchGameOrchestrator>();
 
             services.AddScoped<IModelTrainingOrchestrator, ModelTrainingOrchestrator>();

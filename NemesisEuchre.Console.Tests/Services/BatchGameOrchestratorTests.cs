@@ -7,6 +7,8 @@ using Microsoft.Extensions.Options;
 using Moq;
 
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.Console.Services.Orchestration;
+using NemesisEuchre.Console.Services.Persistence;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation.Constants;
@@ -26,6 +28,9 @@ public class BatchGameOrchestratorTests
     private readonly Mock<IOptions<GameExecutionOptions>> _optionsMock;
     private readonly Mock<IOptions<PersistenceOptions>> _persistenceOptionsMock;
     private readonly Mock<ILogger<BatchGameOrchestrator>> _loggerMock;
+    private readonly Mock<IParallelismCoordinator> _parallelismCoordinatorMock;
+    private readonly Mock<ISubBatchStrategy> _subBatchStrategyMock;
+    private readonly Mock<IPersistenceCoordinator> _persistenceCoordinatorMock;
     private readonly BatchGameOrchestrator _sut;
 
     public BatchGameOrchestratorTests()
@@ -38,6 +43,9 @@ public class BatchGameOrchestratorTests
         _optionsMock = new Mock<IOptions<GameExecutionOptions>>();
         _persistenceOptionsMock = new Mock<IOptions<PersistenceOptions>>();
         _loggerMock = new Mock<ILogger<BatchGameOrchestrator>>();
+        _parallelismCoordinatorMock = new Mock<IParallelismCoordinator>();
+        _subBatchStrategyMock = new Mock<ISubBatchStrategy>();
+        _persistenceCoordinatorMock = new Mock<IPersistenceCoordinator>();
 
         _optionsMock.Setup(x => x.Value).Returns(new GameExecutionOptions
         {
@@ -69,9 +77,75 @@ public class BatchGameOrchestratorTests
             .Callback<IEnumerable<Game>, IProgress<int>?, CancellationToken>((games, progress, _) => progress?.Report(games.Count()))
             .Returns(Task.CompletedTask);
 
+        _subBatchStrategyMock.Setup(x => x.ShouldUseSubBatches(It.IsAny<int>(), It.IsAny<int>()))
+            .Returns(false);
+
+        _parallelismCoordinatorMock.Setup(x => x.CreateParallelTasks(
+            It.IsAny<int>(),
+            It.IsAny<BatchExecutionState>(),
+            It.IsAny<Func<int, BatchExecutionState, CancellationToken, Task>>(),
+            It.IsAny<CancellationToken>()))
+            .Returns<int, BatchExecutionState, Func<int, BatchExecutionState, CancellationToken, Task>, CancellationToken>(
+                (count, state, taskFactory, ct) =>
+                    Enumerable.Range(0, count).Select(i => taskFactory(i, state, ct)));
+
+        _persistenceCoordinatorMock.Setup(x => x.SavePendingGamesAsync(
+            It.IsAny<BatchExecutionState>(),
+            It.IsAny<IBatchProgressReporter>(),
+            It.IsAny<bool>(),
+            It.IsAny<bool>(),
+            It.IsAny<CancellationToken>()))
+            .Returns<BatchExecutionState, IBatchProgressReporter, bool, bool, CancellationToken>(
+                async (state, progressReporter, doNotPersist, force, ct) =>
+                {
+                    var gamesToSave = await state.ExecuteWithLockAsync(
+                        () =>
+                        {
+                            if ((force && state.PendingGames.Count > 0) ||
+                                state.PendingGames.Count >= state.BatchSize)
+                            {
+                                var games = new List<Game>(state.PendingGames);
+                                state.PendingGames.Clear();
+                                return games;
+                            }
+
+                            return null;
+                        }, ct).ConfigureAwait(false);
+
+                    if (gamesToSave?.Count > 0)
+                    {
+                        if (doNotPersist)
+                        {
+                            state.SavedGames += gamesToSave.Count;
+                            progressReporter?.ReportGamesSaved(state.SavedGames);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                var saveProgress = new Progress<int>(count =>
+                                {
+                                    state.SavedGames += count;
+                                    progressReporter?.ReportGamesSaved(state.SavedGames);
+                                });
+
+                                using var scope = _serviceScopeFactoryMock.Object.CreateScope();
+                                var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
+                                await gameRepository.SaveCompletedGamesBulkAsync(gamesToSave, saveProgress, ct).ConfigureAwait(false);
+                            }
+                            catch
+                            {
+                                // Silently swallow exceptions to mimic BatchPersistenceCoordinator behavior
+                            }
+                        }
+                    }
+                });
+
         _sut = new BatchGameOrchestrator(
             _serviceScopeFactoryMock.Object,
-            _optionsMock.Object,
+            _parallelismCoordinatorMock.Object,
+            _subBatchStrategyMock.Object,
+            _persistenceCoordinatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
     }
@@ -166,14 +240,18 @@ public class BatchGameOrchestratorTests
     [Fact]
     public async Task RunBatchAsync_WithMaxDegreeOfParallelism_LimitsParallelism()
     {
-        _optionsMock.Setup(x => x.Value).Returns(new GameExecutionOptions
+        var parallelismOptions = new Mock<IOptions<GameExecutionOptions>>();
+        parallelismOptions.Setup(x => x.Value).Returns(new GameExecutionOptions
         {
             MaxDegreeOfParallelism = 2,
         });
+        var realParallelismCoordinator = new ParallelismCoordinator(parallelismOptions.Object);
 
         var sut = new BatchGameOrchestrator(
             _serviceScopeFactoryMock.Object,
-            _optionsMock.Object,
+            realParallelismCoordinator,
+            _subBatchStrategyMock.Object,
+            _persistenceCoordinatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
 
@@ -267,14 +345,18 @@ public class BatchGameOrchestratorTests
     [Fact]
     public async Task RunBatchAsync_UsesConfiguredMaxDegreeOfParallelism()
     {
-        _optionsMock.Setup(x => x.Value).Returns(new GameExecutionOptions
+        var parallelismOptions = new Mock<IOptions<GameExecutionOptions>>();
+        parallelismOptions.Setup(x => x.Value).Returns(new GameExecutionOptions
         {
             MaxDegreeOfParallelism = 3,
         });
+        var realParallelismCoordinator = new ParallelismCoordinator(parallelismOptions.Object);
 
         var sut = new BatchGameOrchestrator(
             _serviceScopeFactoryMock.Object,
-            _optionsMock.Object,
+            realParallelismCoordinator,
+            _subBatchStrategyMock.Object,
+            _persistenceCoordinatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
 
@@ -314,7 +396,9 @@ public class BatchGameOrchestratorTests
 
         var sut = new BatchGameOrchestrator(
             _serviceScopeFactoryMock.Object,
-            _optionsMock.Object,
+            _parallelismCoordinatorMock.Object,
+            _subBatchStrategyMock.Object,
+            _persistenceCoordinatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
 
@@ -435,6 +519,20 @@ public class BatchGameOrchestratorTests
     [Fact]
     public async Task RunBatchAsync_WithPersistenceFailure_LogsError()
     {
+        var persistenceLogger = new Mock<ILogger<BatchPersistenceCoordinator>>();
+        persistenceLogger.Setup(x => x.IsEnabled(LogLevel.Error)).Returns(true);
+        var realPersistenceCoordinator = new BatchPersistenceCoordinator(
+            _serviceScopeFactoryMock.Object,
+            persistenceLogger.Object);
+
+        var sut = new BatchGameOrchestrator(
+            _serviceScopeFactoryMock.Object,
+            _parallelismCoordinatorMock.Object,
+            _subBatchStrategyMock.Object,
+            realPersistenceCoordinator,
+            _persistenceOptionsMock.Object,
+            _loggerMock.Object);
+
         var game = CreateGameWithWinner(Team.Team1);
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(game);
@@ -442,11 +540,9 @@ public class BatchGameOrchestratorTests
         _gameRepositoryMock.Setup(x => x.SaveCompletedGamesBulkAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
-        _loggerMock.Setup(x => x.IsEnabled(LogLevel.Error)).Returns(true);
+        await sut.RunBatchAsync(1);
 
-        await _sut.RunBatchAsync(1);
-
-        _loggerMock.Verify(
+        persistenceLogger.Verify(
             x => x.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
@@ -541,15 +637,27 @@ public class BatchGameOrchestratorTests
     [Fact]
     public async Task RunBatchAsync_WithDoNotPersist_LogsSkippedMessage()
     {
+        var persistenceLogger = new Mock<ILogger<BatchPersistenceCoordinator>>();
+        persistenceLogger.Setup(x => x.IsEnabled(LogLevel.Information)).Returns(true);
+        var realPersistenceCoordinator = new BatchPersistenceCoordinator(
+            _serviceScopeFactoryMock.Object,
+            persistenceLogger.Object);
+
+        var sut = new BatchGameOrchestrator(
+            _serviceScopeFactoryMock.Object,
+            _parallelismCoordinatorMock.Object,
+            _subBatchStrategyMock.Object,
+            realPersistenceCoordinator,
+            _persistenceOptionsMock.Object,
+            _loggerMock.Object);
+
         var game = CreateGameWithWinner(Team.Team1);
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(game);
 
-        _loggerMock.Setup(x => x.IsEnabled(LogLevel.Information)).Returns(true);
+        await sut.RunBatchAsync(3, doNotPersist: true);
 
-        await _sut.RunBatchAsync(3, doNotPersist: true);
-
-        _loggerMock.Verify(
+        persistenceLogger.Verify(
             x => x.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
