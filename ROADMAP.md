@@ -453,7 +453,7 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 
 1. ~~Record CallTrumpDecision in Deals~~
 2. ~~Record DiscardedCard in Deals~~
-3. Record KnownPlayerSuitVoids in Deals
+3. ~~Record KnownPlayerSuitVoids in Deals~~
 4. Record DealerPosition and DealerPickedUpCard in PlayCardDecisionRecords
 5. Record KnownPlayerSuitVoids in PlayCardDecisionRecords
 6. Record CardsAccountedFor in PlayCardDecisionRecords

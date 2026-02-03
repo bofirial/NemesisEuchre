@@ -32,8 +32,9 @@ public class TrickPlayingOrchestratorTests
         var contextBuilder = new PlayerContextBuilder();
         var trickWinnerCalculator = new TrickWinnerCalculator();
         var decisionRecorder = new DecisionRecorder(contextBuilder);
+        var voidDetector = new VoidDetector();
 
-        _sut = new TrickPlayingOrchestrator(validator, goingAloneHandler, contextBuilder, _actorResolverMock.Object, trickWinnerCalculator, decisionRecorder);
+        _sut = new TrickPlayingOrchestrator(validator, goingAloneHandler, contextBuilder, _actorResolverMock.Object, trickWinnerCalculator, decisionRecorder, voidDetector);
     }
 
     [Fact]
@@ -1119,6 +1120,221 @@ public class TrickPlayingOrchestratorTests
         }
 
         deal.CompletedTricks.SelectMany(t => t.PlayCardDecisions).Should().HaveCount(20);
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_WhenPlayerCannotFollowSuit_VoidIsRecorded()
+    {
+        var deal = CreateTestDeal();
+        deal.Trump = Suit.Hearts;
+        deal.Players[PlayerPosition.North].CurrentHand = [
+            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
+            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+        ];
+        deal.Players[PlayerPosition.East].CurrentHand = [
+            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Ten },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Nine }
+        ];
+
+        _playerActorMock.Setup(b => b.PlayCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Suit?>(),
+                It.IsAny<Dictionary<PlayerPosition, Card>>(),
+                It.IsAny<PlayerPosition?>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_VoidAppearsInSubsequentDecisions()
+    {
+        var deal = CreateTestDeal();
+        deal.Trump = Suit.Hearts;
+        deal.Players[PlayerPosition.North].CurrentHand = [
+            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
+            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+        ];
+        deal.Players[PlayerPosition.East].CurrentHand = [
+            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Ten },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Nine }
+        ];
+
+        _playerActorMock.Setup(b => b.PlayCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Suit?>(),
+                It.IsAny<Dictionary<PlayerPosition, Card>>(),
+                It.IsAny<PlayerPosition?>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        trick.PlayCardDecisions[0].KnownPlayerSuitVoids.Should().BeEmpty();
+        trick.PlayCardDecisions[1].KnownPlayerSuitVoids.Should().BeEmpty();
+        trick.PlayCardDecisions[2].KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
+        trick.PlayCardDecisions[3].KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_MultipleVoidsRecorded()
+    {
+        var deal = CreateTestDeal();
+        deal.Trump = Suit.Hearts;
+        deal.Players[PlayerPosition.North].CurrentHand = [
+            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
+            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+        ];
+        deal.Players[PlayerPosition.East].CurrentHand = [
+            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Ten },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Nine }
+        ];
+        deal.Players[PlayerPosition.South].CurrentHand = [
+            new Card { Suit = Suit.Hearts, Rank = Rank.King },
+            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Jack },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Jack },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Queen }
+        ];
+
+        _playerActorMock.Setup(b => b.PlayCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Suit?>(),
+                It.IsAny<Dictionary<PlayerPosition, Card>>(),
+                It.IsAny<PlayerPosition?>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
+        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.South, Suit.Spades));
+        deal.KnownPlayerSuitVoids.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_SameVoidDetectedTwice_NotDuplicated()
+    {
+        var deal = CreateTestDeal();
+        deal.Trump = Suit.Hearts;
+        deal.KnownPlayerSuitVoids = [(PlayerPosition.East, Suit.Spades)];
+
+        deal.Players[PlayerPosition.North].CurrentHand = [
+            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
+            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+        ];
+        deal.Players[PlayerPosition.East].CurrentHand = [
+            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Ten },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Nine }
+        ];
+
+        _playerActorMock.Setup(b => b.PlayCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Suit?>(),
+                It.IsAny<Dictionary<PlayerPosition, Card>>(),
+                It.IsAny<PlayerPosition?>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        deal.KnownPlayerSuitVoids.Should().HaveCount(1);
+        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_LeftBowerScenario_VoidDetectedInCorrectSuit()
+    {
+        var deal = CreateTestDeal();
+        deal.Trump = Suit.Spades;
+        deal.Players[PlayerPosition.North].CurrentHand = [
+            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            new Card { Suit = Suit.Spades, Rank = Rank.Ten },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+        ];
+        deal.Players[PlayerPosition.East].CurrentHand = [
+            new Card { Suit = Suit.Clubs, Rank = Rank.Jack },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Ten },
+            new Card { Suit = Suit.Diamonds, Rank = Rank.Nine },
+            new Card { Suit = Suit.Clubs, Rank = Rank.Ten }
+        ];
+
+        _playerActorMock.Setup(b => b.PlayCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<Suit?>(),
+                It.IsAny<Dictionary<PlayerPosition, Card>>(),
+                It.IsAny<PlayerPosition?>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+
+        await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Hearts));
     }
 
     private static Deal CreateTestDeal()

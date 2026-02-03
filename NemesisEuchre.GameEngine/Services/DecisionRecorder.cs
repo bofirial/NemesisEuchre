@@ -87,6 +87,7 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder) : IDecisionR
             ValidCardsToPlay = [.. validCards],
             CallingPlayer = deal.CallingPlayer!.Value,
             CallingPlayerGoingAlone = deal.CallingPlayerIsGoingAlone,
+            KnownPlayerSuitVoids = [.. deal.KnownPlayerSuitVoids],
             ChosenCard = chosenCard,
         };
 

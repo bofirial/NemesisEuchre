@@ -19,7 +19,8 @@ public class TrickPlayingOrchestrator(
     IPlayerContextBuilder contextBuilder,
     IPlayerActorResolver actorResolver,
     ITrickWinnerCalculator trickWinnerCalculator,
-    IDecisionRecorder decisionRecorder) : ITrickPlayingOrchestrator
+    IDecisionRecorder decisionRecorder,
+    IVoidDetector voidDetector) : ITrickPlayingOrchestrator
 {
     public async Task<Trick> PlayTrickAsync(Deal deal, PlayerPosition leadPosition)
     {
@@ -116,6 +117,11 @@ public class TrickPlayingOrchestrator(
             var chosenCard = await GetPlayerCardChoiceAsync(deal, trick, position, handArray, validCards).ConfigureAwait(false);
             decisionRecorder.RecordPlayCardDecision(deal, trick, position, handArray, validCards, chosenCard, trickWinnerCalculator);
             validator.ValidateCardChoice(chosenCard, validCards);
+
+            if (voidDetector.TryDetectVoid(deal, chosenCard, trick.LeadSuit, deal.Trump!.Value, position, out var voidSuit))
+            {
+                deal.KnownPlayerSuitVoids = [.. deal.KnownPlayerSuitVoids, (position, voidSuit)];
+            }
 
             SetLeadSuitIfFirstCard(trick, chosenCard, deal.Trump!.Value, isFirstCard);
             RecordPlayedCard(trick, chosenCard, position);

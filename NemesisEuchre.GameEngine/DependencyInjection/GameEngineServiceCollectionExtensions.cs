@@ -46,5 +46,6 @@ public static class GameEngineServiceCollectionExtensions
         serviceCollection.AddScoped<IPlayerContextBuilder, PlayerContextBuilder>();
         serviceCollection.AddScoped<IPlayerActorResolver, PlayerActorResolver>();
         serviceCollection.AddScoped<IDecisionRecorder, DecisionRecorder>();
+        serviceCollection.AddScoped<IVoidDetector, VoidDetector>();
     }
 }

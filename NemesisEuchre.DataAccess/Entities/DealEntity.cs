@@ -40,6 +40,8 @@ public class DealEntity
 
     public short Team2Score { get; set; }
 
+    public string? KnownPlayerSuitVoidsJson { get; set; }
+
     public string PlayersJson { get; set; } = null!;
 
     public GameEntity Game { get; set; } = null!;
@@ -116,6 +118,9 @@ public class DealEntityConfiguration : IEntityTypeConfiguration<DealEntity>
 
         builder.Property(e => e.Team2Score)
             .IsRequired();
+
+        builder.Property(e => e.KnownPlayerSuitVoidsJson)
+            .HasMaxLength(1000);
 
         builder.Property(e => e.PlayersJson)
             .IsRequired();
