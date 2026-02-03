@@ -41,6 +41,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
             Trump = deal.Trump,
             CallingPlayer = deal.CallingPlayer,
             CallingPlayerIsGoingAlone = deal.CallingPlayerIsGoingAlone,
+            ChosenDecision = deal.ChosenDecision,
             DealResult = deal.DealResult,
             WinningTeam = deal.WinningTeam,
             Team1Score = deal.Team1Score,

@@ -142,6 +142,7 @@ public class TrumpSelectionOrchestratorTests
         deal.Trump.Should().Be(Suit.Hearts);
         deal.CallingPlayer.Should().Be(PlayerPosition.East);
         deal.CallingPlayerIsGoingAlone.Should().BeFalse();
+        deal.ChosenDecision.Should().Be(CallTrumpDecision.OrderItUp);
     }
 
     [Fact]
@@ -224,6 +225,7 @@ public class TrumpSelectionOrchestratorTests
         deal.Trump.Should().Be(Suit.Diamonds);
         deal.CallingPlayer.Should().Be(PlayerPosition.South);
         deal.CallingPlayerIsGoingAlone.Should().BeTrue();
+        deal.ChosenDecision.Should().Be(CallTrumpDecision.OrderItUpAndGoAlone);
     }
 
     [Fact]
@@ -279,6 +281,7 @@ public class TrumpSelectionOrchestratorTests
         deal.Trump.Should().Be(Suit.Spades);
         deal.CallingPlayer.Should().Be(PlayerPosition.East);
         deal.CallingPlayerIsGoingAlone.Should().BeFalse();
+        deal.ChosenDecision.Should().Be(CallTrumpDecision.CallSpades);
     }
 
     [Fact]
@@ -339,6 +342,7 @@ public class TrumpSelectionOrchestratorTests
         deal.Trump.Should().Be(Suit.Hearts);
         deal.CallingPlayer.Should().Be(PlayerPosition.East);
         deal.CallingPlayerIsGoingAlone.Should().BeTrue();
+        deal.ChosenDecision.Should().Be(CallTrumpDecision.CallHeartsAndGoAlone);
     }
 
     [Fact]
@@ -664,6 +668,7 @@ public class TrumpSelectionOrchestratorTests
 
         deal.Trump.Should().BeNull();
         deal.CallingPlayer.Should().BeNull();
+        deal.ChosenDecision.Should().BeNull();
     }
 
     [Fact]

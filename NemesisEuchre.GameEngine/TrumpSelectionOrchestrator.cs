@@ -58,6 +58,7 @@ public class TrumpSelectionOrchestrator(
         deal.Trump = trump;
         deal.CallingPlayer = callingPlayer;
         deal.CallingPlayerIsGoingAlone = decisionMapper.IsGoingAloneDecision(decision);
+        deal.ChosenDecision = decision;
     }
 
     private async Task<bool> ExecuteRound1Async(Deal deal)

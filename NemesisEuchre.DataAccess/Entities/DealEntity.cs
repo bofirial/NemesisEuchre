@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
@@ -26,6 +27,8 @@ public class DealEntity
     public PlayerPosition? CallingPlayer { get; set; }
 
     public bool CallingPlayerIsGoingAlone { get; set; }
+
+    public CallTrumpDecision? ChosenDecision { get; set; }
 
     public DealResult? DealResult { get; set; }
 
@@ -90,6 +93,10 @@ public class DealEntityConfiguration : IEntityTypeConfiguration<DealEntity>
 
         builder.Property(e => e.CallingPlayerIsGoingAlone)
             .IsRequired();
+
+        builder.Property(e => e.ChosenDecision)
+            .HasConversion<string>()
+            .HasMaxLength(30);
 
         builder.Property(e => e.DealResult)
             .HasConversion<string>()
