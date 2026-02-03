@@ -38,6 +38,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
             DealerPosition = deal.DealerPosition,
             DeckJson = JsonSerializer.Serialize(deal.Deck.SortByTrump(deal.Trump), JsonSerializationOptions.Default),
             UpCardJson = deal.UpCard != null ? JsonSerializer.Serialize(deal.UpCard, JsonSerializationOptions.Default) : null,
+            DiscardedCardJson = deal.DiscardedCard != null ? JsonSerializer.Serialize(deal.DiscardedCard, JsonSerializationOptions.Default) : null,
             Trump = deal.Trump,
             CallingPlayer = deal.CallingPlayer,
             CallingPlayerIsGoingAlone = deal.CallingPlayerIsGoingAlone,

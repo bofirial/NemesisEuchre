@@ -22,6 +22,8 @@ public class DealEntity
 
     public string? UpCardJson { get; set; }
 
+    public string? DiscardedCardJson { get; set; }
+
     public Suit? Trump { get; set; }
 
     public PlayerPosition? CallingPlayer { get; set; }
@@ -81,6 +83,9 @@ public class DealEntityConfiguration : IEntityTypeConfiguration<DealEntity>
             .IsRequired();
 
         builder.Property(e => e.UpCardJson)
+            .HasMaxLength(200);
+
+        builder.Property(e => e.DiscardedCardJson)
             .HasMaxLength(200);
 
         builder.Property(e => e.Trump)

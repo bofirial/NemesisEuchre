@@ -30,6 +30,8 @@ public class DealerDiscardHandler(
 
         validator.ValidateDiscard(cardToDiscard, hand);
 
+        deal.DiscardedCard = cardToDiscard;
+
         dealer.CurrentHand.Remove(cardToDiscard);
     }
 

@@ -349,6 +349,31 @@ public class DealerDiscardHandlerTests
         dealer.CurrentHand.Should().HaveCount(5);
     }
 
+    [Fact]
+    public async Task HandleDealerDiscardAsync_SetsDiscardedCardOnDeal()
+    {
+        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var deal = CreateTestDeal(upCard);
+        var dealer = deal.Players[PlayerPosition.North];
+        var cardToDiscard = dealer.CurrentHand[0];
+
+        _playerActorMock.Setup(x => x.DiscardCardAsync(
+                It.IsAny<Card[]>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<short>(),
+                It.IsAny<short>(),
+                It.IsAny<Suit>(),
+                It.IsAny<PlayerPosition>(),
+                It.IsAny<bool>(),
+                It.IsAny<Card[]>()))
+            .ReturnsAsync(cardToDiscard);
+
+        await _handler.HandleDealerDiscardAsync(deal);
+
+        deal.DiscardedCard.Should().NotBeNull();
+        deal.DiscardedCard.Should().Be(cardToDiscard);
+    }
+
     private static Deal CreateTestDeal(Card upCard)
     {
         var deal = new Deal
