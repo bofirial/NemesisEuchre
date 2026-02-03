@@ -30,5 +30,13 @@ public class PlayCardDecisionRecord
 
     public bool CallingPlayerGoingAlone { get; set; }
 
+    public PlayerPosition Dealer { get; set; }
+
+    public Card? DealerPickedUpCard { get; set; }
+
+    public Card[] CardsAccountedFor { get; set; } = [];
+
+    public (PlayerPosition PlayerPosition, Suit Suit)[] KnownPlayerSuitVoids { get; set; } = [];
+
     public Card ChosenCard { get; set; } = null!;
 }

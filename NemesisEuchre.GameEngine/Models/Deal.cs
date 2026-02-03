@@ -1,4 +1,5 @@
 ﻿using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.GameEngine.Models;
 
@@ -14,7 +15,11 @@ public class Deal
 
     public Card? UpCard { get; set; }
 
+    public Card? DiscardedCard { get; set; }
+
     public Suit? Trump { get; set; }
+
+    public CallTrumpDecision? ChosenDecision { get; set; }
 
     public PlayerPosition? CallingPlayer { get; set; }
 
@@ -27,6 +32,8 @@ public class Deal
     public short Team1Score { get; set; }
 
     public short Team2Score { get; set; }
+
+    public (PlayerPosition PlayerPosition, Suit Suit)[] KnownPlayerSuitVoids { get; set; } = [];
 
     public List<Trick> CompletedTricks { get; set; } = [];
 
