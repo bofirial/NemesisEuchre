@@ -61,6 +61,18 @@ public class TrickToEntityMapper : ITrickToEntityMapper
                             decision.DealerPickedUpCard.ToRelative(decision.TrumpSuit),
                             JsonSerializationOptions.Default)
                         : null,
+                    KnownPlayerSuitVoidsJson = decision.KnownPlayerSuitVoids.Length > 0
+                        ? JsonSerializer.Serialize(
+                            decision.KnownPlayerSuitVoids
+                                .Where(v => v.PlayerPosition != decision.PlayerPosition)
+                                .Select(v => new
+                                {
+                                    RelativePlayerPosition = v.PlayerPosition.ToRelativePosition(decision.PlayerPosition),
+                                    RelativeSuit = v.Suit.ToRelativeSuit(decision.TrumpSuit),
+                                })
+                                .ToArray(),
+                            JsonSerializationOptions.Default)
+                        : null,
                     ChosenCardJson = JsonSerializer.Serialize(
                         decision.ChosenCard.ToRelative(decision.TrumpSuit), JsonSerializationOptions.Default),
                     ActorType = actorType,

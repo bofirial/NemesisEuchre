@@ -41,6 +41,8 @@ public class PlayCardDecisionEntity : IDecisionEntity
 
     public string ChosenCardJson { get; set; } = null!;
 
+    public string? KnownPlayerSuitVoidsJson { get; set; }
+
     public ActorType? ActorType { get; set; }
 
     public bool? DidTeamWinTrick { get; set; }
@@ -119,6 +121,9 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
 
         builder.Property(e => e.DealerPickedUpCardJson)
             .HasMaxLength(200);
+
+        builder.Property(e => e.KnownPlayerSuitVoidsJson)
+            .HasMaxLength(500);
 
         builder.Property(e => e.ChosenCardJson)
             .IsRequired()
