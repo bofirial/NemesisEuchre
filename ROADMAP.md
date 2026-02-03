@@ -378,48 +378,44 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 
 ### Phase 4: Evaluation & Iteration (Steps 15-18)
 
-15. **Generate Gen1Bot vs ChaosBot games**
-    - Use existing BatchGameOrchestrator from v0.3
-    - Configure matchup: Team1 (2 Gen1Bots) vs Team2 (2 ChaosBots)
-    - Generate 10,000+ games for statistical significance
-    - Store results in database via existing GameRepository
-    - Display progress with Spectre.Console progress bar
-    - Calculate win rate metrics after completion
-    - Example command:
-      ```bash
-      dotnet run --project NemesisEuchre.Console -- --count 10000 --team1-actor Gen1 --team2-actor Chaos
-      ```
+15. ~~**Generate Gen1Bot vs ChaosBot games**~~
+    - ~~Use existing BatchGameOrchestrator from v0.3~~
+    - ~~Configure matchup: Team1 (2 Gen1Bots) vs Team2 (2 ChaosBots)~~
+    - ~~Generate 10,000+ games for statistical significance~~
+    - ~~Store results in database via existing GameRepository~~
+    - ~~Display progress with Spectre.Console progress bar~~
+    - ~~Calculate win rate metrics after completion~~
 
-16. **Create evaluation report**
-    - Query database for Gen1 vs Chaos games using GameRepository
-    - Calculate metrics:
-      - Win rate (Team1 wins / total games)
-      - Average points per game for each team
-      - Euchre rate (how often teams get euchred)
-      - Average deal length
-    - Compare to Chaos vs Chaos baseline (expected ~50% win rate)
-    - Document improvement percentage (e.g., "Gen1Bot wins 54% → 4% improvement")
-    - Export report to markdown file: `Reports/gen1_vs_chaos_evaluation.md`
-    - Include statistical significance test (z-test for proportions)
+16. ~~**Create evaluation report**~~
+    - ~~Query database for Gen1 vs Chaos games using GameRepository~~
+    - ~~Calculate metrics:~~
+      - ~~Win rate (Team1 wins / total games)~~
+      - ~~Average points per game for each team~~
+      - ~~Euchre rate (how often teams get euchred)~~
+      - ~~Average deal length~~
+    - ~~Compare to Chaos vs Chaos baseline (expected ~50% win rate)~~
+    - ~~Document improvement percentage (e.g., "Gen1Bot wins 54% → 4% improvement")~~
+    - ~~Export report to markdown file: `Reports/gen1_vs_chaos_evaluation.md`~~
+    - ~~Include statistical significance test (z-test for proportions)~~
 
-17. **Train Gen2Bot from Gen1Bot data**
-    - Query Gen1Bot decision records from database (use ActorType.Gen1 filter)
-    - Feature engineer Gen1Bot decisions (NOT ChaosBot data)
-    - Train three new models using Gen1Bot's gameplay data
-    - Save models as `Models/gen2_*.zip`
-    - Create `NemesisEuchre.GameEngine\PlayerBots\Gen2Bot.cs` (add ActorType.Gen2 to enum)
-    - Load Gen2 models in Gen2Bot constructor
-    - Include unit tests for Gen2Bot
+17. ~~**Train Gen2Bot from Gen1Bot data**~~
+    - ~~Query Gen1Bot decision records from database (use ActorType.Gen1 filter)~~
+    - ~~Feature engineer Gen1Bot decisions (NOT ChaosBot data)~~
+    - ~~Train three new models using Gen1Bot's gameplay data~~
+    - ~~Save models as `Models/gen2_*.zip`~~
+    - ~~Create `NemesisEuchre.GameEngine\PlayerBots\Gen2Bot.cs` (add ActorType.Gen2 to enum)~~
+    - ~~Load Gen2 models in Gen2Bot constructor~~
+    - ~~Include unit tests for Gen2Bot~~
 
-18. **Evaluate Gen2Bot vs Gen1Bot**
-    - Generate 10,000+ games: Gen2Bot vs Gen1Bot
-    - Calculate improvement metrics (expect Gen2 to improve over Gen1)
-    - Document generational improvement pattern
-    - Establish criteria for "good enough" model:
-      - 55%+ win rate vs previous generation
-      - Consistent improvement over 3+ generations
-      - Diminishing returns threshold (e.g., <1% improvement)
-    - Create visualization of win rate trends across generations
+18. ~~**Evaluate Gen2Bot vs Gen1Bot**~~
+    - ~~Generate 10,000+ games: Gen2Bot vs Gen1Bot~~
+    - ~~Calculate improvement metrics (expect Gen2 to improve over Gen1)~~
+    - ~~Document generational improvement pattern~~
+    - ~~Establish criteria for "good enough" model:~~
+      - ~~55%+ win rate vs previous generation~~
+      - ~~Consistent improvement over 3+ generations~~
+      - ~~Diminishing returns threshold (e.g., <1% improvement)~~
+    - ~~Create visualization of win rate trends across generations~~
 
 ### Phase 5: Infrastructure & Tooling (Steps 19-22)
 
@@ -453,44 +449,20 @@ This version introduces ML.NET-powered bots that learn from game data, establish
     - ~~Store models with timestamp: `gen1_calltrump_20260129_143052_v1.zip`~~
     - ~~Include unit tests with temporary file system~~
 
-21. **Create evaluation/benchmarking command**
-    - Create `NemesisEuchre.Console\Commands\BenchmarkCommand.cs`
-    - Parameters:
-      - `--team1-actor` (Chaos, Gen1, Gen2, etc.)
-      - `--team2-actor` (Chaos, Gen1, Gen2, etc.)
-      - `--game-count` (default: 1000)
-      - `--output-format` (Console, Json, Csv, Markdown)
-    - Run head-to-head matchups using BatchGameOrchestrator
-    - Display live progress with Spectre.Console:
-      - Progress bar showing games completed
-      - Live win rate counter updating in real-time
-    - Final statistics:
-      - Total games
-      - Team1 wins / Team2 wins
-      - Win percentages with confidence intervals
-      - Average points per game
-    - Export results to file (JSON/CSV/Markdown based on --output-format)
-    - Example:
-      ```bash
-      dotnet run --project NemesisEuchre.Console -- benchmark --team1-actor Gen2 --team2-actor Gen1 --game-count 5000 --output-format Markdown
-      ```
-    - Include unit tests
+## Model Memory Improvements 0.5
 
-## Suggested Prompts for v0.4 Implementation
-
-**Step 1**: "Create NemesisEuchre.MachineLearning class library project. Install Microsoft.ML and Microsoft.ML.FastTree NuGet packages. Set up project structure with Models/, Trainers/, DataAccess/, FeatureEngineering/ directories. Add project references to NemesisEuchre.DataAccess and NemesisEuchre.GameEngine. Create DI registration extension method."
-
-**Step 3**: "Implement the IFeatureEngineer interface and all three feature engineer classes (CallTrumpFeatureEngineer, DiscardCardFeatureEngineer, PlayCardFeatureEngineer). Transform decision entities to training DTOs with proper encoding: RelativeCard → (Rank, Suit) integers, enums to integers, map chosen decision to index. Include comprehensive unit tests."
-
-**Step 6-10**: Plan Mode: **Implement the complete ML training infrastructure: IModelTrainer interface, three trainer implementations (CallTrump, Discard, PlayCard), ML.NET pipelines using SdcaMaximumEntropy, evaluation metrics, and model serialization. Include unit tests for each component.**
-
-**Step 11-14**: Plan Mode: **Implement Gen1Bot class inheriting from BotBase. Override CallTrumpAsync, DiscardCardAsync, and PlayCardAsync to use ML.NET PredictionEngines. Add fallback logic for invalid predictions. Include ActorType.Gen1 enum value and DI registration. Add unit tests for each decision method.**
-
-**Step 15**: "Use the existing BatchGameOrchestrator to generate 10,000 games with Team1 using 2 Gen1Bots and Team2 using 2 ChaosBots. Display results using Spectre.Console with win rates and improvement percentage compared to the Chaos vs Chaos baseline."
-
-**Step 19**: Plan Mode: **Implement TrainCommand with parameters for actor-type, decision-type, output-path, and sample-limit. Use DI to get IModelTrainer implementations. Display training progress with Spectre.Console. Include unit tests.**
-
-**Step 21**: Plan Mode: **Implement BenchmarkCommand with parameters for team1-actor, team2-actor, game-count, and output-format. Use BatchGameOrchestrator for head-to-head matchups. Display live progress and export results to JSON/CSV/Markdown. Include unit tests.**
+1. Record CallTrumpDecision in Deals
+2. Record DiscardedCard in Deals
+3. Record KnownPlayerSuitVoids in Deals
+4. Record DealerPosition and DealerPickedUpCard in PlayCardDecisionRecords
+5. Record KnownPlayerSuitVoids in PlayCardDecisionRecords
+6. Record CardsAccountedFor in PlayCardDecisionRecords
+7. Add CardsAccountedFor to PlayCardAsync in IPlayerActor
+8. Add KnownPlayerSuitVoids to PlayCardAsync in IPlayerActor
+9. Add CardsAccountedFor to PlayCardTrainingData
+10. Add KnownPlayerSuitVoids to PlayCardTrainingData
+11. Add KnownPlayerSuitVoids to PlayCardTrainingData
+12. Add DealerPosition and DealerPickedUpCard to PlayCardTrainingData
 
 ## User Players 1.0
 

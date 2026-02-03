@@ -4,7 +4,7 @@ A console-based engine for training a high-performance Euchre AI using massive d
 
 ## Project Status
 
-🚀 **Version 0.3-preview** - Full game engine implemented, now recording game data for ML training.
+🚀 **Version 0.5-preview** - ML-powered AI training with game state memory enhancements.
 
 ### Current State
 - ✅ **v0.1** - Project infrastructure and CLI framework
@@ -17,10 +17,14 @@ A console-based engine for training a high-performance Euchre AI using massive d
 - ✅ **v0.2** - Trump selection, trick playing, and deal result calculation
 - ✅ **v0.2** - Console UI with Spectre.Console integration
 - ✅ **v0.2** - Bot implementations (ChaosBot, BetaBot) for AI development
-- 🚧 **v0.3** - Recording game scores and decision data (in progress)
-- 📋 **v0.3** - Database setup for storing game results (planned)
-- 📋 **v0.4** - AI training infrastructure (planned)
-- 📋 **v0.4** - Genetic algorithms implementation (planned)
+- ✅ **v0.3** - Recording game scores and decision data
+- ✅ **v0.3** - Database setup for storing game results with SQL Server
+- ✅ **v0.4** - AI training infrastructure with ML.NET and LightGBM
+- ✅ **v0.4** - Gen1Bot ML-powered player with regression-based decision making
+- ✅ **v0.4** - Cached prediction engine provider for efficient model inference
+- 🚧 **v0.5** - Model memory enhancements for game state tracking (in progress)
+- 📋 **v0.5** - Enhanced feature engineering with historical context (planned)
+- 📋 **v0.6** - Gen2Bot training from Gen1 gameplay data (planned)
 
 ## Quick Start
 
@@ -61,6 +65,75 @@ dotnet test --collect:"XPlat Code Coverage"
 - **Bot Framework**: Extensible `IPlayerActor` interface with multiple bot implementations
 - **Comprehensive Testing**: Full unit test coverage with FluentAssertions and Moq
 
-### Data Recording (v0.3 - In Progress)
+### Data Recording (v0.3 - Completed)
 - **Score Tracking**: Cumulative game scores recorded on completed deals
-- **Decision Recording**: Framework for capturing trump calls, discards, and card plays for ML training
+- **Decision Recording**: Comprehensive capture of all game decisions (trump calls, discards, card plays)
+- **Database Storage**: SQL Server with JSON columns for complex game state
+- **Training Data Pipeline**: IAsyncEnumerable-based repository pattern for efficient data streaming
+
+### Machine Learning Infrastructure (v0.4 - Completed)
+- **ML Framework**: ML.NET with LightGBM regression trainers
+- **Three-Model Architecture**: Separate regression models for CallTrump, DiscardCard, and PlayCard decisions
+  - Each model predicts expected deal points for optimal decision-making
+  - Trained independently with decision-specific feature engineering
+- **Gen1Bot**: First ML-powered player implementation using regression-based strategy selection
+- **Prediction Caching**: Thread-safe CachedPredictionEngineProvider for efficient model inference
+- **Feature Engineering**: Modular builders for training and inference feature transformation
+- **Model Persistence**: Versioned model storage with generation-based loading
+- **Training Pipeline**: End-to-end workflow from data loading → splitting → training → evaluation → persistence
+
+### Model Memory Enhancements (v0.5 - In Progress)
+- **Game State Tracking**: Enhanced Deal model with trump decisions, discarded cards, and known suit voids
+- **Historical Context**: PlayCardDecision records now include dealer position, upcard pickup, and cards accounted for
+- **Data Denormalization**: TrickNumber directly on PlayCardDecision for simplified feature engineering
+- **Void Tracking**: Capture known player suit voids discovered during trick play for future inference improvements
+
+## Architecture
+
+### Machine Learning Pipeline
+
+**Data Flow:**
+```
+GameOrchestrator → DecisionRecorder → GameRepository → Database
+                                                          ↓
+TrainingDataRepository → FeatureEngineer → DataSplitter → Trainer → ModelPersistenceService
+                                                                           ↓
+                                                    Gen1Bot ← CachedPredictionEngineProvider
+```
+
+**Three-Model Regression Strategy:**
+1. **CallTrump Model** (39 features): Predicts expected deal points for each trump call option
+2. **DiscardCard Model** (23 features): Predicts expected deal points for each discard choice
+3. **PlayCard Model** (36 features): Predicts expected deal points for each valid card play
+
+Each decision type uses LightGBM regression to evaluate all valid options and select the action with the highest predicted point value.
+
+### Project Structure
+
+```
+NemesisEuchre.Console/          # CLI application and game orchestration
+NemesisEuchre.Core/             # Game engine, models, and rule implementations
+NemesisEuchre.DataAccess/       # Entity Framework Core, SQL Server, repositories
+NemesisEuchre.MachineLearning/  # ML.NET trainers, feature engineering, model loading
+NemesisEuchre.MachineLearning.Bots/  # Gen1Bot and future ML-powered players
+NemesisEuchre.Console.Tests/    # Comprehensive test suite
+```
+
+### Key Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| **Regression vs Classification** | Point prediction better reflects continuous game outcomes than discrete classes |
+| **Three Separate Models** | Each decision type has distinct features and strategic context |
+| **LightGBM** | Fast tree-based learner, handles non-linear feature interactions well for game AI |
+| **Relative Representations** | Trump/Off suits and Self/Partner/Opponent positions reduce state space complexity |
+| **Cached Prediction Engines** | Model loading is expensive; thread-safe caching avoids reload per prediction |
+| **Denormalized Data** | TrickNumber on PlayCardDecision eliminates navigation property overhead |
+
+### Generational Training Vision
+
+The project implements a generational improvement strategy:
+1. **Gen1Bot** trained on rule-based bot (ChaosBot, BetaBot) gameplay data
+2. **Gen2Bot** will train on Gen1Bot gameplay, learning from Gen1's strategies
+3. **Iterative refinement** through successive generations, each learning from the previous
+4. **Performance tracking** via win rate metrics across generations
