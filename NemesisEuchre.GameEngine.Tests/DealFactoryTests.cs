@@ -2,7 +2,7 @@ using FluentAssertions;
 
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Utilities;
 
 namespace NemesisEuchre.GameEngine.Tests;
 
@@ -11,7 +11,7 @@ public class DealFactoryTests
     [Fact]
     public Task CreateDealAsync_WithNullGame_ThrowsArgumentNullException()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
 
         var act = async () => await factory.CreateDealAsync(null!);
 
@@ -22,7 +22,7 @@ public class DealFactoryTests
     [Fact]
     public Task CreateDealAsync_WithFewerThan4Players_ThrowsArgumentException()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = new Game();
         game.Players.Add(PlayerPosition.North, new Player { Position = PlayerPosition.North });
         game.Players.Add(PlayerPosition.East, new Player { Position = PlayerPosition.East });
@@ -37,7 +37,7 @@ public class DealFactoryTests
     [Fact]
     public Task CreateDealAsync_WithMoreThan4Players_ThrowsArgumentException()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
         game.Players.Add((PlayerPosition)99, new Player { Position = (PlayerPosition)99 });
 
@@ -51,7 +51,7 @@ public class DealFactoryTests
     [Fact]
     public Task CreateDealAsync_WithPreviousDealHavingNullDealer_ThrowsInvalidOperationException()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
         var previousDeal = new Deal { DealerPosition = null };
 
@@ -62,20 +62,44 @@ public class DealFactoryTests
     }
 
     [Fact]
-    public async Task CreateDealAsync_WithNoPreviousDeal_SetsDealerToNorth()
+    public async Task CreateDealAsync_WithNoPreviousDeal_SetsDealerToValidPosition()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
 
-        deal.DealerPosition.Should().Be(PlayerPosition.North);
+        deal.DealerPosition.Should().BeOneOf(
+            PlayerPosition.North,
+            PlayerPosition.East,
+            PlayerPosition.South,
+            PlayerPosition.West);
+    }
+
+    [Fact]
+    public async Task CreateDealAsync_WithNoPreviousDeal_RandomizesInitialDealerDistribution()
+    {
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
+        var game = CreateTestGame();
+        var dealerCounts = new Dictionary<PlayerPosition, int>();
+
+        for (int i = 0; i < 1000; i++)
+        {
+            var deal = await factory.CreateDealAsync(game);
+            dealerCounts.TryGetValue(deal.DealerPosition!.Value, out var count);
+            dealerCounts[deal.DealerPosition!.Value] = count + 1;
+        }
+
+        dealerCounts[PlayerPosition.North].Should().BeInRange(200, 300);
+        dealerCounts[PlayerPosition.East].Should().BeInRange(200, 300);
+        dealerCounts[PlayerPosition.South].Should().BeInRange(200, 300);
+        dealerCounts[PlayerPosition.West].Should().BeInRange(200, 300);
     }
 
     [Fact]
     public async Task CreateDealAsync_WithPreviousDealerNorth_SetsDealerToEast()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
         var previousDeal = new Deal { DealerPosition = PlayerPosition.North };
 
@@ -87,7 +111,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_WithPreviousDealerEast_SetsDealerToSouth()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
         var previousDeal = new Deal { DealerPosition = PlayerPosition.East };
 
@@ -99,7 +123,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_WithPreviousDealerSouth_SetsDealerToWest()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
         var previousDeal = new Deal { DealerPosition = PlayerPosition.South };
 
@@ -111,7 +135,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_WithPreviousDealerWest_SetsDealerToNorth()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
         var previousDeal = new Deal { DealerPosition = PlayerPosition.West };
 
@@ -123,7 +147,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_DealsExactly5CardsToEachPlayer()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -142,7 +166,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_InitializesStartingHandsAndCurrentHandsWithSameCards()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -156,7 +180,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_EachPlayerReceivesUniqueCards()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -171,7 +195,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_SetsUpCardCorrectly()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -182,7 +206,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_SetsRemainingDeckTo3Cards()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -193,7 +217,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_AllCardsAreUnique()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -211,7 +235,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_SetsDealStatusToNotStarted()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -222,7 +246,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_SetsDealerPositionCorrectly()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -233,7 +257,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_InitializesNullablePropertiesToNull()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -247,7 +271,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_SetsCallingPlayerIsGoingAloneToFalse()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -258,7 +282,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_TotalCardsAccountedFor_Is24Cards()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -273,7 +297,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_StartingHandsAreImmutableArrays()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -287,7 +311,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_CurrentHandsAreMutableLists()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -301,7 +325,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_DealPlayerPositionsAreSetCorrectly()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
 
         var deal = await factory.CreateDealAsync(game);
@@ -315,7 +339,7 @@ public class DealFactoryTests
     [Fact]
     public async Task CreateDealAsync_CopiesActorTypeFromGamePlayer()
     {
-        var factory = new DealFactory(new NoOpShuffler());
+        var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = CreateTestGame();
         game.Players[PlayerPosition.North].ActorType = ActorType.Chaos;
         game.Players[PlayerPosition.South].ActorType = ActorType.Chad;

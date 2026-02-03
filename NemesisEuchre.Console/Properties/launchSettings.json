@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "NemesisEuchre.Console": {
+      "commandName": "Project",
+      "commandLineArgs": "--team-1 Chaos --team-2 Gen1 --do-not-persist --count 10000",
+      "commandLineArgs-PLAY": "--team-1 Gen1 --team-2 Chaos --do-not-persist --count 10000",
+      "commandLineArgs-TRAIN": "train --actor-type Chaos --decision-type All"
+    }
+  }
+}

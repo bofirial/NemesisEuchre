@@ -2,7 +2,7 @@ using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.Console.Services;
 
-internal sealed class BatchExecutionState(int batchSize) : IDisposable
+public sealed class BatchExecutionState(int batchSize) : IDisposable
 {
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 

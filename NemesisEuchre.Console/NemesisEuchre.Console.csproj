@@ -31,6 +31,7 @@
         <ProjectReference Include="..\NemesisEuchre.GameEngine\NemesisEuchre.GameEngine.csproj" />
         <ProjectReference Include="..\NemesisEuchre.DataAccess\NemesisEuchre.DataAccess.csproj" />
         <ProjectReference Include="..\NemesisEuchre.MachineLearning\NemesisEuchre.MachineLearning.csproj" />
+        <ProjectReference Include="..\NemesisEuchre.MachineLearning.Bots\NemesisEuchre.MachineLearning.Bots.csproj" />
     </ItemGroup>
 
     <ItemGroup>

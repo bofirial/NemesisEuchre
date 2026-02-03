@@ -95,6 +95,21 @@ public class PlayCardTrainingData
     public float CallingPlayerGoingAlone { get; set; }
 
     [LoadColumn(30)]
+    public float Card1Chosen { get; set; }
+
+    [LoadColumn(31)]
+    public float Card2Chosen { get; set; }
+
+    [LoadColumn(32)]
+    public float Card3Chosen { get; set; }
+
+    [LoadColumn(33)]
+    public float Card4Chosen { get; set; }
+
+    [LoadColumn(34)]
+    public float Card5Chosen { get; set; }
+
+    [LoadColumn(35)]
     [ColumnName("Label")]
-    public uint ChosenCardIndex { get; set; }
+    public float ExpectedDealPoints { get; set; }
 }

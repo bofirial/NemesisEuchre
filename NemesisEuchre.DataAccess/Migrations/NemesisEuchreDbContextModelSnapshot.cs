@@ -324,6 +324,9 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<int>("TrickId")
                         .HasColumnType("int");
 
+                    b.Property<short>("TrickNumber")
+                        .HasColumnType("smallint");
+
                     b.Property<string>("ValidCardsToPlayJson")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

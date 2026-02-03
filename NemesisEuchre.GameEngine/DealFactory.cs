@@ -1,6 +1,7 @@
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Utilities;
 
 namespace NemesisEuchre.GameEngine;
 
@@ -9,7 +10,7 @@ public interface IDealFactory
     Task<Deal> CreateDealAsync(Game game, Deal? previousDeal = null);
 }
 
-public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
+public class DealFactory(ICardShuffler cardShuffler, IRandomNumberGenerator randomNumberGenerator) : IDealFactory
 {
     private const int CardsPerPlayer = 5;
 
@@ -52,11 +53,6 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
         }
     }
 
-    private static PlayerPosition CalculateDealerPosition(Deal? previousDeal)
-    {
-        return previousDeal?.DealerPosition!.Value.GetNextPosition() ?? PlayerPosition.North;
-    }
-
     private static Dictionary<PlayerPosition, DealPlayer> DistributeCardsToPlayers(
         Card[] deck,
         PlayerPosition dealerPosition,
@@ -67,13 +63,13 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
 
         for (int playerIndex = 0; playerIndex < PlayersPerGame; playerIndex++)
         {
-            var cardsForPlayer = DealCardsToPlayer(deck, playerIndex);
+            var sortedCards = DealCardsToPlayer(deck, playerIndex).SortByTrump(null);
 
             dealPlayers[currentPosition] = new DealPlayer
             {
                 Position = currentPosition,
-                StartingHand = cardsForPlayer,
-                CurrentHand = [.. cardsForPlayer],
+                StartingHand = sortedCards,
+                CurrentHand = [.. sortedCards],
                 ActorType = gamePlayers[currentPosition].ActorType,
             };
 
@@ -125,6 +121,17 @@ public class DealFactory(ICardShuffler cardShuffler) : IDealFactory
         }
 
         return deck;
+    }
+
+    private PlayerPosition CalculateDealerPosition(Deal? previousDeal)
+    {
+        if (previousDeal?.DealerPosition != null)
+        {
+            return previousDeal.DealerPosition.Value.GetNextPosition();
+        }
+
+        int randomPosition = randomNumberGenerator.NextInt(4);
+        return (PlayerPosition)randomPosition;
     }
 
     private Card[] PrepareShuffledDeck()

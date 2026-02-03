@@ -2,11 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using NemesisEuchre.Foundation.Constants;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class PlayCardDecisionEntity
+public class PlayCardDecisionEntity : IDecisionEntity
 {
     public int PlayCardDecisionId { get; set; }
 
@@ -27,6 +26,8 @@ public class PlayCardDecisionEntity
     public string PlayedCardsJson { get; set; } = null!;
 
     public RelativePlayerPosition? WinningTrickPlayer { get; set; }
+
+    public short TrickNumber { get; set; }
 
     public string ValidCardsToPlayJson { get; set; } = null!;
 
@@ -92,6 +93,9 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
         builder.Property(e => e.WinningTrickPlayer)
             .HasConversion<string>()
             .HasMaxLength(25);
+
+        builder.Property(e => e.TrickNumber)
+            .IsRequired();
 
         builder.Property(e => e.ValidCardsToPlayJson)
             .IsRequired();

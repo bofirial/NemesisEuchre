@@ -440,6 +440,9 @@ dotnet_diagnostic.SA1000.severity = none
 # IDE0046: Convert to conditional expression
 dotnet_diagnostic.IDE0046.severity = none
 
+# SA1011: Closing square brackets should be spaced correctly
+dotnet_diagnostic.SA1011.severity = none
+
 [**/*Tests.cs]
 dotnet_diagnostic.VSTHRD200.severity = none
 

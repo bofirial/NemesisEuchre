@@ -1,10 +1,11 @@
 ﻿using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Utilities;
 
 namespace NemesisEuchre.GameEngine.PlayerBots;
 
-public class ChadBot : BotBase
+public class ChadBot(IRandomNumberGenerator random) : BotBase(random)
 {
     public override ActorType ActorType => ActorType.Chad;
 

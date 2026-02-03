@@ -6,10 +6,15 @@ using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Commands;
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.Console.Services.Orchestration;
+using NemesisEuchre.Console.Services.Persistence;
+using NemesisEuchre.Console.Services.TrainerExecutors;
+using NemesisEuchre.Console.Services.Training;
 using NemesisEuchre.DataAccess.DependencyInjection;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.GameEngine.DependencyInjection;
 using NemesisEuchre.GameEngine.Options;
+using NemesisEuchre.MachineLearning.Bots.DependencyInjection;
 using NemesisEuchre.MachineLearning.DependencyInjection;
 
 using Spectre.Console;
@@ -37,7 +42,18 @@ public static class Program
             services.AddScoped<IApplicationBanner, ApplicationBanner>();
             services.AddScoped<IGameResultsRenderer, GameResultsRenderer>();
             services.AddScoped<ISingleGameRunner, SingleGameRunner>();
+            services.AddScoped<IParallelismCoordinator, ParallelismCoordinator>();
+            services.AddScoped<ISubBatchStrategy, SubBatchStrategy>();
+            services.AddScoped<IPersistenceCoordinator, BatchPersistenceCoordinator>();
             services.AddScoped<IBatchGameOrchestrator, BatchGameOrchestrator>();
+
+            services.AddScoped<IModelTrainingOrchestrator, ModelTrainingOrchestrator>();
+            services.AddScoped<ITrainerFactory, TrainerFactory>();
+            services.AddScoped<ITrainingProgressCoordinator, TrainingProgressCoordinator>();
+            services.AddScoped<ITrainingResultsRenderer, TrainingResultsRenderer>();
+            services.AddScoped<ITrainerExecutor, CallTrumpRegressionTrainerExecutor>();
+            services.AddScoped<ITrainerExecutor, DiscardCardRegressionTrainerExecutor>();
+            services.AddScoped<ITrainerExecutor, PlayCardRegressionTrainerExecutor>();
 
             services.AddNemesisEuchreGameEngine();
             services.Configure<GameOptions>(_ => { });
@@ -51,6 +67,7 @@ public static class Program
                 .ValidateOnStart();
             services.AddNemesisEuchreDataAccess(config);
             services.AddNemesisEuchreMachineLearning(config);
+            services.AddNemesisEuchreMachineLearningBots();
         });
 
         return Cli.RunAsync<DefaultCommand>(args, new CliSettings { EnableDefaultExceptionHandler = true });

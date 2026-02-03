@@ -5,13 +5,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Console.Models;
+using NemesisEuchre.Console.Services.Orchestration;
+using NemesisEuchre.Console.Services.Persistence;
 using NemesisEuchre.DataAccess.Options;
-using NemesisEuchre.DataAccess.Repositories;
-using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine;
-using NemesisEuchre.GameEngine.Models;
-using NemesisEuchre.GameEngine.Options;
 
 namespace NemesisEuchre.Console.Services;
 
@@ -20,21 +18,28 @@ public interface IBatchGameOrchestrator
     Task<BatchGameResults> RunBatchAsync(
         int numberOfGames,
         IBatchProgressReporter? progressReporter = null,
+        bool doNotPersist = false,
+        ActorType[]? team1ActorTypes = null,
+        ActorType[]? team2ActorTypes = null,
         CancellationToken cancellationToken = default);
 }
 
 public class BatchGameOrchestrator(
     IServiceScopeFactory serviceScopeFactory,
-    IOptions<GameExecutionOptions> options,
+    IParallelismCoordinator parallelismCoordinator,
+    ISubBatchStrategy subBatchStrategy,
+    IPersistenceCoordinator persistenceCoordinator,
     IOptions<PersistenceOptions> persistenceOptions,
     ILogger<BatchGameOrchestrator> logger) : IBatchGameOrchestrator
 {
-    private readonly GameExecutionOptions _options = options.Value;
     private readonly PersistenceOptions _persistenceOptions = persistenceOptions.Value;
 
     public async Task<BatchGameResults> RunBatchAsync(
         int numberOfGames,
         IBatchProgressReporter? progressReporter = null,
+        bool doNotPersist = false,
+        ActorType[]? team1ActorTypes = null,
+        ActorType[]? team2ActorTypes = null,
         CancellationToken cancellationToken = default)
     {
         if (numberOfGames <= 0)
@@ -43,17 +48,21 @@ public class BatchGameOrchestrator(
         }
 
         const int maxGamesPerSubBatch = 10000;
-        if (numberOfGames > maxGamesPerSubBatch)
+        if (subBatchStrategy.ShouldUseSubBatches(numberOfGames, maxGamesPerSubBatch))
         {
-            return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, cancellationToken).ConfigureAwait(false);
+            return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, doNotPersist, cancellationToken, team1ActorTypes, team2ActorTypes).ConfigureAwait(false);
         }
 
         var stopwatch = Stopwatch.StartNew();
         using var state = new BatchExecutionState(_persistenceOptions.BatchSize);
-        var tasks = CreateGameExecutionTasks(numberOfGames, state, progressReporter, cancellationToken);
+        var tasks = parallelismCoordinator.CreateParallelTasks(
+            numberOfGames,
+            state,
+            (gameNumber, s, ct) => RunSingleGameAsync(gameNumber, s, progressReporter, doNotPersist, team1ActorTypes, team2ActorTypes, ct),
+            cancellationToken);
 
         await Task.WhenAll(tasks).ConfigureAwait(false);
-        await SavePendingGamesAsync(state, progressReporter, force: true, cancellationToken).ConfigureAwait(false);
+        await persistenceCoordinator.SavePendingGamesAsync(state, progressReporter, doNotPersist, force: true, cancellationToken).ConfigureAwait(false);
         stopwatch.Stop();
 
         return AggregateResults(numberOfGames, state, stopwatch.Elapsed);
@@ -79,7 +88,10 @@ public class BatchGameOrchestrator(
         int totalGames,
         int subBatchSize,
         IBatchProgressReporter? progressReporter,
-        CancellationToken cancellationToken)
+        bool doNotPersist,
+        CancellationToken cancellationToken,
+        ActorType[]? team1ActorTypes = null,
+        ActorType[]? team2ActorTypes = null)
     {
         var stopwatch = Stopwatch.StartNew();
         var completedSoFar = 0;
@@ -99,10 +111,14 @@ public class BatchGameOrchestrator(
                 savedSoFar);
 
             using var state = new BatchExecutionState(_persistenceOptions.BatchSize);
-            var tasks = CreateGameExecutionTasks(gamesInThisBatch, state, subProgressReporter, cancellationToken);
+            var tasks = parallelismCoordinator.CreateParallelTasks(
+                gamesInThisBatch,
+                state,
+                (gameNumber, s, ct) => RunSingleGameAsync(gameNumber, s, subProgressReporter, doNotPersist, team1ActorTypes, team2ActorTypes, ct),
+                cancellationToken);
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
-            await SavePendingGamesAsync(state, subProgressReporter, force: true, cancellationToken).ConfigureAwait(false);
+            await persistenceCoordinator.SavePendingGamesAsync(state, subProgressReporter, doNotPersist, force: true, cancellationToken).ConfigureAwait(false);
 
             totalTeam1Wins += state.Team1Wins;
             totalTeam2Wins += state.Team2Wins;
@@ -125,55 +141,20 @@ public class BatchGameOrchestrator(
         };
     }
 
-    private IEnumerable<Task> CreateGameExecutionTasks(
-        int numberOfGames,
-        BatchExecutionState state,
-        IBatchProgressReporter? progressReporter,
-        CancellationToken cancellationToken)
-    {
-        var effectiveParallelism = CalculateEffectiveParallelism();
-        var semaphore = new SemaphoreSlim(effectiveParallelism);
-
-        return Enumerable.Range(0, numberOfGames).Select(async gameNumber =>
-        {
-            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-            try
-            {
-                await RunSingleGameAsync(gameNumber, state, progressReporter, cancellationToken).ConfigureAwait(false);
-            }
-            finally
-            {
-                semaphore.Release();
-            }
-        });
-    }
-
-    private int CalculateEffectiveParallelism()
-    {
-        if (_options.Strategy == ParallelismStrategy.Fixed || _options.MaxDegreeOfParallelism > 0)
-        {
-            return _options.MaxDegreeOfParallelism;
-        }
-
-        var coreCount = Environment.ProcessorCount;
-        var baseParallelism = Math.Max(1, coreCount - _options.ReservedCores);
-
-        return _options.Strategy == ParallelismStrategy.Conservative
-            ? baseParallelism
-            : Math.Min(baseParallelism * 2, _options.MaxThreads);
-    }
-
     private async Task RunSingleGameAsync(
         int gameNumber,
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
+        bool doNotPersist,
+        ActorType[]? team1ActorTypes = null,
+        ActorType[]? team2ActorTypes = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
             using var scope = serviceScopeFactory.CreateScope();
             var gameOrchestrator = scope.ServiceProvider.GetRequiredService<IGameOrchestrator>();
-            var game = await gameOrchestrator.OrchestrateGameAsync().ConfigureAwait(false);
+            var game = await gameOrchestrator.OrchestrateGameAsync(team1ActorTypes, team2ActorTypes).ConfigureAwait(false);
 
             await state.ExecuteWithLockAsync(
                 () =>
@@ -193,11 +174,11 @@ public class BatchGameOrchestrator(
                 progressReporter?.ReportGameCompleted(state.CompletedGames);
             }, cancellationToken).ConfigureAwait(false);
 
-            await SavePendingGamesAsync(state, progressReporter, force: false, cancellationToken).ConfigureAwait(false);
+            await persistenceCoordinator.SavePendingGamesAsync(state, progressReporter, doNotPersist, force: false, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            LoggerMessages.LogGameFailed(logger, gameNumber, ex);
+            Foundation.LoggerMessages.LogGameFailed(logger, gameNumber, ex);
             await state.ExecuteWithLockAsync(
                 () =>
             {
@@ -205,47 +186,6 @@ public class BatchGameOrchestrator(
                 state.CompletedGames++;
                 progressReporter?.ReportGameCompleted(state.CompletedGames);
             }, cancellationToken).ConfigureAwait(false);
-        }
-    }
-
-    private async Task SavePendingGamesAsync(
-        BatchExecutionState state,
-        IBatchProgressReporter? progressReporter,
-        bool force,
-        CancellationToken cancellationToken = default)
-    {
-        var gamesToSave = await state.ExecuteWithLockAsync(
-            () =>
-        {
-            if ((force && state.PendingGames.Count > 0) ||
-                state.PendingGames.Count >= state.BatchSize)
-            {
-                var games = new List<Game>(state.PendingGames);
-                state.PendingGames.Clear();
-                return games;
-            }
-
-            return null;
-        }, cancellationToken).ConfigureAwait(false);
-
-        if (gamesToSave?.Count > 0)
-        {
-            try
-            {
-                var saveProgress = new Progress<int>(count =>
-                {
-                    state.SavedGames += count;
-                    progressReporter?.ReportGamesSaved(state.SavedGames);
-                });
-
-                using var scope = serviceScopeFactory.CreateScope();
-                var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
-                await gameRepository.SaveCompletedGamesBulkAsync(gamesToSave, saveProgress, cancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                LoggerMessages.LogGamePersistenceFailed(logger, ex);
-            }
         }
     }
 }

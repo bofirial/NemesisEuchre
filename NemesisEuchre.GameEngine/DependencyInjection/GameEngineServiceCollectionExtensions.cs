@@ -5,6 +5,7 @@ using NemesisEuchre.GameEngine.Mappers;
 using NemesisEuchre.GameEngine.PlayerBots;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.GameEngine.Services;
+using NemesisEuchre.GameEngine.Utilities;
 using NemesisEuchre.GameEngine.Validation;
 
 namespace NemesisEuchre.GameEngine.DependencyInjection;
@@ -13,6 +14,8 @@ public static class GameEngineServiceCollectionExtensions
 {
     public static void AddNemesisEuchreGameEngine(this IServiceCollection serviceCollection)
     {
+        serviceCollection.AddSingleton<IRandomNumberGenerator, RandomNumberGenerator>();
+
         serviceCollection.AddScoped<IGameFactory, GameFactory>();
         serviceCollection.AddScoped<IDealFactory, DealFactory>();
         serviceCollection.AddScoped<IGameOrchestrator, GameOrchestrator>();

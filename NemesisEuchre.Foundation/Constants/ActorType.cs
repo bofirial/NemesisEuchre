@@ -1,4 +1,4 @@
-﻿namespace NemesisEuchre.GameEngine.PlayerDecisionEngine;
+namespace NemesisEuchre.Foundation.Constants;
 
 public enum ActorType
 {
@@ -6,4 +6,5 @@ public enum ActorType
     Chaos = 1,
     Chad = 2,
     Beta = 3,
+    Gen1 = 10,
 }

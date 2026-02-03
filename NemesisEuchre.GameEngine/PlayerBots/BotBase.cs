@@ -2,12 +2,13 @@
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Utilities;
 
 namespace NemesisEuchre.GameEngine.PlayerBots;
 
-public abstract class BotBase : IPlayerActor
+public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
 {
-    private readonly Random _random = new();
+    private readonly IRandomNumberGenerator _random = random ?? throw new ArgumentNullException(nameof(random));
 
     public abstract ActorType ActorType { get; }
 
@@ -39,6 +40,6 @@ public abstract class BotBase : IPlayerActor
     {
         return options.Length == 0
             ? throw new ArgumentException("Cannot select from empty array", nameof(options))
-            : Task.FromResult(options[_random.Next(options.Length)]);
+            : Task.FromResult(options[_random.NextInt(options.Length)]);
     }
 }

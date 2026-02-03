@@ -2,11 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using NemesisEuchre.Foundation.Constants;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class CallTrumpDecisionEntity
+public class CallTrumpDecisionEntity : IDecisionEntity
 {
     public int CallTrumpDecisionId { get; set; }
 

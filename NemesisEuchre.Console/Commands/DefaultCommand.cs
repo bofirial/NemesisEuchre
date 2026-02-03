@@ -3,7 +3,7 @@
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Services;
-using NemesisEuchre.Foundation;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 
 using Spectre.Console;
@@ -22,9 +22,18 @@ public class DefaultCommand(
     [CliOption(Description = "Number of games to play")]
     public int Count { get; set; } = 1;
 
+    [CliOption(Description = "Skip saving games to the database")]
+    public bool DoNotPersist { get; set; }
+
+    [CliOption(Description = "ActorType for Team1")]
+    public ActorType? Team1 { get; set; }
+
+    [CliOption(Description = "ActorType for Team2")]
+    public ActorType? Team2 { get; set; }
+
     public async Task<int> RunAsync()
     {
-        LoggerMessages.LogStartingUp(logger);
+        Foundation.LoggerMessages.LogStartingUp(logger);
 
         applicationBanner.Display();
 
@@ -44,17 +53,20 @@ public class DefaultCommand(
 
     private Task<Game> RunSingleGameAsync()
     {
-        ansiConsole.MarkupLine("[dim]Playing a game between 4 ChaosBots...[/]");
+        ansiConsole.MarkupLine($"[dim]Playing a game between 2 {Team1 ?? ActorType.Chaos}Bots and 2 {Team2 ?? ActorType.Chaos}Bots...[/]");
         ansiConsole.WriteLine();
+
+        var team1ActorTypes = Team1.HasValue ? new[] { Team1.Value, Team1.Value } : null;
+        var team2ActorTypes = Team2.HasValue ? new[] { Team2.Value, Team2.Value } : null;
 
         return ansiConsole.Status()
             .Spinner(Spinner.Known.Dots)
-            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync());
+            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(doNotPersist: DoNotPersist, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes));
     }
 
     private async Task RunBatchGamesAsync()
     {
-        ansiConsole.MarkupLine($"[dim]Playing {Count} games between 4 ChaosBots...[/]");
+        ansiConsole.MarkupLine($"[dim]Playing a game between 2 {Team1 ?? ActorType.Chaos}Bots and 2 {Team2 ?? ActorType.Chaos}Bots...[/]");
         ansiConsole.WriteLine();
 
         var results = await ansiConsole.Progress()
@@ -65,7 +77,10 @@ public class DefaultCommand(
 
                 var progressReporter = new BatchProgressReporter(playingTask, savingTask);
 
-                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter);
+                var team1ActorTypes = Team1.HasValue ? new[] { Team1.Value, Team1.Value } : null;
+                var team2ActorTypes = Team2.HasValue ? new[] { Team2.Value, Team2.Value } : null;
+
+                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, doNotPersist: DoNotPersist, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes);
             });
 
         gameResultsRenderer.RenderBatchResults(results);
