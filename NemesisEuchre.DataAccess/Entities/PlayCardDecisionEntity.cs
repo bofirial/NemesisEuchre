@@ -35,6 +35,10 @@ public class PlayCardDecisionEntity : IDecisionEntity
 
     public bool CallingPlayerGoingAlone { get; set; }
 
+    public RelativePlayerPosition DealerPosition { get; set; }
+
+    public string? DealerPickedUpCardJson { get; set; }
+
     public string ChosenCardJson { get; set; } = null!;
 
     public ActorType? ActorType { get; set; }
@@ -107,6 +111,14 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
 
         builder.Property(e => e.CallingPlayerGoingAlone)
             .IsRequired();
+
+        builder.Property(e => e.DealerPosition)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(25);
+
+        builder.Property(e => e.DealerPickedUpCardJson)
+            .HasMaxLength(200);
 
         builder.Property(e => e.ChosenCardJson)
             .IsRequired()
