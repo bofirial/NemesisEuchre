@@ -17,13 +17,13 @@ public class TrickEntity
 
     public Suit? LeadSuit { get; set; }
 
-    public string CardsPlayedJson { get; set; } = null!;
+    public required string CardsPlayedJson { get; set; }
 
     public PlayerPosition? WinningPosition { get; set; }
 
     public Team? WinningTeam { get; set; }
 
-    public DealEntity Deal { get; set; } = null!;
+    public DealEntity? Deal { get; set; }
 
     public List<PlayCardDecisionEntity> PlayCardDecisions { get; set; } = [];
 }

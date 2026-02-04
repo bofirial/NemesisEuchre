@@ -13,7 +13,7 @@ public class PlayCardDecisionEntity : IDecisionEntity
 
     public int TrickId { get; set; }
 
-    public string CardsInHandJson { get; set; } = null!;
+    public required string CardsInHandJson { get; set; }
 
     public short TeamScore { get; set; }
 
@@ -23,13 +23,13 @@ public class PlayCardDecisionEntity : IDecisionEntity
 
     public RelativeSuit? LeadSuit { get; set; }
 
-    public string PlayedCardsJson { get; set; } = null!;
+    public required string PlayedCardsJson { get; set; }
 
     public RelativePlayerPosition? WinningTrickPlayer { get; set; }
 
     public short TrickNumber { get; set; }
 
-    public string ValidCardsToPlayJson { get; set; } = null!;
+    public required string ValidCardsToPlayJson { get; set; }
 
     public RelativePlayerPosition CallingPlayer { get; set; }
 
@@ -39,11 +39,11 @@ public class PlayCardDecisionEntity : IDecisionEntity
 
     public string? DealerPickedUpCardJson { get; set; }
 
-    public string ChosenCardJson { get; set; } = null!;
+    public required string ChosenCardJson { get; set; }
 
-    public string? KnownPlayerSuitVoidsJson { get; set; }
+    public required string KnownPlayerSuitVoidsJson { get; set; }
 
-    public string? CardsAccountedForJson { get; set; }
+    public required string CardsAccountedForJson { get; set; }
 
     public ActorType? ActorType { get; set; }
 
@@ -55,9 +55,9 @@ public class PlayCardDecisionEntity : IDecisionEntity
 
     public bool? DidTeamWinGame { get; set; }
 
-    public DealEntity Deal { get; set; } = null!;
+    public DealEntity? Deal { get; set; }
 
-    public TrickEntity Trick { get; set; } = null!;
+    public TrickEntity? Trick { get; set; }
 }
 
 public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<PlayCardDecisionEntity>

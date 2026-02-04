@@ -11,7 +11,7 @@ public class DiscardCardDecisionEntity : IDecisionEntity
 
     public int DealId { get; set; }
 
-    public string CardsInHandJson { get; set; } = null!;
+    public required string CardsInHandJson { get; set; }
 
     public short TeamScore { get; set; }
 
@@ -21,7 +21,7 @@ public class DiscardCardDecisionEntity : IDecisionEntity
 
     public bool CallingPlayerGoingAlone { get; set; }
 
-    public string ChosenCardJson { get; set; } = null!;
+    public required string ChosenCardJson { get; set; }
 
     public ActorType? ActorType { get; set; }
 
@@ -31,7 +31,7 @@ public class DiscardCardDecisionEntity : IDecisionEntity
 
     public bool? DidTeamWinGame { get; set; }
 
-    public DealEntity Deal { get; set; } = null!;
+    public DealEntity? Deal { get; set; }
 }
 
 public class DiscardCardDecisionEntityConfiguration : IEntityTypeConfiguration<DiscardCardDecisionEntity>

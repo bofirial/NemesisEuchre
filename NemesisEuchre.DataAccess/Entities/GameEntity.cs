@@ -11,7 +11,7 @@ public class GameEntity
 
     public GameStatus GameStatus { get; set; }
 
-    public string PlayersJson { get; set; } = null!;
+    public required string PlayersJson { get; set; }
 
     public short Team1Score { get; set; }
 

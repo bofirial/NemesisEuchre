@@ -18,7 +18,7 @@ public class DealEntity
 
     public PlayerPosition? DealerPosition { get; set; }
 
-    public string DeckJson { get; set; } = null!;
+    public required string DeckJson { get; set; }
 
     public string? UpCardJson { get; set; }
 
@@ -42,9 +42,9 @@ public class DealEntity
 
     public string? KnownPlayerSuitVoidsJson { get; set; }
 
-    public string PlayersJson { get; set; } = null!;
+    public required string PlayersJson { get; set; }
 
-    public GameEntity Game { get; set; } = null!;
+    public GameEntity? Game { get; set; }
 
     public ICollection<TrickEntity> Tricks { get; set; } = [];
 
