@@ -68,6 +68,30 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder) : IDecisionR
     {
         var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
 
+        var accountedForCards = new List<Card>();
+
+        foreach (var completedTrick in deal.CompletedTricks)
+        {
+            accountedForCards.AddRange(completedTrick.CardsPlayed.Select(pc => pc.Card));
+        }
+
+        accountedForCards.AddRange(trick.CardsPlayed.Select(pc => pc.Card));
+
+        accountedForCards.AddRange(hand);
+
+        var isRound1 = deal.ChosenDecision is CallTrumpDecision.OrderItUp or
+                       CallTrumpDecision.OrderItUpAndGoAlone;
+
+        if (!isRound1 && deal.UpCard != null)
+        {
+            accountedForCards.Add(deal.UpCard);
+        }
+
+        if (playerPosition == deal.DealerPosition && deal.DiscardedCard != null)
+        {
+            accountedForCards.Add(deal.DiscardedCard);
+        }
+
         var record = new PlayCardDecisionRecord
         {
             CardsInHand = [.. hand],
@@ -90,6 +114,7 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder) : IDecisionR
             KnownPlayerSuitVoids = [.. deal.KnownPlayerSuitVoids],
             Dealer = deal.DealerPosition!.Value,
             DealerPickedUpCard = deal.UpCard,
+            CardsAccountedFor = [.. accountedForCards],
             ChosenCard = chosenCard,
         };
 

@@ -73,6 +73,11 @@ public class TrickToEntityMapper : ITrickToEntityMapper
                                 .ToArray(),
                             JsonSerializationOptions.Default)
                         : null,
+                    CardsAccountedForJson = decision.CardsAccountedFor.Length > 0
+                        ? JsonSerializer.Serialize(
+                            decision.CardsAccountedFor.SortByTrump(decision.TrumpSuit).Select(c => c.ToRelative(decision.TrumpSuit)),
+                            JsonSerializationOptions.Default)
+                        : null,
                     ChosenCardJson = JsonSerializer.Serialize(
                         decision.ChosenCard.ToRelative(decision.TrumpSuit), JsonSerializationOptions.Default),
                     ActorType = actorType,
