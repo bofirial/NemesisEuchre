@@ -69,6 +69,8 @@ public class PlayCardFeatureEngineerTests
             PlayedCardsJson = JsonSerializer.Serialize(CreatePlayedCardsDict(1), JsonSerializationOptions.Default),
             ValidCardsToPlayJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
             ChosenCardJson = JsonSerializer.Serialize(cards[0], JsonSerializationOptions.Default),
+            KnownPlayerSuitVoidsJson = JsonSerializer.Serialize(Array.Empty<(RelativePlayerPosition, RelativeSuit)>(), JsonSerializationOptions.Default),
+            CardsAccountedForJson = JsonSerializer.Serialize(Array.Empty<RelativeCard>(), JsonSerializationOptions.Default),
             LeadPlayer = _faker.PickRandom<RelativePlayerPosition>(),
             LeadSuit = null,
             WinningTrickPlayer = _faker.PickRandom<RelativePlayerPosition>(),
@@ -77,7 +79,7 @@ public class PlayCardFeatureEngineerTests
             CallingPlayer = _faker.PickRandom<RelativePlayerPosition>(),
             CallingPlayerGoingAlone = _faker.Random.Bool(),
             RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
-            Trick = new TrickEntity { TrickNumber = (byte)_faker.Random.Int(1, 5) },
+            Trick = new TrickEntity { TrickNumber = (byte)_faker.Random.Int(1, 5), CardsPlayedJson = JsonSerializer.Serialize(new Dictionary<RelativePlayerPosition, RelativeCard>(), JsonSerializationOptions.Default) },
         };
 
         var result = _engineer.Transform(entity);
@@ -95,6 +97,8 @@ public class PlayCardFeatureEngineerTests
             PlayedCardsJson = JsonSerializer.Serialize(CreatePlayedCardsDict(1), JsonSerializationOptions.Default),
             ValidCardsToPlayJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
             ChosenCardJson = JsonSerializer.Serialize(cards[0], JsonSerializationOptions.Default),
+            KnownPlayerSuitVoidsJson = JsonSerializer.Serialize(Array.Empty<(RelativePlayerPosition, RelativeSuit)>(), JsonSerializationOptions.Default),
+            CardsAccountedForJson = JsonSerializer.Serialize(Array.Empty<RelativeCard>(), JsonSerializationOptions.Default),
             LeadPlayer = _faker.PickRandom<RelativePlayerPosition>(),
             LeadSuit = _faker.PickRandom<RelativeSuit>(),
             WinningTrickPlayer = null,
@@ -103,7 +107,7 @@ public class PlayCardFeatureEngineerTests
             CallingPlayer = _faker.PickRandom<RelativePlayerPosition>(),
             CallingPlayerGoingAlone = _faker.Random.Bool(),
             RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
-            Trick = new TrickEntity { TrickNumber = (byte)_faker.Random.Int(1, 5) },
+            Trick = new TrickEntity { TrickNumber = (byte)_faker.Random.Int(1, 5), CardsPlayedJson = JsonSerializer.Serialize(new Dictionary<RelativePlayerPosition, RelativeCard>(), JsonSerializationOptions.Default) },
         };
 
         var result = _engineer.Transform(entity);
@@ -202,6 +206,8 @@ public class PlayCardFeatureEngineerTests
             PlayedCardsJson = JsonSerializer.Serialize(CreatePlayedCardsDict(1), JsonSerializationOptions.Default),
             ValidCardsToPlayJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
             ChosenCardJson = JsonSerializer.Serialize(cards[0], JsonSerializationOptions.Default),
+            KnownPlayerSuitVoidsJson = JsonSerializer.Serialize(Array.Empty<(RelativePlayerPosition, RelativeSuit)>(), JsonSerializationOptions.Default),
+            CardsAccountedForJson = JsonSerializer.Serialize(Array.Empty<RelativeCard>(), JsonSerializationOptions.Default),
             LeadPlayer = _faker.PickRandom<RelativePlayerPosition>(),
             LeadSuit = _faker.PickRandom<RelativeSuit>(),
             WinningTrickPlayer = _faker.PickRandom<RelativePlayerPosition>(),
@@ -210,7 +216,7 @@ public class PlayCardFeatureEngineerTests
             CallingPlayer = _faker.PickRandom<RelativePlayerPosition>(),
             CallingPlayerGoingAlone = _faker.Random.Bool(),
             RelativeDealPoints = 2,
-            Trick = new TrickEntity { TrickNumber = (byte)_faker.Random.Int(1, 5) },
+            Trick = new TrickEntity { TrickNumber = (byte)_faker.Random.Int(1, 5), CardsPlayedJson = JsonSerializer.Serialize(new Dictionary<RelativePlayerPosition, RelativeCard>(), JsonSerializationOptions.Default) },
         };
 
         var result = _engineer.Transform(entity);
@@ -319,6 +325,8 @@ public class PlayCardFeatureEngineerTests
             PlayedCardsJson = JsonSerializer.Serialize(playedCards, JsonSerializationOptions.Default),
             ValidCardsToPlayJson = JsonSerializer.Serialize(validCards, JsonSerializationOptions.Default),
             ChosenCardJson = JsonSerializer.Serialize(chosenCard, JsonSerializationOptions.Default),
+            KnownPlayerSuitVoidsJson = JsonSerializer.Serialize(Array.Empty<(RelativePlayerPosition, RelativeSuit)>(), JsonSerializationOptions.Default),
+            CardsAccountedForJson = JsonSerializer.Serialize(Array.Empty<RelativeCard>(), JsonSerializationOptions.Default),
             LeadPlayer = leadPlayer ?? _faker.PickRandom<RelativePlayerPosition>(),
             LeadSuit = leadSuit ?? (_faker.Random.Bool() ? _faker.PickRandom<RelativeSuit>() : null),
             WinningTrickPlayer = winningTrickPlayer,

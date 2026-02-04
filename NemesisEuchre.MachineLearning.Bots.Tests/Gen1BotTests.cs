@@ -202,6 +202,8 @@ public class Gen1BotTests
             RelativePlayerPosition.Self,
             false,
             RelativePlayerPosition.LeftHandOpponent,
+            null,
+            RelativePlayerPosition.Self,
             RelativeSuit.Trump,
             [],
             [],

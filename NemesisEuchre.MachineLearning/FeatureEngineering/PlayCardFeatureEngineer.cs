@@ -27,6 +27,16 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
             }
         }
 
+        playedCards.TryGetValue(RelativePlayerPosition.LeftHandOpponent, out RelativeCard? leftHandOpponentPlayedCard);
+        playedCards.TryGetValue(RelativePlayerPosition.Partner, out RelativeCard? partnerPlayedCard);
+        playedCards.TryGetValue(RelativePlayerPosition.RightHandOpponent, out RelativeCard? rightHandOpponentPlayedCard);
+
+        var dealerPickedUpCard = !string.IsNullOrEmpty(entity.DealerPickedUpCardJson) ? JsonDeserializationHelper.DeserializeRelativeCard(entity.DealerPickedUpCardJson) : null;
+
+        var knownPlayerSuitVoids = JsonDeserializationHelper.DeserializeKnownPlayerVoids(entity.KnownPlayerSuitVoidsJson);
+
+        var cardsAccountedFor = JsonDeserializationHelper.DeserializeRelativeCards(entity.CardsAccountedForJson);
+
         var chosenCard = JsonDeserializationHelper.DeserializeRelativeCard(entity.ChosenCardJson);
 
         var chosenCardIndex = Array.FindIndex(cards, c =>
@@ -37,10 +47,6 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
             throw new InvalidOperationException(
                 $"Chosen card {chosenCard.Rank} of {chosenCard.Suit} not found in hand");
         }
-
-        playedCards.TryGetValue(RelativePlayerPosition.LeftHandOpponent, out RelativeCard? leftHandOpponentPlayedCard);
-        playedCards.TryGetValue(RelativePlayerPosition.Partner, out RelativeCard? partnerPlayedCard);
-        playedCards.TryGetValue(RelativePlayerPosition.RightHandOpponent, out RelativeCard? rightHandOpponentPlayedCard);
 
         return new PlayCardTrainingData
         {
@@ -74,6 +80,45 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
             Card5IsValid = validityArray[4],
             CallingPlayerPosition = (float)entity.CallingPlayer,
             CallingPlayerGoingAlone = entity.CallingPlayerGoingAlone ? 1.0f : 0.0f,
+            DealerPlayerPosition = (float)entity.DealerPosition,
+            DealerPickedUpCardRank = dealerPickedUpCard != null ? (float)dealerPickedUpCard.Rank : -1.0f,
+            DealerPickedUpCardSuit = dealerPickedUpCard != null ? (float)dealerPickedUpCard.Suit : -1.0f,
+            LeftHandOpponentMayHaveTrump = knownPlayerSuitVoids.Any(x => x.PlayerPosition == RelativePlayerPosition.LeftHandOpponent && x.Suit == RelativeSuit.Trump) ? 0.0f : 1.0f,
+            LeftHandOpponentMayHaveNonTrumpSameColor = knownPlayerSuitVoids.Any(x => x.PlayerPosition == RelativePlayerPosition.LeftHandOpponent && x.Suit == RelativeSuit.NonTrumpSameColor) ? 0.0f : 1.0f,
+            LeftHandOpponentMayHaveNonTrumpOppositeColor1 = knownPlayerSuitVoids.Any(x => x.PlayerPosition == RelativePlayerPosition.LeftHandOpponent && x.Suit == RelativeSuit.NonTrumpOppositeColor1) ? 0.0f : 1.0f,
+            LeftHandOpponentMayHaveNonTrumpOppositeColor2 = knownPlayerSuitVoids.Any(x => x.PlayerPosition == RelativePlayerPosition.LeftHandOpponent && x.Suit == RelativeSuit.NonTrumpOppositeColor2) ? 0.0f : 1.0f,
+            PartnerMayHaveTrump = knownPlayerSuitVoids.Any(x => x.PlayerPosition == RelativePlayerPosition.Partner && x.Suit == RelativeSuit.Trump) ? 0.0f : 1.0f,
+            PartnerMayHaveNonTrumpSameColor = knownPlayerSuitVoids.Any(x => x.PlayerPosition == RelativePlayerPosition.Partner && x.Suit == RelativeSuit.NonTrumpSameColor) ? 0.0f : 1.0f,
+            PartnerMayHaveNonTrumpOppositeColor1 = knownPlayerSuitVoids.Any(x => x.PlayerPosition == RelativePlayerPosition.Partner && x.Suit == RelativeSuit.NonTrumpOppositeColor1) ? 0.0f : 1.0f,
+            PartnerMayHaveNonTrumpOppositeColor2 = knownPlayerSuitVoids.Any(x => x.PlayerPosition == RelativePlayerPosition.Partner && x.Suit == RelativeSuit.NonTrumpOppositeColor2) ? 0.0f : 1.0f,
+            RightHandOpponentMayHaveTrump = knownPlayerSuitVoids.Any(x => x.PlayerPosition == RelativePlayerPosition.RightHandOpponent && x.Suit == RelativeSuit.Trump) ? 0.0f : 1.0f,
+            RightHandOpponentMayHaveNonTrumpSameColor = knownPlayerSuitVoids.Any(x => x.PlayerPosition == RelativePlayerPosition.RightHandOpponent && x.Suit == RelativeSuit.NonTrumpSameColor) ? 0.0f : 1.0f,
+            RightHandOpponentMayHaveNonTrumpOppositeColor1 = knownPlayerSuitVoids.Any(x => x.PlayerPosition == RelativePlayerPosition.RightHandOpponent && x.Suit == RelativeSuit.NonTrumpOppositeColor1) ? 0.0f : 1.0f,
+            RightHandOpponentMayHaveNonTrumpOppositeColor2 = knownPlayerSuitVoids.Any(x => x.PlayerPosition == RelativePlayerPosition.RightHandOpponent && x.Suit == RelativeSuit.NonTrumpOppositeColor2) ? 0.0f : 1.0f,
+            RightBowerOfTrumpHasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.RightBower && card.Suit == RelativeSuit.Trump) ? 1.0f : 0.0f,
+            LeftBowerOfTrumpHasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.LeftBower && card.Suit == RelativeSuit.Trump) ? 1.0f : 0.0f,
+            AceOfTrumpHasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Ace && card.Suit == RelativeSuit.Trump) ? 1.0f : 0.0f,
+            KingOfTrumpHasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.King && card.Suit == RelativeSuit.Trump) ? 1.0f : 0.0f,
+            QueenOfTrumpHasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Queen && card.Suit == RelativeSuit.Trump) ? 1.0f : 0.0f,
+            TenOfTrumpHasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Ten && card.Suit == RelativeSuit.Trump) ? 1.0f : 0.0f,
+            NineOfTrumpHasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Nine && card.Suit == RelativeSuit.Trump) ? 1.0f : 0.0f,
+            AceOfNonTrumpSameColorHasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Ace && card.Suit == RelativeSuit.NonTrumpSameColor) ? 1.0f : 0.0f,
+            KingOfNonTrumpSameColorHasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.King && card.Suit == RelativeSuit.NonTrumpSameColor) ? 1.0f : 0.0f,
+            QueenOfNonTrumpSameColorHasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Queen && card.Suit == RelativeSuit.NonTrumpSameColor) ? 1.0f : 0.0f,
+            TenOfNonTrumpSameColorHasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Ten && card.Suit == RelativeSuit.NonTrumpSameColor) ? 1.0f : 0.0f,
+            NineOfNonTrumpSameColorHasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Nine && card.Suit == RelativeSuit.NonTrumpSameColor) ? 1.0f : 0.0f,
+            AceOfNonTrumpOppositeColor1HasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Ace && card.Suit == RelativeSuit.NonTrumpOppositeColor1) ? 1.0f : 0.0f,
+            KingOfNonTrumpOppositeColor1HasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.King && card.Suit == RelativeSuit.NonTrumpOppositeColor1) ? 1.0f : 0.0f,
+            QueenOfNonTrumpOppositeColor1HasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Queen && card.Suit == RelativeSuit.NonTrumpOppositeColor1) ? 1.0f : 0.0f,
+            JackOfNonTrumpOppositeColor1HasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Jack && card.Suit == RelativeSuit.NonTrumpOppositeColor1) ? 1.0f : 0.0f,
+            TenOfNonTrumpOppositeColor1HasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Ten && card.Suit == RelativeSuit.NonTrumpOppositeColor1) ? 1.0f : 0.0f,
+            NineOfNonTrumpOppositeColor1HasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Nine && card.Suit == RelativeSuit.NonTrumpOppositeColor1) ? 1.0f : 0.0f,
+            AceOfNonTrumpOppositeColor2HasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Ace && card.Suit == RelativeSuit.NonTrumpOppositeColor2) ? 1.0f : 0.0f,
+            KingOfNonTrumpOppositeColor2HasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.King && card.Suit == RelativeSuit.NonTrumpOppositeColor2) ? 1.0f : 0.0f,
+            QueenOfNonTrumpOppositeColor2HasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Queen && card.Suit == RelativeSuit.NonTrumpOppositeColor2) ? 1.0f : 0.0f,
+            JackOfNonTrumpOppositeColor2HasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Jack && card.Suit == RelativeSuit.NonTrumpOppositeColor2) ? 1.0f : 0.0f,
+            TenOfNonTrumpOppositeColor2HasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Ten && card.Suit == RelativeSuit.NonTrumpOppositeColor2) ? 1.0f : 0.0f,
+            NineOfNonTrumpOppositeColor2HasBeenAccountedFor = cardsAccountedFor.Any(card => card.Rank == Rank.Nine && card.Suit == RelativeSuit.NonTrumpOppositeColor2) ? 1.0f : 0.0f,
             Card1Chosen = chosenCardIndex == 0 ? 1.0f : 0.0f,
             Card2Chosen = chosenCardIndex == 1 ? 1.0f : 0.0f,
             Card3Chosen = chosenCardIndex == 2 ? 1.0f : 0.0f,
