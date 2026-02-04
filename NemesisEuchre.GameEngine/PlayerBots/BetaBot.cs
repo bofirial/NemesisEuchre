@@ -40,6 +40,8 @@ public class BetaBot(IRandomNumberGenerator random) : BotBase(random)
         short opponentScore,
         RelativePlayerPosition callingPlayer,
         bool callingPlayerGoingAlone,
+        RelativePlayerPosition dealer,
+        RelativeCard? dealerPickedUpCard,
         RelativePlayerPosition leadPlayer,
         RelativeSuit? leadSuit,
         (RelativePlayerPosition PlayerPosition, RelativeSuit Suit)[] knownPlayerSuitVoids,

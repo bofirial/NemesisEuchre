@@ -34,6 +34,8 @@ public interface IPlayerActor
         Suit trumpSuit,
         PlayerPosition callingPlayer,
         bool callingPlayerGoingAlone,
+        PlayerPosition dealer,
+        Card? dealerPickedUpCard,
         PlayerPosition leadPlayer,
         Suit? leadSuit,
         (PlayerPosition PlayerPosition, Suit Suit)[] knownPlayerSuitVoids,

@@ -2,6 +2,7 @@ using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Handlers;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.GameEngine.Pooling;
 using NemesisEuchre.GameEngine.Services;
 using NemesisEuchre.GameEngine.Validation;
@@ -169,6 +170,8 @@ public class TrickPlayingOrchestrator(
             deal.Trump!.Value,
             deal.CallingPlayer!.Value,
             deal.CallingPlayerIsGoingAlone,
+            deal.DealerPosition!.Value,
+            deal.ChosenDecision is CallTrumpDecision.OrderItUp or CallTrumpDecision.OrderItUpAndGoAlone ? deal.UpCard : null,
             trick.LeadPosition,
             trick.LeadSuit,
             [.. deal.KnownPlayerSuitVoids],

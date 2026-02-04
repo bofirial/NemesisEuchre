@@ -12,5 +12,5 @@ public class RelativeCard
     public RelativeSuit Suit { get; set; }
 
     [JsonIgnore]
-    public Card Card { get; set; } = null!;
+    public Card? Card { get; set; }
 }

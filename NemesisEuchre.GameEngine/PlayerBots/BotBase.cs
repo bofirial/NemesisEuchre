@@ -35,6 +35,8 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         short opponentScore,
         RelativePlayerPosition callingPlayer,
         bool callingPlayerGoingAlone,
+        RelativePlayerPosition dealer,
+        RelativeCard? dealerPickedUpCard,
         RelativePlayerPosition leadPlayer,
         RelativeSuit? leadSuit,
         (RelativePlayerPosition PlayerPosition, RelativeSuit Suit)[] knownPlayerSuitVoids,
@@ -58,7 +60,7 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         var relativeValidCards = validCardsToDiscard.Select(c => c.ToRelative(trumpSuit)).ToArray();
 
         var relativeChoice = await DiscardCardAsync(relativeHand, teamScore, opponentScore, callingPlayer.ToRelativePosition(playerPosition), callingPlayerGoingAlone, relativeValidCards);
-        return relativeChoice.Card;
+        return relativeChoice.Card!;
     }
 
     public async Task<Card> PlayCardAsync(
@@ -69,6 +71,8 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         Suit trumpSuit,
         PlayerPosition callingPlayer,
         bool callingPlayerGoingAlone,
+        PlayerPosition dealer,
+        Card? dealerPickedUpCard,
         PlayerPosition leadPlayer,
         Suit? leadSuit,
         (PlayerPosition PlayerPosition, Suit Suit)[] knownPlayerSuitVoids,
@@ -88,6 +92,8 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
             opponentScore,
             callingPlayer.ToRelativePosition(playerPosition),
             callingPlayerGoingAlone,
+            dealer.ToRelativePosition(playerPosition),
+            dealerPickedUpCard?.ToRelative(trumpSuit),
             leadPlayer.ToRelativePosition(playerPosition),
             leadSuit?.ToRelativeSuit(trumpSuit),
             [.. knownPlayerSuitVoids.Select(kpv => (kpv.PlayerPosition.ToRelativePosition(playerPosition), kpv.Suit.ToRelativeSuit(trumpSuit)))],
@@ -96,7 +102,7 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
             currentlyWinningTrickPlayer?.ToRelativePosition(playerPosition),
             trickNumber,
             relativeValidCards);
-        return relativeChoice.Card;
+        return relativeChoice.Card!;
     }
 
     protected Task<T> SelectRandomAsync<T>(T[] options)
