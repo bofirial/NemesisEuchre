@@ -53,6 +53,7 @@ public class CallTrumpDecisionEntityConfiguration : IEntityTypeConfiguration<Cal
             .IsRequired();
 
         builder.Property(e => e.CardsInHandJson)
+            .HasMaxLength(200)
             .IsRequired();
 
         builder.Property(e => e.TeamScore)
@@ -68,9 +69,10 @@ public class CallTrumpDecisionEntityConfiguration : IEntityTypeConfiguration<Cal
 
         builder.Property(e => e.UpCardJson)
             .IsRequired()
-            .HasMaxLength(200);
+            .HasMaxLength(50);
 
         builder.Property(e => e.ValidDecisionsJson)
+            .HasMaxLength(150)
             .IsRequired();
 
         builder.Property(e => e.ChosenDecisionJson)

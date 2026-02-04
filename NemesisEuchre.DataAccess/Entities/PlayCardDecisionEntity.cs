@@ -78,7 +78,8 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
             .IsRequired();
 
         builder.Property(e => e.CardsInHandJson)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(250);
 
         builder.Property(e => e.TeamScore)
             .IsRequired();
@@ -96,7 +97,8 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
             .HasMaxLength(30);
 
         builder.Property(e => e.PlayedCardsJson)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(200);
 
         builder.Property(e => e.WinningTrickPlayer)
             .HasConversion<string>()
@@ -106,7 +108,8 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
             .IsRequired();
 
         builder.Property(e => e.ValidCardsToPlayJson)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(250);
 
         builder.Property(e => e.CallingPlayer)
             .IsRequired()
@@ -122,16 +125,17 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
             .HasMaxLength(25);
 
         builder.Property(e => e.DealerPickedUpCardJson)
-            .HasMaxLength(200);
+            .HasMaxLength(50);
 
         builder.Property(e => e.KnownPlayerSuitVoidsJson)
-            .HasMaxLength(1500);
+            .HasMaxLength(1000);
 
-        builder.Property(e => e.CardsAccountedForJson);
+        builder.Property(e => e.CardsAccountedForJson)
+            .HasMaxLength(1000);
 
         builder.Property(e => e.ChosenCardJson)
             .IsRequired()
-            .HasMaxLength(200);
+            .HasMaxLength(50);
 
         builder.Property(e => e.ActorType)
             .HasConversion<string>()

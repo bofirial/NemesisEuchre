@@ -82,13 +82,14 @@ public class DealEntityConfiguration : IEntityTypeConfiguration<DealEntity>
             .HasMaxLength(10);
 
         builder.Property(e => e.DeckJson)
+            .HasMaxLength(150)
             .IsRequired();
 
         builder.Property(e => e.UpCardJson)
-            .HasMaxLength(200);
+            .HasMaxLength(50);
 
         builder.Property(e => e.DiscardedCardJson)
-            .HasMaxLength(200);
+            .HasMaxLength(50);
 
         builder.Property(e => e.Trump)
             .HasConversion<string>()
@@ -120,10 +121,11 @@ public class DealEntityConfiguration : IEntityTypeConfiguration<DealEntity>
             .IsRequired();
 
         builder.Property(e => e.KnownPlayerSuitVoidsJson)
-            .HasMaxLength(1000);
+            .HasMaxLength(600);
 
         builder.Property(e => e.PlayersJson)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(1500);
 
         builder.HasOne(e => e.Game)
             .WithMany(g => g.Deals)

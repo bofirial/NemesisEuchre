@@ -49,7 +49,8 @@ public class DiscardCardDecisionEntityConfiguration : IEntityTypeConfiguration<D
             .IsRequired();
 
         builder.Property(e => e.CardsInHandJson)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(300);
 
         builder.Property(e => e.CallingPlayer)
             .IsRequired()
@@ -64,7 +65,7 @@ public class DiscardCardDecisionEntityConfiguration : IEntityTypeConfiguration<D
 
         builder.Property(e => e.ChosenCardJson)
             .IsRequired()
-            .HasMaxLength(200);
+            .HasMaxLength(50);
 
         builder.Property(e => e.ActorType)
             .HasConversion<string>()

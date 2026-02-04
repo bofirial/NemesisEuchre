@@ -42,7 +42,7 @@ public class GameEntityConfiguration : IEntityTypeConfiguration<GameEntity>
 
         builder.Property(e => e.PlayersJson)
             .IsRequired()
-            .HasMaxLength(4000);
+            .HasMaxLength(500);
 
         builder.Property(e => e.Team1Score)
             .IsRequired();

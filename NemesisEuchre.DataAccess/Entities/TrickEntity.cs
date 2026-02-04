@@ -52,7 +52,7 @@ public class TrickEntityConfiguration : IEntityTypeConfiguration<TrickEntity>
 
         builder.Property(e => e.CardsPlayedJson)
             .IsRequired()
-            .HasMaxLength(1000);
+            .HasMaxLength(400);
 
         builder.Property(e => e.LeadSuit)
             .HasConversion<string>()
