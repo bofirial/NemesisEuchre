@@ -150,8 +150,9 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         var result = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -193,15 +194,16 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (hand, _, _, _, _, _, _, _, _, _, _, _, _, _) =>
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (hand, _, _, _, _, _, _, _, _, _, _, _, _, _, _) =>
                 {
                     var card = hand[0];
                     var position = GetPositionFromCard(card);
                     playOrder.Add(position);
                 })
-            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] _) => hand[0]);
+            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] _) => hand[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -228,15 +230,16 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (hand, _, _, _, _, _, _, _, _, _, _, _, _, _) =>
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (hand, _, _, _, _, _, _, _, _, _, _, _, _, _, _) =>
                 {
                     var card = hand[0];
                     var position = GetPositionFromCard(card);
                     playOrder.Add(position);
                 })
-            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] _) => hand[0]);
+            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] _) => hand[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.East);
 
@@ -279,10 +282,11 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (_, _, _, _, _, _, _, _, _, _, _, _, _, valid) => capturedValidCards ??= valid)
-            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] _) => hand[0]);
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (_, _, _, _, _, _, _, _, _, _, _, _, _, _, valid) => capturedValidCards ??= valid)
+            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] _) => hand[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -326,9 +330,10 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (_, _, _, _, _, _, _, _, _, _, _, _, _, valid) =>
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (_, _, _, _, _, _, _, _, _, _, _, _, _, _, valid) =>
                 {
                     callCount++;
                     if (callCount == 2)
@@ -336,7 +341,7 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -381,9 +386,10 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (_, _, _, _, _, _, _, _, _, _, _, _, _, valid) =>
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (_, _, _, _, _, _, _, _, _, _, _, _, _, _, valid) =>
                 {
                     callCount++;
                     if (callCount == 2)
@@ -391,7 +397,7 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -426,10 +432,11 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (_, _, _, _, _, _, _, _, _, _, _, _, _, _) => callCount++)
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => callCount == 2
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => callCount++)
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => callCount == 2
                     ? new Card { Suit = Suit.Hearts, Rank = Rank.Jack }
                     : valid[0]);
 
@@ -468,10 +475,11 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (_, _, _, _, _, _, _, _, _, _, _, _, _, valid) => allValidCards.Add(valid))
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (_, _, _, _, _, _, _, _, _, _, _, _, _, _, valid) => allValidCards.Add(valid))
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -510,9 +518,10 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (_, _, _, _, _, _, _, _, _, _, _, _, _, valid) =>
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (_, _, _, _, _, _, _, _, _, _, _, _, _, _, valid) =>
                 {
                     callCount++;
                     if (callCount == 2)
@@ -520,7 +529,7 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         var result = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -565,9 +574,10 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (_, _, _, _, _, _, _, _, _, _, _, _, _, valid) =>
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (_, _, _, _, _, _, _, _, _, _, _, _, _, _, valid) =>
                 {
                     callCount++;
                     if (callCount == 2)
@@ -575,7 +585,7 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -603,8 +613,9 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         var result = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -648,9 +659,10 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (_, _, _, _, _, _, _, _, _, _, _, _, _, valid) =>
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (_, _, _, _, _, _, _, _, _, _, _, _, _, _, valid) =>
                 {
                     callCount++;
                     if (callCount == 2)
@@ -658,7 +670,7 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -697,9 +709,10 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (_, _, _, _, _, _, _, _, _, _, _, _, _, valid) =>
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (_, _, _, _, _, _, _, _, _, _, _, _, _, _, valid) =>
                 {
                     callCount++;
                     if (callCount == 2)
@@ -707,7 +720,7 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -736,8 +749,9 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         var result = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -811,15 +825,16 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (hand, _, _, _, _, _, _, _, _, _, _, _, _, _) =>
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (hand, _, _, _, _, _, _, _, _, _, _, _, _, _, _) =>
                 {
                     var card = hand[0];
                     var position = GetPositionFromCard(card);
                     playOrder.Add(position);
                 })
-            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] _) => hand[0]);
+            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] _) => hand[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -854,9 +869,10 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (hand, _, team, opp, _, _, _, _, _, _, _, _, _, valid) =>
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (hand, _, team, opp, _, _, _, _, _, _, _, _, _, _, valid) =>
                 {
                     if (capturedHand == null)
                     {
@@ -866,7 +882,7 @@ public class TrickPlayingOrchestratorTests
                         capturedValidCards = valid;
                     }
                 })
-            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] _) => hand[0]);
+            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] _) => hand[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -898,8 +914,9 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] _) => hand[0]);
+            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] _) => hand[0]);
 
         var result = _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -918,6 +935,7 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()),
             Times.AtLeastOnce());
 
@@ -947,10 +965,11 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, Card[]>(
-                (_, _, team, opp, _, _, _, _, _, _, _, _, _, _) => capturedScores.Add((team, opp)))
-            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] _) => hand[0]);
+            .Callback<Card[], PlayerPosition, short, short, Suit, PlayerPosition, bool, PlayerPosition, Suit?, (PlayerPosition PlayerPosition, Suit Suit)[], Card[], Dictionary<PlayerPosition, Card>, PlayerPosition?, short, Card[]>(
+                (_, _, team, opp, _, _, _, _, _, _, _, _, _, _, _) => capturedScores.Add((team, opp)))
+            .ReturnsAsync((Card[] hand, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] _) => hand[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -1053,8 +1072,9 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -1197,8 +1217,9 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -1239,8 +1260,9 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -1291,8 +1313,9 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -1337,8 +1360,9 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -1380,8 +1404,9 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
@@ -1486,7 +1511,8 @@ public class TrickPlayingOrchestratorTests
                 It.IsAny<Card[]>(),
                 It.IsAny<Dictionary<PlayerPosition, Card>>(),
                 It.IsAny<PlayerPosition?>(),
+                It.IsAny<short>(),
                 It.IsAny<Card[]>()))
-            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, Card[] valid) => valid[0]);
+            .ReturnsAsync((Card[] _, PlayerPosition _, short _, short _, Suit _, PlayerPosition _, bool _, PlayerPosition _, Suit? _, (PlayerPosition PlayerPosition, Suit Suit)[] _, Card[] _, Dictionary<PlayerPosition, Card> _, PlayerPosition? _, short _, Card[] valid) => valid[0]);
     }
 }

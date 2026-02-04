@@ -52,6 +52,7 @@ public class ChadBot(IRandomNumberGenerator random) : BotBase(random)
         RelativeCard[] cardsAccountedFor,
         Dictionary<RelativePlayerPosition, RelativeCard> playedCardsInTrick,
         RelativePlayerPosition? currentlyWinningTrickPlayer,
+        short trickNumber,
         RelativeCard[] validCardsToPlay)
     {
         var trumpCards = validCardsToPlay

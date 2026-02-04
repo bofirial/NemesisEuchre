@@ -46,6 +46,7 @@ public class BetaBot(IRandomNumberGenerator random) : BotBase(random)
         RelativeCard[] cardsAccountedFor,
         Dictionary<RelativePlayerPosition, RelativeCard> playedCardsInTrick,
         RelativePlayerPosition? currentlyWinningTrickPlayer,
+        short trickNumber,
         RelativeCard[] validCardsToPlay)
     {
         return Task.FromResult(SelectLowestNonTrumpCardOrLowest(validCardsToPlay));

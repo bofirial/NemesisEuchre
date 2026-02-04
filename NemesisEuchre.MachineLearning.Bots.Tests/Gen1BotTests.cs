@@ -207,6 +207,7 @@ public class Gen1BotTests
             [],
             playedCards,
             null,
+            1,
             validCardsToPlay);
 
         result.Should().BeOneOf(validCardsToPlay);

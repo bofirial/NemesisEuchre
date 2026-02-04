@@ -175,6 +175,7 @@ public class TrickPlayingOrchestrator(
             [.. accountedForCards],
             playedCards,
             winningTrickPlayer,
+            trick.TrickNumber,
             [.. validCards]);
     }
 }

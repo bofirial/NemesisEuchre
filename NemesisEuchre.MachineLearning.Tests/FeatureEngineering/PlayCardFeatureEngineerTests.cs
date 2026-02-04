@@ -89,12 +89,12 @@ public class PlayCardFeatureEngineerTests
         var result = _engineer.Transform(entity);
 
         result.CardsPlayedInTrick.Should().Be(0);
-        result.PlayedCard1Rank.Should().Be(0.0f);
-        result.PlayedCard1Suit.Should().Be(0.0f);
-        result.PlayedCard2Rank.Should().Be(0.0f);
-        result.PlayedCard2Suit.Should().Be(0.0f);
-        result.PlayedCard3Rank.Should().Be(0.0f);
-        result.PlayedCard3Suit.Should().Be(0.0f);
+        result.PlayedCard1Rank.Should().Be(-1.0f);
+        result.PlayedCard1Suit.Should().Be(-1.0f);
+        result.PlayedCard2Rank.Should().Be(-1.0f);
+        result.PlayedCard2Suit.Should().Be(-1.0f);
+        result.PlayedCard3Rank.Should().Be(-1.0f);
+        result.PlayedCard3Suit.Should().Be(-1.0f);
     }
 
     [Fact]

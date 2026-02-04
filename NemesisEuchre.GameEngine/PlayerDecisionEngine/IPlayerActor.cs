@@ -40,5 +40,6 @@ public interface IPlayerActor
         Card[] cardsAccountedFor,
         Dictionary<PlayerPosition, Card> playedCardsInTrick,
         PlayerPosition? currentlyWinningTrickPlayer,
+        short trickNumber,
         Card[] validCardsToPlay);
 }

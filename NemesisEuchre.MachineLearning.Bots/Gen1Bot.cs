@@ -142,6 +142,7 @@ public class Gen1Bot(
         RelativeCard[] cardsAccountedFor,
         Dictionary<RelativePlayerPosition, RelativeCard> playedCardsInTrick,
         RelativePlayerPosition? currentlyWinningTrickPlayer,
+        short trickNumber,
         RelativeCard[] validCardsToPlay)
     {
         if (_playCardEngine == null)
@@ -165,7 +166,10 @@ public class Gen1Bot(
                     opponentScore,
                     callingPlayer,
                     callingPlayerGoingAlone,
+                    knownPlayerSuitVoids,
+                    cardsAccountedFor,
                     currentlyWinningTrickPlayer,
+                    trickNumber,
                     validCardsToPlay,
                     card);
 
