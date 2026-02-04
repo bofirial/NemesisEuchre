@@ -138,8 +138,8 @@ public class Gen1Bot(
         bool callingPlayerGoingAlone,
         RelativePlayerPosition leadPlayer,
         RelativeSuit? leadSuit,
-        Dictionary<RelativePlayerPosition, RelativeCard> playedCards,
-        RelativePlayerPosition? winningTrickPlayer,
+        Dictionary<RelativePlayerPosition, RelativeCard> playedCardsInTrick,
+        RelativePlayerPosition? currentlyWinningTrickPlayer,
         RelativeCard[] validCardsToPlay)
     {
         if (_playCardEngine == null)
@@ -158,12 +158,12 @@ public class Gen1Bot(
                     cardsInHand,
                     leadPlayer,
                     leadSuit,
-                    playedCards,
+                    playedCardsInTrick,
                     teamScore,
                     opponentScore,
                     callingPlayer,
                     callingPlayerGoingAlone,
-                    winningTrickPlayer,
+                    currentlyWinningTrickPlayer,
                     validCardsToPlay,
                     card);
 

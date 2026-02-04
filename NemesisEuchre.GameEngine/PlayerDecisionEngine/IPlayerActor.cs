@@ -11,5 +11,5 @@ public interface IPlayerActor
 
     Task<Card> DiscardCardAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, Suit trumpSuit, PlayerPosition callingPlayer, bool callingPlayerGoingAlone, Card[] validCardsToDiscard);
 
-    Task<Card> PlayCardAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, Suit trumpSuit, PlayerPosition callingPlayer, bool callingPlayerGoingAlone, PlayerPosition leadPlayer, Suit? leadSuit, Dictionary<PlayerPosition, Card> playedCards, PlayerPosition? winningTrickPlayer, Card[] validCardsToPlay);
+    Task<Card> PlayCardAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, Suit trumpSuit, PlayerPosition callingPlayer, bool callingPlayerGoingAlone, PlayerPosition leadPlayer, Suit? leadSuit, Dictionary<PlayerPosition, Card> playedCardsInTrick, PlayerPosition? currentlyWinningTrickPlayer, Card[] validCardsToPlay);
 }
