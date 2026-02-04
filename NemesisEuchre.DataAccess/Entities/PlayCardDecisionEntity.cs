@@ -125,10 +125,9 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
             .HasMaxLength(200);
 
         builder.Property(e => e.KnownPlayerSuitVoidsJson)
-            .HasMaxLength(500);
+            .HasMaxLength(1500);
 
-        builder.Property(e => e.CardsAccountedForJson)
-            .HasMaxLength(1000);
+        builder.Property(e => e.CardsAccountedForJson);
 
         builder.Property(e => e.ChosenCardJson)
             .IsRequired()
