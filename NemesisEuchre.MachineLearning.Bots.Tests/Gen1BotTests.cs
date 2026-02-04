@@ -203,6 +203,8 @@ public class Gen1BotTests
             false,
             RelativePlayerPosition.LeftHandOpponent,
             RelativeSuit.Trump,
+            [],
+            [],
             playedCards,
             null,
             validCardsToPlay);

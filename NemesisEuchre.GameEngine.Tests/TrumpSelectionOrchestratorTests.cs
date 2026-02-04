@@ -35,7 +35,8 @@ public class TrumpSelectionOrchestratorTests
         var validator = new TrumpSelectionValidator();
         var decisionMapper = new CallTrumpDecisionMapper();
         var contextBuilder = new PlayerContextBuilder();
-        var decisionRecorder = new DecisionRecorder(contextBuilder);
+        var cardAccountingService = new CardAccountingService();
+        var decisionRecorder = new DecisionRecorder(contextBuilder, cardAccountingService);
         var dealerDiscardHandler = new DealerDiscardHandler(_actorResolverMock.Object, contextBuilder, validator, decisionRecorder);
 
         _sut = new TrumpSelectionOrchestrator(
@@ -638,7 +639,8 @@ public class TrumpSelectionOrchestratorTests
         var validator = new TrumpSelectionValidator();
         var decisionMapper = new CallTrumpDecisionMapper();
         var contextBuilder = new PlayerContextBuilder();
-        var decisionRecorder = new DecisionRecorder(contextBuilder);
+        var cardAccountingService = new CardAccountingService();
+        var decisionRecorder = new DecisionRecorder(contextBuilder, cardAccountingService);
         var dealerDiscardHandler = new DealerDiscardHandler(actorResolverMock.Object, contextBuilder, validator, decisionRecorder);
 
         var sut = new TrumpSelectionOrchestrator(
@@ -682,7 +684,8 @@ public class TrumpSelectionOrchestratorTests
         var validator = new TrumpSelectionValidator();
         var decisionMapper = new CallTrumpDecisionMapper();
         var contextBuilder = new PlayerContextBuilder();
-        var decisionRecorder = new DecisionRecorder(contextBuilder);
+        var cardAccountingService = new CardAccountingService();
+        var decisionRecorder = new DecisionRecorder(contextBuilder, cardAccountingService);
         var dealerDiscardHandler = new DealerDiscardHandler(actorResolverMock.Object, contextBuilder, validator, decisionRecorder);
 
         var sut = new TrumpSelectionOrchestrator(

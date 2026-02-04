@@ -37,6 +37,8 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         bool callingPlayerGoingAlone,
         RelativePlayerPosition leadPlayer,
         RelativeSuit? leadSuit,
+        (RelativePlayerPosition PlayerPosition, RelativeSuit Suit)[] knownPlayerSuitVoids,
+        RelativeCard[] cardsAccountedFor,
         Dictionary<RelativePlayerPosition, RelativeCard> playedCardsInTrick,
         RelativePlayerPosition? currentlyWinningTrickPlayer,
         RelativeCard[] validCardsToPlay);
@@ -68,14 +70,29 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         bool callingPlayerGoingAlone,
         PlayerPosition leadPlayer,
         Suit? leadSuit,
+        (PlayerPosition PlayerPosition, Suit Suit)[] knownPlayerSuitVoids,
+        Card[] cardsAccountedFor,
         Dictionary<PlayerPosition, Card> playedCardsInTrick,
         PlayerPosition? currentlyWinningTrickPlayer,
         Card[] validCardsToPlay)
     {
         var relativeHand = cardsInHand.Select(c => c.ToRelative(trumpSuit)).ToArray();
         var relativeValidCards = validCardsToPlay.Select(c => c.ToRelative(trumpSuit)).ToArray();
+        var relativeAccountedForCards = cardsAccountedFor.Select(c => c.ToRelative(trumpSuit)).ToArray();
 
-        var relativeChoice = await PlayCardAsync(relativeHand, teamScore, opponentScore, callingPlayer.ToRelativePosition(playerPosition), callingPlayerGoingAlone, leadPlayer.ToRelativePosition(playerPosition), leadSuit?.ToRelativeSuit(trumpSuit), playedCardsInTrick.ToDictionary(kvp => kvp.Key.ToRelativePosition(playerPosition), kvp => kvp.Value.ToRelative(trumpSuit)), currentlyWinningTrickPlayer?.ToRelativePosition(playerPosition), relativeValidCards);
+        var relativeChoice = await PlayCardAsync(
+            relativeHand,
+            teamScore,
+            opponentScore,
+            callingPlayer.ToRelativePosition(playerPosition),
+            callingPlayerGoingAlone,
+            leadPlayer.ToRelativePosition(playerPosition),
+            leadSuit?.ToRelativeSuit(trumpSuit),
+            [.. knownPlayerSuitVoids.Select(kpv => (kpv.PlayerPosition.ToRelativePosition(playerPosition), kpv.Suit.ToRelativeSuit(trumpSuit)))],
+            relativeAccountedForCards,
+            playedCardsInTrick.ToDictionary(kvp => kvp.Key.ToRelativePosition(playerPosition), kvp => kvp.Value.ToRelative(trumpSuit)),
+            currentlyWinningTrickPlayer?.ToRelativePosition(playerPosition),
+            relativeValidCards);
         return relativeChoice.Card;
     }
 

@@ -20,7 +20,8 @@ public class TrickPlayingOrchestrator(
     IPlayerActorResolver actorResolver,
     ITrickWinnerCalculator trickWinnerCalculator,
     IDecisionRecorder decisionRecorder,
-    IVoidDetector voidDetector) : ITrickPlayingOrchestrator
+    IVoidDetector voidDetector,
+    ICardAccountingService cardAccountingService) : ITrickPlayingOrchestrator
 {
     public async Task<Trick> PlayTrickAsync(Deal deal, PlayerPosition leadPosition)
     {
@@ -154,6 +155,12 @@ public class TrickPlayingOrchestrator(
             winningTrickPlayer = trickWinnerCalculator.CalculateWinner(trick, deal.Trump!.Value);
         }
 
+        var accountedForCards = cardAccountingService.GetAccountedForCards(
+            deal,
+            trick,
+            playerPosition,
+            hand);
+
         return playerActor.PlayCardAsync(
             [.. hand],
             playerPosition,
@@ -164,6 +171,8 @@ public class TrickPlayingOrchestrator(
             deal.CallingPlayerIsGoingAlone,
             trick.LeadPosition,
             trick.LeadSuit,
+            [.. deal.KnownPlayerSuitVoids],
+            [.. accountedForCards],
             playedCards,
             winningTrickPlayer,
             [.. validCards]);

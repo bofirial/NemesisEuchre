@@ -21,7 +21,8 @@ public class DealerDiscardHandlerTests
 
     public DealerDiscardHandlerTests()
     {
-        var decisionRecorder = new DecisionRecorder(_contextBuilderMock.Object);
+        var cardAccountingService = new CardAccountingService();
+        var decisionRecorder = new DecisionRecorder(_contextBuilderMock.Object, cardAccountingService);
         _handler = new DealerDiscardHandler(
             _actorResolverMock.Object,
             _contextBuilderMock.Object,

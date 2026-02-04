@@ -7,9 +7,38 @@ public interface IPlayerActor
 {
     ActorType ActorType { get; }
 
-    Task<CallTrumpDecision> CallTrumpAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, PlayerPosition dealerPosition, Card upCard, CallTrumpDecision[] validCallTrumpDecisions);
+    Task<CallTrumpDecision> CallTrumpAsync(
+        Card[] cardsInHand,
+        PlayerPosition playerPosition,
+        short teamScore,
+        short opponentScore,
+        PlayerPosition dealerPosition,
+        Card upCard,
+        CallTrumpDecision[] validCallTrumpDecisions);
 
-    Task<Card> DiscardCardAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, Suit trumpSuit, PlayerPosition callingPlayer, bool callingPlayerGoingAlone, Card[] validCardsToDiscard);
+    Task<Card> DiscardCardAsync(
+        Card[] cardsInHand,
+        PlayerPosition playerPosition,
+        short teamScore,
+        short opponentScore,
+        Suit trumpSuit,
+        PlayerPosition callingPlayer,
+        bool callingPlayerGoingAlone,
+        Card[] validCardsToDiscard);
 
-    Task<Card> PlayCardAsync(Card[] cardsInHand, PlayerPosition playerPosition, short teamScore, short opponentScore, Suit trumpSuit, PlayerPosition callingPlayer, bool callingPlayerGoingAlone, PlayerPosition leadPlayer, Suit? leadSuit, Dictionary<PlayerPosition, Card> playedCardsInTrick, PlayerPosition? currentlyWinningTrickPlayer, Card[] validCardsToPlay);
+    Task<Card> PlayCardAsync(
+        Card[] cardsInHand,
+        PlayerPosition playerPosition,
+        short teamScore,
+        short opponentScore,
+        Suit trumpSuit,
+        PlayerPosition callingPlayer,
+        bool callingPlayerGoingAlone,
+        PlayerPosition leadPlayer,
+        Suit? leadSuit,
+        (PlayerPosition PlayerPosition, Suit Suit)[] knownPlayerSuitVoids,
+        Card[] cardsAccountedFor,
+        Dictionary<PlayerPosition, Card> playedCardsInTrick,
+        PlayerPosition? currentlyWinningTrickPlayer,
+        Card[] validCardsToPlay);
 }
