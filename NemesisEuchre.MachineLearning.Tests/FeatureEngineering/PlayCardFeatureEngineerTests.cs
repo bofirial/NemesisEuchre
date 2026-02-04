@@ -43,44 +43,6 @@ public class PlayCardFeatureEngineerTests
         result.Card5Suit.Should().Be((float)cards[4].Suit);
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(3)]
-    public void Transform_WithPlayedCards_MapsInConsistentOrder(int playedCardCount)
-    {
-        var playedCards = CreatePlayedCardsDict(playedCardCount);
-        var entity = CreatePlayCardDecisionEntity(playedCards: playedCards);
-
-        var result = _engineer.Transform(entity);
-
-        result.CardsPlayedInTrick.Should().Be(playedCardCount);
-
-        var orderedPlayedCards = playedCards
-            .OrderBy(kvp => kvp.Key)
-            .Select(kvp => kvp.Value)
-            .ToArray();
-
-        if (playedCardCount > 0)
-        {
-            result.PlayedCard1Rank.Should().Be((float)orderedPlayedCards[0].Rank);
-            result.PlayedCard1Suit.Should().Be((float)orderedPlayedCards[0].Suit);
-        }
-
-        if (playedCardCount > 1)
-        {
-            result.PlayedCard2Rank.Should().Be((float)orderedPlayedCards[1].Rank);
-            result.PlayedCard2Suit.Should().Be((float)orderedPlayedCards[1].Suit);
-        }
-
-        if (playedCardCount > 2)
-        {
-            result.PlayedCard3Rank.Should().Be((float)orderedPlayedCards[2].Rank);
-            result.PlayedCard3Suit.Should().Be((float)orderedPlayedCards[2].Suit);
-        }
-    }
-
     [Fact]
     public void Transform_WithNoPlayedCards_UsesZeroSentinels()
     {
@@ -89,12 +51,12 @@ public class PlayCardFeatureEngineerTests
         var result = _engineer.Transform(entity);
 
         result.CardsPlayedInTrick.Should().Be(0);
-        result.PlayedCard1Rank.Should().Be(-1.0f);
-        result.PlayedCard1Suit.Should().Be(-1.0f);
-        result.PlayedCard2Rank.Should().Be(-1.0f);
-        result.PlayedCard2Suit.Should().Be(-1.0f);
-        result.PlayedCard3Rank.Should().Be(-1.0f);
-        result.PlayedCard3Suit.Should().Be(-1.0f);
+        result.LeftHandOpponentPlayedCardRank.Should().Be(-1.0f);
+        result.LeftHandOpponentPlayedCardSuit.Should().Be(-1.0f);
+        result.PartnerPlayedCardRank.Should().Be(-1.0f);
+        result.PartnerPlayedCardSuit.Should().Be(-1.0f);
+        result.RightHandOpponentPlayedCardRank.Should().Be(-1.0f);
+        result.RightHandOpponentPlayedCardSuit.Should().Be(-1.0f);
     }
 
     [Fact]

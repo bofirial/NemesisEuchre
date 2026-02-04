@@ -459,9 +459,9 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 6. ~~Record CardsAccountedFor in PlayCardDecisionRecords~~
 7. ~~Add CardsAccountedFor to PlayCardAsync in IPlayerActor~~
 8. ~~Add KnownPlayerSuitVoids to PlayCardAsync in IPlayerActor~~
-9. Add CardsAccountedFor to PlayCardTrainingData
-10. Add KnownPlayerSuitVoids to PlayCardTrainingData
-11. Add DealerPosition and DealerPickedUpCard to PlayCardTrainingData
+9. ~~Add CardsAccountedFor to PlayCardTrainingData~~
+10. ~~Add KnownPlayerSuitVoids to PlayCardTrainingData~~
+11. ~~Add DealerPosition and DealerPickedUpCard to PlayCardTrainingData~~
 
 ## User Players 1.0
 

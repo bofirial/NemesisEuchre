@@ -1,4 +1,6 @@
 using NemesisEuchre.DataAccess.Entities;
+using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.FeatureEngineering;
@@ -10,12 +12,7 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
     public PlayCardTrainingData Transform(PlayCardDecisionEntity entity)
     {
         var cards = JsonDeserializationHelper.DeserializeRelativeCards(entity.CardsInHandJson);
-        var playedCardsDict = JsonDeserializationHelper.DeserializePlayedCards(entity.PlayedCardsJson);
-
-        var playedCards = playedCardsDict
-            .OrderBy(kvp => kvp.Key)
-            .Select(kvp => kvp.Value)
-            .ToArray();
+        var playedCards = JsonDeserializationHelper.DeserializePlayedCards(entity.PlayedCardsJson);
 
         var validCards = JsonDeserializationHelper.DeserializeRelativeCards(entity.ValidCardsToPlayJson);
 
@@ -41,6 +38,10 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
                 $"Chosen card {chosenCard.Rank} of {chosenCard.Suit} not found in hand");
         }
 
+        playedCards.TryGetValue(RelativePlayerPosition.LeftHandOpponent, out RelativeCard? leftHandOpponentPlayedCard);
+        playedCards.TryGetValue(RelativePlayerPosition.Partner, out RelativeCard? partnerPlayedCard);
+        playedCards.TryGetValue(RelativePlayerPosition.RightHandOpponent, out RelativeCard? rightHandOpponentPlayedCard);
+
         return new PlayCardTrainingData
         {
             Card1Rank = cards.Length > 0 ? (float)cards[0].Rank : -1.0f,
@@ -55,16 +56,16 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
             Card5Suit = cards.Length > 4 ? (float)cards[4].Suit : -1.0f,
             LeadPlayer = (float)entity.LeadPlayer,
             LeadSuit = entity.LeadSuit.HasValue ? (float)entity.LeadSuit.Value : -1.0f,
-            PlayedCard1Rank = playedCards.Length > 0 ? (float)playedCards[0].Rank : -1.0f,
-            PlayedCard1Suit = playedCards.Length > 0 ? (float)playedCards[0].Suit : -1.0f,
-            PlayedCard2Rank = playedCards.Length > 1 ? (float)playedCards[1].Rank : -1.0f,
-            PlayedCard2Suit = playedCards.Length > 1 ? (float)playedCards[1].Suit : -1.0f,
-            PlayedCard3Rank = playedCards.Length > 2 ? (float)playedCards[2].Rank : -1.0f,
-            PlayedCard3Suit = playedCards.Length > 2 ? (float)playedCards[2].Suit : -1.0f,
+            LeftHandOpponentPlayedCardRank = (float?)leftHandOpponentPlayedCard?.Rank ?? -1.0f,
+            LeftHandOpponentPlayedCardSuit = (float?)leftHandOpponentPlayedCard?.Suit ?? -1.0f,
+            PartnerPlayedCardRank = (float?)partnerPlayedCard?.Rank ?? -1.0f,
+            PartnerPlayedCardSuit = (float?)partnerPlayedCard?.Suit ?? -1.0f,
+            RightHandOpponentPlayedCardRank = (float?)rightHandOpponentPlayedCard?.Rank ?? -1.0f,
+            RightHandOpponentPlayedCardSuit = (float?)rightHandOpponentPlayedCard?.Suit ?? -1.0f,
             TeamScore = entity.TeamScore,
             OpponentScore = entity.OpponentScore,
             TrickNumber = entity.TrickNumber,
-            CardsPlayedInTrick = playedCards.Length,
+            CardsPlayedInTrick = playedCards.Count,
             WinningTrickPlayer = entity.WinningTrickPlayer.HasValue ? (float)entity.WinningTrickPlayer.Value : -1.0f,
             Card1IsValid = validityArray[0],
             Card2IsValid = validityArray[1],

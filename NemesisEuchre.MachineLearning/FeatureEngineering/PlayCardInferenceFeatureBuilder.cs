@@ -41,11 +41,6 @@ public class PlayCardInferenceFeatureBuilder : IPlayCardInferenceFeatureBuilder
         RelativeCard[] validCardsToPlay,
         RelativeCard chosenCard)
     {
-        var playedCardsArray = playedCards
-            .OrderBy(kvp => kvp.Key)
-            .Select(kvp => kvp.Value)
-            .ToArray();
-
         var validityArray = new float[5];
         foreach (var card in validCardsToPlay)
         {
@@ -55,6 +50,10 @@ public class PlayCardInferenceFeatureBuilder : IPlayCardInferenceFeatureBuilder
                 validityArray[index] = 1.0f;
             }
         }
+
+        playedCards.TryGetValue(RelativePlayerPosition.LeftHandOpponent, out RelativeCard? leftHandOpponentPlayedCard);
+        playedCards.TryGetValue(RelativePlayerPosition.Partner, out RelativeCard? partnerPlayedCard);
+        playedCards.TryGetValue(RelativePlayerPosition.RightHandOpponent, out RelativeCard? rightHandOpponentPlayedCard);
 
         var chosenIndex = Array.IndexOf(cardsInHand, chosenCard);
 
@@ -72,16 +71,16 @@ public class PlayCardInferenceFeatureBuilder : IPlayCardInferenceFeatureBuilder
             Card5Suit = cardsInHand.Length > 4 ? (float)cardsInHand[4].Suit : -1.0f,
             LeadPlayer = (float)leadPlayer,
             LeadSuit = leadSuit.HasValue ? (float)leadSuit.Value : -1.0f,
-            PlayedCard1Rank = playedCardsArray.Length > 0 ? (float)playedCardsArray[0].Rank : -1.0f,
-            PlayedCard1Suit = playedCardsArray.Length > 0 ? (float)playedCardsArray[0].Suit : -1.0f,
-            PlayedCard2Rank = playedCardsArray.Length > 1 ? (float)playedCardsArray[1].Rank : -1.0f,
-            PlayedCard2Suit = playedCardsArray.Length > 1 ? (float)playedCardsArray[1].Suit : -1.0f,
-            PlayedCard3Rank = playedCardsArray.Length > 2 ? (float)playedCardsArray[2].Rank : -1.0f,
-            PlayedCard3Suit = playedCardsArray.Length > 2 ? (float)playedCardsArray[2].Suit : -1.0f,
+            LeftHandOpponentPlayedCardRank = (float?)leftHandOpponentPlayedCard?.Rank ?? -1.0f,
+            LeftHandOpponentPlayedCardSuit = (float?)leftHandOpponentPlayedCard?.Suit ?? -1.0f,
+            PartnerPlayedCardRank = (float?)partnerPlayedCard?.Rank ?? -1.0f,
+            PartnerPlayedCardSuit = (float?)partnerPlayedCard?.Suit ?? -1.0f,
+            RightHandOpponentPlayedCardRank = (float?)rightHandOpponentPlayedCard?.Rank ?? -1.0f,
+            RightHandOpponentPlayedCardSuit = (float?)rightHandOpponentPlayedCard?.Suit ?? -1.0f,
             TeamScore = teamScore,
             OpponentScore = opponentScore,
             TrickNumber = trickNumber,
-            CardsPlayedInTrick = playedCardsArray.Length,
+            CardsPlayedInTrick = playedCards.Count,
             WinningTrickPlayer = winningTrickPlayer.HasValue ? (float)winningTrickPlayer.Value : -1.0f,
             Card1IsValid = validityArray[0],
             Card2IsValid = validityArray[1],
