@@ -451,20 +451,19 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 
 ## Model Memory Improvements 0.5
 
-1. Record CallTrumpDecision in Deals
-2. Record DiscardedCard in Deals
-3. Record KnownPlayerSuitVoids in Deals
-4. Record DealerPosition and DealerPickedUpCard in PlayCardDecisionRecords
-5. Record KnownPlayerSuitVoids in PlayCardDecisionRecords
-6. Record CardsAccountedFor in PlayCardDecisionRecords
-7. Add CardsAccountedFor to PlayCardAsync in IPlayerActor
-8. Add KnownPlayerSuitVoids to PlayCardAsync in IPlayerActor
-9. Add CardsAccountedFor to PlayCardTrainingData
-10. Add KnownPlayerSuitVoids to PlayCardTrainingData
-11. Add KnownPlayerSuitVoids to PlayCardTrainingData
-12. Add DealerPosition and DealerPickedUpCard to PlayCardTrainingData
+1. ~~Record CallTrumpDecision in Deals~~
+2. ~~Record DiscardedCard in Deals~~
+3. ~~Record KnownPlayerSuitVoids in Deals~~
+4. ~~Record DealerPosition and DealerPickedUpCard in PlayCardDecisionRecords~~
+5. ~~Record KnownPlayerSuitVoids in PlayCardDecisionRecords~~
+6. ~~Record CardsAccountedFor in PlayCardDecisionRecords~~
+7. ~~Add CardsAccountedFor to PlayCardAsync in IPlayerActor~~
+8. ~~Add KnownPlayerSuitVoids to PlayCardAsync in IPlayerActor~~
+9. ~~Add CardsAccountedFor to PlayCardTrainingData~~
+10. ~~Add KnownPlayerSuitVoids to PlayCardTrainingData~~
+11. ~~Add DealerPosition and DealerPickedUpCard to PlayCardTrainingData~~
 
-## User Players 1.0
+## Interactive Play 0.6
 
 1. Add a PlayGame command to allow interactive play
 2. Implement IPlayerActor with methods in NemesisEuchre.Console for handling player actions

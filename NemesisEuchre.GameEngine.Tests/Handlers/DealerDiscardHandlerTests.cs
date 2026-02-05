@@ -21,7 +21,8 @@ public class DealerDiscardHandlerTests
 
     public DealerDiscardHandlerTests()
     {
-        var decisionRecorder = new DecisionRecorder(_contextBuilderMock.Object);
+        var cardAccountingService = new CardAccountingService();
+        var decisionRecorder = new DecisionRecorder(_contextBuilderMock.Object, cardAccountingService);
         _handler = new DealerDiscardHandler(
             _actorResolverMock.Object,
             _contextBuilderMock.Object,
@@ -43,15 +44,7 @@ public class DealerDiscardHandlerTests
         var dealer = deal.Players[PlayerPosition.North];
         var initialHandCount = dealer.CurrentHand.Count;
 
-        _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<Card[]>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<short>(),
-                It.IsAny<short>(),
-                It.IsAny<Suit>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<bool>(),
-                It.IsAny<Card[]>()))
+        _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
             .ReturnsAsync(upCard);
 
         await _handler.HandleDealerDiscardAsync(deal);
@@ -65,29 +58,22 @@ public class DealerDiscardHandlerTests
         var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
         var deal = CreateTestDeal(upCard);
 
-        _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<Card[]>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<short>(),
-                It.IsAny<short>(),
-                It.IsAny<Suit>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<bool>(),
-                It.IsAny<Card[]>()))
+        _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
             .ReturnsAsync(upCard);
 
         await _handler.HandleDealerDiscardAsync(deal);
 
         _playerActorMock.Verify(
             x => x.DiscardCardAsync(
-                It.Is<Card[]>(cards => cards.Length == 6),
-                PlayerPosition.North,
-                10,
-                5,
-                Suit.Hearts,
-                PlayerPosition.North,
-                false,
-                It.Is<Card[]>(cards => cards.Length == 6)),
+                It.Is<DiscardCardContext>(ctx =>
+                    ctx.CardsInHand.Length == 6 &&
+                    ctx.PlayerPosition == PlayerPosition.North &&
+                    ctx.TeamScore == 10 &&
+                    ctx.OpponentScore == 5 &&
+                    ctx.TrumpSuit == Suit.Hearts &&
+
+                    !ctx.CallingPlayerGoingAlone &&
+                    ctx.ValidCardsToDiscard.Length == 6)),
             Times.Once);
     }
 
@@ -97,15 +83,7 @@ public class DealerDiscardHandlerTests
         var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
         var deal = CreateTestDeal(upCard);
 
-        _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<Card[]>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<short>(),
-                It.IsAny<short>(),
-                It.IsAny<Suit>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<bool>(),
-                It.IsAny<Card[]>()))
+        _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
             .ReturnsAsync(upCard);
 
         await _handler.HandleDealerDiscardAsync(deal);
@@ -127,15 +105,7 @@ public class DealerDiscardHandlerTests
 
         var cardToDiscard = dealer.CurrentHand[0];
 
-        _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<Card[]>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<short>(),
-                It.IsAny<short>(),
-                It.IsAny<Suit>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<bool>(),
-                It.IsAny<Card[]>()))
+        _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
             .ReturnsAsync(cardToDiscard);
 
         await _handler.HandleDealerDiscardAsync(deal);
@@ -150,15 +120,7 @@ public class DealerDiscardHandlerTests
         var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
         var deal = CreateTestDeal(upCard);
 
-        _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<Card[]>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<short>(),
-                It.IsAny<short>(),
-                It.IsAny<Suit>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<bool>(),
-                It.IsAny<Card[]>()))
+        _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
             .ReturnsAsync(upCard);
 
         await _handler.HandleDealerDiscardAsync(deal);
@@ -174,15 +136,7 @@ public class DealerDiscardHandlerTests
         var deal = CreateTestDeal(upCard);
         var dealer = deal.Players[PlayerPosition.North];
 
-        _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<Card[]>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<short>(),
-                It.IsAny<short>(),
-                It.IsAny<Suit>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<bool>(),
-                It.IsAny<Card[]>()))
+        _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
             .ReturnsAsync(upCard);
 
         await _handler.HandleDealerDiscardAsync(deal);
@@ -202,15 +156,7 @@ public class DealerDiscardHandlerTests
         _contextBuilderMock.Setup(x => x.GetScores(deal, PlayerPosition.North))
             .Returns((7, 5));
 
-        _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<Card[]>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<short>(),
-                It.IsAny<short>(),
-                It.IsAny<Suit>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<bool>(),
-                It.IsAny<Card[]>()))
+        _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
             .ReturnsAsync(upCard);
 
         await _handler.HandleDealerDiscardAsync(deal);
@@ -226,15 +172,7 @@ public class DealerDiscardHandlerTests
         var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
         var deal = CreateTestDeal(upCard);
 
-        _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<Card[]>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<short>(),
-                It.IsAny<short>(),
-                It.IsAny<Suit>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<bool>(),
-                It.IsAny<Card[]>()))
+        _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
             .ReturnsAsync(upCard);
 
         await _handler.HandleDealerDiscardAsync(deal);
@@ -253,15 +191,7 @@ public class DealerDiscardHandlerTests
         deal.CallingPlayer = PlayerPosition.East;
         deal.CallingPlayerIsGoingAlone = true;
 
-        _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<Card[]>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<short>(),
-                It.IsAny<short>(),
-                It.IsAny<Suit>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<bool>(),
-                It.IsAny<Card[]>()))
+        _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
             .ReturnsAsync(upCard);
 
         await _handler.HandleDealerDiscardAsync(deal);
@@ -303,15 +233,7 @@ public class DealerDiscardHandlerTests
         _contextBuilderMock.Setup(x => x.GetScores(dealSouth, PlayerPosition.South))
             .Returns((10, 5));
 
-        _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<Card[]>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<short>(),
-                It.IsAny<short>(),
-                It.IsAny<Suit>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<bool>(),
-                It.IsAny<Card[]>()))
+        _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
             .ReturnsAsync(upCard);
 
         await _handler.HandleDealerDiscardAsync(dealSouth);
@@ -328,15 +250,7 @@ public class DealerDiscardHandlerTests
         var dealer = deal.Players[PlayerPosition.North];
         var cardToDiscard = dealer.CurrentHand[0];
 
-        _playerActorMock.Setup(x => x.DiscardCardAsync(
-                It.IsAny<Card[]>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<short>(),
-                It.IsAny<short>(),
-                It.IsAny<Suit>(),
-                It.IsAny<PlayerPosition>(),
-                It.IsAny<bool>(),
-                It.IsAny<Card[]>()))
+        _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
             .ReturnsAsync(cardToDiscard);
 
         await _handler.HandleDealerDiscardAsync(deal);
@@ -347,6 +261,23 @@ public class DealerDiscardHandlerTests
         record.ChosenCard.Should().Be(cardToDiscard);
         dealer.CurrentHand.Should().NotContain(cardToDiscard);
         dealer.CurrentHand.Should().HaveCount(5);
+    }
+
+    [Fact]
+    public async Task HandleDealerDiscardAsync_SetsDiscardedCardOnDeal()
+    {
+        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var deal = CreateTestDeal(upCard);
+        var dealer = deal.Players[PlayerPosition.North];
+        var cardToDiscard = dealer.CurrentHand[0];
+
+        _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
+            .ReturnsAsync(cardToDiscard);
+
+        await _handler.HandleDealerDiscardAsync(deal);
+
+        deal.DiscardedCard.Should().NotBeNull();
+        deal.DiscardedCard.Should().Be(cardToDiscard);
     }
 
     private static Deal CreateTestDeal(Card upCard)

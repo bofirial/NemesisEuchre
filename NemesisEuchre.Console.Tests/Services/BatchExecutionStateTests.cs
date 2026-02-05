@@ -42,7 +42,7 @@ public class BatchExecutionStateTests
         using var state = new BatchExecutionState(100);
         var counter = 0;
 
-        await state.ExecuteWithLockAsync(() => counter++);
+        await state.ExecuteWithLockAsync(() => counter++, cancellationToken: TestContext.Current.CancellationToken);
 
         counter.Should().Be(1);
     }
@@ -52,7 +52,7 @@ public class BatchExecutionStateTests
     {
         using var state = new BatchExecutionState(100);
 
-        var result = await state.ExecuteWithLockAsync(() => 42);
+        var result = await state.ExecuteWithLockAsync(() => 42, cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().Be(42);
     }

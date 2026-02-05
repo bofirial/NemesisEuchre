@@ -157,7 +157,7 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(game);
 
-        var results = await _sut.RunBatchAsync(1);
+        var results = await _sut.RunBatchAsync(1, cancellationToken: TestContext.Current.CancellationToken);
 
         results.TotalGames.Should().Be(1);
         results.Team1Wins.Should().Be(1);
@@ -183,7 +183,7 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(() => games[callCount++]);
 
-        var results = await _sut.RunBatchAsync(5);
+        var results = await _sut.RunBatchAsync(5, cancellationToken: TestContext.Current.CancellationToken);
 
         results.TotalGames.Should().Be(5);
         results.Team1Wins.Should().Be(3);
@@ -201,7 +201,7 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(game);
 
-        await _sut.RunBatchAsync(5);
+        await _sut.RunBatchAsync(5, cancellationToken: TestContext.Current.CancellationToken);
 
         _serviceScopeFactoryMock.Verify(x => x.CreateScope(), Times.Exactly(6), "5 scopes for games + 1 scope for batch save");
     }
@@ -213,7 +213,7 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(game);
 
-        await _sut.RunBatchAsync(5);
+        await _sut.RunBatchAsync(5, cancellationToken: TestContext.Current.CancellationToken);
 
         _serviceScopeMock.Verify(x => x.Dispose(), Times.Exactly(6), "5 scopes for games + 1 scope for batch save");
     }
@@ -230,7 +230,7 @@ public class BatchGameOrchestratorTests
         progressReporter.Setup(x => x.ReportGameCompleted(It.IsAny<int>()))
             .Callback<int>(reportedCompletedValues.Add);
 
-        await _sut.RunBatchAsync(3, progressReporter: progressReporter.Object);
+        await _sut.RunBatchAsync(3, progressReporter: progressReporter.Object, cancellationToken: TestContext.Current.CancellationToken);
 
         reportedCompletedValues.Should().HaveCount(3);
         reportedCompletedValues.Should().Equal(1, 2, 3);
@@ -279,7 +279,7 @@ public class BatchGameOrchestratorTests
                 return game;
             });
 
-        await sut.RunBatchAsync(10);
+        await sut.RunBatchAsync(10, cancellationToken: TestContext.Current.CancellationToken);
 
         maxConcurrent.Should().BeLessThanOrEqualTo(2);
     }
@@ -301,7 +301,7 @@ public class BatchGameOrchestratorTests
                 return game;
             });
 
-        var results = await _sut.RunBatchAsync(3);
+        var results = await _sut.RunBatchAsync(3, cancellationToken: TestContext.Current.CancellationToken);
 
         results.TotalGames.Should().Be(3);
         results.Team1Wins.Should().Be(2);
@@ -318,7 +318,7 @@ public class BatchGameOrchestratorTests
 
         _loggerMock.Setup(x => x.IsEnabled(LogLevel.Error)).Returns(true);
 
-        await _sut.RunBatchAsync(1);
+        await _sut.RunBatchAsync(1, cancellationToken: TestContext.Current.CancellationToken);
 
         _loggerMock.Verify(
             x => x.Log(
@@ -384,7 +384,7 @@ public class BatchGameOrchestratorTests
                 return game;
             });
 
-        await sut.RunBatchAsync(10);
+        await sut.RunBatchAsync(10, cancellationToken: TestContext.Current.CancellationToken);
 
         maxConcurrent.Should().BeLessThanOrEqualTo(3);
     }
@@ -445,7 +445,7 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(() => games[callCount++]);
 
-        var results = await _sut.RunBatchAsync(4);
+        var results = await _sut.RunBatchAsync(4, cancellationToken: TestContext.Current.CancellationToken);
 
         results.Team1WinRate.Should().BeApproximately(0.75, 0.01);
         results.Team2WinRate.Should().BeApproximately(0.25, 0.01);
@@ -457,7 +457,7 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ThrowsAsync(new InvalidOperationException("All games failed"));
 
-        var results = await _sut.RunBatchAsync(3);
+        var results = await _sut.RunBatchAsync(3, cancellationToken: TestContext.Current.CancellationToken);
 
         results.Team1WinRate.Should().Be(0.0);
         results.Team2WinRate.Should().Be(0.0);
@@ -471,7 +471,7 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(game);
 
-        await _sut.RunBatchAsync(5);
+        await _sut.RunBatchAsync(5, cancellationToken: TestContext.Current.CancellationToken);
 
         _gameRepositoryMock.Verify(
             x => x.SaveCompletedGamesBulkAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),
@@ -485,7 +485,7 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(game);
 
-        await _sut.RunBatchAsync(3);
+        await _sut.RunBatchAsync(3, cancellationToken: TestContext.Current.CancellationToken);
 
         _gameRepositoryMock.Verify(
             x => x.SaveCompletedGamesBulkAsync(
@@ -506,7 +506,7 @@ public class BatchGameOrchestratorTests
         _gameRepositoryMock.Setup(x => x.SaveCompletedGamesBulkAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
-        var results = await _sut.RunBatchAsync(3);
+        var results = await _sut.RunBatchAsync(3, cancellationToken: TestContext.Current.CancellationToken);
 
         results.TotalGames.Should().Be(3);
         results.Team1Wins.Should().Be(3);
@@ -540,7 +540,7 @@ public class BatchGameOrchestratorTests
         _gameRepositoryMock.Setup(x => x.SaveCompletedGamesBulkAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
-        await sut.RunBatchAsync(1);
+        await sut.RunBatchAsync(1, cancellationToken: TestContext.Current.CancellationToken);
 
         persistenceLogger.Verify(
             x => x.Log(
@@ -574,7 +574,7 @@ public class BatchGameOrchestratorTests
             .Callback<IEnumerable<Game>, IProgress<int>?, CancellationToken>((games, _, _) => persistedGameCount += games.Count())
             .Returns(Task.CompletedTask);
 
-        await _sut.RunBatchAsync(3);
+        await _sut.RunBatchAsync(3, cancellationToken: TestContext.Current.CancellationToken);
 
         persistedGameCount.Should().Be(2, "Only 2 games should be persisted (1 failed)");
     }
@@ -586,7 +586,7 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(game);
 
-        await _sut.RunBatchAsync(5, doNotPersist: true);
+        await _sut.RunBatchAsync(5, doNotPersist: true, cancellationToken: TestContext.Current.CancellationToken);
 
         _gameRepositoryMock.Verify(
             x => x.SaveCompletedGamesBulkAsync(It.IsAny<IEnumerable<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),
@@ -603,7 +603,7 @@ public class BatchGameOrchestratorTests
 
         var progressReporter = new Mock<IBatchProgressReporter>();
 
-        await _sut.RunBatchAsync(3, progressReporter: progressReporter.Object, doNotPersist: true);
+        await _sut.RunBatchAsync(3, progressReporter: progressReporter.Object, doNotPersist: true, cancellationToken: TestContext.Current.CancellationToken);
 
         progressReporter.Verify(x => x.ReportGameCompleted(It.IsAny<int>()), Times.Exactly(3));
         progressReporter.Verify(
@@ -626,7 +626,7 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(() => games[callCount++]);
 
-        var results = await _sut.RunBatchAsync(3, doNotPersist: true);
+        var results = await _sut.RunBatchAsync(3, doNotPersist: true, cancellationToken: TestContext.Current.CancellationToken);
 
         results.TotalGames.Should().Be(3);
         results.Team1Wins.Should().Be(2);
@@ -655,7 +655,7 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(game);
 
-        await sut.RunBatchAsync(3, doNotPersist: true);
+        await sut.RunBatchAsync(3, doNotPersist: true, cancellationToken: TestContext.Current.CancellationToken);
 
         persistenceLogger.Verify(
             x => x.Log(

@@ -38,13 +38,20 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
             DealerPosition = deal.DealerPosition,
             DeckJson = JsonSerializer.Serialize(deal.Deck.SortByTrump(deal.Trump), JsonSerializationOptions.Default),
             UpCardJson = deal.UpCard != null ? JsonSerializer.Serialize(deal.UpCard, JsonSerializationOptions.Default) : null,
+            DiscardedCardJson = deal.DiscardedCard != null ? JsonSerializer.Serialize(deal.DiscardedCard, JsonSerializationOptions.Default) : null,
             Trump = deal.Trump,
             CallingPlayer = deal.CallingPlayer,
             CallingPlayerIsGoingAlone = deal.CallingPlayerIsGoingAlone,
+            ChosenDecision = deal.ChosenDecision,
             DealResult = deal.DealResult,
             WinningTeam = deal.WinningTeam,
             Team1Score = deal.Team1Score,
             Team2Score = deal.Team2Score,
+            KnownPlayerSuitVoidsJson = deal.KnownPlayerSuitVoids.Count > 0
+                ? JsonSerializer.Serialize(
+                    deal.KnownPlayerSuitVoids.Select(v => new { v.PlayerPosition, v.Suit }),
+                    JsonSerializationOptions.Default)
+                : null,
             PlayersJson = JsonSerializer.Serialize(deal.Players, JsonSerializationOptions.Default),
             Tricks = [.. deal.CompletedTricks.Select((trick, index) => trickMapper.Map(trick, index + 1, gamePlayers, didTeam1WinGame, didTeam2WinGame, deal.WinningTeam, deal.DealResult))],
         };

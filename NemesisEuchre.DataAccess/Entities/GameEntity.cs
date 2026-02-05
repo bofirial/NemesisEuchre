@@ -11,7 +11,7 @@ public class GameEntity
 
     public GameStatus GameStatus { get; set; }
 
-    public string PlayersJson { get; set; } = null!;
+    public required string PlayersJson { get; set; }
 
     public short Team1Score { get; set; }
 
@@ -42,7 +42,7 @@ public class GameEntityConfiguration : IEntityTypeConfiguration<GameEntity>
 
         builder.Property(e => e.PlayersJson)
             .IsRequired()
-            .HasMaxLength(4000);
+            .HasMaxLength(500);
 
         builder.Property(e => e.Team1Score)
             .IsRequired();

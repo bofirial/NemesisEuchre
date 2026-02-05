@@ -54,18 +54,18 @@ public class BatchGameOrchestrator(
         }
 
         var stopwatch = Stopwatch.StartNew();
-        using var state = new BatchExecutionState(_persistenceOptions.BatchSize);
-        var tasks = parallelismCoordinator.CreateParallelTasks(
-            numberOfGames,
-            state,
-            (gameNumber, s, ct) => RunSingleGameAsync(gameNumber, s, progressReporter, doNotPersist, team1ActorTypes, team2ActorTypes, ct),
-            cancellationToken);
-
-        await Task.WhenAll(tasks).ConfigureAwait(false);
-        await persistenceCoordinator.SavePendingGamesAsync(state, progressReporter, doNotPersist, force: true, cancellationToken).ConfigureAwait(false);
+        var results = await ExecuteSingleBatchAsync(numberOfGames, progressReporter, doNotPersist, team1ActorTypes, team2ActorTypes, cancellationToken).ConfigureAwait(false);
         stopwatch.Stop();
 
-        return AggregateResults(numberOfGames, state, stopwatch.Elapsed);
+        return new BatchGameResults
+        {
+            TotalGames = results.TotalGames,
+            Team1Wins = results.Team1Wins,
+            Team2Wins = results.Team2Wins,
+            FailedGames = results.FailedGames,
+            TotalDeals = results.TotalDeals,
+            ElapsedTime = stopwatch.Elapsed,
+        };
     }
 
     private static BatchGameResults AggregateResults(
@@ -82,6 +82,27 @@ public class BatchGameOrchestrator(
             TotalDeals = state.TotalDeals,
             ElapsedTime = elapsedTime,
         };
+    }
+
+    private async Task<BatchGameResults> ExecuteSingleBatchAsync(
+        int numberOfGames,
+        IBatchProgressReporter? progressReporter,
+        bool doNotPersist,
+        ActorType[]? team1ActorTypes,
+        ActorType[]? team2ActorTypes,
+        CancellationToken cancellationToken)
+    {
+        using var state = new BatchExecutionState(_persistenceOptions.BatchSize);
+        var tasks = parallelismCoordinator.CreateParallelTasks(
+            numberOfGames,
+            state,
+            (gameNumber, s, ct) => RunSingleGameAsync(gameNumber, s, progressReporter, doNotPersist, team1ActorTypes, team2ActorTypes, ct),
+            cancellationToken);
+
+        await Task.WhenAll(tasks).ConfigureAwait(false);
+        await persistenceCoordinator.SavePendingGamesAsync(state, progressReporter, doNotPersist, force: true, cancellationToken).ConfigureAwait(false);
+
+        return AggregateResults(numberOfGames, state, TimeSpan.Zero);
     }
 
     private async Task<BatchGameResults> RunBatchesInSubBatchesAsync(
@@ -110,22 +131,20 @@ public class BatchGameOrchestrator(
                 completedSoFar,
                 savedSoFar);
 
-            using var state = new BatchExecutionState(_persistenceOptions.BatchSize);
-            var tasks = parallelismCoordinator.CreateParallelTasks(
+            var batchResults = await ExecuteSingleBatchAsync(
                 gamesInThisBatch,
-                state,
-                (gameNumber, s, ct) => RunSingleGameAsync(gameNumber, s, subProgressReporter, doNotPersist, team1ActorTypes, team2ActorTypes, ct),
-                cancellationToken);
+                subProgressReporter,
+                doNotPersist,
+                team1ActorTypes,
+                team2ActorTypes,
+                cancellationToken).ConfigureAwait(false);
 
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-            await persistenceCoordinator.SavePendingGamesAsync(state, subProgressReporter, doNotPersist, force: true, cancellationToken).ConfigureAwait(false);
-
-            totalTeam1Wins += state.Team1Wins;
-            totalTeam2Wins += state.Team2Wins;
-            totalFailedGames += state.FailedGames;
-            totalDeals += state.TotalDeals;
+            totalTeam1Wins += batchResults.Team1Wins;
+            totalTeam2Wins += batchResults.Team2Wins;
+            totalFailedGames += batchResults.FailedGames;
+            totalDeals += batchResults.TotalDeals;
             completedSoFar += gamesInThisBatch;
-            savedSoFar += state.SavedGames;
+            savedSoFar += batchResults.TotalGames;
         }
 
         stopwatch.Stop();

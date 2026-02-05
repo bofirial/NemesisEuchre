@@ -13,7 +13,7 @@ public class PlayCardDecisionEntity : IDecisionEntity
 
     public int TrickId { get; set; }
 
-    public string CardsInHandJson { get; set; } = null!;
+    public required string CardsInHandJson { get; set; }
 
     public short TeamScore { get; set; }
 
@@ -23,19 +23,27 @@ public class PlayCardDecisionEntity : IDecisionEntity
 
     public RelativeSuit? LeadSuit { get; set; }
 
-    public string PlayedCardsJson { get; set; } = null!;
+    public required string PlayedCardsJson { get; set; }
 
     public RelativePlayerPosition? WinningTrickPlayer { get; set; }
 
     public short TrickNumber { get; set; }
 
-    public string ValidCardsToPlayJson { get; set; } = null!;
+    public required string ValidCardsToPlayJson { get; set; }
 
     public RelativePlayerPosition CallingPlayer { get; set; }
 
     public bool CallingPlayerGoingAlone { get; set; }
 
-    public string ChosenCardJson { get; set; } = null!;
+    public RelativePlayerPosition DealerPosition { get; set; }
+
+    public string? DealerPickedUpCardJson { get; set; }
+
+    public required string ChosenCardJson { get; set; }
+
+    public required string KnownPlayerSuitVoidsJson { get; set; }
+
+    public required string CardsAccountedForJson { get; set; }
 
     public ActorType? ActorType { get; set; }
 
@@ -47,9 +55,9 @@ public class PlayCardDecisionEntity : IDecisionEntity
 
     public bool? DidTeamWinGame { get; set; }
 
-    public DealEntity Deal { get; set; } = null!;
+    public DealEntity? Deal { get; set; }
 
-    public TrickEntity Trick { get; set; } = null!;
+    public TrickEntity? Trick { get; set; }
 }
 
 public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<PlayCardDecisionEntity>
@@ -70,7 +78,8 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
             .IsRequired();
 
         builder.Property(e => e.CardsInHandJson)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(250);
 
         builder.Property(e => e.TeamScore)
             .IsRequired();
@@ -88,7 +97,8 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
             .HasMaxLength(30);
 
         builder.Property(e => e.PlayedCardsJson)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(200);
 
         builder.Property(e => e.WinningTrickPlayer)
             .HasConversion<string>()
@@ -98,7 +108,8 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
             .IsRequired();
 
         builder.Property(e => e.ValidCardsToPlayJson)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(250);
 
         builder.Property(e => e.CallingPlayer)
             .IsRequired()
@@ -108,9 +119,23 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
         builder.Property(e => e.CallingPlayerGoingAlone)
             .IsRequired();
 
+        builder.Property(e => e.DealerPosition)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(25);
+
+        builder.Property(e => e.DealerPickedUpCardJson)
+            .HasMaxLength(50);
+
+        builder.Property(e => e.KnownPlayerSuitVoidsJson)
+            .HasMaxLength(1000);
+
+        builder.Property(e => e.CardsAccountedForJson)
+            .HasMaxLength(1000);
+
         builder.Property(e => e.ChosenCardJson)
             .IsRequired()
-            .HasMaxLength(200);
+            .HasMaxLength(50);
 
         builder.Property(e => e.ActorType)
             .HasConversion<string>()

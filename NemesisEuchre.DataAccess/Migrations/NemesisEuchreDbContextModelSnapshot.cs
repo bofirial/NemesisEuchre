@@ -36,7 +36,8 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     b.Property<string>("CardsInHandJson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("ChosenDecisionJson")
                         .IsRequired()
@@ -70,12 +71,13 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     b.Property<string>("UpCardJson")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("ValidDecisionsJson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.HasKey("CallTrumpDecisionId");
 
@@ -103,6 +105,10 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<bool>("CallingPlayerIsGoingAlone")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ChosenDecision")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<int>("DealNumber")
                         .HasColumnType("int");
 
@@ -121,14 +127,24 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     b.Property<string>("DeckJson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("DiscardedCardJson")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("GameId")
                         .HasColumnType("int");
 
+                    b.Property<string>("KnownPlayerSuitVoidsJson")
+                        .HasMaxLength(600)
+                        .HasColumnType("nvarchar(600)");
+
                     b.Property<string>("PlayersJson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1500)
+                        .HasColumnType("nvarchar(1500)");
 
                     b.Property<short>("Team1Score")
                         .HasColumnType("smallint");
@@ -141,8 +157,8 @@ namespace NemesisEuchre.DataAccess.Migrations
                         .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("UpCardJson")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("WinningTeam")
                         .HasMaxLength(10)
@@ -178,12 +194,13 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     b.Property<string>("CardsInHandJson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("ChosenCardJson")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("DealId")
                         .HasColumnType("int");
@@ -234,8 +251,8 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     b.Property<string>("PlayersJson")
                         .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<short>("Team1Score")
                         .HasColumnType("smallint");
@@ -278,17 +295,32 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<bool>("CallingPlayerGoingAlone")
                         .HasColumnType("bit");
 
+                    b.Property<string>("CardsAccountedForJson")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<string>("CardsInHandJson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("ChosenCardJson")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("DealId")
                         .HasColumnType("int");
+
+                    b.Property<string>("DealerPickedUpCardJson")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DealerPosition")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
 
                     b.Property<bool?>("DidTeamWinDeal")
                         .HasColumnType("bit");
@@ -298,6 +330,11 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     b.Property<bool?>("DidTeamWinTrick")
                         .HasColumnType("bit");
+
+                    b.Property<string>("KnownPlayerSuitVoidsJson")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("LeadPlayer")
                         .IsRequired()
@@ -313,7 +350,8 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     b.Property<string>("PlayedCardsJson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<short?>("RelativeDealPoints")
                         .HasColumnType("smallint");
@@ -329,7 +367,8 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     b.Property<string>("ValidCardsToPlayJson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("WinningTrickPlayer")
                         .HasMaxLength(25)
@@ -359,8 +398,8 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     b.Property<string>("CardsPlayedJson")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.Property<int>("DealId")
                         .HasColumnType("int");

@@ -29,7 +29,7 @@ public interface IDecisionRecorder
         Card chosenCard);
 }
 
-public class DecisionRecorder(IPlayerContextBuilder contextBuilder) : IDecisionRecorder
+public class DecisionRecorder(IPlayerContextBuilder contextBuilder, ICardAccountingService cardAccountingService) : IDecisionRecorder
 {
     public void RecordCallTrumpDecision(
         Deal deal,
@@ -68,6 +68,12 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder) : IDecisionR
     {
         var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
 
+        var accountedForCards = cardAccountingService.GetAccountedForCards(
+            deal,
+            trick,
+            playerPosition,
+            hand);
+
         var record = new PlayCardDecisionRecord
         {
             CardsInHand = [.. hand],
@@ -87,6 +93,10 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder) : IDecisionR
             ValidCardsToPlay = [.. validCards],
             CallingPlayer = deal.CallingPlayer!.Value,
             CallingPlayerGoingAlone = deal.CallingPlayerIsGoingAlone,
+            KnownPlayerSuitVoids = [.. deal.KnownPlayerSuitVoids],
+            Dealer = deal.DealerPosition!.Value,
+            DealerPickedUpCard = deal.UpCard,
+            CardsAccountedFor = [.. accountedForCards],
             ChosenCard = chosenCard,
         };
 

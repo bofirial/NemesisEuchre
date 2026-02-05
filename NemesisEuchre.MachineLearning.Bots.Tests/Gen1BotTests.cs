@@ -202,9 +202,14 @@ public class Gen1BotTests
             RelativePlayerPosition.Self,
             false,
             RelativePlayerPosition.LeftHandOpponent,
+            null,
+            RelativePlayerPosition.Self,
             RelativeSuit.Trump,
+            [],
+            [],
             playedCards,
             null,
+            1,
             validCardsToPlay);
 
         result.Should().BeOneOf(validCardsToPlay);

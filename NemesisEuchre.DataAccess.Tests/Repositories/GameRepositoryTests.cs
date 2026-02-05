@@ -44,9 +44,9 @@ public class GameRepositoryTests
         var repository = new GameRepository(context, mockLogger.Object, mockMapper.Object, mockOptions.Object);
 
         var game = new Game { GameStatus = GameStatus.Complete };
-        await repository.SaveCompletedGameAsync(game);
+        await repository.SaveCompletedGameAsync(game, TestContext.Current.CancellationToken);
 
-        var savedGame = await context.Games!.FirstOrDefaultAsync();
+        var savedGame = await context.Games!.FirstOrDefaultAsync(TestContext.Current.CancellationToken);
         savedGame.Should().NotBeNull();
         savedGame!.GameStatus.Should().Be(GameStatus.Complete);
     }

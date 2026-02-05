@@ -10,7 +10,10 @@ public class PlayCardDecisionRecordTests
     [Fact]
     public void PlayCardDecisionRecord_DefaultInitialization_SetsCollectionsToEmpty()
     {
-        var record = new PlayCardDecisionRecord();
+        var record = new PlayCardDecisionRecord
+        {
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+        };
 
         record.CardsInHand.Should().NotBeNull();
         record.CardsInHand.Should().BeEmpty();
@@ -37,6 +40,7 @@ public class PlayCardDecisionRecordTests
         var record = new PlayCardDecisionRecord
         {
             CardsInHand = hand,
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
         };
 
         record.CardsInHand.Should().HaveCount(cardCount);
@@ -59,6 +63,7 @@ public class PlayCardDecisionRecordTests
         {
             CardsInHand = hand,
             ValidCardsToPlay = hand,
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
         };
 
         record.ValidCardsToPlay.Should().HaveCount(5);
@@ -86,6 +91,7 @@ public class PlayCardDecisionRecordTests
         {
             CardsInHand = hand,
             ValidCardsToPlay = validCards,
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
         };
 
         record.ValidCardsToPlay.Should().HaveCount(2);
@@ -106,6 +112,7 @@ public class PlayCardDecisionRecordTests
         {
             CardsInHand = hand,
             ValidCardsToPlay = hand,
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
         };
 
         record.ValidCardsToPlay.Should().HaveCount(3);
@@ -122,6 +129,7 @@ public class PlayCardDecisionRecordTests
         var record = new PlayCardDecisionRecord
         {
             LeadPlayer = position,
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
         };
 
         record.LeadPlayer.Should().Be(position);
@@ -133,6 +141,7 @@ public class PlayCardDecisionRecordTests
         var record = new PlayCardDecisionRecord
         {
             LeadSuit = null,
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
         };
 
         record.LeadSuit.Should().BeNull();
@@ -144,6 +153,7 @@ public class PlayCardDecisionRecordTests
         var record = new PlayCardDecisionRecord
         {
             LeadSuit = Suit.Hearts,
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
         };
 
         record.LeadSuit.Should().Be(Suit.Hearts);
@@ -244,6 +254,7 @@ public class PlayCardDecisionRecordTests
             TeamScore = 0,
             TrumpSuit = Suit.Hearts,
             LeadPlayer = PlayerPosition.North,
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
         };
 
         var record2 = new PlayCardDecisionRecord
@@ -252,6 +263,7 @@ public class PlayCardDecisionRecordTests
             TeamScore = 5,
             TrumpSuit = Suit.Hearts,
             LeadPlayer = PlayerPosition.East,
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
         };
 
         trick.PlayCardDecisions.Add(record1);

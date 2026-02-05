@@ -29,7 +29,8 @@ public class ModelTrainingOrchestratorTests
             "./models",
             0,
             1,
-            new Progress<TrainingProgress>());
+            new Progress<TrainingProgress>(),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         results.SuccessfulModels.Should().Be(0);
         results.FailedModels.Should().Be(0);
@@ -71,7 +72,8 @@ public class ModelTrainingOrchestratorTests
             "./models",
             1000,
             1,
-            new Progress<TrainingProgress>());
+            new Progress<TrainingProgress>(),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         results.SuccessfulModels.Should().Be(1);
         results.FailedModels.Should().Be(0);
@@ -113,7 +115,8 @@ public class ModelTrainingOrchestratorTests
             "./models",
             1000,
             1,
-            new Progress<TrainingProgress>());
+            new Progress<TrainingProgress>(),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         results.SuccessfulModels.Should().Be(0);
         results.FailedModels.Should().Be(1);
@@ -163,7 +166,8 @@ public class ModelTrainingOrchestratorTests
             "./models",
             1000,
             1,
-            new Progress<TrainingProgress>());
+            new Progress<TrainingProgress>(),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         results.SuccessfulModels.Should().Be(1);
         results.FailedModels.Should().Be(1);

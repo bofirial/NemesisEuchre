@@ -11,7 +11,7 @@ public class CallTrumpDecisionEntity : IDecisionEntity
 
     public int DealId { get; set; }
 
-    public string CardsInHandJson { get; set; } = null!;
+    public required string CardsInHandJson { get; set; }
 
     public short TeamScore { get; set; }
 
@@ -19,11 +19,11 @@ public class CallTrumpDecisionEntity : IDecisionEntity
 
     public RelativePlayerPosition DealerPosition { get; set; }
 
-    public string UpCardJson { get; set; } = null!;
+    public required string UpCardJson { get; set; }
 
-    public string ValidDecisionsJson { get; set; } = null!;
+    public required string ValidDecisionsJson { get; set; }
 
-    public string ChosenDecisionJson { get; set; } = null!;
+    public required string ChosenDecisionJson { get; set; }
 
     public byte DecisionOrder { get; set; }
 
@@ -35,7 +35,7 @@ public class CallTrumpDecisionEntity : IDecisionEntity
 
     public bool? DidTeamWinGame { get; set; }
 
-    public DealEntity Deal { get; set; } = null!;
+    public DealEntity? Deal { get; set; }
 }
 
 public class CallTrumpDecisionEntityConfiguration : IEntityTypeConfiguration<CallTrumpDecisionEntity>
@@ -53,6 +53,7 @@ public class CallTrumpDecisionEntityConfiguration : IEntityTypeConfiguration<Cal
             .IsRequired();
 
         builder.Property(e => e.CardsInHandJson)
+            .HasMaxLength(200)
             .IsRequired();
 
         builder.Property(e => e.TeamScore)
@@ -68,9 +69,10 @@ public class CallTrumpDecisionEntityConfiguration : IEntityTypeConfiguration<Cal
 
         builder.Property(e => e.UpCardJson)
             .IsRequired()
-            .HasMaxLength(200);
+            .HasMaxLength(50);
 
         builder.Property(e => e.ValidDecisionsJson)
+            .HasMaxLength(150)
             .IsRequired();
 
         builder.Property(e => e.ChosenDecisionJson)

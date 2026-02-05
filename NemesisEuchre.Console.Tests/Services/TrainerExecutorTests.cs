@@ -38,7 +38,8 @@ public class TrainerExecutorTests
             "./models",
             1000,
             1,
-            new Progress<TrainingProgress>());
+            new Progress<TrainingProgress>(),
+            cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Be("No training data available");

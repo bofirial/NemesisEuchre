@@ -58,12 +58,12 @@ public class PlayCardModelTrainerTests
             .RuleFor(x => x.Card5Suit, f => f.Random.Float(0, 3))
             .RuleFor(x => x.LeadPlayer, f => f.Random.Float(0, 3))
             .RuleFor(x => x.LeadSuit, f => f.Random.Float(0, 3))
-            .RuleFor(x => x.PlayedCard1Rank, f => f.Random.Float(0, 5))
-            .RuleFor(x => x.PlayedCard1Suit, f => f.Random.Float(0, 3))
-            .RuleFor(x => x.PlayedCard2Rank, f => f.Random.Float(0, 5))
-            .RuleFor(x => x.PlayedCard2Suit, f => f.Random.Float(0, 3))
-            .RuleFor(x => x.PlayedCard3Rank, f => f.Random.Float(0, 5))
-            .RuleFor(x => x.PlayedCard3Suit, f => f.Random.Float(0, 3))
+            .RuleFor(x => x.LeftHandOpponentPlayedCardRank, f => f.Random.Float(0, 5))
+            .RuleFor(x => x.LeftHandOpponentPlayedCardSuit, f => f.Random.Float(0, 3))
+            .RuleFor(x => x.PartnerPlayedCardRank, f => f.Random.Float(0, 5))
+            .RuleFor(x => x.PartnerPlayedCardSuit, f => f.Random.Float(0, 3))
+            .RuleFor(x => x.RightHandOpponentPlayedCardRank, f => f.Random.Float(0, 5))
+            .RuleFor(x => x.RightHandOpponentPlayedCardSuit, f => f.Random.Float(0, 3))
             .RuleFor(x => x.TeamScore, f => f.Random.Float(0, 10))
             .RuleFor(x => x.OpponentScore, f => f.Random.Float(0, 10))
             .RuleFor(x => x.TrickNumber, f => f.Random.Float(1, 5))
@@ -84,7 +84,7 @@ public class PlayCardModelTrainerTests
     {
         var trainingData = _faker.Generate(100);
 
-        var result = await _trainer.TrainAsync(trainingData);
+        var result = await _trainer.TrainAsync(trainingData, cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().NotBeNull();
         result.Model.Should().NotBeNull();
@@ -99,7 +99,7 @@ public class PlayCardModelTrainerTests
     {
         var trainingData = _faker.Generate(100);
 
-        var result = await _trainer.TrainAsync(trainingData);
+        var result = await _trainer.TrainAsync(trainingData, cancellationToken: TestContext.Current.CancellationToken);
 
         ((EvaluationMetrics)result.ValidationMetrics).MicroAccuracy.Should().BeGreaterThanOrEqualTo(0);
         ((EvaluationMetrics)result.ValidationMetrics).MacroAccuracy.Should().BeGreaterThanOrEqualTo(0);
@@ -149,10 +149,10 @@ public class PlayCardModelTrainerTests
     public async Task EvaluateAsync_AfterTraining_ReturnsMetrics()
     {
         var trainingData = _faker.Generate(100);
-        await _trainer.TrainAsync(trainingData);
+        await _trainer.TrainAsync(trainingData, cancellationToken: TestContext.Current.CancellationToken);
 
         var testData = _mlContext.Data.LoadFromEnumerable(_faker.Generate(20));
-        var metrics = await _trainer.EvaluateAsync(testData);
+        var metrics = await _trainer.EvaluateAsync(testData, cancellationToken: TestContext.Current.CancellationToken);
 
         metrics.Should().NotBeNull();
         metrics.MicroAccuracy.Should().BeInRange(0, 1);
@@ -188,13 +188,13 @@ public class PlayCardModelTrainerTests
     public async Task SaveModelAsync_AfterTraining_CreatesModelAndMetadataFiles()
     {
         var trainingData = _faker.Generate(100);
-        var result = await _trainer.TrainAsync(trainingData);
+        var result = await _trainer.TrainAsync(trainingData, cancellationToken: TestContext.Current.CancellationToken);
 
         var modelsDirectory = Path.Combine(Path.GetTempPath(), $"test_models_{Guid.NewGuid()}");
 
         try
         {
-            await _trainer.SaveModelAsync(modelsDirectory, 1, ActorType.Chaos, result);
+            await _trainer.SaveModelAsync(modelsDirectory, 1, ActorType.Chaos, result, cancellationToken: TestContext.Current.CancellationToken);
 
             var modelPath = Path.Combine(modelsDirectory, "gen1_playcard_v1.zip");
             var metadataPath = Path.Combine(modelsDirectory, "gen1_playcard_v1.json");
@@ -202,7 +202,7 @@ public class PlayCardModelTrainerTests
             File.Exists(modelPath).Should().BeTrue();
             File.Exists(metadataPath).Should().BeTrue();
 
-            var metadataContent = await File.ReadAllTextAsync(metadataPath);
+            var metadataContent = await File.ReadAllTextAsync(metadataPath, cancellationToken: TestContext.Current.CancellationToken);
             metadataContent.Should().Contain("PlayCard");
             metadataContent.Should().Contain("LightGbm");
             metadataContent.Should().Contain("Chaos");
@@ -220,18 +220,18 @@ public class PlayCardModelTrainerTests
     public async Task SaveModelAsync_AfterTraining_CreatesEvaluationReportFile()
     {
         var trainingData = _faker.Generate(100);
-        var result = await _trainer.TrainAsync(trainingData);
+        var result = await _trainer.TrainAsync(trainingData, cancellationToken: TestContext.Current.CancellationToken);
 
         var modelsDirectory = Path.Combine(Path.GetTempPath(), $"test_models_{Guid.NewGuid()}");
 
         try
         {
-            await _trainer.SaveModelAsync(modelsDirectory, 1, ActorType.Chaos, result);
+            await _trainer.SaveModelAsync(modelsDirectory, 1, ActorType.Chaos, result, cancellationToken: TestContext.Current.CancellationToken);
 
             var evaluationPath = Path.Combine(modelsDirectory, "gen1_playcard_v1.evaluation.json");
             File.Exists(evaluationPath).Should().BeTrue();
 
-            var reportContent = await File.ReadAllTextAsync(evaluationPath);
+            var reportContent = await File.ReadAllTextAsync(evaluationPath, cancellationToken: TestContext.Current.CancellationToken);
             reportContent.Should().Contain("PlayCard");
             reportContent.Should().Contain("PerClass");
             reportContent.Should().Contain("Precision");
@@ -251,7 +251,7 @@ public class PlayCardModelTrainerTests
     public async Task SaveModelAsync_WithNullPath_ThrowsArgumentException()
     {
         var trainingData = _faker.Generate(100);
-        var result = await _trainer.TrainAsync(trainingData);
+        var result = await _trainer.TrainAsync(trainingData, cancellationToken: TestContext.Current.CancellationToken);
 
         var act = async () => await _trainer.SaveModelAsync(null!, 1, ActorType.Chaos, result);
 
@@ -262,7 +262,7 @@ public class PlayCardModelTrainerTests
     public async Task TrainAsync_WithLargerDataset_ProducesValidPredictions()
     {
         var trainingData = _faker.Generate(500);
-        var result = await _trainer.TrainAsync(trainingData);
+        var result = await _trainer.TrainAsync(trainingData, cancellationToken: TestContext.Current.CancellationToken);
 
         var testData = _faker.Generate(10);
         var testDataView = _mlContext.Data.LoadFromEnumerable(testData);
@@ -283,7 +283,7 @@ public class PlayCardModelTrainerTests
             trainingData[i].ExpectedDealPoints = (short)(i % 2);
         }
 
-        var result = await _trainer.TrainAsync(trainingData);
+        var result = await _trainer.TrainAsync(trainingData, cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().NotBeNull();
         ((EvaluationMetrics)result.ValidationMetrics).MicroAccuracy.Should().BeGreaterThanOrEqualTo(0);

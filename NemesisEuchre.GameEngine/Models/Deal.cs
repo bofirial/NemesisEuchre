@@ -33,7 +33,7 @@ public class Deal
 
     public short Team2Score { get; set; }
 
-    public (PlayerPosition PlayerPosition, Suit Suit)[] KnownPlayerSuitVoids { get; set; } = [];
+    public List<(PlayerPosition PlayerPosition, Suit Suit)> KnownPlayerSuitVoids { get; set; } = [];
 
     public List<Trick> CompletedTricks { get; set; } = [];
 

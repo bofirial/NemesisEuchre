@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
@@ -17,15 +18,19 @@ public class DealEntity
 
     public PlayerPosition? DealerPosition { get; set; }
 
-    public string DeckJson { get; set; } = null!;
+    public required string DeckJson { get; set; }
 
     public string? UpCardJson { get; set; }
+
+    public string? DiscardedCardJson { get; set; }
 
     public Suit? Trump { get; set; }
 
     public PlayerPosition? CallingPlayer { get; set; }
 
     public bool CallingPlayerIsGoingAlone { get; set; }
+
+    public CallTrumpDecision? ChosenDecision { get; set; }
 
     public DealResult? DealResult { get; set; }
 
@@ -35,9 +40,11 @@ public class DealEntity
 
     public short Team2Score { get; set; }
 
-    public string PlayersJson { get; set; } = null!;
+    public string? KnownPlayerSuitVoidsJson { get; set; }
 
-    public GameEntity Game { get; set; } = null!;
+    public required string PlayersJson { get; set; }
+
+    public GameEntity? Game { get; set; }
 
     public ICollection<TrickEntity> Tricks { get; set; } = [];
 
@@ -75,10 +82,14 @@ public class DealEntityConfiguration : IEntityTypeConfiguration<DealEntity>
             .HasMaxLength(10);
 
         builder.Property(e => e.DeckJson)
+            .HasMaxLength(150)
             .IsRequired();
 
         builder.Property(e => e.UpCardJson)
-            .HasMaxLength(200);
+            .HasMaxLength(50);
+
+        builder.Property(e => e.DiscardedCardJson)
+            .HasMaxLength(50);
 
         builder.Property(e => e.Trump)
             .HasConversion<string>()
@@ -90,6 +101,10 @@ public class DealEntityConfiguration : IEntityTypeConfiguration<DealEntity>
 
         builder.Property(e => e.CallingPlayerIsGoingAlone)
             .IsRequired();
+
+        builder.Property(e => e.ChosenDecision)
+            .HasConversion<string>()
+            .HasMaxLength(30);
 
         builder.Property(e => e.DealResult)
             .HasConversion<string>()
@@ -105,8 +120,12 @@ public class DealEntityConfiguration : IEntityTypeConfiguration<DealEntity>
         builder.Property(e => e.Team2Score)
             .IsRequired();
 
+        builder.Property(e => e.KnownPlayerSuitVoidsJson)
+            .HasMaxLength(600);
+
         builder.Property(e => e.PlayersJson)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(1500);
 
         builder.HasOne(e => e.Game)
             .WithMany(g => g.Deals)

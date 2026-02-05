@@ -121,15 +121,15 @@ public class ParallelismCoordinatorTests
         var cts = new CancellationTokenSource();
         var executedCount = 0;
 
-        cts.CancelAfter(50);
+        cts.CancelAfter(25);
 
         var tasks = _coordinator.CreateParallelTasks(
             100,
             state,
             async (_, _, ct) =>
             {
-                Interlocked.Increment(ref executedCount);
                 await Task.Delay(100, ct);
+                Interlocked.Increment(ref executedCount);
             },
             cts.Token);
 

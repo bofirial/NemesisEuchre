@@ -30,6 +30,8 @@ public class DealerDiscardHandler(
 
         validator.ValidateDiscard(cardToDiscard, hand);
 
+        deal.DiscardedCard = cardToDiscard;
+
         dealer.CurrentHand.Remove(cardToDiscard);
     }
 
@@ -47,14 +49,18 @@ public class DealerDiscardHandler(
         var dealerActor = playerActorResolver.GetPlayerActor(dealer);
         var (teamScore, opponentScore) = contextBuilder.GetScores(deal, dealerPosition);
 
-        return dealerActor.DiscardCardAsync(
-            [.. hand],
-            dealerPosition,
-            teamScore,
-            opponentScore,
-            deal.Trump!.Value,
-            deal.CallingPlayer!.Value,
-            deal.CallingPlayerIsGoingAlone,
-            [.. hand]);
+        var context = new DiscardCardContext
+        {
+            CardsInHand = [.. hand],
+            PlayerPosition = dealerPosition,
+            TeamScore = teamScore,
+            OpponentScore = opponentScore,
+            TrumpSuit = deal.Trump!.Value,
+            CallingPlayer = deal.CallingPlayer!.Value,
+            CallingPlayerGoingAlone = deal.CallingPlayerIsGoingAlone,
+            ValidCardsToDiscard = [.. hand],
+        };
+
+        return dealerActor.DiscardCardAsync(context);
     }
 }

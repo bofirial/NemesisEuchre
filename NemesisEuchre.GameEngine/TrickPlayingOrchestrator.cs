@@ -2,6 +2,7 @@ using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Handlers;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.GameEngine.Pooling;
 using NemesisEuchre.GameEngine.Services;
 using NemesisEuchre.GameEngine.Validation;
@@ -19,7 +20,9 @@ public class TrickPlayingOrchestrator(
     IPlayerContextBuilder contextBuilder,
     IPlayerActorResolver actorResolver,
     ITrickWinnerCalculator trickWinnerCalculator,
-    IDecisionRecorder decisionRecorder) : ITrickPlayingOrchestrator
+    IDecisionRecorder decisionRecorder,
+    IVoidDetector voidDetector,
+    ICardAccountingService cardAccountingService) : ITrickPlayingOrchestrator
 {
     public async Task<Trick> PlayTrickAsync(Deal deal, PlayerPosition leadPosition)
     {
@@ -117,6 +120,11 @@ public class TrickPlayingOrchestrator(
             decisionRecorder.RecordPlayCardDecision(deal, trick, position, handArray, validCards, chosenCard, trickWinnerCalculator);
             validator.ValidateCardChoice(chosenCard, validCards);
 
+            if (voidDetector.TryDetectVoid(deal, chosenCard, trick.LeadSuit, deal.Trump!.Value, position, out var voidSuit))
+            {
+                deal.KnownPlayerSuitVoids.Add((position, voidSuit));
+            }
+
             SetLeadSuitIfFirstCard(trick, chosenCard, deal.Trump!.Value, isFirstCard);
             RecordPlayedCard(trick, chosenCard, position);
             UpdateHandAfterPlay(player, chosenCard);
@@ -148,18 +156,33 @@ public class TrickPlayingOrchestrator(
             winningTrickPlayer = trickWinnerCalculator.CalculateWinner(trick, deal.Trump!.Value);
         }
 
-        return playerActor.PlayCardAsync(
-            [.. hand],
+        var accountedForCards = cardAccountingService.GetAccountedForCards(
+            deal,
+            trick,
             playerPosition,
-            teamScore,
-            opponentScore,
-            deal.Trump!.Value,
-            deal.CallingPlayer!.Value,
-            deal.CallingPlayerIsGoingAlone,
-            trick.LeadPosition,
-            trick.LeadSuit,
-            playedCards,
-            winningTrickPlayer,
-            [.. validCards]);
+            hand);
+
+        var context = new PlayCardContext
+        {
+            CardsInHand = [.. hand],
+            ValidCardsToPlay = [.. validCards],
+            PlayerPosition = playerPosition,
+            TeamScore = teamScore,
+            OpponentScore = opponentScore,
+            TrumpSuit = deal.Trump!.Value,
+            CallingPlayer = deal.CallingPlayer!.Value,
+            CallingPlayerIsGoingAlone = deal.CallingPlayerIsGoingAlone,
+            Dealer = deal.DealerPosition!.Value,
+            DealerPickedUpCard = deal.ChosenDecision is CallTrumpDecision.OrderItUp or CallTrumpDecision.OrderItUpAndGoAlone ? deal.UpCard : null,
+            LeadPlayer = trick.LeadPosition,
+            LeadSuit = trick.LeadSuit,
+            TrickNumber = trick.TrickNumber,
+            PlayedCardsInTrick = playedCards,
+            CurrentlyWinningTrickPlayer = winningTrickPlayer,
+            KnownPlayerSuitVoids = [.. deal.KnownPlayerSuitVoids],
+            CardsAccountedFor = [.. accountedForCards],
+        };
+
+        return playerActor.PlayCardAsync(context);
     }
 }

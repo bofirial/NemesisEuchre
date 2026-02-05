@@ -55,6 +55,25 @@ public class TrickToEntityMapper : ITrickToEntityMapper
                         decision.ValidCardsToPlay.SortByTrump(decision.TrumpSuit).Select(c => c.ToRelative(decision.TrumpSuit)), JsonSerializationOptions.Default),
                     CallingPlayer = decision.CallingPlayer.ToRelativePosition(decision.PlayerPosition),
                     CallingPlayerGoingAlone = decision.CallingPlayerGoingAlone,
+                    DealerPosition = decision.Dealer.ToRelativePosition(decision.PlayerPosition),
+                    DealerPickedUpCardJson = decision.DealerPickedUpCard != null
+                        ? JsonSerializer.Serialize(
+                            decision.DealerPickedUpCard.ToRelative(decision.TrumpSuit),
+                            JsonSerializationOptions.Default)
+                        : null,
+                    KnownPlayerSuitVoidsJson = JsonSerializer.Serialize(
+                            decision.KnownPlayerSuitVoids
+                                .Where(v => v.PlayerPosition != decision.PlayerPosition)
+                                .Select(v => new
+                                {
+                                    RelativePlayerPosition = v.PlayerPosition.ToRelativePosition(decision.PlayerPosition),
+                                    RelativeSuit = v.Suit.ToRelativeSuit(decision.TrumpSuit),
+                                })
+                                .ToArray(),
+                            JsonSerializationOptions.Default),
+                    CardsAccountedForJson = JsonSerializer.Serialize(
+                            decision.CardsAccountedFor.SortByTrump(decision.TrumpSuit).Select(c => c.ToRelative(decision.TrumpSuit)),
+                            JsonSerializationOptions.Default),
                     ChosenCardJson = JsonSerializer.Serialize(
                         decision.ChosenCard.ToRelative(decision.TrumpSuit), JsonSerializationOptions.Default),
                     ActorType = actorType,
