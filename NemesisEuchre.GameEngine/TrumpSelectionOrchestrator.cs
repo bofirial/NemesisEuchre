@@ -122,17 +122,20 @@ public class TrumpSelectionOrchestrator(
     {
         var player = deal.Players[playerPosition];
         var playerActor = actorResolver.GetPlayerActor(player);
-
         var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
 
-        return playerActor.CallTrumpAsync(
-            [.. player.CurrentHand],
-            playerPosition,
-            teamScore,
-            opponentScore,
-            deal.DealerPosition!.Value,
-            deal.UpCard!,
-            [.. validDecisions]);
+        var context = new CallTrumpContext
+        {
+            CardsInHand = [.. player.CurrentHand],
+            PlayerPosition = playerPosition,
+            TeamScore = teamScore,
+            OpponentScore = opponentScore,
+            DealerPosition = deal.DealerPosition!.Value,
+            UpCard = deal.UpCard!,
+            ValidCallTrumpDecisions = [.. validDecisions],
+        };
+
+        return playerActor.CallTrumpAsync(context);
     }
 
     private async Task<CallTrumpDecision> GetAndValidatePlayerDecisionAsync(

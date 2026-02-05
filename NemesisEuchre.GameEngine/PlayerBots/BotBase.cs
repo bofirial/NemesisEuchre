@@ -12,6 +12,20 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
 
     public abstract ActorType ActorType { get; }
 
+    public Task<CallTrumpDecision> CallTrumpAsync(CallTrumpContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+
+        return CallTrumpAsync(
+            context.CardsInHand,
+            context.PlayerPosition,
+            context.TeamScore,
+            context.OpponentScore,
+            context.DealerPosition,
+            context.UpCard,
+            context.ValidCallTrumpDecisions);
+    }
+
     public abstract Task<CallTrumpDecision> CallTrumpAsync(
         Card[] cardsInHand,
         PlayerPosition playerPosition,
@@ -46,6 +60,21 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         short trickNumber,
         RelativeCard[] validCardsToPlay);
 
+    public Task<Card> DiscardCardAsync(DiscardCardContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+
+        return DiscardCardAsync(
+            context.CardsInHand,
+            context.PlayerPosition,
+            context.TeamScore,
+            context.OpponentScore,
+            context.TrumpSuit,
+            context.CallingPlayer,
+            context.CallingPlayerGoingAlone,
+            context.ValidCardsToDiscard);
+    }
+
     public async Task<Card> DiscardCardAsync(
         Card[] cardsInHand,
         PlayerPosition playerPosition,
@@ -61,6 +90,30 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
 
         var relativeChoice = await DiscardCardAsync(relativeHand, teamScore, opponentScore, callingPlayer.ToRelativePosition(playerPosition), callingPlayerGoingAlone, relativeValidCards);
         return relativeChoice.Card!;
+    }
+
+    public Task<Card> PlayCardAsync(PlayCardContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+
+        return PlayCardAsync(
+            context.CardsInHand,
+            context.PlayerPosition,
+            context.TeamScore,
+            context.OpponentScore,
+            context.TrumpSuit,
+            context.CallingPlayer,
+            context.CallingPlayerIsGoingAlone,
+            context.Dealer,
+            context.DealerPickedUpCard,
+            context.LeadPlayer,
+            context.LeadSuit,
+            context.KnownPlayerSuitVoids,
+            context.CardsAccountedFor,
+            context.PlayedCardsInTrick,
+            context.CurrentlyWinningTrickPlayer,
+            context.TrickNumber,
+            context.ValidCardsToPlay);
     }
 
     public async Task<Card> PlayCardAsync(

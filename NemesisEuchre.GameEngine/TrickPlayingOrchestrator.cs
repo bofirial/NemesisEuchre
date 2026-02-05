@@ -162,23 +162,27 @@ public class TrickPlayingOrchestrator(
             playerPosition,
             hand);
 
-        return playerActor.PlayCardAsync(
-            [.. hand],
-            playerPosition,
-            teamScore,
-            opponentScore,
-            deal.Trump!.Value,
-            deal.CallingPlayer!.Value,
-            deal.CallingPlayerIsGoingAlone,
-            deal.DealerPosition!.Value,
-            deal.ChosenDecision is CallTrumpDecision.OrderItUp or CallTrumpDecision.OrderItUpAndGoAlone ? deal.UpCard : null,
-            trick.LeadPosition,
-            trick.LeadSuit,
-            [.. deal.KnownPlayerSuitVoids],
-            [.. accountedForCards],
-            playedCards,
-            winningTrickPlayer,
-            trick.TrickNumber,
-            [.. validCards]);
+        var context = new PlayCardContext
+        {
+            CardsInHand = [.. hand],
+            ValidCardsToPlay = [.. validCards],
+            PlayerPosition = playerPosition,
+            TeamScore = teamScore,
+            OpponentScore = opponentScore,
+            TrumpSuit = deal.Trump!.Value,
+            CallingPlayer = deal.CallingPlayer!.Value,
+            CallingPlayerIsGoingAlone = deal.CallingPlayerIsGoingAlone,
+            Dealer = deal.DealerPosition!.Value,
+            DealerPickedUpCard = deal.ChosenDecision is CallTrumpDecision.OrderItUp or CallTrumpDecision.OrderItUpAndGoAlone ? deal.UpCard : null,
+            LeadPlayer = trick.LeadPosition,
+            LeadSuit = trick.LeadSuit,
+            TrickNumber = trick.TrickNumber,
+            PlayedCardsInTrick = playedCards,
+            CurrentlyWinningTrickPlayer = winningTrickPlayer,
+            KnownPlayerSuitVoids = [.. deal.KnownPlayerSuitVoids],
+            CardsAccountedFor = [.. accountedForCards],
+        };
+
+        return playerActor.PlayCardAsync(context);
     }
 }
