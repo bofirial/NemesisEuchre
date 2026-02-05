@@ -14,8 +14,37 @@ public interface ICallTrumpDecisionMapper
     bool IsGoingAloneDecision(CallTrumpDecision decision);
 }
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Record positional parameters")]
+internal sealed record CallTrumpDecisionMetadata(
+    Suit? Suit,
+    bool IsGoingAlone,
+    CallTrumpDecision BaseDecision);
+
 public class CallTrumpDecisionMapper : ICallTrumpDecisionMapper
 {
+    private static readonly Dictionary<CallTrumpDecision, CallTrumpDecisionMetadata> DecisionMetadata = new()
+    {
+        [CallTrumpDecision.Pass] = new(null, false, CallTrumpDecision.Pass),
+        [CallTrumpDecision.OrderItUp] = new(null, false, CallTrumpDecision.OrderItUp),
+        [CallTrumpDecision.OrderItUpAndGoAlone] = new(null, true, CallTrumpDecision.OrderItUp),
+        [CallTrumpDecision.CallClubs] = new(Suit.Clubs, false, CallTrumpDecision.CallClubs),
+        [CallTrumpDecision.CallClubsAndGoAlone] = new(Suit.Clubs, true, CallTrumpDecision.CallClubs),
+        [CallTrumpDecision.CallDiamonds] = new(Suit.Diamonds, false, CallTrumpDecision.CallDiamonds),
+        [CallTrumpDecision.CallDiamondsAndGoAlone] = new(Suit.Diamonds, true, CallTrumpDecision.CallDiamonds),
+        [CallTrumpDecision.CallHearts] = new(Suit.Hearts, false, CallTrumpDecision.CallHearts),
+        [CallTrumpDecision.CallHeartsAndGoAlone] = new(Suit.Hearts, true, CallTrumpDecision.CallHearts),
+        [CallTrumpDecision.CallSpades] = new(Suit.Spades, false, CallTrumpDecision.CallSpades),
+        [CallTrumpDecision.CallSpadesAndGoAlone] = new(Suit.Spades, true, CallTrumpDecision.CallSpades),
+    };
+
+    private static readonly Dictionary<Suit, (CallTrumpDecision Base, CallTrumpDecision Alone)> SuitToDecisions = new()
+    {
+        [Suit.Clubs] = (CallTrumpDecision.CallClubs, CallTrumpDecision.CallClubsAndGoAlone),
+        [Suit.Diamonds] = (CallTrumpDecision.CallDiamonds, CallTrumpDecision.CallDiamondsAndGoAlone),
+        [Suit.Hearts] = (CallTrumpDecision.CallHearts, CallTrumpDecision.CallHeartsAndGoAlone),
+        [Suit.Spades] = (CallTrumpDecision.CallSpades, CallTrumpDecision.CallSpadesAndGoAlone),
+    };
+
     public CallTrumpDecision[] GetValidRound1Decisions()
     {
         return [CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp, CallTrumpDecision.OrderItUpAndGoAlone];
@@ -32,7 +61,9 @@ public class CallTrumpDecisionMapper : ICallTrumpDecisionMapper
 
         foreach (var suit in Enum.GetValues<Suit>().Where(suit => suit != upcardSuit))
         {
-            AddSuitDecisions(decisions, suit);
+            var (baseDecision, aloneDecision) = SuitToDecisions[suit];
+            decisions.Add(baseDecision);
+            decisions.Add(aloneDecision);
         }
 
         return [.. decisions];
@@ -40,40 +71,16 @@ public class CallTrumpDecisionMapper : ICallTrumpDecisionMapper
 
     public Suit ConvertDecisionToSuit(CallTrumpDecision decision)
     {
-        return decision switch
+        if (!DecisionMetadata.TryGetValue(decision, out var metadata))
         {
-            CallTrumpDecision.CallClubs or CallTrumpDecision.CallClubsAndGoAlone => Suit.Clubs,
-            CallTrumpDecision.CallDiamonds or CallTrumpDecision.CallDiamondsAndGoAlone => Suit.Diamonds,
-            CallTrumpDecision.CallHearts or CallTrumpDecision.CallHeartsAndGoAlone => Suit.Hearts,
-            CallTrumpDecision.CallSpades or CallTrumpDecision.CallSpadesAndGoAlone => Suit.Spades,
-            CallTrumpDecision.Pass or
-            CallTrumpDecision.OrderItUp or
-            CallTrumpDecision.OrderItUpAndGoAlone or
-            _ => throw new ArgumentOutOfRangeException(nameof(decision), $"Cannot convert {decision} to Suit")
-        };
+            throw new ArgumentOutOfRangeException(nameof(decision), $"Unknown decision: {decision}");
+        }
+
+        return metadata.Suit ?? throw new ArgumentOutOfRangeException(nameof(decision), $"Cannot convert {decision} to Suit");
     }
 
     public bool IsGoingAloneDecision(CallTrumpDecision decision)
     {
-        return decision is CallTrumpDecision.OrderItUpAndGoAlone
-            or CallTrumpDecision.CallClubsAndGoAlone
-            or CallTrumpDecision.CallDiamondsAndGoAlone
-            or CallTrumpDecision.CallHeartsAndGoAlone
-            or CallTrumpDecision.CallSpadesAndGoAlone;
-    }
-
-    private static void AddSuitDecisions(List<CallTrumpDecision> decisions, Suit suit)
-    {
-        var (callDecision, callAloneDecision) = suit switch
-        {
-            Suit.Clubs => (CallTrumpDecision.CallClubs, CallTrumpDecision.CallClubsAndGoAlone),
-            Suit.Diamonds => (CallTrumpDecision.CallDiamonds, CallTrumpDecision.CallDiamondsAndGoAlone),
-            Suit.Hearts => (CallTrumpDecision.CallHearts, CallTrumpDecision.CallHeartsAndGoAlone),
-            Suit.Spades => (CallTrumpDecision.CallSpades, CallTrumpDecision.CallSpadesAndGoAlone),
-            _ => throw new InvalidOperationException($"Invalid Suit: {suit}")
-        };
-
-        decisions.Add(callDecision);
-        decisions.Add(callAloneDecision);
+        return DecisionMetadata.TryGetValue(decision, out var metadata) && metadata.IsGoingAlone;
     }
 }
