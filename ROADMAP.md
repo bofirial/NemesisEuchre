@@ -463,7 +463,7 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 10. ~~Add KnownPlayerSuitVoids to PlayCardTrainingData~~
 11. ~~Add DealerPosition and DealerPickedUpCard to PlayCardTrainingData~~
 
-## User Players 1.0
+## Interactive Play 0.6
 
 1. Add a PlayGame command to allow interactive play
 2. Implement IPlayerActor with methods in NemesisEuchre.Console for handling player actions

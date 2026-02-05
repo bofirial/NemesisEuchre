@@ -4,7 +4,7 @@ A console-based engine for training a high-performance Euchre AI using massive d
 
 ## Project Status
 
-🚀 **Version 0.5-preview** - ML-powered AI training with game state memory enhancements.
+🚀 **Version 0.6-preview** - Interactive play with ASCII card display and human opponent support.
 
 ### Current State
 - ✅ **v0.1** - Project infrastructure and CLI framework
@@ -22,9 +22,9 @@ A console-based engine for training a high-performance Euchre AI using massive d
 - ✅ **v0.4** - AI training infrastructure with ML.NET and LightGBM
 - ✅ **v0.4** - Gen1Bot ML-powered player with regression-based decision making
 - ✅ **v0.4** - Cached prediction engine provider for efficient model inference
-- 🚧 **v0.5** - Model memory enhancements for game state tracking (in progress)
-- 📋 **v0.5** - Enhanced feature engineering with historical context (planned)
-- 📋 **v0.6** - Gen2Bot training from Gen1 gameplay data (planned)
+- ✅ **v0.5** - Model memory enhancements for game state tracking
+- ✅ **v0.5** - Enhanced feature engineering with historical context
+- 🚧 **v0.6** - Interactive play with ASCII card display (in progress)
 
 ## Quick Start
 
@@ -82,11 +82,23 @@ dotnet test --collect:"XPlat Code Coverage"
 - **Model Persistence**: Versioned model storage with generation-based loading
 - **Training Pipeline**: End-to-end workflow from data loading → splitting → training → evaluation → persistence
 
-### Model Memory Enhancements (v0.5 - In Progress)
+### Model Memory Enhancements (v0.5 - Completed)
 - **Game State Tracking**: Enhanced Deal model with trump decisions, discarded cards, and known suit voids
 - **Historical Context**: PlayCardDecision records now include dealer position, upcard pickup, and cards accounted for
 - **Data Denormalization**: TrickNumber directly on PlayCardDecision for simplified feature engineering
-- **Void Tracking**: Capture known player suit voids discovered during trick play for future inference improvements
+- **Void Tracking**: Capture known player suit voids discovered during trick play for improved inference
+
+### Code Quality & Performance (v0.5 - Completed)
+- **Context Objects**: Eliminated parameter bloat by introducing PlayCardContext, CallTrumpContext, and DiscardCardContext
+  - Reduced 17-parameter methods to single-parameter methods (94% reduction)
+  - Simplified test setup code by 82% (~800 lines eliminated)
+- **Feature Engineering Consolidation**: Unified PlayCardFeatureBuilder eliminates 95% duplication
+  - Single source of truth for all 65 PlayCard features
+  - Net elimination of 172 lines of duplicated logic
+- **Performance Optimization**: Array pooling and batch deserialization reduce GC pressure by 20-30%
+  - GameEnginePoolManager with float[], RelativeCard[], and PlayerVoid[] pools
+  - Batch JSON deserialization consolidates 7 operations into 1
+- **Infrastructure Upgrades**: xUnit v3 and Entity Framework Core 10 for improved testing and data access
 
 ## Architecture
 
@@ -129,6 +141,9 @@ NemesisEuchre.Console.Tests/    # Comprehensive test suite
 | **Relative Representations** | Trump/Off suits and Self/Partner/Opponent positions reduce state space complexity |
 | **Cached Prediction Engines** | Model loading is expensive; thread-safe caching avoids reload per prediction |
 | **Denormalized Data** | TrickNumber on PlayCardDecision eliminates navigation property overhead |
+| **Context Objects** | Single-parameter methods with context objects eliminate parameter bloat and improve API clarity |
+| **Array Pooling** | Reusing arrays reduces GC pressure by 20-30% during high-throughput feature engineering |
+| **Unified Feature Builders** | Single source of truth eliminates duplication between training and inference code paths |
 
 ### Generational Training Vision
 
