@@ -122,7 +122,7 @@ public class TrickPlayingOrchestrator(
 
             if (voidDetector.TryDetectVoid(deal, chosenCard, trick.LeadSuit, deal.Trump!.Value, position, out var voidSuit))
             {
-                deal.KnownPlayerSuitVoids = [.. deal.KnownPlayerSuitVoids, (position, voidSuit)];
+                deal.KnownPlayerSuitVoids.Add((position, voidSuit));
             }
 
             SetLeadSuitIfFirstCard(trick, chosenCard, deal.Trump!.Value, isFirstCard);
