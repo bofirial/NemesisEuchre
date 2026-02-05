@@ -40,13 +40,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
-        var result = await _coordinator.CoordinateTrainingWithProgressAsync(
-            ActorType.Chaos,
-            DecisionType.CallTrump,
-            "./models",
-            1000,
-            1,
-            _testConsole);
+        var result = await _coordinator.CoordinateTrainingWithProgressAsync(ActorType.Chaos, DecisionType.CallTrump, "./models", 1000, 1, _testConsole, TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(expectedResults);
 
@@ -92,13 +86,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 })
             .ReturnsAsync(expectedResults);
 
-        await _coordinator.CoordinateTrainingWithProgressAsync(
-            ActorType.Beta,
-            DecisionType.All,
-            "./output",
-            5000,
-            2,
-            _testConsole);
+        await _coordinator.CoordinateTrainingWithProgressAsync(ActorType.Beta, DecisionType.All, "./output", 5000, 2, _testConsole, TestContext.Current.CancellationToken);
 
         capturedActorType.Should().Be(ActorType.Beta);
         capturedDecisionType.Should().Be(DecisionType.All);
@@ -191,13 +179,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
-        var result = await _coordinator.CoordinateTrainingWithProgressAsync(
-            ActorType.Chaos,
-            DecisionType.CallTrump,
-            "./models",
-            0,
-            1,
-            _testConsole);
+        var result = await _coordinator.CoordinateTrainingWithProgressAsync(ActorType.Chaos, DecisionType.CallTrump, "./models", 0, 1, _testConsole, TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(expectedResults);
         result.SuccessfulModels.Should().Be(1);

@@ -39,7 +39,7 @@ public class GamePersistenceIntegrationTests
             mockOptions.Setup(x => x.Value).Returns(new PersistenceOptions());
             var repository = new GameRepository(context, mockLogger.Object, gameMapper, mockOptions.Object);
 
-            await repository.SaveCompletedGameAsync(game);
+            await repository.SaveCompletedGameAsync(game, TestContext.Current.CancellationToken);
         }
 
         await using (var context = new NemesisEuchreDbContext(options))
@@ -54,7 +54,7 @@ public class GamePersistenceIntegrationTests
                     .ThenInclude(d => d.DiscardCardDecisions)
                 .Include(g => g.Deals)
                     .ThenInclude(d => d.PlayCardDecisions)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(TestContext.Current.CancellationToken);
 
             savedGame.Should().NotBeNull();
             savedGame!.GameStatus.Should().Be(GameStatus.Complete);

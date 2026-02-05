@@ -76,7 +76,7 @@ public class CallTrumpTrainingDataLoaderTests
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
-        var result = await loader.LoadTrainingDataAsync(ActorType.Chaos, 10, false);
+        var result = await loader.LoadTrainingDataAsync(ActorType.Chaos, 10, false, TestContext.Current.CancellationToken);
 
         result.Should().HaveCount(10);
         _mockFeatureEngineer.Verify(x => x.Transform(It.IsAny<CallTrumpDecisionEntity>()), Times.Exactly(10));
@@ -115,7 +115,7 @@ public class CallTrumpTrainingDataLoaderTests
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
-        var result = await loader.LoadTrainingDataAsync(ActorType.Chaos);
+        var result = await loader.LoadTrainingDataAsync(ActorType.Chaos, cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().HaveCount(4);
     }
@@ -143,7 +143,7 @@ public class CallTrumpTrainingDataLoaderTests
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
-        var result = await loader.LoadTrainingDataAsync(ActorType.Chaos, 50);
+        var result = await loader.LoadTrainingDataAsync(ActorType.Chaos, 50, cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().HaveCount(50);
     }
@@ -212,7 +212,7 @@ public class CallTrumpTrainingDataLoaderTests
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
-        await loader.LoadTrainingDataAsync(ActorType.Chaos, 25000);
+        await loader.LoadTrainingDataAsync(ActorType.Chaos, 25000, cancellationToken: TestContext.Current.CancellationToken);
 
         _mockLogger.Verify(
             x => x.Log(

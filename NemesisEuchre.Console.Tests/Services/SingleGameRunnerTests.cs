@@ -35,7 +35,7 @@ public class SingleGameRunnerTests
 
         var runner = new SingleGameRunner(mockOrchestrator.Object, mockRepository.Object, mockRenderer.Object, mockLogger);
 
-        await runner.RunAsync();
+        await runner.RunAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         mockOrchestrator.Verify(o => o.OrchestrateGameAsync(), Times.Once);
     }
@@ -61,7 +61,7 @@ public class SingleGameRunnerTests
 
         var runner = new SingleGameRunner(mockOrchestrator.Object, mockRepository.Object, mockRenderer.Object, mockLogger);
 
-        await runner.RunAsync();
+        await runner.RunAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         mockRepository.Verify(
             r => r.SaveCompletedGameAsync(
@@ -91,7 +91,7 @@ public class SingleGameRunnerTests
 
         var runner = new SingleGameRunner(mockOrchestrator.Object, mockRepository.Object, mockRenderer.Object, mockLogger);
 
-        await runner.RunAsync();
+        await runner.RunAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         mockRenderer.Verify(r => r.RenderResults(game), Times.Once);
     }
@@ -117,7 +117,7 @@ public class SingleGameRunnerTests
 
         var runner = new SingleGameRunner(mockOrchestrator.Object, mockRepository.Object, mockRenderer.Object, mockLogger);
 
-        var result = await runner.RunAsync();
+        var result = await runner.RunAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(game);
     }
@@ -143,7 +143,7 @@ public class SingleGameRunnerTests
 
         var runner = new SingleGameRunner(mockOrchestrator.Object, mockRepository.Object, mockRenderer.Object, mockLogger.Object);
 
-        await runner.RunAsync();
+        await runner.RunAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         mockRenderer.Verify(r => r.RenderResults(game), Times.Once, "Results should be rendered even when persistence fails");
     }
@@ -170,7 +170,7 @@ public class SingleGameRunnerTests
 
         var runner = new SingleGameRunner(mockOrchestrator.Object, mockRepository.Object, mockRenderer.Object, mockLogger.Object);
 
-        await runner.RunAsync();
+        await runner.RunAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Error),
@@ -199,7 +199,7 @@ public class SingleGameRunnerTests
 
         var runner = new SingleGameRunner(mockOrchestrator.Object, mockRepository.Object, mockRenderer.Object, mockLogger);
 
-        var result = await runner.RunAsync();
+        var result = await runner.RunAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(game, "Game should still be returned even when persistence fails");
     }
@@ -264,7 +264,7 @@ public class SingleGameRunnerTests
 
         var runner = new SingleGameRunner(mockOrchestrator.Object, mockRepository.Object, mockRenderer.Object, mockLogger);
 
-        await runner.RunAsync();
+        await runner.RunAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         callOrder.Should().ContainInOrder("Orchestrate", "Persist", "Render");
     }
@@ -288,7 +288,7 @@ public class SingleGameRunnerTests
 
         var runner = new SingleGameRunner(mockOrchestrator.Object, mockRepository.Object, mockRenderer.Object, mockLogger.Object);
 
-        await runner.RunAsync(doNotPersist: true);
+        await runner.RunAsync(doNotPersist: true, cancellationToken: TestContext.Current.CancellationToken);
 
         mockRepository.Verify(
             r => r.SaveCompletedGameAsync(It.IsAny<Game>(), It.IsAny<CancellationToken>()),
@@ -315,7 +315,7 @@ public class SingleGameRunnerTests
 
         var runner = new SingleGameRunner(mockOrchestrator.Object, mockRepository.Object, mockRenderer.Object, mockLogger);
 
-        await runner.RunAsync(doNotPersist: true);
+        await runner.RunAsync(doNotPersist: true, cancellationToken: TestContext.Current.CancellationToken);
 
         mockRenderer.Verify(r => r.RenderResults(game), Times.Once, "Results should still be rendered");
     }
@@ -339,7 +339,7 @@ public class SingleGameRunnerTests
 
         var runner = new SingleGameRunner(mockOrchestrator.Object, mockRepository.Object, mockRenderer.Object, mockLogger.Object);
 
-        await runner.RunAsync(doNotPersist: true);
+        await runner.RunAsync(doNotPersist: true, cancellationToken: TestContext.Current.CancellationToken);
 
         mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Information),

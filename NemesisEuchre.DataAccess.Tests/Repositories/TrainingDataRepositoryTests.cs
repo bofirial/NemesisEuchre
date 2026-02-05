@@ -68,10 +68,10 @@ public class TrainingDataRepositoryTests : IDisposable
                 DidTeamWinGame = true,
             });
 
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var results = new List<CallTrumpDecisionEntity>();
-        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(ActorType.Chaos))
+        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(ActorType.Chaos, cancellationToken: TestContext.Current.CancellationToken))
         {
             results.Add(entity);
         }
@@ -96,12 +96,12 @@ public class TrainingDataRepositoryTests : IDisposable
                 ChosenDecisionJson = "{}",
                 DecisionOrder = (byte)i,
                 DidTeamWinGame = true,
-            }));
+            }), TestContext.Current.CancellationToken);
 
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var results = new List<CallTrumpDecisionEntity>();
-        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(ActorType.Chaos, limit: 5))
+        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(ActorType.Chaos, limit: 5, cancellationToken: TestContext.Current.CancellationToken))
         {
             results.Add(entity);
         }
@@ -149,12 +149,10 @@ public class TrainingDataRepositoryTests : IDisposable
                 DidTeamWinGame = true,
             });
 
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var results = new List<CallTrumpDecisionEntity>();
-        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(
-            ActorType.Chaos,
-            winningTeamOnly: true))
+        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(ActorType.Chaos, winningTeamOnly: true, cancellationToken: TestContext.Current.CancellationToken))
         {
             results.Add(entity);
         }
@@ -167,7 +165,7 @@ public class TrainingDataRepositoryTests : IDisposable
     public async Task GetDecisionDataAsync_NoMatchingData_ReturnsEmpty()
     {
         var results = new List<CallTrumpDecisionEntity>();
-        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(ActorType.Chaos))
+        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(ActorType.Chaos, cancellationToken: TestContext.Current.CancellationToken))
         {
             results.Add(entity);
         }
