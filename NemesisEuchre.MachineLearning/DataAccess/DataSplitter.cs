@@ -75,8 +75,8 @@ public class DataSplitter : IDataSplitter
         var validationDataView = secondSplit.TrainSet;
         var testDataView = secondSplit.TestSet;
 
-        var trainCount = CountRows(trainDataView);
-        var validationCount = CountRows(validationDataView);
+        var trainCount = GetRowCountOrFallback(trainDataView);
+        var validationCount = GetRowCountOrFallback(validationDataView);
         var testCount = rowCount - trainCount - validationCount;
 
         return new DataSplit(
@@ -86,6 +86,24 @@ public class DataSplitter : IDataSplitter
             trainCount,
             validationCount,
             testCount);
+    }
+
+    private static int GetRowCountOrFallback(IDataView dataView)
+    {
+        var rowCount = dataView.GetRowCount();
+        if (rowCount.HasValue)
+        {
+            return (int)rowCount.Value;
+        }
+
+        using var cursor = dataView.GetRowCursor(dataView.Schema);
+        int count = 0;
+        while (cursor.MoveNext())
+        {
+            count++;
+        }
+
+        return count;
     }
 
     private static void ValidateRatios(double trainRatio, double validationRatio, double testRatio)
@@ -112,17 +130,5 @@ public class DataSplitter : IDataSplitter
         {
             throw new ArgumentException($"Split ratios must sum to 1.0 (±{tolerance}). Got {sum}.");
         }
-    }
-
-    private static int CountRows(IDataView dataView)
-    {
-        using var cursor = dataView.GetRowCursor(dataView.Schema);
-        int count = 0;
-        while (cursor.MoveNext())
-        {
-            count++;
-        }
-
-        return count;
     }
 }
