@@ -18,20 +18,18 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
 
         return CallTrumpAsync(
             context.CardsInHand,
-            context.PlayerPosition,
             context.TeamScore,
             context.OpponentScore,
-            context.DealerPosition,
+            context.DealerPosition.ToRelativePosition(context.PlayerPosition),
             context.UpCard,
             context.ValidCallTrumpDecisions);
     }
 
     public abstract Task<CallTrumpDecision> CallTrumpAsync(
         Card[] cardsInHand,
-        PlayerPosition playerPosition,
         short teamScore,
         short opponentScore,
-        PlayerPosition dealerPosition,
+        RelativePlayerPosition dealerPosition,
         Card upCard,
         CallTrumpDecision[] validCallTrumpDecisions);
 

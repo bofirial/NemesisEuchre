@@ -114,10 +114,9 @@ public class Gen1BotTests
 
         var result = await bot.CallTrumpAsync(
             cardsInHand,
-            PlayerPosition.North,
             0,
             0,
-            PlayerPosition.South,
+            RelativePlayerPosition.Self,
             upCard,
             validDecisions);
 

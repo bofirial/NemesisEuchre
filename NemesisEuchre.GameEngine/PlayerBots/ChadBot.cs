@@ -11,10 +11,9 @@ public class ChadBot(IRandomNumberGenerator random) : BotBase(random)
 
     public override Task<CallTrumpDecision> CallTrumpAsync(
         Card[] cardsInHand,
-        PlayerPosition playerPosition,
         short teamScore,
         short opponentScore,
-        PlayerPosition dealerPosition,
+        RelativePlayerPosition dealerPosition,
         Card upCard,
         CallTrumpDecision[] validCallTrumpDecisions)
     {

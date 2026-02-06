@@ -11,7 +11,7 @@ public interface ICallTrumpInferenceFeatureBuilder
     CallTrumpTrainingData BuildFeatures(
         Card[] cardsInHand,
         Card upCard,
-        PlayerPosition dealerPosition,
+        RelativePlayerPosition dealerPosition,
         short teamScore,
         short opponentScore,
         CallTrumpDecision[] validDecisions,
@@ -23,7 +23,7 @@ public class CallTrumpInferenceFeatureBuilder : ICallTrumpInferenceFeatureBuilde
     public CallTrumpTrainingData BuildFeatures(
         Card[] cardsInHand,
         Card upCard,
-        PlayerPosition dealerPosition,
+        RelativePlayerPosition dealerPosition,
         short teamScore,
         short opponentScore,
         CallTrumpDecision[] validDecisions,

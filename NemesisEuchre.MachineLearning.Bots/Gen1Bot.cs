@@ -33,10 +33,9 @@ public class Gen1Bot(
 
     public override async Task<CallTrumpDecision> CallTrumpAsync(
         Card[] cardsInHand,
-        PlayerPosition playerPosition,
         short teamScore,
         short opponentScore,
-        PlayerPosition dealerPosition,
+        RelativePlayerPosition dealerPosition,
         Card upCard,
         CallTrumpDecision[] validCallTrumpDecisions)
     {
