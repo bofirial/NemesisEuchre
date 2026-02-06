@@ -25,7 +25,7 @@ public class DiscardCardInferenceFeatureBuilder : IDiscardCardInferenceFeatureBu
         short opponentScore,
         RelativeCard chosenCard)
     {
-        var data = new DiscardCardTrainingData
+        return new DiscardCardTrainingData
         {
             Card1Rank = (float)cardsInHand[0].Rank,
             Card1Suit = (float)cardsInHand[0].Suit,
@@ -43,16 +43,12 @@ public class DiscardCardInferenceFeatureBuilder : IDiscardCardInferenceFeatureBu
             CallingPlayerGoingAlone = callingPlayerGoingAlone ? 1.0f : 0.0f,
             TeamScore = teamScore,
             OpponentScore = opponentScore,
+            Card1Chosen = cardsInHand[0].Rank == chosenCard.Rank && cardsInHand[0].Suit == chosenCard.Suit ? 1.0f : 0.0f,
+            Card2Chosen = cardsInHand[1].Rank == chosenCard.Rank && cardsInHand[1].Suit == chosenCard.Suit ? 1.0f : 0.0f,
+            Card3Chosen = cardsInHand[2].Rank == chosenCard.Rank && cardsInHand[2].Suit == chosenCard.Suit ? 1.0f : 0.0f,
+            Card4Chosen = cardsInHand[3].Rank == chosenCard.Rank && cardsInHand[3].Suit == chosenCard.Suit ? 1.0f : 0.0f,
+            Card5Chosen = cardsInHand[4].Rank == chosenCard.Rank && cardsInHand[4].Suit == chosenCard.Suit ? 1.0f : 0.0f,
+            Card6Chosen = cardsInHand[5].Rank == chosenCard.Rank && cardsInHand[5].Suit == chosenCard.Suit ? 1.0f : 0.0f,
         };
-
-        var chosenIndex = Array.IndexOf(cardsInHand, chosenCard);
-        data.Card1Chosen = chosenIndex == 0 ? 1.0f : 0.0f;
-        data.Card2Chosen = chosenIndex == 1 ? 1.0f : 0.0f;
-        data.Card3Chosen = chosenIndex == 2 ? 1.0f : 0.0f;
-        data.Card4Chosen = chosenIndex == 3 ? 1.0f : 0.0f;
-        data.Card5Chosen = chosenIndex == 4 ? 1.0f : 0.0f;
-        data.Card6Chosen = chosenIndex == 5 ? 1.0f : 0.0f;
-
-        return data;
     }
 }
