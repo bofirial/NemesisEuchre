@@ -403,7 +403,7 @@ public class TrumpSelectionOrchestratorTests
         await _sut.SelectTrumpAsync(deal);
 
         dealer.CurrentHand.Should().HaveCount(5);
-        dealer.CurrentHand.Should().NotContain(c => c.Rank == Rank.Ten && c.Suit == Suit.Spades);
+        dealer.CurrentHand.Should().NotContain(c => c.Rank == Rank.King && c.Suit == Suit.Hearts);
     }
 
     [Fact]
