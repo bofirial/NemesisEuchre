@@ -1,4 +1,5 @@
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.Services;
 using NemesisEuchre.GameEngine.Validation;
@@ -23,7 +24,7 @@ public class DealerDiscardHandler(
 
         AddUpcardToDealerHand(dealer, deal.UpCard!);
 
-        var hand = dealer.CurrentHand.ToArray();
+        var hand = dealer.CurrentHand.SortByTrump(deal.Trump);
         var cardToDiscard = await GetDealerDiscardDecisionAsync(deal, dealerPosition, dealer, hand);
 
         decisionRecorder.RecordDiscardDecision(deal, dealerPosition, hand, cardToDiscard);
