@@ -18,12 +18,14 @@ public interface IGameResultsRenderer
 
 public class GameResultsRenderer(IAnsiConsole ansiConsole) : IGameResultsRenderer
 {
+    private readonly Color _team1Color = Color.Green;
+    private readonly Color _team2Color = Color.Blue;
+
     public void RenderResults(Game game)
     {
         ansiConsole.Write(new Rule("[bold]Game Results[/]").RuleStyle("grey"));
         ansiConsole.WriteLine();
 
-        RenderWinner(game);
         RenderStatistics(game);
         RenderDealsTable(game);
     }
@@ -39,8 +41,8 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole) : IGameResultsRendere
             .AddColumn(new TableColumn("[bold]Value[/]").Centered());
 
         table.AddRow("Total Games", results.TotalGames.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Team 1 Wins", $"{results.Team1Wins} ([green]{results.Team1WinRate:P1}[/])");
-        table.AddRow("Team 2 Wins", $"{results.Team2Wins} ([blue]{results.Team2WinRate:P1}[/])");
+        table.AddRow("Team 1 Wins", $"{results.Team1Wins} ([{_team1Color}]{results.Team1WinRate:P1}[/])");
+        table.AddRow("Team 2 Wins", $"{results.Team2Wins} ([{_team2Color}]{results.Team2WinRate:P1}[/])");
         table.AddRow("Failed Games", results.FailedGames.ToString(CultureInfo.InvariantCulture));
         table.AddRow("Total Deals Played", results.TotalDeals.ToString(CultureInfo.InvariantCulture));
         table.AddRow("Elapsed Time", $"{results.ElapsedTime.TotalSeconds:F2}s");
@@ -88,42 +90,68 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole) : IGameResultsRendere
         return string.Join(" ", formattedCards);
     }
 
-    private void RenderWinner(Game game)
-    {
-        var winnerColor = game.WinningTeam == Team.Team1 ? "green" : "yellow";
-        var winnerText = $"[bold {winnerColor}]{game.WinningTeam} wins![/]";
-
-        var panel = new Panel(winnerText)
-            .Border(BoxBorder.Double)
-            .BorderColor(game.WinningTeam == Team.Team1 ? Color.Green : Color.Yellow)
-            .Padding(1, 0);
-
-        ansiConsole.Write(panel);
-        ansiConsole.WriteLine();
-    }
-
     private void RenderStatistics(Game game)
     {
-        var table = CreateStyledTable();
+        var winnerColor = game.WinningTeam == Team.Team1 ? _team1Color : _team2Color;
 
-        table.AddColumn("Team 1 Score");
-        table.AddColumn("Team 2 Score");
-        table.AddColumn("Deals Played");
-        table.AddColumn("Winning Team");
+        var scoreTable = new Table()
+            .AddColumn($"[{_team1Color}]Team 1[/]", c => c.Centered())
+            .AddColumn($"[{_team2Color}]Team 2[/]", c => c.Centered())
+            .AddRow(game.Team1Score.ToString(CultureInfo.InvariantCulture), game.Team2Score.ToString(CultureInfo.InvariantCulture))
+            .RoundedBorder();
 
-        table.AddRow(
-            game.Team1Score.ToString(CultureInfo.InvariantCulture),
-            game.Team2Score.ToString(CultureInfo.InvariantCulture),
-            game.CompletedDeals.Count.ToString(CultureInfo.InvariantCulture),
-            game.WinningTeam?.ToString() ?? "N/A");
+        var panel = new Panel(scoreTable)
+            .Header($" [bold {winnerColor}]{game.WinningTeam} wins![/] ", Justify.Center)
+            .Border(BoxBorder.Double)
+            .BorderColor(winnerColor)
+            .Padding(1, 0);
 
-        ansiConsole.Write(table);
+        ansiConsole.Write(Align.Center(panel));
         ansiConsole.WriteLine();
     }
 
     private void RenderDealsTable(Game game)
     {
-        var table = CreateStyledTable("[bold]Deals Summary[/]");
+        var table = CreateStyledTable("[bold]Deals Summary[/]").Centered();
+
+        /*
+         * Deal Number
+         * Dealer Position
+         * UpCard
+         * Trump
+         * Calling Player Position
+         * Going Alone Indicator
+         * DealResult
+         * Winning Team
+         * Team 1 Score
+         * Team 2 Score
+         * North Hand
+         * East Hand
+         * West Hand
+         * South Hand
+         * */
+
+        /*
+         * Player Position
+         * Hand
+         * UpCard
+         * Possible Decisions w/ EstimatedPoints and Chosen Indicator
+         */
+
+        /*
+         * Card
+         * Estimated Points
+         * Chosen Card Indicator
+         */
+
+        /*
+         * Trick Number
+         * First Card & Position
+         * Second Card & Position
+         * Third Card & Position
+         * Fourth Card & Position
+         * N E S W N E S columns?
+         */
 
         table.AddColumn("Deal #");
         table.AddColumn("Trump");
