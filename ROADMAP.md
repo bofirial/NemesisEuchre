@@ -463,23 +463,34 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 10. ~~Add KnownPlayerSuitVoids to PlayCardTrainingData~~
 11. ~~Add DealerPosition and DealerPickedUpCard to PlayCardTrainingData~~
 
-## Interactive Play 0.6
+## Advanced Game Display 0.6
 
 1. CallTrumpAsync needs to know the current player's position
-2. 
-3. Add a PlayGame command to allow interactive play
-4. Implement IPlayerActor with methods in NemesisEuchre.Console for handling player actions
-5. Create Display for Cards in terminal ASCII art
-6. Add interactivity for selecting an option or card from the terminal
-7. Create Display for current state of Deal
-8. Create Display for current state of Trick
-9. Implement Call Trump action in the terminal
-10. Implement Discard Card action in the terminal
-11. Implement Play Card action in the terminal
-12. Add animations? to simulate bot actions and allow for human reactions
-13. CONSIDER Adding hooks into the GameEngine to allow players to get GameState updates in more real time (Would allow for multiple players in the future)
-14. Play games against ChaosBot to record win percentage
-15. Play games against GenX bots to record win percentage and prove they are improving
+2. Display Tricks in each Deal of a Euchre game
+3. Display Choices and Decisions made during a Euchre game
+4. Rework BotBase to record EstimatedPoints for each valid decision
+5. Add Command to display results from a Game in the Database
+6. Consider Bulk Game display improvements?
+7. Protect against game state mutations in IPlayerActor implementations
+8. Database Changes
+   * "Minify" json in the database to reduce memory?
+   * Convert json columns to metadata tables and FKs?
+
+## Interactive Play 0.7
+
+1. Add a PlayGame command to allow interactive play
+2. Implement IPlayerActor with methods in NemesisEuchre.Console for handling player actions
+3. Create Display for Cards in terminal ASCII art
+4. Add interactivity for selecting an option or card from the terminal
+5. Create Display for current state of Deal
+6. Create Display for current state of Trick
+7. Implement Call Trump action in the terminal
+8.  Implement Discard Card action in the terminal
+9.  Implement Play Card action in the terminal
+10. Add animations? to simulate bot actions and allow for human reactions
+11. CONSIDER Adding hooks into the GameEngine to allow players to get GameState updates in more real time (Would allow for multiple players in the future)
+12. Play games against ChaosBot to record win percentage
+13. Play games against GenX bots to record win percentage and prove they are improving
 
 ## AI Improvements
 

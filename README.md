@@ -24,7 +24,8 @@ A console-based engine for training a high-performance Euchre AI using massive d
 - ✅ **v0.4** - Cached prediction engine provider for efficient model inference
 - ✅ **v0.5** - Model memory enhancements for game state tracking
 - ✅ **v0.5** - Enhanced feature engineering with historical context
-- 🚧 **v0.6** - Interactive play with ASCII card display (in progress)
+- 🚧 **v0.6** - Advanced Game Display (in progress)
+- 🚧 **v0.7** - Interactive play with ASCII card display
 
 ## Quick Start
 
