@@ -70,6 +70,8 @@ public static class Program
             services.AddNemesisEuchreMachineLearningBots();
         });
 
+        System.Console.OutputEncoding = System.Text.Encoding.UTF8;
+
         return Cli.RunAsync<DefaultCommand>(args, new CliSettings { EnableDefaultExceptionHandler = true });
     }
 }
