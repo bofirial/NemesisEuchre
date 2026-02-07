@@ -36,7 +36,7 @@ public class PlayCardDecisionRecord
 
     public Card[] CardsAccountedFor { get; set; } = [];
 
-    public (PlayerPosition PlayerPosition, Suit Suit)[] KnownPlayerSuitVoids { get; set; } = [];
+    public PlayerSuitVoid[] KnownPlayerSuitVoids { get; set; } = [];
 
     public required Card ChosenCard { get; set; }
 }

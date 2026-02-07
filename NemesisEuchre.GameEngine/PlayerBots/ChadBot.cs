@@ -49,7 +49,7 @@ public class ChadBot(IRandomNumberGenerator random) : BotBase(random)
         RelativeCard? dealerPickedUpCard,
         RelativePlayerPosition leadPlayer,
         RelativeSuit? leadSuit,
-        (RelativePlayerPosition PlayerPosition, RelativeSuit Suit)[] knownPlayerSuitVoids,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids,
         RelativeCard[] cardsAccountedFor,
         Dictionary<RelativePlayerPosition, RelativeCard> playedCardsInTrick,
         RelativePlayerPosition? currentlyWinningTrickPlayer,

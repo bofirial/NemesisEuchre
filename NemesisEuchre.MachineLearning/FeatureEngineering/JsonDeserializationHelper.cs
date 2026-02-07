@@ -44,8 +44,8 @@ public static class JsonDeserializationHelper
         return JsonSerializer.Deserialize<CallTrumpDecision>(json, JsonSerializationOptions.Default);
     }
 
-    public static (RelativePlayerPosition PlayerPosition, RelativeSuit Suit)[] DeserializeKnownPlayerVoids(string json)
+    public static RelativePlayerSuitVoid[] DeserializeKnownPlayerVoids(string json)
     {
-        return JsonSerializer.Deserialize<(RelativePlayerPosition PlayerPosition, RelativeSuit Suit)[]>(json, JsonSerializationOptions.Default)!;
+        return JsonSerializer.Deserialize<RelativePlayerSuitVoid[]>(json, JsonSerializationOptions.Default)!;
     }
 }

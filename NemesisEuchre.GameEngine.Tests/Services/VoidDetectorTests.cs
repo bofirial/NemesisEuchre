@@ -107,7 +107,7 @@ public class VoidDetectorTests
         {
             KnownPlayerSuitVoids =
             [
-                (PlayerPosition.North, Suit.Clubs)
+                new PlayerSuitVoid(PlayerPosition.North, Suit.Clubs)
             ],
         };
         var chosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
@@ -131,7 +131,7 @@ public class VoidDetectorTests
         {
             KnownPlayerSuitVoids =
             [
-                (PlayerPosition.South, Suit.Clubs)
+                new (PlayerPosition.South, Suit.Clubs)
             ],
         };
         var chosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
@@ -155,7 +155,7 @@ public class VoidDetectorTests
         {
             KnownPlayerSuitVoids =
             [
-                (PlayerPosition.North, Suit.Diamonds)
+                new (PlayerPosition.North, Suit.Diamonds)
             ],
         };
         var chosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };

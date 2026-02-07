@@ -883,7 +883,7 @@ public class TrickPlayingOrchestratorTests
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
+        deal.KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
     }
 
     [Fact]
@@ -913,8 +913,8 @@ public class TrickPlayingOrchestratorTests
 
         trick.PlayCardDecisions[0].KnownPlayerSuitVoids.Should().BeEmpty();
         trick.PlayCardDecisions[1].KnownPlayerSuitVoids.Should().BeEmpty();
-        trick.PlayCardDecisions[2].KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
-        trick.PlayCardDecisions[3].KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
+        trick.PlayCardDecisions[2].KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
+        trick.PlayCardDecisions[3].KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
     }
 
     [Fact]
@@ -949,8 +949,8 @@ public class TrickPlayingOrchestratorTests
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
-        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.South, Suit.Spades));
+        deal.KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
+        deal.KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.South, Suit.Spades));
         deal.KnownPlayerSuitVoids.Should().HaveCount(2);
     }
 
@@ -959,7 +959,7 @@ public class TrickPlayingOrchestratorTests
     {
         var deal = CreateTestDeal();
         deal.Trump = Suit.Hearts;
-        deal.KnownPlayerSuitVoids = [(PlayerPosition.East, Suit.Spades)];
+        deal.KnownPlayerSuitVoids = [new(PlayerPosition.East, Suit.Spades)];
 
         deal.Players[PlayerPosition.North].CurrentHand = [
             new Card { Suit = Suit.Spades, Rank = Rank.Ace },
@@ -982,7 +982,7 @@ public class TrickPlayingOrchestratorTests
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
         deal.KnownPlayerSuitVoids.Should().HaveCount(1);
-        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
+        deal.KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
     }
 
     [Fact]
@@ -1010,7 +1010,7 @@ public class TrickPlayingOrchestratorTests
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Hearts));
+        deal.KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Hearts));
     }
 
     private static Deal CreateTestDeal()

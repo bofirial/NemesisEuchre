@@ -13,7 +13,7 @@ public sealed class PlayCardFeatureContext
 
     public required RelativeCard? DealerPickedUpCard { get; init; }
 
-    public required (RelativePlayerPosition PlayerPosition, RelativeSuit Suit)[] KnownPlayerSuitVoids { get; init; }
+    public required RelativePlayerSuitVoid[] KnownPlayerSuitVoids { get; init; }
 
     public required RelativeCard[] CardsAccountedFor { get; init; }
 

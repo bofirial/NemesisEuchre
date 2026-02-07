@@ -21,7 +21,7 @@ public static class PlayCardFeatureBuilder
         bool callingPlayerGoingAlone,
         RelativePlayerPosition dealer,
         RelativeCard? dealerPickedUpCard,
-        (RelativePlayerPosition PlayerPosition, RelativeSuit Suit)[] knownPlayerSuitVoids,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids,
         RelativeCard[] cardsAccountedFor,
         RelativePlayerPosition? winningTrickPlayer,
         short trickNumber,

@@ -38,8 +38,8 @@ public class DealToEntityMapperTests
         var deal = CreateTestDeal();
         deal.KnownPlayerSuitVoids =
         [
-            (PlayerPosition.North, Suit.Spades),
-            (PlayerPosition.East, Suit.Hearts),
+            new(PlayerPosition.North, Suit.Spades),
+            new(PlayerPosition.East, Suit.Hearts),
         ];
 
         var gamePlayers = CreateTestGamePlayers();
@@ -60,9 +60,9 @@ public class DealToEntityMapperTests
         var deal = CreateTestDeal();
         deal.KnownPlayerSuitVoids =
         [
-            (PlayerPosition.South, Suit.Clubs),
-            (PlayerPosition.West, Suit.Diamonds),
-            (PlayerPosition.North, Suit.Hearts),
+            new(PlayerPosition.South, Suit.Clubs),
+            new(PlayerPosition.West, Suit.Diamonds),
+            new(PlayerPosition.North, Suit.Hearts),
         ];
 
         var gamePlayers = CreateTestGamePlayers();
