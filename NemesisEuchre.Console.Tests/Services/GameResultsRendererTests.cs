@@ -29,7 +29,7 @@ public class GameResultsRendererTests
             WinningTeam = Team.Team1,
         };
 
-        renderer.RenderResults(game);
+        renderer.RenderResults(game, false);
 
         testConsole.Output.Should().Contain("Team1");
         testConsole.Output.Should().Contain("wins");
@@ -50,7 +50,7 @@ public class GameResultsRendererTests
             WinningTeam = Team.Team1,
         };
 
-        renderer.RenderResults(game);
+        renderer.RenderResults(game, false);
 
         testConsole.Output.Should().Contain("10");
         testConsole.Output.Should().Contain("8");
@@ -75,7 +75,7 @@ public class GameResultsRendererTests
         game.CompletedDeals.Add(CreateMinimalDeal(Suit.Spades));
         game.CompletedDeals.Add(CreateMinimalDeal(Suit.Diamonds));
 
-        renderer.RenderResults(game);
+        renderer.RenderResults(game, false);
 
         testConsole.Output.Should().Contain("3");
     }
@@ -139,7 +139,7 @@ public class GameResultsRendererTests
             CompletedTricks = [trick1, trick2, trick3, trick4, trick5],
         });
 
-        renderer.RenderResults(game);
+        renderer.RenderResults(game, false);
 
         testConsole.Output.Should().Contain("and Go");
         testConsole.Output.Should().Contain("Alone");
@@ -169,7 +169,7 @@ public class GameResultsRendererTests
 
         game.CompletedDeals.Add(deal);
 
-        renderer.RenderResults(game);
+        renderer.RenderResults(game, false);
 
         testConsole.Output.Should().Contain("J♠ ");
         testConsole.Output.Should().Contain("A♥ ");
@@ -199,7 +199,7 @@ public class GameResultsRendererTests
 
         game.CompletedDeals.Add(deal);
 
-        renderer.RenderResults(game);
+        renderer.RenderResults(game, false);
 
         testConsole.Output.Should().Contain("A♥ ");
         testConsole.Output.Should().Contain("K♦ ");
@@ -230,7 +230,7 @@ public class GameResultsRendererTests
 
         game.CompletedDeals.Add(deal);
 
-        renderer.RenderResults(game);
+        renderer.RenderResults(game, false);
 
         var output = testConsole.Output;
         output.Should().Contain("J♠");
@@ -258,7 +258,7 @@ public class GameResultsRendererTests
 
         game.CompletedDeals.Add(deal);
 
-        renderer.RenderResults(game);
+        renderer.RenderResults(game, false);
 
         testConsole.Output.Should().Contain("N/A");
     }
@@ -278,7 +278,7 @@ public class GameResultsRendererTests
             WinningTeam = Team.Team2,
         };
 
-        renderer.RenderResults(game);
+        renderer.RenderResults(game, false);
 
         testConsole.Output.Should().Contain("Team2");
         testConsole.Output.Should().Contain("wins");
@@ -299,7 +299,7 @@ public class GameResultsRendererTests
             WinningTeam = Team.Team1,
         };
 
-        renderer.RenderResults(game);
+        renderer.RenderResults(game, false);
 
         testConsole.Output.Should().Contain("0");
     }

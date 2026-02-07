@@ -25,6 +25,9 @@ public class DefaultCommand(
     [CliOption(Description = "Skip saving games to the database")]
     public bool DoNotPersist { get; set; }
 
+    [CliOption(Description = "Show decisions made during the game")]
+    public bool ShowDecisions { get; set; }
+
     [CliOption(Description = "ActorType for Team1")]
     public ActorType? Team1 { get; set; }
 
@@ -61,7 +64,7 @@ public class DefaultCommand(
 
         return ansiConsole.Status()
             .Spinner(Spinner.Known.Dots)
-            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(doNotPersist: DoNotPersist, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes));
+            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(doNotPersist: DoNotPersist, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes, showDecisions: ShowDecisions));
     }
 
     private async Task RunBatchGamesAsync()

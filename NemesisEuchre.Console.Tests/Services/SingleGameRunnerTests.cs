@@ -93,7 +93,7 @@ public class SingleGameRunnerTests
 
         await runner.RunAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        mockRenderer.Verify(r => r.RenderResults(game), Times.Once);
+        mockRenderer.Verify(r => r.RenderResults(game, false), Times.Once);
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class SingleGameRunnerTests
 
         await runner.RunAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        mockRenderer.Verify(r => r.RenderResults(game), Times.Once, "Results should be rendered even when persistence fails");
+        mockRenderer.Verify(r => r.RenderResults(game, false), Times.Once, "Results should be rendered even when persistence fails");
     }
 
     [Fact]
@@ -259,7 +259,7 @@ public class SingleGameRunnerTests
             .Returns(Task.CompletedTask)
             .Callback(() => callOrder.Add("Persist"));
 
-        mockRenderer.Setup(x => x.RenderResults(It.IsAny<Game>()))
+        mockRenderer.Setup(x => x.RenderResults(It.IsAny<Game>(), false))
             .Callback(() => callOrder.Add("Render"));
 
         var runner = new SingleGameRunner(mockOrchestrator.Object, mockRepository.Object, mockRenderer.Object, mockLogger);
@@ -317,7 +317,7 @@ public class SingleGameRunnerTests
 
         await runner.RunAsync(doNotPersist: true, cancellationToken: TestContext.Current.CancellationToken);
 
-        mockRenderer.Verify(r => r.RenderResults(game), Times.Once, "Results should still be rendered");
+        mockRenderer.Verify(r => r.RenderResults(game, false), Times.Once, "Results should still be rendered");
     }
 
     [Fact]
