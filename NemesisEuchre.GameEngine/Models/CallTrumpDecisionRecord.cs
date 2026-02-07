@@ -23,5 +23,5 @@ public class CallTrumpDecisionRecord
 
     public CallTrumpDecision ChosenDecision { get; set; }
 
-    public Dictionary<CallTrumpDecision, decimal> DecisionPredictedPoints { get; set; } = [];
+    public Dictionary<CallTrumpDecision, float> DecisionPredictedPoints { get; set; } = [];
 }

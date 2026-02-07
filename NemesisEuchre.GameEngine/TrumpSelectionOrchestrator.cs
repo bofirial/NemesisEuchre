@@ -68,13 +68,13 @@ public class TrumpSelectionOrchestrator(
 
         for (int i = 0; i < PlayersPerDeal; i++)
         {
-            var decision = await GetAndValidatePlayerDecisionAsync(deal, currentPosition, validDecisions);
+            var callTrumpDecisionContext = await GetAndValidatePlayerDecisionAsync(deal, currentPosition, validDecisions);
 
-            decisionRecorder.RecordCallTrumpDecision(deal, currentPosition, validDecisions, decision, ref _decisionOrder);
+            decisionRecorder.RecordCallTrumpDecision(deal, currentPosition, validDecisions, callTrumpDecisionContext, ref _decisionOrder);
 
-            if (decision != CallTrumpDecision.Pass)
+            if (callTrumpDecisionContext.ChosenCallTrumpDecision != CallTrumpDecision.Pass)
             {
-                SetTrumpResult(deal, deal.UpCard!.Suit, currentPosition, decision);
+                SetTrumpResult(deal, deal.UpCard!.Suit, currentPosition, callTrumpDecisionContext.ChosenCallTrumpDecision);
                 await dealerDiscardHandler.HandleDealerDiscardAsync(deal);
                 return true;
             }
@@ -95,14 +95,14 @@ public class TrumpSelectionOrchestrator(
             bool isDealer = IsDealer(deal, currentPosition);
             var validDecisions = decisionMapper.GetValidRound2Decisions(upcardSuit, isDealer, gameOptions.Value.StickTheDealer);
 
-            var decision = await GetAndValidatePlayerDecisionAsync(deal, currentPosition, validDecisions);
+            var callTrumpDecisionContext = await GetAndValidatePlayerDecisionAsync(deal, currentPosition, validDecisions);
 
-            decisionRecorder.RecordCallTrumpDecision(deal, currentPosition, validDecisions, decision, ref _decisionOrder);
+            decisionRecorder.RecordCallTrumpDecision(deal, currentPosition, validDecisions, callTrumpDecisionContext, ref _decisionOrder);
 
-            if (decision != CallTrumpDecision.Pass)
+            if (callTrumpDecisionContext.ChosenCallTrumpDecision != CallTrumpDecision.Pass)
             {
-                var trump = decisionMapper.ConvertDecisionToSuit(decision);
-                SetTrumpResult(deal, trump, currentPosition, decision);
+                var trump = decisionMapper.ConvertDecisionToSuit(callTrumpDecisionContext.ChosenCallTrumpDecision);
+                SetTrumpResult(deal, trump, currentPosition, callTrumpDecisionContext.ChosenCallTrumpDecision);
                 return;
             }
 
@@ -115,7 +115,7 @@ public class TrumpSelectionOrchestrator(
         }
     }
 
-    private Task<CallTrumpDecision> GetPlayerDecisionAsync(
+    private Task<CallTrumpDecisionContext> GetPlayerDecisionAsync(
         Deal deal,
         PlayerPosition playerPosition,
         CallTrumpDecision[] validDecisions)
@@ -138,13 +138,13 @@ public class TrumpSelectionOrchestrator(
         return playerActor.CallTrumpAsync(context);
     }
 
-    private async Task<CallTrumpDecision> GetAndValidatePlayerDecisionAsync(
+    private async Task<CallTrumpDecisionContext> GetAndValidatePlayerDecisionAsync(
         Deal deal,
         PlayerPosition playerPosition,
         CallTrumpDecision[] validDecisions)
     {
-        var decision = await GetPlayerDecisionAsync(deal, playerPosition, validDecisions);
-        validator.ValidateDecision(decision, validDecisions);
-        return decision;
+        var callTrumpDecisionContext = await GetPlayerDecisionAsync(deal, playerPosition, validDecisions);
+        validator.ValidateDecision(callTrumpDecisionContext.ChosenCallTrumpDecision, validDecisions);
+        return callTrumpDecisionContext;
     }
 }

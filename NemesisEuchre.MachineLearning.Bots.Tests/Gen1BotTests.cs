@@ -120,7 +120,7 @@ public class Gen1BotTests
             upCard,
             validDecisions);
 
-        result.Should().BeOneOf(validDecisions);
+        result.ChosenCallTrumpDecision.Should().BeOneOf(validDecisions);
     }
 
     [Fact]
@@ -173,7 +173,7 @@ public class Gen1BotTests
             false,
             validCardsToDiscard);
 
-        result.Should().BeOneOf(validCardsToDiscard);
+        result.ChosenCard.Should().BeOneOf(validCardsToDiscard);
     }
 
     [Fact]
@@ -211,7 +211,7 @@ public class Gen1BotTests
             1,
             validCardsToPlay);
 
-        result.Should().BeOneOf(validCardsToPlay);
+        result.ChosenCard.Should().BeOneOf(validCardsToPlay);
     }
 
     private Card[] GenerateCards(int count)

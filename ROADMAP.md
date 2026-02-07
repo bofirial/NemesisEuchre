@@ -468,7 +468,7 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 1. ~~CallTrumpAsync needs to know the current player's position~~
 2. ~~Display Tricks in each Deal of a Euchre game~~
 3. ~~Display Choices and Decisions made during a Euchre game~~
-4. Rework BotBase to record EstimatedPoints for each valid decision
+4. ~~Rework BotBase to record EstimatedPoints for each valid decision~~
 5. Add Command to display results from a Game in the Database
 6. Consider Bulk Game display improvements?
 7. Protect against game state mutations in IPlayerActor implementations

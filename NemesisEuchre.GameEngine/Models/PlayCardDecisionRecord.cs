@@ -40,5 +40,5 @@ public class PlayCardDecisionRecord
 
     public required Card ChosenCard { get; set; }
 
-    public Dictionary<Card, decimal> DecisionPredictedPoints { get; set; } = [];
+    public Dictionary<Card, float> DecisionPredictedPoints { get; set; } = [];
 }

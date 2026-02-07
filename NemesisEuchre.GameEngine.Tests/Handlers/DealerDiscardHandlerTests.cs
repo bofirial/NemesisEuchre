@@ -45,7 +45,7 @@ public class DealerDiscardHandlerTests
         var initialHandCount = dealer.CurrentHand.Count;
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync(upCard);
+            .ReturnsAsync(new CardDecisionContext { ChosenCard = upCard });
 
         await _handler.HandleDealerDiscardAsync(deal);
 
@@ -59,7 +59,7 @@ public class DealerDiscardHandlerTests
         var deal = CreateTestDeal(upCard);
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync(upCard);
+            .ReturnsAsync(new CardDecisionContext { ChosenCard = upCard });
 
         await _handler.HandleDealerDiscardAsync(deal);
 
@@ -84,7 +84,7 @@ public class DealerDiscardHandlerTests
         var deal = CreateTestDeal(upCard);
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync(upCard);
+            .ReturnsAsync(new CardDecisionContext { ChosenCard = upCard });
 
         await _handler.HandleDealerDiscardAsync(deal);
 
@@ -106,7 +106,7 @@ public class DealerDiscardHandlerTests
         var cardToDiscard = dealer.CurrentHand[0];
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync(cardToDiscard);
+            .ReturnsAsync(new CardDecisionContext { ChosenCard = cardToDiscard });
 
         await _handler.HandleDealerDiscardAsync(deal);
 
@@ -121,7 +121,7 @@ public class DealerDiscardHandlerTests
         var deal = CreateTestDeal(upCard);
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync(upCard);
+            .ReturnsAsync(new CardDecisionContext { ChosenCard = upCard });
 
         await _handler.HandleDealerDiscardAsync(deal);
 
@@ -137,7 +137,7 @@ public class DealerDiscardHandlerTests
         var dealer = deal.Players[PlayerPosition.North];
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync(upCard);
+            .ReturnsAsync(new CardDecisionContext { ChosenCard = upCard });
 
         await _handler.HandleDealerDiscardAsync(deal);
 
@@ -157,7 +157,7 @@ public class DealerDiscardHandlerTests
             .Returns((7, 5));
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync(upCard);
+            .ReturnsAsync(new CardDecisionContext { ChosenCard = upCard });
 
         await _handler.HandleDealerDiscardAsync(deal);
 
@@ -173,7 +173,7 @@ public class DealerDiscardHandlerTests
         var deal = CreateTestDeal(upCard);
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync(upCard);
+            .ReturnsAsync(new CardDecisionContext { ChosenCard = upCard });
 
         await _handler.HandleDealerDiscardAsync(deal);
 
@@ -192,7 +192,7 @@ public class DealerDiscardHandlerTests
         deal.CallingPlayerIsGoingAlone = true;
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync(upCard);
+            .ReturnsAsync(new CardDecisionContext { ChosenCard = upCard });
 
         await _handler.HandleDealerDiscardAsync(deal);
 
@@ -234,7 +234,7 @@ public class DealerDiscardHandlerTests
             .Returns((10, 5));
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync(upCard);
+            .ReturnsAsync(new CardDecisionContext { ChosenCard = upCard });
 
         await _handler.HandleDealerDiscardAsync(dealSouth);
 
@@ -251,7 +251,7 @@ public class DealerDiscardHandlerTests
         var cardToDiscard = dealer.CurrentHand[0];
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync(cardToDiscard);
+            .ReturnsAsync(new CardDecisionContext { ChosenCard = cardToDiscard });
 
         await _handler.HandleDealerDiscardAsync(deal);
 
@@ -272,7 +272,7 @@ public class DealerDiscardHandlerTests
         var cardToDiscard = dealer.CurrentHand[0];
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync(cardToDiscard);
+            .ReturnsAsync(new CardDecisionContext { ChosenCard = cardToDiscard });
 
         await _handler.HandleDealerDiscardAsync(deal);
 

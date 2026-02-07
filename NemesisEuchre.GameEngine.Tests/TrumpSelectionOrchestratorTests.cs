@@ -127,7 +127,7 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.OrderItUp);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.OrderItUp });
 
         SetupDealerDiscardMock();
 
@@ -147,8 +147,8 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.West;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.OrderItUp);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.OrderItUp });
 
         SetupDealerDiscardMock();
 
@@ -167,10 +167,10 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.South;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.OrderItUp);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.OrderItUp });
 
         SetupDealerDiscardMock();
 
@@ -189,7 +189,7 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.East;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.OrderItUpAndGoAlone);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.OrderItUpAndGoAlone });
 
         SetupDealerDiscardMock();
 
@@ -209,11 +209,11 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.CallClubs);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.CallClubs });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -229,11 +229,11 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.CallSpades);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.CallSpades });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -251,14 +251,14 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.CallDiamonds);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.CallDiamonds });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -275,12 +275,12 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.West;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.CallHeartsAndGoAlone);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.CallHeartsAndGoAlone });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -309,7 +309,7 @@ public class TrumpSelectionOrchestratorTests
                         capturedValidDecisions = ctx.ValidCallTrumpDecisions;
                     }
                 })
-            .ReturnsAsync((CallTrumpContext _) => callCount <= 4 ? CallTrumpDecision.Pass : CallTrumpDecision.CallClubs);
+            .ReturnsAsync((CallTrumpContext _) => new CallTrumpDecisionContext { ChosenCallTrumpDecision = callCount <= 4 ? CallTrumpDecision.Pass : CallTrumpDecision.CallClubs });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -327,17 +327,17 @@ public class TrumpSelectionOrchestratorTests
 
         _playerActorMock.Setup(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
             .Callback<CallTrumpContext>(ctx => allCapturedDecisions.Add(ctx.ValidCallTrumpDecisions))
-            .ReturnsAsync(CallTrumpDecision.Pass);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass });
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.CallClubs);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.CallClubs });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -367,11 +367,11 @@ public class TrumpSelectionOrchestratorTests
         var handSizeBeforeDiscard = 0;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.OrderItUp);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.OrderItUp });
 
         _playerActorMock.Setup(b => b.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
             .Callback<DiscardCardContext>(ctx => handSizeBeforeDiscard = ctx.CardsInHand.Length)
-            .ReturnsAsync((DiscardCardContext ctx) => ctx.ValidCardsToDiscard[0]);
+            .ReturnsAsync((DiscardCardContext ctx) => new CardDecisionContext { ChosenCard = ctx.ValidCardsToDiscard[0] });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -395,10 +395,10 @@ public class TrumpSelectionOrchestratorTests
         ];
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.OrderItUp);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.OrderItUp });
 
         _playerActorMock.Setup(b => b.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync((DiscardCardContext ctx) => ctx.ValidCardsToDiscard[0]);
+            .ReturnsAsync((DiscardCardContext ctx) => new CardDecisionContext { ChosenCard = ctx.ValidCardsToDiscard[0] });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -423,7 +423,7 @@ public class TrumpSelectionOrchestratorTests
         ];
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.OrderItUp);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.OrderItUp });
 
         SetupDealerDiscardMock();
 
@@ -449,7 +449,7 @@ public class TrumpSelectionOrchestratorTests
                     playerPositions.Add(player);
                     callCount++;
                 })
-            .ReturnsAsync((CallTrumpContext _) => callCount <= 4 ? CallTrumpDecision.Pass : CallTrumpDecision.CallClubs);
+            .ReturnsAsync((CallTrumpContext _) => new CallTrumpDecisionContext { ChosenCallTrumpDecision = callCount <= 4 ? CallTrumpDecision.Pass : CallTrumpDecision.CallClubs });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -481,7 +481,7 @@ public class TrumpSelectionOrchestratorTests
 
                     callCount++;
                 })
-            .ReturnsAsync((CallTrumpContext _) => callCount <= 4 ? CallTrumpDecision.Pass : CallTrumpDecision.CallClubs);
+            .ReturnsAsync((CallTrumpContext _) => new CallTrumpDecisionContext { ChosenCallTrumpDecision = callCount <= 4 ? CallTrumpDecision.Pass : CallTrumpDecision.CallClubs });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -521,7 +521,7 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.Setup(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass });
 
         await sut.SelectTrumpAsync(deal);
 
@@ -570,7 +570,7 @@ public class TrumpSelectionOrchestratorTests
                         capturedValidDecisions = ctx.ValidCallTrumpDecisions;
                     }
                 })
-            .ReturnsAsync(CallTrumpDecision.Pass);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass });
 
         await sut.SelectTrumpAsync(deal);
 
@@ -596,7 +596,7 @@ public class TrumpSelectionOrchestratorTests
                         capturedValidDecisions = ctx.ValidCallTrumpDecisions;
                     }
                 })
-            .ReturnsAsync((CallTrumpContext _) => callCount <= 7 ? CallTrumpDecision.Pass : CallTrumpDecision.CallClubs);
+            .ReturnsAsync((CallTrumpContext _) => new CallTrumpDecisionContext { ChosenCallTrumpDecision = callCount <= 7 ? CallTrumpDecision.Pass : CallTrumpDecision.CallClubs });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -611,7 +611,7 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.OrderItUp);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.OrderItUp });
 
         SetupDealerDiscardMock();
 
@@ -630,10 +630,10 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.OrderItUp);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.OrderItUp });
 
         SetupDealerDiscardMock();
 
@@ -654,14 +654,14 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.CallClubs);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.CallClubs });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -679,14 +679,14 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.CallClubs);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.CallClubs });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -705,7 +705,7 @@ public class TrumpSelectionOrchestratorTests
         var firstPlayer = deal.Players[PlayerPosition.East];
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.OrderItUp);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.OrderItUp });
 
         SetupDealerDiscardMock();
 
@@ -724,8 +724,8 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.OrderItUp);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.OrderItUp });
 
         SetupDealerDiscardMock();
 
@@ -748,7 +748,7 @@ public class TrumpSelectionOrchestratorTests
         deal.Team2Score = 3;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.OrderItUp);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.OrderItUp });
 
         SetupDealerDiscardMock();
 
@@ -767,11 +767,11 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.CallClubs);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.CallClubs });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -790,11 +790,11 @@ public class TrumpSelectionOrchestratorTests
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.Pass)
-            .ReturnsAsync(CallTrumpDecision.CallSpades);
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass })
+            .ReturnsAsync(new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.CallSpades });
 
         await _sut.SelectTrumpAsync(deal);
 
@@ -843,6 +843,6 @@ public class TrumpSelectionOrchestratorTests
     private void SetupDealerDiscardMock()
     {
         _playerActorMock.Setup(b => b.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
-            .ReturnsAsync((DiscardCardContext ctx) => ctx.CardsInHand[0]);
+            .ReturnsAsync((DiscardCardContext ctx) => new CardDecisionContext { ChosenCard = ctx.CardsInHand[0] });
     }
 }

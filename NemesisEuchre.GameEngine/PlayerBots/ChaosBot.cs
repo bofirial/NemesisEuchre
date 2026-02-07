@@ -9,7 +9,7 @@ public class ChaosBot(IRandomNumberGenerator random) : BotBase(random)
 {
     public override ActorType ActorType => ActorType.Chaos;
 
-    public override Task<CallTrumpDecision> CallTrumpAsync(
+    public override Task<CallTrumpDecisionContext> CallTrumpAsync(
         Card[] cardsInHand,
         short teamScore,
         short opponentScore,
@@ -17,10 +17,14 @@ public class ChaosBot(IRandomNumberGenerator random) : BotBase(random)
         Card upCard,
         CallTrumpDecision[] validCallTrumpDecisions)
     {
-        return SelectRandomAsync(validCallTrumpDecisions);
+        return Task.FromResult(new CallTrumpDecisionContext()
+        {
+            ChosenCallTrumpDecision = SelectRandom(validCallTrumpDecisions),
+            DecisionPredictedPoints = validCallTrumpDecisions.ToDictionary(d => d, _ => 0f),
+        });
     }
 
-    public override Task<RelativeCard> DiscardCardAsync(
+    public override Task<RelativeCardDecisionContext> DiscardCardAsync(
         RelativeCard[] cardsInHand,
         short teamScore,
         short opponentScore,
@@ -28,10 +32,14 @@ public class ChaosBot(IRandomNumberGenerator random) : BotBase(random)
         bool callingPlayerGoingAlone,
         RelativeCard[] validCardsToDiscard)
     {
-        return SelectRandomAsync(validCardsToDiscard);
+        return Task.FromResult(new RelativeCardDecisionContext()
+        {
+            ChosenCard = SelectRandom(validCardsToDiscard),
+            DecisionPredictedPoints = validCardsToDiscard.ToDictionary(d => d, _ => 0f),
+        });
     }
 
-    public override Task<RelativeCard> PlayCardAsync(
+    public override Task<RelativeCardDecisionContext> PlayCardAsync(
         RelativeCard[] cardsInHand,
         short teamScore,
         short opponentScore,
@@ -48,6 +56,10 @@ public class ChaosBot(IRandomNumberGenerator random) : BotBase(random)
         short trickNumber,
         RelativeCard[] validCardsToPlay)
     {
-        return SelectRandomAsync(validCardsToPlay);
+        return Task.FromResult(new RelativeCardDecisionContext()
+        {
+            ChosenCard = SelectRandom(validCardsToPlay),
+            DecisionPredictedPoints = validCardsToPlay.ToDictionary(d => d, _ => 0f),
+        });
     }
 }

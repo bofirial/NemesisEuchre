@@ -31,7 +31,7 @@ public class Gen1Bot(
 
     public override ActorType ActorType => ActorType.Gen1;
 
-    public override async Task<CallTrumpDecision> CallTrumpAsync(
+    public override async Task<CallTrumpDecisionContext> CallTrumpAsync(
         Card[] cardsInHand,
         short teamScore,
         short opponentScore,
@@ -41,13 +41,20 @@ public class Gen1Bot(
     {
         if (_callTrumpEngine == null)
         {
-            return await SelectRandomAsync(validCallTrumpDecisions);
+            LoggerMessages.LogCallTrumpEngineNotAvailable(_logger);
+
+            return new CallTrumpDecisionContext()
+            {
+                ChosenCallTrumpDecision = SelectRandom(validCallTrumpDecisions),
+                DecisionPredictedPoints = validCallTrumpDecisions.ToDictionary(d => d, _ => 0f),
+            };
         }
 
         try
         {
             var bestDecision = CallTrumpDecision.Pass;
             var bestScore = float.MinValue;
+            var decisionScores = new Dictionary<CallTrumpDecision, float>();
 
             foreach (var decision in validCallTrumpDecisions)
             {
@@ -62,6 +69,8 @@ public class Gen1Bot(
 
                 var prediction = _callTrumpEngine.Predict(trainingData);
 
+                decisionScores.Add(decision, prediction.PredictedPoints);
+
                 if (prediction.PredictedPoints > bestScore)
                 {
                     bestScore = prediction.PredictedPoints;
@@ -69,16 +78,25 @@ public class Gen1Bot(
                 }
             }
 
-            return bestDecision;
+            return new CallTrumpDecisionContext()
+            {
+                ChosenCallTrumpDecision = bestDecision,
+                DecisionPredictedPoints = decisionScores,
+            };
         }
         catch (Exception ex)
         {
             LoggerMessages.LogCallTrumpPredictionError(_logger, ex);
-            return await SelectRandomAsync(validCallTrumpDecisions);
+
+            return new CallTrumpDecisionContext()
+            {
+                ChosenCallTrumpDecision = SelectRandom(validCallTrumpDecisions),
+                DecisionPredictedPoints = validCallTrumpDecisions.ToDictionary(d => d, _ => 0f),
+            };
         }
     }
 
-    public override async Task<RelativeCard> DiscardCardAsync(
+    public override async Task<RelativeCardDecisionContext> DiscardCardAsync(
         RelativeCard[] cardsInHand,
         short teamScore,
         short opponentScore,
@@ -93,13 +111,20 @@ public class Gen1Bot(
 
         if (_discardCardEngine == null)
         {
-            return await SelectRandomAsync(validCardsToDiscard);
+            LoggerMessages.LogDiscardCardEngineNotAvailable(_logger);
+
+            return new RelativeCardDecisionContext()
+            {
+                ChosenCard = SelectRandom(validCardsToDiscard),
+                DecisionPredictedPoints = validCardsToDiscard.ToDictionary(d => d, _ => 0f),
+            };
         }
 
         try
         {
             var bestCard = validCardsToDiscard[0];
             var bestScore = float.MinValue;
+            var decisionScores = new Dictionary<RelativeCard, float>();
 
             foreach (var card in validCardsToDiscard)
             {
@@ -113,6 +138,8 @@ public class Gen1Bot(
 
                 var prediction = _discardCardEngine.Predict(trainingData);
 
+                decisionScores.Add(card, prediction.PredictedPoints);
+
                 if (prediction.PredictedPoints > bestScore)
                 {
                     bestScore = prediction.PredictedPoints;
@@ -120,16 +147,25 @@ public class Gen1Bot(
                 }
             }
 
-            return bestCard;
+            return new RelativeCardDecisionContext()
+            {
+                ChosenCard = bestCard,
+                DecisionPredictedPoints = decisionScores,
+            };
         }
         catch (Exception ex)
         {
             LoggerMessages.LogDiscardCardPredictionError(_logger, ex);
-            return await SelectRandomAsync(validCardsToDiscard);
+
+            return new RelativeCardDecisionContext()
+            {
+                ChosenCard = SelectRandom(validCardsToDiscard),
+                DecisionPredictedPoints = validCardsToDiscard.ToDictionary(d => d, _ => 0f),
+            };
         }
     }
 
-    public override async Task<RelativeCard> PlayCardAsync(
+    public override async Task<RelativeCardDecisionContext> PlayCardAsync(
         RelativeCard[] cardsInHand,
         short teamScore,
         short opponentScore,
@@ -148,13 +184,20 @@ public class Gen1Bot(
     {
         if (_playCardEngine == null)
         {
-            return await SelectRandomAsync(validCardsToPlay);
+            LoggerMessages.LogPlayCardEngineNotAvailable(_logger);
+
+            return new RelativeCardDecisionContext()
+            {
+                ChosenCard = SelectRandom(validCardsToPlay),
+                DecisionPredictedPoints = validCardsToPlay.ToDictionary(d => d, _ => 0f),
+            };
         }
 
         try
         {
             var bestCard = validCardsToPlay[0];
             var bestScore = float.MinValue;
+            var decisionScores = new Dictionary<RelativeCard, float>();
 
             foreach (var card in validCardsToPlay)
             {
@@ -178,6 +221,8 @@ public class Gen1Bot(
 
                 var prediction = _playCardEngine.Predict(trainingData);
 
+                decisionScores.Add(card, prediction.PredictedPoints);
+
                 if (prediction.PredictedPoints > bestScore)
                 {
                     bestScore = prediction.PredictedPoints;
@@ -185,12 +230,21 @@ public class Gen1Bot(
                 }
             }
 
-            return bestCard;
+            return new RelativeCardDecisionContext()
+            {
+                ChosenCard = bestCard,
+                DecisionPredictedPoints = decisionScores,
+            };
         }
         catch (Exception ex)
         {
             LoggerMessages.LogPlayCardPredictionError(_logger, ex);
-            return await SelectRandomAsync(validCardsToPlay);
+
+            return new RelativeCardDecisionContext()
+            {
+                ChosenCard = SelectRandom(validCardsToPlay),
+                DecisionPredictedPoints = validCardsToPlay.ToDictionary(d => d, _ => 0f),
+            };
         }
     }
 }

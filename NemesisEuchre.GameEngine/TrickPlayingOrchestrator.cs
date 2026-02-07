@@ -116,18 +116,18 @@ public class TrickPlayingOrchestrator(
             Array.Copy(hand, handArray, handCount);
             var validCards = GetValidCardsToPlay(handArray, deal.Trump!.Value, trick.LeadSuit);
 
-            var chosenCard = await GetPlayerCardChoiceAsync(deal, trick, position, handArray, validCards).ConfigureAwait(false);
-            decisionRecorder.RecordPlayCardDecision(deal, trick, position, handArray, validCards, chosenCard, trickWinnerCalculator);
-            validator.ValidateCardChoice(chosenCard, validCards);
+            var cardDecisionContext = await GetPlayerCardChoiceAsync(deal, trick, position, handArray, validCards).ConfigureAwait(false);
+            decisionRecorder.RecordPlayCardDecision(deal, trick, position, handArray, validCards, cardDecisionContext, trickWinnerCalculator);
+            validator.ValidateCardChoice(cardDecisionContext.ChosenCard, validCards);
 
-            if (voidDetector.TryDetectVoid(deal, chosenCard, trick.LeadSuit, deal.Trump!.Value, position, out var voidSuit))
+            if (voidDetector.TryDetectVoid(deal, cardDecisionContext.ChosenCard, trick.LeadSuit, deal.Trump!.Value, position, out var voidSuit))
             {
                 deal.KnownPlayerSuitVoids.Add(new PlayerSuitVoid(position, voidSuit));
             }
 
-            SetLeadSuitIfFirstCard(trick, chosenCard, deal.Trump!.Value, isFirstCard);
-            RecordPlayedCard(trick, chosenCard, position);
-            UpdateHandAfterPlay(player, chosenCard);
+            SetLeadSuitIfFirstCard(trick, cardDecisionContext.ChosenCard, deal.Trump!.Value, isFirstCard);
+            RecordPlayedCard(trick, cardDecisionContext.ChosenCard, position);
+            UpdateHandAfterPlay(player, cardDecisionContext.ChosenCard);
         }
         finally
         {
@@ -135,7 +135,7 @@ public class TrickPlayingOrchestrator(
         }
     }
 
-    private Task<Card> GetPlayerCardChoiceAsync(
+    private Task<CardDecisionContext> GetPlayerCardChoiceAsync(
         Deal deal,
         Trick trick,
         PlayerPosition playerPosition,

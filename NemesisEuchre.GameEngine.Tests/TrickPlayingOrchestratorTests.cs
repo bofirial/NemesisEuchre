@@ -320,10 +320,10 @@ public class TrickPlayingOrchestratorTests
             {
                 if (callCount == 2)
                 {
-                    return Task.FromResult(new Card { Suit = Suit.Hearts, Rank = Rank.Jack });
+                    return Task.FromResult(new CardDecisionContext { ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Jack } });
                 }
 
-                return Task.FromResult(ctx.ValidCardsToPlay[0]);
+                return Task.FromResult(new CardDecisionContext { ChosenCard = ctx.ValidCardsToPlay[0] });
             });
 
         var act = async () => await _sut.PlayTrickAsync(deal, PlayerPosition.North);
