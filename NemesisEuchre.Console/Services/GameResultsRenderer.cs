@@ -150,37 +150,49 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         return $"[{suitColor}]{suit} {suitSymbol}[/]";
     }
 
-    private static string[] GetTrickRowPreSpacers(Trick trick)
+    private static IRenderable[] GetTrickRowPreSpacers(Trick trick)
     {
         return trick.CardsPlayed[0].PlayerPosition switch
         {
-            PlayerPosition.East => [string.Empty],
-            PlayerPosition.South => [string.Empty, string.Empty],
-            PlayerPosition.West => [string.Empty, string.Empty, string.Empty],
+            PlayerPosition.East => [new Text(string.Empty)],
+            PlayerPosition.South => [new Text(string.Empty), new Text(string.Empty)],
+            PlayerPosition.West => [new Text(string.Empty), new Text(string.Empty), new Text(string.Empty)],
             PlayerPosition.North => [],
             _ => [],
         };
     }
 
-    private static string[] GetTrickRowPostSpacers(Trick trick)
+    private static IRenderable[] GetTrickRowPostSpacers(Trick trick)
     {
-        string[] trickRowPostSpacers = trick.CardsPlayed[0].PlayerPosition switch
+        return trick.CardsPlayed[0].PlayerPosition switch
         {
-            PlayerPosition.East => [string.Empty, string.Empty],
-            PlayerPosition.South => [string.Empty],
+            PlayerPosition.East => [new Text(string.Empty), new Text(string.Empty)],
+            PlayerPosition.South => [new Text(string.Empty)],
             PlayerPosition.West => [],
-            PlayerPosition.North => [string.Empty, string.Empty, string.Empty],
+            PlayerPosition.North => [new Text(string.Empty), new Text(string.Empty), new Text(string.Empty)],
             _ => [],
         };
+    }
 
-        return [.. trickRowPostSpacers];
+    private static IRenderable GetCardCell(PlayedCard card, Trick trick, Suit trump)
+    {
+        var cardMarkup = new Markup(GetDisplayCard(card.Card, trump));
+
+        if (trick.WinningPosition == card.PlayerPosition)
+        {
+            return new Columns(new Markup(":diamond_with_a_dot: "), cardMarkup, new Markup(" :diamond_with_a_dot:"));
+        }
+
+        return cardMarkup;
     }
 
     private IRenderable[] GetPlayerRow(DealPlayer dealPlayer, Deal deal)
     {
         var playerHand = dealPlayer.StartingHand;
 
-        if (dealPlayer.Position == deal.DealerPosition && deal.ChosenDecision is CallTrumpDecision.OrderItUp or CallTrumpDecision.OrderItUpAndGoAlone)
+        if (dealPlayer.Position == deal.DealerPosition
+            && deal.ChosenDecision is CallTrumpDecision.OrderItUp or CallTrumpDecision.OrderItUpAndGoAlone
+            && (deal.UpCard!.Rank != deal.DiscardedCard!.Rank || deal.UpCard!.Suit != deal.DiscardedCard!.Suit))
         {
             playerHand = [.. playerHand.Where(c => c.Rank != deal.DiscardedCard!.Rank || c.Suit != deal.DiscardedCard!.Suit), deal.UpCard!];
         }
@@ -283,9 +295,9 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0045:Convert to conditional expression", Justification = "Nested Conditionals are bad")]
-    private string[] GetTrickRow(Trick trick, Deal deal)
+    private IRenderable[] GetTrickRow(Trick trick, Deal deal)
     {
-        var cards = trick.CardsPlayed.ConvertAll(c => (trick.WinningPosition == c.PlayerPosition ? ":crown: " : string.Empty) + GetDisplayCard(c.Card, deal.Trump!.Value) + (trick.WinningPosition == c.PlayerPosition ? " :crown:" : string.Empty));
+        var cards = trick.CardsPlayed.ConvertAll(card => GetCardCell(card, trick, deal.Trump!.Value));
 
         if (callTrumpDecisionMapper.IsGoingAloneDecision(deal.ChosenDecision!.Value))
         {
@@ -305,10 +317,10 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
                 insertIndex = 3;
             }
 
-            cards.Insert(insertIndex, string.Empty);
+            cards.Insert(insertIndex, new Text(string.Empty));
         }
 
-        return [trick.TrickNumber.ToString(CultureInfo.InvariantCulture), .. GetTrickRowPreSpacers(trick), .. cards, .. GetTrickRowPostSpacers(trick)];
+        return [new Text(trick.TrickNumber.ToString(CultureInfo.InvariantCulture)), .. GetTrickRowPreSpacers(trick), .. cards, .. GetTrickRowPostSpacers(trick)];
     }
 
     private Table RenderTricksTable(Deal deal)
