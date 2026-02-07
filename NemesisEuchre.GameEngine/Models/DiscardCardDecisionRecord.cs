@@ -20,5 +20,7 @@ public class DiscardCardDecisionRecord
 
     public Card[] ValidCardsToDiscard { get; set; } = [];
 
-    public Card ChosenCard { get; set; } = new();
+    public required Card ChosenCard { get; set; }
+
+    public Dictionary<Card, decimal> DecisionPredictedPoints { get; set; } = [];
 }

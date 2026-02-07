@@ -13,6 +13,8 @@ public class CallTrumpDecisionRecord
 
     public short OpponentScore { get; set; }
 
+    public short DecisionOrder { get; set; }
+
     public PlayerPosition DealerPosition { get; set; }
 
     public Card UpCard { get; set; } = new();
@@ -21,5 +23,5 @@ public class CallTrumpDecisionRecord
 
     public CallTrumpDecision ChosenDecision { get; set; }
 
-    public short DecisionOrder { get; set; }
+    public Dictionary<CallTrumpDecision, decimal> DecisionPredictedPoints { get; set; } = [];
 }

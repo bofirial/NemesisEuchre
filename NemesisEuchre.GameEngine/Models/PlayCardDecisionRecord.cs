@@ -39,4 +39,6 @@ public class PlayCardDecisionRecord
     public PlayerSuitVoid[] KnownPlayerSuitVoids { get; set; } = [];
 
     public required Card ChosenCard { get; set; }
+
+    public Dictionary<Card, decimal> DecisionPredictedPoints { get; set; } = [];
 }

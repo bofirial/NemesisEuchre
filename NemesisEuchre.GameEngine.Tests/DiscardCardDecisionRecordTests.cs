@@ -10,7 +10,7 @@ public class DiscardCardDecisionRecordTests
     [Fact]
     public void DiscardCardDecisionRecord_DefaultInitialization_SetsCollectionsToEmpty()
     {
-        var record = new DiscardCardDecisionRecord();
+        var record = new DiscardCardDecisionRecord() { ChosenCard = new() };
 
         record.CardsInHand.Should().NotBeNull();
         record.CardsInHand.Should().BeEmpty();
@@ -32,6 +32,7 @@ public class DiscardCardDecisionRecordTests
                 new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
                 new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
             ],
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
         };
 
         record.CardsInHand.Should().HaveCount(6);
@@ -52,6 +53,7 @@ public class DiscardCardDecisionRecordTests
                 new Card { Suit = Suit.Spades, Rank = Rank.Ten },
                 new Card { Suit = Suit.Spades, Rank = Rank.Nine },
             ],
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
         };
 
         record.ValidCardsToDiscard.Should().HaveCount(6);
@@ -147,12 +149,14 @@ public class DiscardCardDecisionRecordTests
         {
             PlayerPosition = PlayerPosition.North,
             TeamScore = 0,
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
         };
 
         var record2 = new DiscardCardDecisionRecord
         {
             PlayerPosition = PlayerPosition.South,
             TeamScore = 5,
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
         };
 
         deal.DiscardCardDecisions.Add(record1);
