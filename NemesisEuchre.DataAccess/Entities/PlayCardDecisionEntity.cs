@@ -55,6 +55,8 @@ public class PlayCardDecisionEntity : IDecisionEntity
 
     public bool? DidTeamWinGame { get; set; }
 
+    public string? DecisionPredictedPointsJson { get; set; }
+
     public DealEntity? Deal { get; set; }
 
     public TrickEntity? Trick { get; set; }
@@ -148,6 +150,9 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
         builder.Property(e => e.RelativeDealPoints);
 
         builder.Property(e => e.DidTeamWinGame);
+
+        builder.Property(e => e.DecisionPredictedPointsJson)
+            .HasMaxLength(350);
 
         builder.HasOne(e => e.Deal)
             .WithMany(d => d.PlayCardDecisions)

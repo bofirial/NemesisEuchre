@@ -35,6 +35,8 @@ public class CallTrumpDecisionEntity : IDecisionEntity
 
     public bool? DidTeamWinGame { get; set; }
 
+    public string? DecisionPredictedPointsJson { get; set; }
+
     public DealEntity? Deal { get; set; }
 }
 
@@ -90,6 +92,9 @@ public class CallTrumpDecisionEntityConfiguration : IEntityTypeConfiguration<Cal
         builder.Property(e => e.RelativeDealPoints);
 
         builder.Property(e => e.DidTeamWinGame);
+
+        builder.Property(e => e.DecisionPredictedPointsJson)
+            .HasMaxLength(400);
 
         builder.HasOne(e => e.Deal)
             .WithMany(d => d.CallTrumpDecisions)

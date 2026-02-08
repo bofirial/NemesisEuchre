@@ -200,6 +200,41 @@ public class TrickToEntityMapperTests
         northDecision.ActorType.Should().Be(gamePlayers[firstPosition].ActorType);
     }
 
+    [Fact]
+    public void Map_ShouldSerializeDecisionPredictedPoints()
+    {
+        var mapper = new TrickToEntityMapper();
+        var trick = CreateTrickWithDecisions();
+        var gamePlayers = CreateSamplePlayers();
+
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+
+        var decision = entity.PlayCardDecisions[0];
+        decision.DecisionPredictedPointsJson.Should().NotBeNull();
+
+        var items = JsonSerializer.Deserialize<List<CardPointsPair>>(decision.DecisionPredictedPointsJson!, JsonSerializationOptions.Default);
+        items.Should().HaveCount(2);
+        items.Should().Contain(i => Math.Abs(i.Points - 1.5f) < 0.001f);
+        items.Should().Contain(i => Math.Abs(i.Points - 0.8f) < 0.001f);
+    }
+
+    [Fact]
+    public void Map_WithEmptyDecisionPredictedPoints_SetsJsonToNull()
+    {
+        var mapper = new TrickToEntityMapper();
+        var trick = CreateTrickWithDecisions();
+        foreach (var d in trick.PlayCardDecisions)
+        {
+            d.DecisionPredictedPoints = [];
+        }
+
+        var gamePlayers = CreateSamplePlayers();
+
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+
+        entity.PlayCardDecisions.Should().AllSatisfy(d => d.DecisionPredictedPointsJson.Should().BeNull());
+    }
+
     private static Trick CreateSampleTrick()
     {
         var trick = new Trick
@@ -261,6 +296,11 @@ public class TrickToEntityMapperTests
                 WinningTrickPlayer = PlayerPosition.North,
                 ValidCardsToPlay = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
                 ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+                DecisionPredictedPoints = new Dictionary<Card, float>
+                {
+                    { new Card { Suit = Suit.Hearts, Rank = Rank.Nine }, 1.5f },
+                    { new Card { Suit = Suit.Clubs, Rank = Rank.Ten }, 0.8f },
+                },
             });
         }
 
@@ -277,4 +317,8 @@ public class TrickToEntityMapperTests
             { PlayerPosition.West, new Player { Position = PlayerPosition.West, ActorType = ActorType.Chaos } },
         };
     }
+
+#pragma warning disable SA1313, CA1852
+    private record CardPointsPair(RelativeCard Card, float Points);
+#pragma warning restore SA1313, CA1852
 }

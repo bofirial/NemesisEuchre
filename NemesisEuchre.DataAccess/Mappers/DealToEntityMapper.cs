@@ -90,6 +90,9 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
                 DidTeamWinDeal = didTeamWinDeal,
                 RelativeDealPoints = deal.DealResult.CalculateRelativeDealPoints(decision.PlayerPosition, deal.WinningTeam),
                 DidTeamWinGame = didTeamWinGame,
+                DecisionPredictedPointsJson = decision.DecisionPredictedPoints.Count > 0
+                    ? JsonSerializer.Serialize(decision.DecisionPredictedPoints, JsonSerializationOptions.Default)
+                    : null,
             };
         })];
     }
@@ -118,6 +121,15 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
                 DidTeamWinDeal = didTeamWinDeal,
                 RelativeDealPoints = deal.DealResult.CalculateRelativeDealPoints(decision.PlayerPosition, deal.WinningTeam),
                 DidTeamWinGame = didTeamWinGame,
+                DecisionPredictedPointsJson = decision.DecisionPredictedPoints.Count > 0
+                    ? JsonSerializer.Serialize(
+                        decision.DecisionPredictedPoints.Select(kvp => new
+                        {
+                            Card = kvp.Key.ToRelative(deal.Trump!.Value),
+                            Points = kvp.Value,
+                        }),
+                        JsonSerializationOptions.Default)
+                    : null,
             };
         })];
     }

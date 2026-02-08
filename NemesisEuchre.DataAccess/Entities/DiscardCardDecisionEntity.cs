@@ -31,6 +31,8 @@ public class DiscardCardDecisionEntity : IDecisionEntity
 
     public bool? DidTeamWinGame { get; set; }
 
+    public string? DecisionPredictedPointsJson { get; set; }
+
     public DealEntity? Deal { get; set; }
 }
 
@@ -76,6 +78,9 @@ public class DiscardCardDecisionEntityConfiguration : IEntityTypeConfiguration<D
         builder.Property(e => e.RelativeDealPoints);
 
         builder.Property(e => e.DidTeamWinGame);
+
+        builder.Property(e => e.DecisionPredictedPointsJson)
+            .HasMaxLength(500);
 
         builder.HasOne(e => e.Deal)
             .WithMany(d => d.DiscardCardDecisions)

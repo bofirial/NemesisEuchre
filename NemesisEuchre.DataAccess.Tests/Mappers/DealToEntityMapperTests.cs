@@ -1,7 +1,10 @@
+using System.Text.Json;
+
 using FluentAssertions;
 
 using Moq;
 
+using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
@@ -75,6 +78,128 @@ public class DealToEntityMapperTests
         json.Should().Contain("Diamonds");
         json.Should().Contain("North");
         json.Should().Contain("Hearts");
+    }
+
+    [Fact]
+    public void Map_ShouldSerializeCallTrumpDecisionPredictedPoints()
+    {
+        var deal = CreateTestDeal();
+        deal.CallTrumpDecisions.Add(new CallTrumpDecisionRecord
+        {
+            CardsInHand = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
+            PlayerPosition = PlayerPosition.North,
+            TeamScore = 0,
+            OpponentScore = 0,
+            DecisionOrder = 1,
+            DealerPosition = PlayerPosition.West,
+            UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            ValidCallTrumpDecisions = [CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp],
+            ChosenDecision = CallTrumpDecision.OrderItUp,
+            DecisionPredictedPoints = new Dictionary<CallTrumpDecision, float>
+            {
+                { CallTrumpDecision.Pass, 0.2f },
+                { CallTrumpDecision.OrderItUp, 1.8f },
+            },
+        });
+
+        var gamePlayers = CreateTestGamePlayers();
+        var entity = _mapper.Map(deal, 1, gamePlayers, false, false);
+
+        entity.CallTrumpDecisions.Should().HaveCount(1);
+        var decision = entity.CallTrumpDecisions.First();
+        decision.DecisionPredictedPointsJson.Should().NotBeNull();
+
+        var deserialized = JsonSerializer.Deserialize<Dictionary<CallTrumpDecision, float>>(
+            decision.DecisionPredictedPointsJson!, JsonSerializationOptions.Default);
+        deserialized.Should().HaveCount(2);
+        deserialized![CallTrumpDecision.Pass].Should().BeApproximately(0.2f, 0.001f);
+        deserialized[CallTrumpDecision.OrderItUp].Should().BeApproximately(1.8f, 0.001f);
+    }
+
+    [Fact]
+    public void Map_WithEmptyCallTrumpDecisionPredictedPoints_SetsJsonToNull()
+    {
+        var deal = CreateTestDeal();
+        deal.CallTrumpDecisions.Add(new CallTrumpDecisionRecord
+        {
+            CardsInHand = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
+            PlayerPosition = PlayerPosition.North,
+            TeamScore = 0,
+            OpponentScore = 0,
+            DecisionOrder = 1,
+            DealerPosition = PlayerPosition.West,
+            UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            ValidCallTrumpDecisions = [CallTrumpDecision.Pass],
+            ChosenDecision = CallTrumpDecision.Pass,
+            DecisionPredictedPoints = [],
+        });
+
+        var gamePlayers = CreateTestGamePlayers();
+        var entity = _mapper.Map(deal, 1, gamePlayers, false, false);
+
+        entity.CallTrumpDecisions.First().DecisionPredictedPointsJson.Should().BeNull();
+    }
+
+    [Fact]
+    public void Map_ShouldSerializeDiscardCardDecisionPredictedPoints()
+    {
+        var deal = CreateTestDeal();
+        var nineOfHearts = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        var tenOfClubs = new Card { Suit = Suit.Clubs, Rank = Rank.Ten };
+        deal.DiscardCardDecisions.Add(new DiscardCardDecisionRecord
+        {
+            CardsInHand = [nineOfHearts, tenOfClubs],
+            PlayerPosition = PlayerPosition.North,
+            TeamScore = 0,
+            OpponentScore = 0,
+            TrumpSuit = Suit.Hearts,
+            CallingPlayer = PlayerPosition.North,
+            CallingPlayerGoingAlone = false,
+            ValidCardsToDiscard = [nineOfHearts, tenOfClubs],
+            ChosenCard = tenOfClubs,
+            DecisionPredictedPoints = new Dictionary<Card, float>
+            {
+                { nineOfHearts, 1.2f },
+                { tenOfClubs, 0.5f },
+            },
+        });
+
+        var gamePlayers = CreateTestGamePlayers();
+        var entity = _mapper.Map(deal, 1, gamePlayers, false, false);
+
+        entity.DiscardCardDecisions.Should().HaveCount(1);
+        var decision = entity.DiscardCardDecisions.First();
+        decision.DecisionPredictedPointsJson.Should().NotBeNull();
+
+        var items = JsonSerializer.Deserialize<List<CardPointsPair>>(
+            decision.DecisionPredictedPointsJson!, JsonSerializationOptions.Default);
+        items.Should().HaveCount(2);
+        items.Should().Contain(i => Math.Abs(i.Points - 1.2f) < 0.001f);
+        items.Should().Contain(i => Math.Abs(i.Points - 0.5f) < 0.001f);
+    }
+
+    [Fact]
+    public void Map_WithEmptyDiscardCardDecisionPredictedPoints_SetsJsonToNull()
+    {
+        var deal = CreateTestDeal();
+        deal.DiscardCardDecisions.Add(new DiscardCardDecisionRecord
+        {
+            CardsInHand = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
+            PlayerPosition = PlayerPosition.North,
+            TeamScore = 0,
+            OpponentScore = 0,
+            TrumpSuit = Suit.Hearts,
+            CallingPlayer = PlayerPosition.North,
+            CallingPlayerGoingAlone = false,
+            ValidCardsToDiscard = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
+            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            DecisionPredictedPoints = [],
+        });
+
+        var gamePlayers = CreateTestGamePlayers();
+        var entity = _mapper.Map(deal, 1, gamePlayers, false, false);
+
+        entity.DiscardCardDecisions.First().DecisionPredictedPointsJson.Should().BeNull();
     }
 
     private static Deal CreateTestDeal()
@@ -154,4 +279,8 @@ public class DealToEntityMapperTests
             },
         };
     }
+
+#pragma warning disable SA1313, CA1852
+    private record CardPointsPair(RelativeCard Card, float Points);
+#pragma warning restore SA1313, CA1852
 }

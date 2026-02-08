@@ -81,6 +81,15 @@ public class TrickToEntityMapper : ITrickToEntityMapper
                     DidTeamWinDeal = didTeamWinDeal,
                     RelativeDealPoints = dealResult.CalculateRelativeDealPoints(decision.PlayerPosition, dealWinningTeam),
                     DidTeamWinGame = didTeamWinGame,
+                    DecisionPredictedPointsJson = decision.DecisionPredictedPoints.Count > 0
+                        ? JsonSerializer.Serialize(
+                            decision.DecisionPredictedPoints.Select(kvp => new
+                            {
+                                Card = kvp.Key.ToRelative(decision.TrumpSuit),
+                                Points = kvp.Value,
+                            }),
+                            JsonSerializationOptions.Default)
+                        : null,
                 };
             })],
         };
