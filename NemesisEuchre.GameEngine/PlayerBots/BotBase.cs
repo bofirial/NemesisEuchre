@@ -8,9 +8,9 @@ namespace NemesisEuchre.GameEngine.PlayerBots;
 
 public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
 {
-    private readonly IRandomNumberGenerator _random = random ?? throw new ArgumentNullException(nameof(random));
-
     public abstract ActorType ActorType { get; }
+
+    protected IRandomNumberGenerator Random { get; } = random ?? throw new ArgumentNullException(nameof(random));
 
     public Task<CallTrumpDecisionContext> CallTrumpAsync(CallTrumpContext context)
     {
@@ -170,6 +170,6 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
     {
         return options.Length == 0
             ? throw new ArgumentException("Cannot select from empty array", nameof(options))
-            : options[_random.NextInt(options.Length)];
+            : options[Random.NextInt(options.Length)];
     }
 }

@@ -5,6 +5,8 @@ public interface IRandomNumberGenerator
     int NextInt(int maxValue);
 
     int NextInt(int minValue, int maxValue);
+
+    double NextDouble();
 }
 
 public class RandomNumberGenerator : IRandomNumberGenerator
@@ -19,5 +21,10 @@ public class RandomNumberGenerator : IRandomNumberGenerator
     public int NextInt(int minValue, int maxValue)
     {
         return _random.Next(minValue, maxValue);
+    }
+
+    public double NextDouble()
+    {
+        return _random.NextDouble();
     }
 }

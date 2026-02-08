@@ -469,12 +469,13 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 2. ~~Display Tricks in each Deal of a Euchre game~~
 3. ~~Display Choices and Decisions made during a Euchre game~~
 4. ~~Rework BotBase to record EstimatedPoints for each valid decision~~
-5. Add Command to display results from a Game in the Database
-6. Consider Bulk Game display improvements?
-7. Protect against game state mutations in IPlayerActor implementations
-8. Database Changes
+5. ~~Implement Gen1TrainerBot using Boltzmann/Softmax with a temperature to allow the bot to explore "suboptimal" decisions~~
+6. Protect against game state mutations in IPlayerActor implementations
+7. Database Changes
    * "Minify" json in the database to reduce memory?
    * Convert json columns to metadata tables and FKs?
+8. Consider Bulk Game display improvements?
+9. Add Command to display results from a Game in the Database
 
 ## Interactive Play 0.7
 
