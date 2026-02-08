@@ -39,17 +39,17 @@ public class DecisionRenderer : IDecisionRenderer
         var round1Table = new Table()
             .ShowRowSeparators()
             .AddColumn("[bold]Player[/]", c => c.Centered())
-            .AddColumn("[bold]Actor Type[/]", c => c.Centered())
+            .AddColumn("[bold]Actor[/]", c => c.Centered())
             .AddColumn("[bold]Hand[/]", c => c.Centered())
             .AddColumn("[bold]Up Card[/]", c => c.Centered())
             .AddColumn($"[bold]{CallTrumpDecision.Pass.Humanize()}[/]", c => c.Centered())
             .AddColumn($"[bold]{CallTrumpDecision.OrderItUp.Humanize(LetterCasing.Title)}[/]", c => c.Centered())
-            .AddColumn("[bold]Order It Up (Alone)[/]", c => c.Centered());
+            .AddColumn("[bold]Order It Up Alone[/]", c => c.Centered());
 
         var round2Table = new Table()
             .ShowRowSeparators()
             .AddColumn("[bold]Player[/]", c => c.Centered())
-            .AddColumn("[bold]Actor Type[/]", c => c.Centered())
+            .AddColumn("[bold]Actor[/]", c => c.Centered())
             .AddColumn("[bold]Hand[/]", c => c.Centered())
             .AddColumn("[bold]Up Card[/]", c => c.Centered())
             .AddColumn($"[bold]{CallTrumpDecision.Pass.Humanize()}[/]", c => c.Centered());
@@ -57,25 +57,25 @@ public class DecisionRenderer : IDecisionRenderer
         if (deal.UpCard!.Suit != Suit.Clubs)
         {
             round2Table.AddColumn("[bold]Clubs[/]", c => c.Centered());
-            round2Table.AddColumn("[bold]Clubs (Alone)[/]", c => c.Centered());
+            round2Table.AddColumn("[bold]Clubs Alone[/]", c => c.Centered());
         }
 
         if (deal.UpCard!.Suit != Suit.Diamonds)
         {
             round2Table.AddColumn("[bold]Diamonds[/]", c => c.Centered());
-            round2Table.AddColumn("[bold]Diamonds (Alone)[/]", c => c.Centered());
+            round2Table.AddColumn("[bold]Diamonds Alone[/]", c => c.Centered());
         }
 
         if (deal.UpCard!.Suit != Suit.Hearts)
         {
             round2Table.AddColumn("[bold]Hearts[/]", c => c.Centered());
-            round2Table.AddColumn("[bold]Hearts (Alone)[/]", c => c.Centered());
+            round2Table.AddColumn("[bold]Hearts Alone[/]", c => c.Centered());
         }
 
         if (deal.UpCard!.Suit != Suit.Spades)
         {
             round2Table.AddColumn("[bold]Spades[/]", c => c.Centered());
-            round2Table.AddColumn("[bold]Spades (Alone)[/]", c => c.Centered());
+            round2Table.AddColumn("[bold]Spades Alone[/]", c => c.Centered());
         }
 
         foreach (var callDecision in deal.CallTrumpDecisions)
@@ -195,7 +195,7 @@ public class DecisionRenderer : IDecisionRenderer
             var discardDecisionsTable = new Table()
                 .ShowRowSeparators()
                 .AddColumn("[bold]Player[/]", c => c.Centered())
-                .AddColumn("[bold]Actor Type[/]", c => c.Centered())
+                .AddColumn("[bold]Actor[/]", c => c.Centered())
                 .AddColumn("[bold]Card[/]", c => c.Centered())
                 .AddColumn("[bold]Estimated Points[/]", c => c.Centered());
 
@@ -227,7 +227,7 @@ public class DecisionRenderer : IDecisionRenderer
             .ShowRowSeparators()
             .AddColumn("[bold]#[/]", c => c.Centered())
             .AddColumn("[bold]Player[/]", c => c.Centered())
-            .AddColumn("[bold]Actor Type[/]", c => c.Centered())
+            .AddColumn("[bold]Actor[/]", c => c.Centered())
             .AddColumn("[bold]Lead Suit[/]", c => c.Centered())
             .AddColumn("[bold]Card 1[/]", c => c.Centered().Width(18))
             .AddColumn("[bold]Card 2[/]", c => c.Centered().Width(18))
