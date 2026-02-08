@@ -3,6 +3,7 @@
 using Humanizer;
 
 using NemesisEuchre.Console.Models;
+using NemesisEuchre.Console.Services.Rendering;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Mappers;
@@ -21,7 +22,7 @@ public interface IGameResultsRenderer
     void RenderBatchResults(BatchGameResults results);
 }
 
-public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMapper callTrumpDecisionMapper) : IGameResultsRenderer
+public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMapper callTrumpDecisionMapper, IDecisionRenderer decisionRenderer) : IGameResultsRenderer
 {
     private static readonly Color Team1Color = Color.Green;
     private static readonly Color Team2Color = Color.Blue;
@@ -61,28 +62,14 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         ansiConsole.WriteLine();
     }
 
-    private static Table CreateStyledTable(string? title = null)
-    {
-        var table = new Table()
-            .Border(TableBorder.Rounded)
-            .BorderColor(Color.Grey);
-
-        if (title is not null)
-        {
-            table.Title(title);
-        }
-
-        return table;
-    }
-
-    private static string GetDisplayTeam(Team team)
+    internal static string GetDisplayTeam(Team team)
     {
         var teamColor = team == Team.Team1 ? Team1Color : Team2Color;
 
         return $"[{teamColor}]{team.Humanize()}[/]";
     }
 
-    private static string GetDisplayPlayer(PlayerPosition position, Deal? deal = null)
+    internal static string GetDisplayPlayer(PlayerPosition position, Deal? deal = null)
     {
         var teamColor = position.GetTeam() == Team.Team1 ? Team1Color : Team2Color;
         var dealerIcon = deal?.DealerPosition == position ? ":flower_playing_cards: " : string.Empty;
@@ -91,7 +78,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         return $"[{teamColor}]{dealerIcon}{callerIcon}{position}[/]";
     }
 
-    private static string GetDisplayCard(Card card, Suit? trump = null)
+    internal static string GetDisplayCard(Card card, Suit? trump = null)
     {
         var rankSymbol = card.Rank switch
         {
@@ -129,7 +116,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         return $"[{suitColor}{backgroundColor}]{rankSymbol}{suitSymbol}[/]";
     }
 
-    private static string GetDisplaySuit(Suit suit)
+    internal static string GetDisplaySuit(Suit suit)
     {
         var suitSymbol = suit switch
         {
@@ -148,6 +135,29 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
             _ => Color.Grey
         };
         return $"[{suitColor}]{suit} {suitSymbol}[/]";
+    }
+
+    internal static string GetPlayCardDecisionCardDisplay(Card card, PlayCardDecisionRecord playCardDecision, Suit trump)
+    {
+        var decisionPredictedPoints = playCardDecision.DecisionPredictedPoints.First(p => p.Key.Rank == card.Rank && p.Key.Suit == card.Suit).Value;
+
+        var cardDisplay = $"{GetDisplayCard(card, trump)} {decisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)}";
+
+        return card == playCardDecision.ChosenCard ? $":diamond_with_a_dot: {cardDisplay} :diamond_with_a_dot:" : cardDisplay;
+    }
+
+    private static Table CreateStyledTable(string? title = null)
+    {
+        var table = new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Grey);
+
+        if (title is not null)
+        {
+            table.Title(title);
+        }
+
+        return table;
     }
 
     private static IRenderable[] GetTrickRowPreSpacers(Trick trick)
@@ -208,15 +218,6 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
                     GetDisplayTeam(deal.WinningTeam!.Value),
                     deal.Team1Score.ToString(CultureInfo.InvariantCulture),
                     deal.Team2Score.ToString(CultureInfo.InvariantCulture));
-    }
-
-    private static string GetPlayCardDecisionCardDisplay(Card card, PlayCardDecisionRecord playCardDecision, Suit trump)
-    {
-        var decisionPredictedPoints = playCardDecision.DecisionPredictedPoints.First(p => p.Key.Rank == card.Rank && p.Key.Suit == card.Suit).Value;
-
-        var cardDisplay = $"{GetDisplayCard(card, trump)} {decisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)}";
-
-        return card == playCardDecision.ChosenCard ? $":diamond_with_a_dot: {cardDisplay} :diamond_with_a_dot:" : cardDisplay;
     }
 
     private IRenderable[] GetPlayerRow(DealPlayer dealPlayer, Deal deal)
@@ -288,198 +289,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
 
         if (showDecisions)
         {
-            rows.Add(new Markup("[bold]Call Trump Decisions[/]"));
-
-            var callTrumpDecisionsRound1Table = new Table()
-                .ShowRowSeparators()
-                .AddColumn("[bold]Player[/]", c => c.Centered())
-                .AddColumn("[bold]Actor Type[/]", c => c.Centered())
-                .AddColumn("[bold]Hand[/]", c => c.Centered())
-                .AddColumn("[bold]Up Card[/]", c => c.Centered())
-                .AddColumn($"[bold]{CallTrumpDecision.Pass.Humanize()}[/]", c => c.Centered())
-                .AddColumn($"[bold]{CallTrumpDecision.OrderItUp.Humanize(LetterCasing.Title)}[/]", c => c.Centered())
-                .AddColumn("[bold]Order It Up (Alone)[/]", c => c.Centered());
-
-            var callTrumpDecisionsRound2Table = new Table()
-                .ShowRowSeparators()
-                .AddColumn("[bold]Player[/]", c => c.Centered())
-                .AddColumn("[bold]Actor Type[/]", c => c.Centered())
-                .AddColumn("[bold]Hand[/]", c => c.Centered())
-                .AddColumn("[bold]Up Card[/]", c => c.Centered())
-                .AddColumn($"[bold]{CallTrumpDecision.Pass.Humanize()}[/]", c => c.Centered());
-
-            if (deal.UpCard!.Suit != Suit.Clubs)
-            {
-                callTrumpDecisionsRound2Table.AddColumn("[bold]Clubs[/]", c => c.Centered());
-                callTrumpDecisionsRound2Table.AddColumn("[bold]Clubs (Alone)[/]", c => c.Centered());
-            }
-
-            if (deal.UpCard!.Suit != Suit.Diamonds)
-            {
-                callTrumpDecisionsRound2Table.AddColumn("[bold]Diamonds[/]", c => c.Centered());
-                callTrumpDecisionsRound2Table.AddColumn("[bold]Diamonds (Alone)[/]", c => c.Centered());
-            }
-
-            if (deal.UpCard!.Suit != Suit.Hearts)
-            {
-                callTrumpDecisionsRound2Table.AddColumn("[bold]Hearts[/]", c => c.Centered());
-                callTrumpDecisionsRound2Table.AddColumn("[bold]Hearts (Alone)[/]", c => c.Centered());
-            }
-
-            if (deal.UpCard!.Suit != Suit.Spades)
-            {
-                callTrumpDecisionsRound2Table.AddColumn("[bold]Spades[/]", c => c.Centered());
-                callTrumpDecisionsRound2Table.AddColumn("[bold]Spades (Alone)[/]", c => c.Centered());
-            }
-
-            foreach (var callDecision in deal.CallTrumpDecisions)
-            {
-                if (callDecision.DecisionOrder < 5)
-                {
-                    callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.Pass, out float passDecisionPredictedPoints);
-                    callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.OrderItUp, out float orderItUpDecisionPredictedPoints);
-                    callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.OrderItUpAndGoAlone, out float orderItUpAndGoAloneDecisionPredictedPoints);
-
-                    var cells = new List<IRenderable>
-                    {
-                        new Markup(GetDisplayPlayer(callDecision.PlayerPosition, deal)),
-                        new Markup(deal.Players[callDecision.PlayerPosition].ActorType!.Value.Humanize()),
-                        new Columns(callDecision.CardsInHand.Select(c => GetDisplayCard(c, deal.Trump!.Value))),
-                        new Markup(GetDisplayCard(callDecision.UpCard)),
-                        callDecision.ChosenDecision == CallTrumpDecision.Pass ? new Markup($":diamond_with_a_dot: {passDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(passDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)),
-                        callDecision.ChosenDecision == CallTrumpDecision.OrderItUp ? new Markup($":diamond_with_a_dot: {orderItUpDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(orderItUpDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)),
-                        callDecision.ChosenDecision == CallTrumpDecision.OrderItUpAndGoAlone ? new Markup($":diamond_with_a_dot: {orderItUpAndGoAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(orderItUpAndGoAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)),
-                    };
-
-                    callTrumpDecisionsRound1Table.AddRow(cells);
-                }
-                else
-                {
-                    var cells = new List<IRenderable>
-                    {
-                        new Markup(GetDisplayPlayer(callDecision.PlayerPosition, deal)),
-                        new Markup(deal.Players[callDecision.PlayerPosition].ActorType!.Value.Humanize()),
-                        new Columns(callDecision.CardsInHand.Select(c => GetDisplayCard(c, deal.Trump!.Value))),
-                        new Markup(GetDisplayCard(callDecision.UpCard)),
-                    };
-
-                    if (callDecision.ValidCallTrumpDecisions.Contains(CallTrumpDecision.Pass))
-                    {
-                        callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.Pass, out float passDecisionPredictedPoints);
-
-                        cells.Add(callDecision.ChosenDecision == CallTrumpDecision.Pass ? new Markup($":diamond_with_a_dot: {passDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(passDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-                    }
-                    else
-                    {
-                        cells.Add(new Text(string.Empty));
-                    }
-
-                    if (deal.UpCard!.Suit != Suit.Clubs)
-                    {
-                        callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallClubs, out float clubsDecisionPredictedPoints);
-                        callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallClubsAndGoAlone, out float clubsAloneDecisionPredictedPoints);
-
-                        cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallClubs ? new Markup($":diamond_with_a_dot: {clubsDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(clubsDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-                        cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallClubsAndGoAlone ? new Markup($":diamond_with_a_dot: {clubsAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(clubsAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-                    }
-
-                    if (deal.UpCard!.Suit != Suit.Diamonds)
-                    {
-                        callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallDiamonds, out float diamondsDecisionPredictedPoints);
-                        callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallDiamondsAndGoAlone, out float diamondsAloneDecisionPredictedPoints);
-
-                        cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallDiamonds ? new Markup($":diamond_with_a_dot: {diamondsDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(diamondsDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-                        cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallDiamondsAndGoAlone ? new Markup($":diamond_with_a_dot: {diamondsAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(diamondsAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-                    }
-
-                    if (deal.UpCard!.Suit != Suit.Hearts)
-                    {
-                        callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallHearts, out float heartsDecisionPredictedPoints);
-                        callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallHeartsAndGoAlone, out float heartsAloneDecisionPredictedPoints);
-
-                        cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallHearts ? new Markup($":diamond_with_a_dot: {heartsDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(heartsDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-                        cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallHeartsAndGoAlone ? new Markup($":diamond_with_a_dot: {heartsAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(heartsAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-                    }
-
-                    if (deal.UpCard!.Suit != Suit.Spades)
-                    {
-                        callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallSpades, out float spadesDecisionPredictedPoints);
-                        callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallSpadesAndGoAlone, out float spadesAloneDecisionPredictedPoints);
-
-                        cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallSpades ? new Markup($":diamond_with_a_dot: {spadesDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(spadesDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-                        cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallSpadesAndGoAlone ? new Markup($":diamond_with_a_dot: {spadesAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(spadesAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-                    }
-
-                    callTrumpDecisionsRound2Table.AddRow(cells);
-                }
-            }
-
-            rows.Add(callTrumpDecisionsRound1Table);
-            if (callTrumpDecisionsRound2Table.Rows.Count > 0)
-            {
-                rows.Add(callTrumpDecisionsRound2Table);
-            }
-
-            if (deal.DiscardCardDecisions.Count > 0)
-            {
-                rows.Add(new Markup("[bold]Discard Decisions[/]"));
-
-                foreach (var discardCardDecision in deal.DiscardCardDecisions)
-                {
-                    var discardDecisionsTable = new Table()
-                        .ShowRowSeparators()
-                        .AddColumn("[bold]Player[/]", c => c.Centered())
-                        .AddColumn("[bold]Actor Type[/]", c => c.Centered())
-                        .AddColumn("[bold]Card[/]", c => c.Centered())
-                        .AddColumn("[bold]Estimated Points[/]", c => c.Centered());
-
-                    foreach (var card in discardCardDecision.CardsInHand)
-                    {
-                        var decisionPredictedPoints = discardCardDecision.DecisionPredictedPoints.First(p => p.Key.Rank == card.Rank && p.Key.Suit == card.Suit).Value;
-
-                        discardDecisionsTable.AddRow(
-                            GetDisplayPlayer(discardCardDecision.PlayerPosition, deal),
-                            deal.Players[discardCardDecision.PlayerPosition].ActorType!.Value.Humanize(),
-                            GetDisplayCard(card, deal.Trump),
-                            discardCardDecision.ChosenCard == card ? $":diamond_with_a_dot: {decisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:" : decisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture));
-                    }
-
-                    rows.Add(discardDecisionsTable);
-                }
-            }
-
-            rows.Add(new Markup("[bold]Play Card Decisions[/]"));
-
-            var playCardDecisionsTable = new Table()
-                .ShowRowSeparators()
-                .AddColumn("[bold]#[/]", c => c.Centered())
-                .AddColumn("[bold]Player[/]", c => c.Centered())
-                .AddColumn("[bold]Actor Type[/]", c => c.Centered())
-                .AddColumn("[bold]Lead Suit[/]", c => c.Centered())
-                .AddColumn("[bold]Card 1[/]", c => c.Centered().Width(18))
-                .AddColumn("[bold]Card 2[/]", c => c.Centered().Width(18))
-                .AddColumn("[bold]Card 3[/]", c => c.Centered().Width(18))
-                .AddColumn("[bold]Card 4[/]", c => c.Centered().Width(18))
-                .AddColumn("[bold]Card 5[/]", c => c.Centered().Width(18));
-
-            foreach (var trick in deal.CompletedTricks)
-            {
-                foreach (var playCardDecision in trick.PlayCardDecisions)
-                {
-                    playCardDecisionsTable.AddRow(
-                        trick.TrickNumber.ToString(CultureInfo.InvariantCulture),
-                        GetDisplayPlayer(playCardDecision.PlayerPosition, deal),
-                        deal.Players[playCardDecision.PlayerPosition].ActorType!.Value.Humanize(),
-                        playCardDecision.LeadSuit != null ? GetDisplaySuit(playCardDecision.LeadSuit!.Value) : string.Empty,
-                        playCardDecision.ValidCardsToPlay.Length > 0 ? GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[0], playCardDecision, deal.Trump!.Value) : string.Empty,
-                        playCardDecision.ValidCardsToPlay.Length > 1 ? GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[1], playCardDecision, deal.Trump!.Value) : string.Empty,
-                        playCardDecision.ValidCardsToPlay.Length > 2 ? GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[2], playCardDecision, deal.Trump!.Value) : string.Empty,
-                        playCardDecision.ValidCardsToPlay.Length > 3 ? GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[3], playCardDecision, deal.Trump!.Value) : string.Empty,
-                        playCardDecision.ValidCardsToPlay.Length > 4 ? GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[4], playCardDecision, deal.Trump!.Value) : string.Empty);
-                }
-            }
-
-            rows.Add(playCardDecisionsTable);
+            rows.AddRange(decisionRenderer.RenderDecisions(deal));
         }
 
         ansiConsole.Write(Align.Center(new Rows(rows)));

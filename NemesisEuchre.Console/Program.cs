@@ -8,6 +8,7 @@ using NemesisEuchre.Console.Commands;
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.Console.Services.Orchestration;
 using NemesisEuchre.Console.Services.Persistence;
+using NemesisEuchre.Console.Services.Rendering;
 using NemesisEuchre.Console.Services.TrainerExecutors;
 using NemesisEuchre.Console.Services.Training;
 using NemesisEuchre.DataAccess.DependencyInjection;
@@ -40,6 +41,7 @@ public static class Program
             services.AddScoped(_ => AnsiConsole.Console);
 
             services.AddScoped<IApplicationBanner, ApplicationBanner>();
+            services.AddScoped<IDecisionRenderer, DecisionRenderer>();
             services.AddScoped<IGameResultsRenderer, GameResultsRenderer>();
             services.AddScoped<ISingleGameRunner, SingleGameRunner>();
             services.AddScoped<IParallelismCoordinator, ParallelismCoordinator>();

@@ -3,6 +3,7 @@ using FluentAssertions;
 using Moq;
 
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.Console.Services.Rendering;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Mappers;
 using NemesisEuchre.GameEngine.Models;
@@ -19,7 +20,7 @@ public class GameResultsRendererTests
     {
         var testConsole = new TestConsole();
         var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object);
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
 
         var game = new Game
         {
@@ -40,7 +41,7 @@ public class GameResultsRendererTests
     {
         var testConsole = new TestConsole();
         var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object);
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
 
         var game = new Game
         {
@@ -61,7 +62,7 @@ public class GameResultsRendererTests
     {
         var testConsole = new TestConsole();
         var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object);
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
 
         var game = new Game
         {
@@ -86,7 +87,7 @@ public class GameResultsRendererTests
         var testConsole = new TestConsole();
         var mockMapper = new Mock<ICallTrumpDecisionMapper>();
         mockMapper.Setup(m => m.IsGoingAloneDecision(It.IsAny<CallTrumpDecision>())).Returns(true);
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object);
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
 
         var game = new Game
         {
@@ -150,7 +151,7 @@ public class GameResultsRendererTests
     {
         var testConsole = new TestConsole();
         var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object);
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
 
         var game = new Game
         {
@@ -180,7 +181,7 @@ public class GameResultsRendererTests
     {
         var testConsole = new TestConsole();
         var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object);
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
 
         var game = new Game
         {
@@ -210,7 +211,7 @@ public class GameResultsRendererTests
     {
         var testConsole = new TestConsole();
         var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object);
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
 
         var game = new Game
         {
@@ -243,7 +244,7 @@ public class GameResultsRendererTests
     {
         var testConsole = new TestConsole();
         var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object);
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
 
         var game = new Game
         {
@@ -268,7 +269,7 @@ public class GameResultsRendererTests
     {
         var testConsole = new TestConsole();
         var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object);
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
 
         var game = new Game
         {
@@ -289,7 +290,7 @@ public class GameResultsRendererTests
     {
         var testConsole = new TestConsole();
         var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object);
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
 
         var game = new Game
         {
