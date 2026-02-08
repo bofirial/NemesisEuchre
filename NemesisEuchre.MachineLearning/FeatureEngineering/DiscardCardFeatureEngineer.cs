@@ -9,32 +9,30 @@ public class DiscardCardFeatureEngineer : IFeatureEngineer<DiscardCardDecisionEn
 
     public DiscardCardTrainingData Transform(DiscardCardDecisionEntity entity)
     {
-        var cards = JsonDeserializationHelper.DeserializeRelativeCards(entity.CardsInHandJson);
+        var context = DiscardCardEntityDeserializer.Deserialize(entity);
 
-        if (cards.Length != ExpectedCardsInHand)
+        if (context.CardsInHand.Length != ExpectedCardsInHand)
         {
             throw new InvalidOperationException(
-                $"Expected 6 cards in hand but found {cards.Length}");
+                $"Expected 6 cards in hand but found {context.CardsInHand.Length}");
         }
 
-        var chosenCard = JsonDeserializationHelper.DeserializeRelativeCard(entity.ChosenCardJson);
-
-        var chosenCardIndex = Array.FindIndex(cards, c =>
-            c.Rank == chosenCard.Rank && c.Suit == chosenCard.Suit);
+        var chosenCardIndex = Array.FindIndex(context.CardsInHand, c =>
+            c.Rank == context.ChosenCard.Rank && c.Suit == context.ChosenCard.Suit);
 
         if (chosenCardIndex == -1)
         {
             throw new InvalidOperationException(
-                $"Chosen card {chosenCard.Rank} of {chosenCard.Suit} not found in hand");
+                $"Chosen card {context.ChosenCard.Rank} of {context.ChosenCard.Suit} not found in hand");
         }
 
         var result = DiscardCardFeatureBuilder.BuildFeatures(
-            cards,
+            context.CardsInHand,
             entity.CallingPlayer,
             entity.CallingPlayerGoingAlone,
             entity.TeamScore,
             entity.OpponentScore,
-            chosenCard);
+            context.ChosenCard);
 
         result.ExpectedDealPoints = entity.RelativeDealPoints ?? throw new InvalidOperationException(
             "RelativeDealPoints is required for regression training");

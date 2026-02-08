@@ -7,26 +7,23 @@ public class CallTrumpFeatureEngineer : IFeatureEngineer<CallTrumpDecisionEntity
 {
     public CallTrumpTrainingData Transform(CallTrumpDecisionEntity entity)
     {
-        var cards = JsonDeserializationHelper.DeserializeCards(entity.CardsInHandJson);
-        var upCard = JsonDeserializationHelper.DeserializeCard(entity.UpCardJson);
-        var validDecisions = JsonDeserializationHelper.DeserializeCallTrumpDecisions(entity.ValidDecisionsJson);
-        var chosenDecision = JsonDeserializationHelper.DeserializeCallTrumpDecision(entity.ChosenDecisionJson);
+        var context = CallTrumpEntityDeserializer.Deserialize(entity);
 
-        if (!validDecisions.Contains(chosenDecision))
+        if (!context.ValidDecisions.Contains(context.ChosenDecision))
         {
             throw new InvalidOperationException(
-                $"Chosen decision {chosenDecision} is not in the valid decisions array");
+                $"Chosen decision {context.ChosenDecision} is not in the valid decisions array");
         }
 
         var result = CallTrumpFeatureBuilder.BuildFeatures(
-            cards,
-            upCard,
+            context.Cards,
+            context.UpCard,
             entity.DealerPosition,
             entity.TeamScore,
             entity.OpponentScore,
             entity.DecisionOrder,
-            validDecisions,
-            chosenDecision);
+            context.ValidDecisions,
+            context.ChosenDecision);
 
         result.ExpectedDealPoints = entity.RelativeDealPoints ?? throw new InvalidOperationException(
             "RelativeDealPoints is required for regression training");
