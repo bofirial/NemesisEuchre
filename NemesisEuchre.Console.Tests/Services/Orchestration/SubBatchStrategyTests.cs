@@ -84,10 +84,10 @@ public class SubBatchStrategyTests
     {
         var testCases = new[]
         {
-            (TotalGames: 15000, MaxPerBatch: 10000),
-            (TotalGames: 27500, MaxPerBatch: 10000),
-            (TotalGames: 99999, MaxPerBatch: 10000),
-            (TotalGames: 10001, MaxPerBatch: 5000),
+            (totalGames: 15000, maxPerBatch: 10000),
+            (totalGames: 27500, maxPerBatch: 10000),
+            (totalGames: 99999, maxPerBatch: 10000),
+            (totalGames: 10001, maxPerBatch: 5000),
         };
 
         foreach (var (totalGames, maxPerBatch) in testCases)

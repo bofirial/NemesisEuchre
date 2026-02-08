@@ -64,7 +64,7 @@ public static class CardExtensions
             Rank.Ace => "A",
             Rank.LeftBower => "J",
             Rank.RightBower => "J",
-            _ => "?"
+            _ => "?",
         };
 
         var suitSymbol = card.Suit switch
@@ -73,7 +73,7 @@ public static class CardExtensions
             Suit.Hearts => "♥ ",
             Suit.Clubs => "♣ ",
             Suit.Diamonds => "♦ ",
-            _ => "?"
+            _ => "?",
         };
 
         return rankSymbol + suitSymbol;

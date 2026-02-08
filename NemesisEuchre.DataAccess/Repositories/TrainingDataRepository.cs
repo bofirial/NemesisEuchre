@@ -64,7 +64,7 @@ public class TrainingDataRepository(
             nameof(CallTrumpDecisionEntity) => (DbSet<TEntity>)(object)context.CallTrumpDecisions!,
             nameof(DiscardCardDecisionEntity) => (DbSet<TEntity>)(object)context.DiscardCardDecisions!,
             nameof(PlayCardDecisionEntity) => (DbSet<TEntity>)(object)context.PlayCardDecisions!,
-            _ => throw new NotSupportedException($"Entity type {typeof(TEntity).Name} is not supported for training data retrieval")
+            _ => throw new NotSupportedException($"Entity type {typeof(TEntity).Name} is not supported for training data retrieval"),
         };
     }
 }

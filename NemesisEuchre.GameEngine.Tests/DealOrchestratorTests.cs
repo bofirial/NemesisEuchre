@@ -413,6 +413,6 @@ public class DealOrchestratorTests
     private void SetupDealResultMock()
     {
         _dealResultMock.Setup(x => x.CalculateDealResult(It.IsAny<Deal>()))
-            .Returns((DealResult.WonStandardBid, Team.Team1));
+            .Returns((dealResult: DealResult.WonStandardBid, winningTeam: Team.Team1));
     }
 }

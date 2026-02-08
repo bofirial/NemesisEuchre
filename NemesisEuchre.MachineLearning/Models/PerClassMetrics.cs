@@ -8,7 +8,6 @@ namespace NemesisEuchre.MachineLearning.Models;
 /// <param name="Recall">Recall score (TP / (TP + FN)), or NaN if no actual examples of this class.</param>
 /// <param name="F1Score">F1 score (harmonic mean of precision and recall), or NaN if undefined.</param>
 /// <param name="Support">Number of actual examples in the test set for this class.</param>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Records")]
 public record PerClassMetrics(
     int ClassLabel,
     double Precision,

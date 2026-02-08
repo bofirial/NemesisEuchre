@@ -655,10 +655,10 @@ public class TrickPlayingOrchestratorTests
         deal.Team1Score = 7;
         deal.Team2Score = 4;
 
-        List<(short Team, short Opponent)> capturedScores = [];
+        List<(short team, short opponent)> capturedScores = [];
 
         _playerActorMock.Setup(b => b.PlayCardAsync(It.IsAny<PlayCardContext>()))
-            .Callback((PlayCardContext ctx) => capturedScores.Add((ctx.TeamScore, ctx.OpponentScore)))
+            .Callback((PlayCardContext ctx) => capturedScores.Add((team: ctx.TeamScore, opponent: ctx.OpponentScore)))
             .ReturnsFirstValidCard();
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
@@ -1070,7 +1070,7 @@ public class TrickPlayingOrchestratorTests
                 new Card { Suit = Suit.Clubs, Rank = Rank.Queen },
                 new Card { Suit = Suit.Diamonds, Rank = Rank.Queen }
             ],
-            _ => throw new ArgumentOutOfRangeException(nameof(position))
+            _ => throw new ArgumentOutOfRangeException(nameof(position)),
         };
 
         return new DealPlayer

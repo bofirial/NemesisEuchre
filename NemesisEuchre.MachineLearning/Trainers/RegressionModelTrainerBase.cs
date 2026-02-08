@@ -94,20 +94,21 @@ public abstract class RegressionModelTrainerBase<TData>(
 
         return Task.Run(
             () =>
-        {
-            var predictions = TrainedModel.Transform(testData);
-            var mlMetrics = MlContext.Regression.Evaluate(
-                predictions,
-                labelColumnName: "Label",
-                scoreColumnName: "Score");
+                {
+                    var predictions = TrainedModel.Transform(testData);
+                    var mlMetrics = MlContext.Regression.Evaluate(
+                        predictions,
+                        labelColumnName: "Label",
+                        scoreColumnName: "Score");
 
-            return new RegressionEvaluationMetrics(
-                mlMetrics.RSquared,
-                mlMetrics.MeanAbsoluteError,
-                mlMetrics.RootMeanSquaredError,
-                mlMetrics.MeanSquaredError,
-                mlMetrics.LossFunction);
-        }, cancellationToken);
+                    return new RegressionEvaluationMetrics(
+                        mlMetrics.RSquared,
+                        mlMetrics.MeanAbsoluteError,
+                        mlMetrics.RootMeanSquaredError,
+                        mlMetrics.MeanSquaredError,
+                        mlMetrics.LossFunction);
+                },
+            cancellationToken);
     }
 
     public Task SaveModelAsync(

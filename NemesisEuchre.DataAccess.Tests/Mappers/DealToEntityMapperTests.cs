@@ -280,7 +280,5 @@ public class DealToEntityMapperTests
         };
     }
 
-#pragma warning disable SA1313, CA1852
-    private record CardPointsPair(RelativeCard Card, float Points);
-#pragma warning restore SA1313, CA1852
+    private sealed record CardPointsPair(RelativeCard Card, float Points);
 }

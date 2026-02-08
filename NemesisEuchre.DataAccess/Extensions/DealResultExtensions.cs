@@ -30,7 +30,7 @@ public static class DealResultExtensions
             DealResult.WonAndWentAlone => 4,
             DealResult.OpponentsEuchred => 2,
             DealResult.ThrowIn => throw new InvalidOperationException("ThrowIn should have been handled earlier"),
-            _ => throw new ArgumentOutOfRangeException(nameof(dealResult), dealResult, "Invalid DealResult value")
+            _ => throw new ArgumentOutOfRangeException(nameof(dealResult), dealResult, "Invalid DealResult value"),
         };
 
         return playerTeam == winningTeam ? basePoints : (short)-basePoints;

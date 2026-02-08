@@ -30,17 +30,18 @@ public class BatchPersistenceCoordinator(
     {
         var gamesToSave = await state.ExecuteWithLockAsync(
             () =>
-        {
-            if ((force && state.PendingGames.Count > 0) ||
-                state.PendingGames.Count >= state.BatchSize)
-            {
-                var games = new List<Game>(state.PendingGames);
-                state.PendingGames.Clear();
-                return games;
-            }
+                {
+                    if ((force && state.PendingGames.Count > 0) ||
+                        state.PendingGames.Count >= state.BatchSize)
+                    {
+                        var games = new List<Game>(state.PendingGames);
+                        state.PendingGames.Clear();
+                        return games;
+                    }
 
-            return null;
-        }, cancellationToken).ConfigureAwait(false);
+                    return null;
+                },
+            cancellationToken).ConfigureAwait(false);
 
         if (gamesToSave?.Count > 0)
         {

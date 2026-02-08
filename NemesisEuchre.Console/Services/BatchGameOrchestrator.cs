@@ -176,21 +176,22 @@ public class BatchGameOrchestrator(
 
             await state.ExecuteWithLockAsync(
                 () =>
-            {
-                if (game.WinningTeam == Team.Team1)
-                {
-                    state.Team1Wins++;
-                }
-                else if (game.WinningTeam == Team.Team2)
-                {
-                    state.Team2Wins++;
-                }
+                    {
+                        if (game.WinningTeam == Team.Team1)
+                        {
+                            state.Team1Wins++;
+                        }
+                        else if (game.WinningTeam == Team.Team2)
+                        {
+                            state.Team2Wins++;
+                        }
 
-                state.TotalDeals += game.CompletedDeals.Count;
-                state.CompletedGames++;
-                state.PendingGames.Add(game);
-                progressReporter?.ReportGameCompleted(state.CompletedGames);
-            }, cancellationToken).ConfigureAwait(false);
+                        state.TotalDeals += game.CompletedDeals.Count;
+                        state.CompletedGames++;
+                        state.PendingGames.Add(game);
+                        progressReporter?.ReportGameCompleted(state.CompletedGames);
+                    },
+                cancellationToken).ConfigureAwait(false);
 
             await persistenceCoordinator.SavePendingGamesAsync(state, progressReporter, doNotPersist, force: false, cancellationToken).ConfigureAwait(false);
         }
@@ -199,11 +200,12 @@ public class BatchGameOrchestrator(
             Foundation.LoggerMessages.LogGameFailed(logger, gameNumber, ex);
             await state.ExecuteWithLockAsync(
                 () =>
-            {
-                state.FailedGames++;
-                state.CompletedGames++;
-                progressReporter?.ReportGameCompleted(state.CompletedGames);
-            }, cancellationToken).ConfigureAwait(false);
+                    {
+                        state.FailedGames++;
+                        state.CompletedGames++;
+                        progressReporter?.ReportGameCompleted(state.CompletedGames);
+                    },
+                cancellationToken).ConfigureAwait(false);
         }
     }
 }

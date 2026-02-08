@@ -54,7 +54,7 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
                         TrainingPhase.Saving => "💾",
                         TrainingPhase.Complete => "✓",
                         TrainingPhase.Failed => "✗",
-                        _ => string.Empty
+                        _ => string.Empty,
                     };
 
                     var message = p.Message ?? p.Phase.ToString();

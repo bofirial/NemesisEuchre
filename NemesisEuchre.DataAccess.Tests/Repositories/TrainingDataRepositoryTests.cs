@@ -96,7 +96,8 @@ public class TrainingDataRepositoryTests : IDisposable
                 ChosenDecisionJson = "{}",
                 DecisionOrder = (byte)i,
                 DidTeamWinGame = true,
-            }), TestContext.Current.CancellationToken);
+            }),
+            TestContext.Current.CancellationToken);
 
         await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 

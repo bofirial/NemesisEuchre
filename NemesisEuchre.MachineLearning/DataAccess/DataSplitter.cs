@@ -15,15 +15,6 @@ public interface IDataSplitter
         where T : class;
 }
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Not Records")]
-public record DataSplit(
-    IDataView Train,
-    IDataView Validation,
-    IDataView Test,
-    int TrainRowCount,
-    int ValidationRowCount,
-    int TestRowCount);
-
 public class DataSplitter : IDataSplitter
 {
     private readonly MLContext _mlContext;

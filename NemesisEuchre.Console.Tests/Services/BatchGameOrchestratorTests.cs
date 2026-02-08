@@ -109,7 +109,8 @@ public class BatchGameOrchestratorTests
                             }
 
                             return null;
-                        }, ct).ConfigureAwait(false);
+                        },
+                        ct).ConfigureAwait(false);
 
                     if (gamesToSave?.Count > 0)
                     {

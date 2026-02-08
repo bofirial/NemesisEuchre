@@ -90,7 +90,8 @@ public class TrainCommandTests
             r => r.RenderTrainingResults(
             trainingResults,
             ActorType.Gen1,
-            DecisionType.All), Times.Once);
+            DecisionType.All),
+            Times.Once);
     }
 
     [Fact]
@@ -182,6 +183,7 @@ public class TrainCommandTests
             1000,
             2,
             It.IsAny<Spectre.Console.IAnsiConsole>(),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }

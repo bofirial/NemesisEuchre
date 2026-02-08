@@ -7,7 +7,7 @@ namespace NemesisEuchre.GameEngine;
 
 public interface IDealResultCalculator
 {
-    (DealResult DealResult, Team WinningTeam) CalculateDealResult(Deal deal);
+    (DealResult dealResult, Team winningTeam) CalculateDealResult(Deal deal);
 }
 
 public class DealResultCalculator(IDealResultValidator validator) : IDealResultCalculator
@@ -15,7 +15,7 @@ public class DealResultCalculator(IDealResultValidator validator) : IDealResultC
     private const int MinimumTricksToWinBid = 3;
     private const int AllTricks = 5;
 
-    public (DealResult DealResult, Team WinningTeam) CalculateDealResult(Deal deal)
+    public (DealResult dealResult, Team winningTeam) CalculateDealResult(Deal deal)
     {
         validator.ValidateDeal(deal);
 
@@ -39,7 +39,7 @@ public class DealResultCalculator(IDealResultValidator validator) : IDealResultC
             AllTricks when isGoingAlone => DealResult.WonAndWentAlone,
             AllTricks => DealResult.WonGotAllTricks,
             >= MinimumTricksToWinBid => DealResult.WonStandardBid,
-            _ => DealResult.OpponentsEuchred
+            _ => DealResult.OpponentsEuchred,
         };
     }
 

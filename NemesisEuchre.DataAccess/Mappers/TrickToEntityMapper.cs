@@ -46,7 +46,8 @@ public class TrickToEntityMapper : ITrickToEntityMapper
                     PlayedCardsJson = JsonSerializer.Serialize(
                         decision.PlayedCards.ToDictionary(
                             kvp => kvp.Key.ToRelativePosition(decision.PlayerPosition),
-                            kvp => kvp.Value.ToRelative(decision.TrumpSuit)), JsonSerializationOptions.Default),
+                            kvp => kvp.Value.ToRelative(decision.TrumpSuit)),
+                        JsonSerializationOptions.Default),
                     WinningTrickPlayer = decision.WinningTrickPlayer?.ToRelativePosition(decision.PlayerPosition),
                     TrickNumber = decision.TrickNumber,
                     TeamScore = decision.TeamScore,

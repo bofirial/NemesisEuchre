@@ -12,7 +12,7 @@ public static class SuitExtensions
             Suit.Clubs => Suit.Spades,
             Suit.Hearts => Suit.Diamonds,
             Suit.Diamonds => Suit.Hearts,
-            _ => throw new ArgumentOutOfRangeException(nameof(suit))
+            _ => throw new ArgumentOutOfRangeException(nameof(suit)),
         };
     }
 

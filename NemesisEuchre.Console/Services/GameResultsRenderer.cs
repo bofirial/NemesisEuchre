@@ -89,7 +89,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
             Rank.Ace => "A",
             Rank.LeftBower => "J",
             Rank.RightBower => "J",
-            _ => "?"
+            _ => "?",
         };
 
         var suitSymbol = card.Suit switch
@@ -98,7 +98,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
             Suit.Hearts => ":heart_suit: ",
             Suit.Clubs => ":club_suit:",
             Suit.Diamonds => ":diamond_suit:",
-            _ => "?"
+            _ => "?",
         };
 
         var suitColor = card.Suit switch
@@ -107,7 +107,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
             Suit.Hearts => HeartsColor,
             Suit.Clubs => ClubsColor,
             Suit.Diamonds => DiamondsColor,
-            _ => Color.Grey
+            _ => Color.Grey,
         };
 
         var backgroundColor = trump != null && card.IsTrump(trump!.Value) ? " on grey30" : string.Empty;
@@ -123,7 +123,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
             Suit.Hearts => ":heart_suit: ",
             Suit.Clubs => ":club_suit:",
             Suit.Diamonds => ":diamond_suit:",
-            _ => "?"
+            _ => "?",
         };
         var suitColor = suit switch
         {
@@ -131,7 +131,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
             Suit.Hearts => HeartsColor,
             Suit.Clubs => ClubsColor,
             Suit.Diamonds => DiamondsColor,
-            _ => Color.Grey
+            _ => Color.Grey,
         };
         return $"[{suitColor}]{suit} {suitSymbol}[/]";
     }

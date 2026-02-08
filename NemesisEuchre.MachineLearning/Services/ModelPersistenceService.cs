@@ -108,10 +108,11 @@ public class ModelPersistenceService(
 
         return Task.Run(
             () =>
-        {
-            mlContext.Model.Save(model, schema, modelPath);
-            LoggerMessages.LogModelSaved(logger, modelPath);
-        }, cancellationToken);
+                {
+                    mlContext.Model.Save(model, schema, modelPath);
+                    LoggerMessages.LogModelSaved(logger, modelPath);
+                },
+            cancellationToken);
     }
 
     private async Task SaveMetadataAsync(

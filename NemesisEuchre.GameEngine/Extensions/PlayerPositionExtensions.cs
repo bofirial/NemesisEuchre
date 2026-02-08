@@ -15,7 +15,7 @@ public static class PlayerPositionExtensions
             PlayerPosition.South => Team.Team1,
             PlayerPosition.East => Team.Team2,
             PlayerPosition.West => Team.Team2,
-            _ => throw new ArgumentOutOfRangeException(nameof(position))
+            _ => throw new ArgumentOutOfRangeException(nameof(position)),
         };
     }
 
@@ -27,7 +27,7 @@ public static class PlayerPositionExtensions
             PlayerPosition.East => PlayerPosition.South,
             PlayerPosition.South => PlayerPosition.West,
             PlayerPosition.West => PlayerPosition.North,
-            _ => throw new ArgumentOutOfRangeException(nameof(position))
+            _ => throw new ArgumentOutOfRangeException(nameof(position)),
         };
     }
 
@@ -39,7 +39,7 @@ public static class PlayerPositionExtensions
             PlayerPosition.South => PlayerPosition.North,
             PlayerPosition.East => PlayerPosition.West,
             PlayerPosition.West => PlayerPosition.East,
-            _ => throw new ArgumentOutOfRangeException(nameof(position))
+            _ => throw new ArgumentOutOfRangeException(nameof(position)),
         };
     }
 
@@ -54,7 +54,7 @@ public static class PlayerPositionExtensions
             1 => RelativePlayerPosition.LeftHandOpponent,
             2 => RelativePlayerPosition.Partner,
             3 => RelativePlayerPosition.RightHandOpponent,
-            _ => throw new InvalidOperationException($"Impossible modulo {TotalPlayerPositions} state")
+            _ => throw new InvalidOperationException($"Impossible modulo {TotalPlayerPositions} state"),
         };
     }
 
@@ -68,7 +68,7 @@ public static class PlayerPositionExtensions
             RelativePlayerPosition.LeftHandOpponent => 1,
             RelativePlayerPosition.Partner => 2,
             RelativePlayerPosition.RightHandOpponent => 3,
-            _ => throw new ArgumentOutOfRangeException(nameof(relativePosition))
+            _ => throw new ArgumentOutOfRangeException(nameof(relativePosition)),
         };
 
         return (PlayerPosition)(((int)self + offset) % TotalPlayerPositions);
