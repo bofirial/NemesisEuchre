@@ -3,7 +3,6 @@ using FluentAssertions;
 using Moq;
 
 using NemesisEuchre.Console.Services;
-using NemesisEuchre.Console.Services.Rendering;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Mappers;
 using NemesisEuchre.GameEngine.Models;

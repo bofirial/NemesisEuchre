@@ -3,7 +3,7 @@ using NemesisEuchre.Foundation.Constants;
 
 using Spectre.Console;
 
-namespace NemesisEuchre.Console.Services.Training;
+namespace NemesisEuchre.Console.Services;
 
 public interface ITrainingProgressCoordinator
 {

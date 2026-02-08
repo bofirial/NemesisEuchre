@@ -9,7 +9,7 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
-namespace NemesisEuchre.Console.Services.Rendering;
+namespace NemesisEuchre.Console.Services;
 
 public interface IDecisionRenderer
 {

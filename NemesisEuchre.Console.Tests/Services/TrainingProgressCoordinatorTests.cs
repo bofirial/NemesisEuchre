@@ -4,12 +4,12 @@ using Moq;
 
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
-using NemesisEuchre.Console.Services.Training;
+
 using NemesisEuchre.Foundation.Constants;
 
 using Spectre.Console.Testing;
 
-namespace NemesisEuchre.Console.Tests.Services.Training;
+namespace NemesisEuchre.Console.Tests.Services;
 
 public class TrainingProgressCoordinatorTests : IDisposable
 {

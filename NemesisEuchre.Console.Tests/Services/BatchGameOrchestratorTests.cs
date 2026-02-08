@@ -8,7 +8,6 @@ using Moq;
 
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.Console.Services.Orchestration;
-using NemesisEuchre.Console.Services.Persistence;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation.Constants;

@@ -8,7 +8,6 @@ using Moq;
 using NemesisEuchre.Console.Commands;
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
-using NemesisEuchre.Console.Services.Training;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Options;
 

@@ -6,7 +6,6 @@ using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services.Orchestration;
-using NemesisEuchre.Console.Services.Persistence;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine;

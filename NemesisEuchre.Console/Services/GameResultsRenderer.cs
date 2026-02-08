@@ -3,7 +3,6 @@
 using Humanizer;
 
 using NemesisEuchre.Console.Models;
-using NemesisEuchre.Console.Services.Rendering;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Mappers;

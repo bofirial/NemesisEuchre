@@ -5,7 +5,7 @@ using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.GameEngine.Models;
 
-namespace NemesisEuchre.Console.Services.Persistence;
+namespace NemesisEuchre.Console.Services;
 
 public interface IPersistenceCoordinator
 {
