@@ -34,8 +34,7 @@ public static class PlayCardFeatureBuilder
 
             foreach (var validCard in validCards)
             {
-                var index = Array.FindIndex(cardsInHand, c =>
-                    c.Rank == validCard.Rank && c.Suit == validCard.Suit);
+                var index = Array.FindIndex(cardsInHand, c => c == validCard);
                 if (index is >= 0 and < MaxCardsInHand)
                 {
                     validityArray[index] = 1.0f;
@@ -46,8 +45,7 @@ public static class PlayCardFeatureBuilder
             playedCards.TryGetValue(RelativePlayerPosition.Partner, out RelativeCard? partnerPlayedCard);
             playedCards.TryGetValue(RelativePlayerPosition.RightHandOpponent, out RelativeCard? rightHandOpponentPlayedCard);
 
-            var chosenCardIndex = Array.FindIndex(cardsInHand, c =>
-                c.Rank == chosenCard.Rank && c.Suit == chosenCard.Suit);
+            var chosenCardIndex = Array.FindIndex(cardsInHand, c => c == chosenCard);
 
             return new PlayCardTrainingData
             {

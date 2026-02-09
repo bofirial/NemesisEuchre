@@ -110,7 +110,7 @@ public class DecisionRenderer : IDecisionRenderer
             new Markup(GameResultsRenderer.GetDisplayPlayer(callDecision.PlayerPosition, deal)),
             new Markup(deal.Players[callDecision.PlayerPosition].ActorType!.Value.Humanize()),
             new Columns(callDecision.CardsInHand.Select(c => GameResultsRenderer.GetDisplayCard(c, deal.Trump!.Value))),
-            new Markup(GameResultsRenderer.GetDisplayCard(callDecision.UpCard)),
+            new Markup(GameResultsRenderer.GetDisplayCard(callDecision.UpCard!)),
             callDecision.ChosenDecision == CallTrumpDecision.Pass ? new Markup($":diamond_with_a_dot: {passDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(passDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)),
             callDecision.ChosenDecision == CallTrumpDecision.OrderItUp ? new Markup($":diamond_with_a_dot: {orderItUpDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(orderItUpDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)),
             callDecision.ChosenDecision == CallTrumpDecision.OrderItUpAndGoAlone ? new Markup($":diamond_with_a_dot: {orderItUpAndGoAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(orderItUpAndGoAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)),
@@ -126,7 +126,7 @@ public class DecisionRenderer : IDecisionRenderer
             new Markup(GameResultsRenderer.GetDisplayPlayer(callDecision.PlayerPosition, deal)),
             new Markup(deal.Players[callDecision.PlayerPosition].ActorType!.Value.Humanize()),
             new Columns(callDecision.CardsInHand.Select(c => GameResultsRenderer.GetDisplayCard(c, deal.Trump!.Value))),
-            new Markup(GameResultsRenderer.GetDisplayCard(callDecision.UpCard)),
+            new Markup(GameResultsRenderer.GetDisplayCard(callDecision.UpCard!)),
         };
 
         if (callDecision.ValidCallTrumpDecisions.Contains(CallTrumpDecision.Pass))
@@ -201,7 +201,7 @@ public class DecisionRenderer : IDecisionRenderer
 
             foreach (var card in discardCardDecision.CardsInHand)
             {
-                var decisionPredictedPoints = discardCardDecision.DecisionPredictedPoints.First(p => p.Key.Rank == card.Rank && p.Key.Suit == card.Suit).Value;
+                var decisionPredictedPoints = discardCardDecision.DecisionPredictedPoints.First(p => p.Key == card).Value;
 
                 discardDecisionsTable.AddRow(
                     GameResultsRenderer.GetDisplayPlayer(discardCardDecision.PlayerPosition, deal),

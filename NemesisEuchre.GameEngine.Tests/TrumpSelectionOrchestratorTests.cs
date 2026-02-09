@@ -123,7 +123,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_Round1FirstPlayerOrdersUp_SetsTrumpToUpcardSuit()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -143,7 +143,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_Round1SecondPlayerOrdersUp_SetsTrumpToUpcardSuit()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Clubs, Rank = Rank.Jack };
+        deal.UpCard = new Card(Suit.Clubs, Rank.Jack);
         deal.DealerPosition = PlayerPosition.West;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -163,7 +163,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_Round1DealerOrdersUp_SetsTrumpToUpcardSuit()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Spades, Rank = Rank.Ace };
+        deal.UpCard = new Card(Suit.Spades, Rank.Ace);
         deal.DealerPosition = PlayerPosition.South;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -185,7 +185,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_Round1PlayerOrdersUpAndGoesAlone_SetsGoingAloneFlag()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Diamonds, Rank = Rank.King };
+        deal.UpCard = new Card(Suit.Diamonds, Rank.King);
         deal.DealerPosition = PlayerPosition.East;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -205,7 +205,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_Round1AllPass_ProceedsToRound2()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -225,7 +225,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_Round2FirstPlayerCalls_SetsTrumpToCalledSuit()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -247,7 +247,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_Round2DealerMustCall_SetsTrump()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -271,7 +271,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_Round2PlayerCallsAndGoesAlone_SetsGoingAloneFlag()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Clubs, Rank = Rank.Ten };
+        deal.UpCard = new Card(Suit.Clubs, Rank.Ten);
         deal.DealerPosition = PlayerPosition.West;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -294,7 +294,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_Round2ValidDecisions_NonDealerCanPass()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         CallTrumpDecision[]? capturedValidDecisions = null;
@@ -320,7 +320,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_Round2ValidDecisions_UpcardSuitNotIncluded()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         var allCapturedDecisions = new List<CallTrumpDecision[]>();
@@ -352,16 +352,16 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_DealerDiscard_AddsUpcardToHand()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
         var dealer = deal.Players[PlayerPosition.North];
         dealer.CurrentHand =
         [
-            new() { Suit = Suit.Spades, Rank = Rank.Ten },
-            new() { Suit = Suit.Clubs, Rank = Rank.Jack },
-            new() { Suit = Suit.Hearts, Rank = Rank.King },
-            new() { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new() { Suit = Suit.Spades, Rank = Rank.Ace },
+            new(Suit.Spades, Rank.Ten),
+            new(Suit.Clubs, Rank.Jack),
+            new(Suit.Hearts, Rank.King),
+            new(Suit.Diamonds, Rank.Queen),
+            new(Suit.Spades, Rank.Ace),
         ];
 
         var handSizeBeforeDiscard = 0;
@@ -382,16 +382,16 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_DealerDiscard_RemovesCorrectCard()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
         var dealer = deal.Players[PlayerPosition.North];
         dealer.CurrentHand =
         [
-            new() { Suit = Suit.Spades, Rank = Rank.Ten },
-            new() { Suit = Suit.Clubs, Rank = Rank.Jack },
-            new() { Suit = Suit.Hearts, Rank = Rank.King },
-            new() { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new() { Suit = Suit.Spades, Rank = Rank.Ace },
+            new(Suit.Spades, Rank.Ten),
+            new(Suit.Clubs, Rank.Jack),
+            new(Suit.Hearts, Rank.King),
+            new(Suit.Diamonds, Rank.Queen),
+            new(Suit.Spades, Rank.Ace),
         ];
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -410,16 +410,16 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_DealerDiscard_HandReturnsToFiveCards()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
         var dealer = deal.Players[PlayerPosition.North];
         dealer.CurrentHand =
         [
-            new() { Suit = Suit.Spades, Rank = Rank.Ten },
-            new() { Suit = Suit.Clubs, Rank = Rank.Jack },
-            new() { Suit = Suit.Hearts, Rank = Rank.King },
-            new() { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new() { Suit = Suit.Spades, Rank = Rank.Ace },
+            new(Suit.Spades, Rank.Ten),
+            new(Suit.Clubs, Rank.Jack),
+            new(Suit.Hearts, Rank.King),
+            new(Suit.Diamonds, Rank.Queen),
+            new(Suit.Spades, Rank.Ace),
         ];
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -436,7 +436,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_PlayerIterationOrder_StartsLeftOfDealer()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.West;
 
         var playerPositions = new List<PlayerPosition>();
@@ -464,7 +464,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_PlayerIterationOrder_IncludesAllFourPlayers()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.South;
 
         var playerPositions = new List<PlayerPosition>();
@@ -517,7 +517,7 @@ public class TrumpSelectionOrchestratorTests
             decisionRecorder);
 
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.Setup(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -555,7 +555,7 @@ public class TrumpSelectionOrchestratorTests
             decisionRecorder);
 
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         CallTrumpDecision[]? capturedValidDecisions = null;
@@ -581,7 +581,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_WithStickTheDealerTrue_DealerCannotPassInRound2()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         CallTrumpDecision[]? capturedValidDecisions = null;
@@ -607,7 +607,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_Round1FirstPlayerCalls_CapturesOneDecision()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -626,7 +626,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_Round1AllPlayersDecide_CapturesFourDecisions()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -650,7 +650,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_BothRounds_CapturesAllEightDecisions()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -675,7 +675,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_CapturesDecisionOrder_SequentialFrom1To8()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -700,7 +700,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_CapturesPlayerContext_HandAndUpCard()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
         var firstPlayer = deal.Players[PlayerPosition.East];
 
@@ -720,7 +720,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_CapturesPlayerPositions_DealerAndDecidingPlayer()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -742,7 +742,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_CapturesScores_TeamAndOpponent()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
         deal.Team1Score = 5;
         deal.Team2Score = 3;
@@ -763,7 +763,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_CapturesValidDecisions_Round1AndRound2()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -786,7 +786,7 @@ public class TrumpSelectionOrchestratorTests
     public async Task SelectTrumpAsync_Round2_CapturesDecisionsWithCorrectOrder()
     {
         var deal = CreateTestDeal();
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Nine);
         deal.DealerPosition = PlayerPosition.North;
 
         _playerActorMock.SetupSequence(b => b.CallTrumpAsync(It.IsAny<CallTrumpContext>()))
@@ -810,7 +810,7 @@ public class TrumpSelectionOrchestratorTests
         {
             DealStatus = DealStatus.SelectingTrump,
             DealerPosition = PlayerPosition.North,
-            UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            UpCard = new Card(Suit.Hearts, Rank.Nine),
             Team1Score = 0,
             Team2Score = 0,
             Players = new Dictionary<PlayerPosition, DealPlayer>
@@ -825,18 +825,22 @@ public class TrumpSelectionOrchestratorTests
 
     private static DealPlayer CreateTestPlayer(PlayerPosition position)
     {
+        var hands = new Dictionary<PlayerPosition, List<Card>>
+        {
+            { PlayerPosition.North, [new(Suit.Spades, Rank.Nine), new(Suit.Clubs, Rank.Ten), new(Suit.Hearts, Rank.Jack), new(Suit.Diamonds, Rank.Queen), new(Suit.Spades, Rank.King)] },
+            { PlayerPosition.East, [new(Suit.Hearts, Rank.Nine), new(Suit.Diamonds, Rank.Ten), new(Suit.Spades, Rank.Jack), new(Suit.Clubs, Rank.Queen), new(Suit.Hearts, Rank.King)] },
+            { PlayerPosition.South, [new(Suit.Clubs, Rank.Nine), new(Suit.Spades, Rank.Ten), new(Suit.Diamonds, Rank.Jack), new(Suit.Hearts, Rank.Queen), new(Suit.Clubs, Rank.King)] },
+            { PlayerPosition.West, [new(Suit.Diamonds, Rank.Nine), new(Suit.Hearts, Rank.Ten), new(Suit.Clubs, Rank.Jack), new(Suit.Spades, Rank.Queen), new(Suit.Diamonds, Rank.King)] },
+        };
+
+        var hand = hands.GetValueOrDefault(position) ??
+            [new(Suit.Spades, Rank.Ace), new(Suit.Hearts, Rank.Ace), new(Suit.Clubs, Rank.Ace), new(Suit.Diamonds, Rank.Ace), new(Suit.Spades, Rank.Queen)];
+
         return new DealPlayer
         {
             Position = position,
             ActorType = ActorType.Chaos,
-            CurrentHand =
-            [
-                new() { Suit = Suit.Spades, Rank = Rank.Nine },
-                new() { Suit = Suit.Clubs, Rank = Rank.Ten },
-                new() { Suit = Suit.Hearts, Rank = Rank.Jack },
-                new() { Suit = Suit.Diamonds, Rank = Rank.Queen },
-                new() { Suit = Suit.Spades, Rank = Rank.King },
-            ],
+            CurrentHand = hand,
         };
     }
 

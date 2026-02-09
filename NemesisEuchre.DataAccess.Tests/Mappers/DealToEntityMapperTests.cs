@@ -86,13 +86,13 @@ public class DealToEntityMapperTests
         var deal = CreateTestDeal();
         deal.CallTrumpDecisions.Add(new CallTrumpDecisionRecord
         {
-            CardsInHand = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
+            CardsInHand = [new Card(Suit.Hearts, Rank.Nine)],
             PlayerPosition = PlayerPosition.North,
             TeamScore = 0,
             OpponentScore = 0,
             DecisionOrder = 1,
             DealerPosition = PlayerPosition.West,
-            UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            UpCard = new Card(Suit.Hearts, Rank.Ace),
             ValidCallTrumpDecisions = [CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp],
             ChosenDecision = CallTrumpDecision.OrderItUp,
             DecisionPredictedPoints = new Dictionary<CallTrumpDecision, float>
@@ -122,13 +122,13 @@ public class DealToEntityMapperTests
         var deal = CreateTestDeal();
         deal.CallTrumpDecisions.Add(new CallTrumpDecisionRecord
         {
-            CardsInHand = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
+            CardsInHand = [new Card(Suit.Hearts, Rank.Nine)],
             PlayerPosition = PlayerPosition.North,
             TeamScore = 0,
             OpponentScore = 0,
             DecisionOrder = 1,
             DealerPosition = PlayerPosition.West,
-            UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            UpCard = new Card(Suit.Hearts, Rank.Ace),
             ValidCallTrumpDecisions = [CallTrumpDecision.Pass],
             ChosenDecision = CallTrumpDecision.Pass,
             DecisionPredictedPoints = [],
@@ -144,8 +144,8 @@ public class DealToEntityMapperTests
     public void Map_ShouldSerializeDiscardCardDecisionPredictedPoints()
     {
         var deal = CreateTestDeal();
-        var nineOfHearts = new Card { Suit = Suit.Hearts, Rank = Rank.Nine };
-        var tenOfClubs = new Card { Suit = Suit.Clubs, Rank = Rank.Ten };
+        var nineOfHearts = new Card(Suit.Hearts, Rank.Nine);
+        var tenOfClubs = new Card(Suit.Clubs, Rank.Ten);
         deal.DiscardCardDecisions.Add(new DiscardCardDecisionRecord
         {
             CardsInHand = [nineOfHearts, tenOfClubs],
@@ -184,15 +184,15 @@ public class DealToEntityMapperTests
         var deal = CreateTestDeal();
         deal.DiscardCardDecisions.Add(new DiscardCardDecisionRecord
         {
-            CardsInHand = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
+            CardsInHand = [new Card(Suit.Hearts, Rank.Nine)],
             PlayerPosition = PlayerPosition.North,
             TeamScore = 0,
             OpponentScore = 0,
             TrumpSuit = Suit.Hearts,
             CallingPlayer = PlayerPosition.North,
             CallingPlayerGoingAlone = false,
-            ValidCardsToDiscard = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
-            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            ValidCardsToDiscard = [new Card(Suit.Hearts, Rank.Nine)],
+            ChosenCard = new Card(Suit.Hearts, Rank.Nine),
             DecisionPredictedPoints = [],
         });
 
@@ -210,7 +210,7 @@ public class DealToEntityMapperTests
             DealStatus = DealStatus.Complete,
             DealerPosition = PlayerPosition.North,
             Deck = [],
-            UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            UpCard = new Card(Suit.Hearts, Rank.Nine),
             Trump = Suit.Hearts,
             CallingPlayer = PlayerPosition.North,
             CallingPlayerIsGoingAlone = false,

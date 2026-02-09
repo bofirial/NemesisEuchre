@@ -246,17 +246,9 @@ public class TrickToEntityMapperTests
             WinningTeam = Team.Team1,
         };
 
-        trick.CardsPlayed.Add(new PlayedCard
-        {
-            Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-            PlayerPosition = PlayerPosition.North,
-        });
+        trick.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Ace), PlayerPosition.North));
 
-        trick.CardsPlayed.Add(new PlayedCard
-        {
-            Card = new Card { Suit = Suit.Hearts, Rank = Rank.King },
-            PlayerPosition = PlayerPosition.East,
-        });
+        trick.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.King), PlayerPosition.East));
 
         return trick;
     }
@@ -274,15 +266,11 @@ public class TrickToEntityMapperTests
 
         foreach (var position in Enum.GetValues<PlayerPosition>())
         {
-            trick.CardsPlayed.Add(new PlayedCard
-            {
-                Card = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-                PlayerPosition = position,
-            });
+            trick.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Nine), position));
 
             trick.PlayCardDecisions.Add(new PlayCardDecisionRecord
             {
-                CardsInHand = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }, new Card { Suit = Suit.Clubs, Rank = Rank.Ten }],
+                CardsInHand = [new Card(Suit.Hearts, Rank.Nine), new Card(Suit.Clubs, Rank.Ten)],
                 PlayerPosition = position,
                 TeamScore = 2,
                 OpponentScore = 0,
@@ -291,15 +279,15 @@ public class TrickToEntityMapperTests
                 LeadSuit = Suit.Hearts,
                 PlayedCards = new Dictionary<PlayerPosition, Card>
                 {
-                    { PlayerPosition.North, new Card { Suit = Suit.Hearts, Rank = Rank.Nine } },
+                    { PlayerPosition.North, new Card(Suit.Hearts, Rank.Nine) },
                 },
                 WinningTrickPlayer = PlayerPosition.North,
-                ValidCardsToPlay = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
-                ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+                ValidCardsToPlay = [new Card(Suit.Hearts, Rank.Nine)],
+                ChosenCard = new Card(Suit.Hearts, Rank.Nine),
                 DecisionPredictedPoints = new Dictionary<Card, float>
                 {
-                    { new Card { Suit = Suit.Hearts, Rank = Rank.Nine }, 1.5f },
-                    { new Card { Suit = Suit.Clubs, Rank = Rank.Ten }, 0.8f },
+                    { new Card(Suit.Hearts, Rank.Nine), 1.5f },
+                    { new Card(Suit.Clubs, Rank.Ten), 0.8f },
                 },
             });
         }

@@ -72,11 +72,7 @@ public class TrickPlayingOrchestrator(
 
     private static void RecordPlayedCard(Trick trick, Card card, PlayerPosition position)
     {
-        trick.CardsPlayed.Add(new PlayedCard
-        {
-            Card = card,
-            PlayerPosition = position,
-        });
+        trick.CardsPlayed.Add(new PlayedCard(card, position));
     }
 
     private static void UpdateHandAfterPlay(DealPlayer player, Card card)

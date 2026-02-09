@@ -40,11 +40,7 @@ public class TrickWinnerCalculatorTests
             LeadPosition = PlayerPosition.North,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.North,
-                },
+                new PlayedCard(new Card(Suit.Hearts, Rank.Ace), PlayerPosition.North),
             },
         };
 
@@ -63,11 +59,7 @@ public class TrickWinnerCalculatorTests
             LeadSuit = Suit.Hearts,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-                    PlayerPosition = PlayerPosition.North,
-                },
+                new PlayedCard(new Card(Suit.Hearts, Rank.Nine), PlayerPosition.North),
             },
         };
 
@@ -85,26 +77,10 @@ public class TrickWinnerCalculatorTests
             LeadSuit = Suit.Spades,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.North,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Spades, Rank = Rank.Jack },
-                    PlayerPosition = PlayerPosition.East,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Clubs, Rank = Rank.Jack },
-                    PlayerPosition = PlayerPosition.South,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Spades, Rank = Rank.King },
-                    PlayerPosition = PlayerPosition.West,
-                },
+                new PlayedCard(new Card(Suit.Spades, Rank.Ace), PlayerPosition.North),
+                new PlayedCard(new Card(Suit.Spades, Rank.Jack), PlayerPosition.East),
+                new PlayedCard(new Card(Suit.Clubs, Rank.Jack), PlayerPosition.South),
+                new PlayedCard(new Card(Suit.Spades, Rank.King), PlayerPosition.West),
             },
         };
 
@@ -122,26 +98,10 @@ public class TrickWinnerCalculatorTests
             LeadSuit = Suit.Spades,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.North,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Spades, Rank = Rank.King },
-                    PlayerPosition = PlayerPosition.East,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Clubs, Rank = Rank.Jack },
-                    PlayerPosition = PlayerPosition.South,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Spades, Rank = Rank.Queen },
-                    PlayerPosition = PlayerPosition.West,
-                },
+                new PlayedCard(new Card(Suit.Spades, Rank.Ace), PlayerPosition.North),
+                new PlayedCard(new Card(Suit.Spades, Rank.King), PlayerPosition.East),
+                new PlayedCard(new Card(Suit.Clubs, Rank.Jack), PlayerPosition.South),
+                new PlayedCard(new Card(Suit.Spades, Rank.Queen), PlayerPosition.West),
             },
         };
 
@@ -159,26 +119,10 @@ public class TrickWinnerCalculatorTests
             LeadSuit = Suit.Hearts,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.North,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Spades, Rank = Rank.Nine },
-                    PlayerPosition = PlayerPosition.East,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.King },
-                    PlayerPosition = PlayerPosition.South,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-                    PlayerPosition = PlayerPosition.West,
-                },
+                new PlayedCard(new Card(Suit.Hearts, Rank.Ace), PlayerPosition.North),
+                new PlayedCard(new Card(Suit.Spades, Rank.Nine), PlayerPosition.East),
+                new PlayedCard(new Card(Suit.Hearts, Rank.King), PlayerPosition.South),
+                new PlayedCard(new Card(Suit.Diamonds, Rank.Queen), PlayerPosition.West),
             },
         };
 
@@ -196,26 +140,10 @@ public class TrickWinnerCalculatorTests
             LeadSuit = Suit.Hearts,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Spades, Rank = Rank.Nine },
-                    PlayerPosition = PlayerPosition.North,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.East,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Spades, Rank = Rank.Ten },
-                    PlayerPosition = PlayerPosition.South,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Spades, Rank = Rank.King },
-                    PlayerPosition = PlayerPosition.West,
-                },
+                new PlayedCard(new Card(Suit.Spades, Rank.Nine), PlayerPosition.North),
+                new PlayedCard(new Card(Suit.Spades, Rank.Ace), PlayerPosition.East),
+                new PlayedCard(new Card(Suit.Spades, Rank.Ten), PlayerPosition.South),
+                new PlayedCard(new Card(Suit.Spades, Rank.King), PlayerPosition.West),
             },
         };
 
@@ -233,26 +161,10 @@ public class TrickWinnerCalculatorTests
             LeadSuit = Suit.Hearts,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-                    PlayerPosition = PlayerPosition.North,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.East,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-                    PlayerPosition = PlayerPosition.South,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.King },
-                    PlayerPosition = PlayerPosition.West,
-                },
+                new PlayedCard(new Card(Suit.Hearts, Rank.Nine), PlayerPosition.North),
+                new PlayedCard(new Card(Suit.Hearts, Rank.Ace), PlayerPosition.East),
+                new PlayedCard(new Card(Suit.Hearts, Rank.Ten), PlayerPosition.South),
+                new PlayedCard(new Card(Suit.Hearts, Rank.King), PlayerPosition.West),
             },
         };
 
@@ -270,26 +182,10 @@ public class TrickWinnerCalculatorTests
             LeadSuit = Suit.Hearts,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-                    PlayerPosition = PlayerPosition.North,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.East,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Clubs, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.South,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-                    PlayerPosition = PlayerPosition.West,
-                },
+                new PlayedCard(new Card(Suit.Hearts, Rank.Nine), PlayerPosition.North),
+                new PlayedCard(new Card(Suit.Diamonds, Rank.Ace), PlayerPosition.East),
+                new PlayedCard(new Card(Suit.Clubs, Rank.Ace), PlayerPosition.South),
+                new PlayedCard(new Card(Suit.Hearts, Rank.Ten), PlayerPosition.West),
             },
         };
 
@@ -307,26 +203,10 @@ public class TrickWinnerCalculatorTests
             LeadSuit = Suit.Clubs,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
-                    PlayerPosition = PlayerPosition.North,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Clubs, Rank = Rank.Jack },
-                    PlayerPosition = PlayerPosition.East,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Clubs, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.South,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
-                    PlayerPosition = PlayerPosition.West,
-                },
+                new PlayedCard(new Card(Suit.Clubs, Rank.Nine), PlayerPosition.North),
+                new PlayedCard(new Card(Suit.Clubs, Rank.Jack), PlayerPosition.East),
+                new PlayedCard(new Card(Suit.Clubs, Rank.Ace), PlayerPosition.South),
+                new PlayedCard(new Card(Suit.Clubs, Rank.Ten), PlayerPosition.West),
             },
         };
 
@@ -344,26 +224,10 @@ public class TrickWinnerCalculatorTests
             LeadSuit = Suit.Hearts,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Queen },
-                    PlayerPosition = PlayerPosition.North,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.East,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Diamonds, Rank = Rank.Jack },
-                    PlayerPosition = PlayerPosition.South,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
-                    PlayerPosition = PlayerPosition.West,
-                },
+                new PlayedCard(new Card(Suit.Hearts, Rank.Queen), PlayerPosition.North),
+                new PlayedCard(new Card(Suit.Hearts, Rank.Ace), PlayerPosition.East),
+                new PlayedCard(new Card(Suit.Diamonds, Rank.Jack), PlayerPosition.South),
+                new PlayedCard(new Card(Suit.Hearts, Rank.Jack), PlayerPosition.West),
             },
         };
 
@@ -381,16 +245,8 @@ public class TrickWinnerCalculatorTests
             LeadSuit = Suit.Hearts,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-                    PlayerPosition = PlayerPosition.North,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.King },
-                    PlayerPosition = PlayerPosition.East,
-                },
+                new PlayedCard(new Card(Suit.Hearts, Rank.Nine), PlayerPosition.North),
+                new PlayedCard(new Card(Suit.Hearts, Rank.King), PlayerPosition.East),
             },
         };
 
@@ -408,21 +264,9 @@ public class TrickWinnerCalculatorTests
             LeadSuit = Suit.Hearts,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-                    PlayerPosition = PlayerPosition.North,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.King },
-                    PlayerPosition = PlayerPosition.East,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.South,
-                },
+                new PlayedCard(new Card(Suit.Hearts, Rank.Nine), PlayerPosition.North),
+                new PlayedCard(new Card(Suit.Hearts, Rank.King), PlayerPosition.East),
+                new PlayedCard(new Card(Suit.Hearts, Rank.Ace), PlayerPosition.South),
             },
         };
 
@@ -443,16 +287,8 @@ public class TrickWinnerCalculatorTests
             LeadSuit = Suit.Diamonds,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.North,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = trump, Rank = Rank.Nine },
-                    PlayerPosition = PlayerPosition.East,
-                },
+                new PlayedCard(new Card(Suit.Diamonds, Rank.Ace), PlayerPosition.North),
+                new PlayedCard(new Card(trump, Rank.Nine), PlayerPosition.East),
             },
         };
 
@@ -470,26 +306,10 @@ public class TrickWinnerCalculatorTests
             LeadSuit = Suit.Diamonds,
             CardsPlayed =
             {
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.North,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-                    PlayerPosition = PlayerPosition.East,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
-                    PlayerPosition = PlayerPosition.South,
-                },
-                new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Diamonds, Rank = Rank.King },
-                    PlayerPosition = PlayerPosition.West,
-                },
+                new PlayedCard(new Card(Suit.Diamonds, Rank.Ace), PlayerPosition.North),
+                new PlayedCard(new Card(Suit.Hearts, Rank.Ace), PlayerPosition.East),
+                new PlayedCard(new Card(Suit.Clubs, Rank.Ten), PlayerPosition.South),
+                new PlayedCard(new Card(Suit.Diamonds, Rank.King), PlayerPosition.West),
             },
         };
 

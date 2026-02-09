@@ -39,7 +39,7 @@ public class DealerDiscardHandlerTests
     [Fact]
     public async Task HandleDealerDiscardAsync_AddsUpcardToDealerHand()
     {
-        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var upCard = new Card(Suit.Hearts, Rank.Ace);
         var deal = CreateTestDeal(upCard);
         var dealer = deal.Players[PlayerPosition.North];
         var initialHandCount = dealer.CurrentHand.Count;
@@ -55,7 +55,7 @@ public class DealerDiscardHandlerTests
     [Fact]
     public async Task HandleDealerDiscardAsync_CallsPlayerActorWithCorrectParameters()
     {
-        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var upCard = new Card(Suit.Hearts, Rank.Ace);
         var deal = CreateTestDeal(upCard);
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
@@ -80,7 +80,7 @@ public class DealerDiscardHandlerTests
     [Fact]
     public async Task HandleDealerDiscardAsync_ValidatesDiscard()
     {
-        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var upCard = new Card(Suit.Hearts, Rank.Ace);
         var deal = CreateTestDeal(upCard);
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
@@ -98,7 +98,7 @@ public class DealerDiscardHandlerTests
     [Fact]
     public async Task HandleDealerDiscardAsync_RemovesDiscardedCardFromHand()
     {
-        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var upCard = new Card(Suit.Hearts, Rank.Ace);
         var deal = CreateTestDeal(upCard);
         var dealer = deal.Players[PlayerPosition.North];
         var initialHandCount = dealer.CurrentHand.Count;
@@ -117,7 +117,7 @@ public class DealerDiscardHandlerTests
     [Fact]
     public async Task HandleDealerDiscardAsync_CapturesDiscardDecision()
     {
-        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var upCard = new Card(Suit.Hearts, Rank.Ace);
         var deal = CreateTestDeal(upCard);
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
@@ -132,7 +132,7 @@ public class DealerDiscardHandlerTests
     [Fact]
     public async Task HandleDealerDiscardAsync_CapturesSixCardHand()
     {
-        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var upCard = new Card(Suit.Hearts, Rank.Ace);
         var deal = CreateTestDeal(upCard);
         var dealer = deal.Players[PlayerPosition.North];
 
@@ -150,7 +150,7 @@ public class DealerDiscardHandlerTests
     [Fact]
     public async Task HandleDealerDiscardAsync_CapturesScoresFromContextBuilder()
     {
-        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var upCard = new Card(Suit.Hearts, Rank.Ace);
         var deal = CreateTestDeal(upCard);
 
         _contextBuilderMock.Setup(x => x.GetScores(deal, PlayerPosition.North))
@@ -169,7 +169,7 @@ public class DealerDiscardHandlerTests
     [Fact]
     public async Task HandleDealerDiscardAsync_ValidCardsToDiscardMatchesHand()
     {
-        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var upCard = new Card(Suit.Hearts, Rank.Ace);
         var deal = CreateTestDeal(upCard);
 
         _playerActorMock.Setup(x => x.DiscardCardAsync(It.IsAny<DiscardCardContext>()))
@@ -185,7 +185,7 @@ public class DealerDiscardHandlerTests
     [Fact]
     public async Task HandleDealerDiscardAsync_CapturesTrumpAndCallingPlayerInfo()
     {
-        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var upCard = new Card(Suit.Hearts, Rank.Ace);
         var deal = CreateTestDeal(upCard);
         deal.Trump = Suit.Spades;
         deal.CallingPlayer = PlayerPosition.East;
@@ -205,7 +205,7 @@ public class DealerDiscardHandlerTests
     [Fact]
     public async Task HandleDealerDiscardAsync_CapturesDealerPosition()
     {
-        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var upCard = new Card(Suit.Hearts, Rank.Ace);
         var dealSouth = new Deal
         {
             DealerPosition = PlayerPosition.South,
@@ -220,11 +220,11 @@ public class DealerDiscardHandlerTests
             ActorType = ActorType.Chaos,
             CurrentHand =
             [
-                new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-                new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-                new Card { Suit = Suit.Clubs, Rank = Rank.Jack },
-                new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-                new Card { Suit = Suit.Spades, Rank = Rank.King },
+                new Card(Suit.Hearts, Rank.Nine),
+                new Card(Suit.Hearts, Rank.Ten),
+                new Card(Suit.Clubs, Rank.Jack),
+                new Card(Suit.Diamonds, Rank.Queen),
+                new Card(Suit.Spades, Rank.King),
             ],
         };
 
@@ -245,7 +245,7 @@ public class DealerDiscardHandlerTests
     [Fact]
     public async Task HandleDealerDiscardAsync_CapturesAndDiscardsCorrectly()
     {
-        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var upCard = new Card(Suit.Hearts, Rank.Ace);
         var deal = CreateTestDeal(upCard);
         var dealer = deal.Players[PlayerPosition.North];
         var cardToDiscard = dealer.CurrentHand[0];
@@ -266,7 +266,7 @@ public class DealerDiscardHandlerTests
     [Fact]
     public async Task HandleDealerDiscardAsync_SetsDiscardedCardOnDeal()
     {
-        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var upCard = new Card(Suit.Hearts, Rank.Ace);
         var deal = CreateTestDeal(upCard);
         var dealer = deal.Players[PlayerPosition.North];
         var cardToDiscard = dealer.CurrentHand[0];
@@ -296,11 +296,11 @@ public class DealerDiscardHandlerTests
             ActorType = ActorType.Chaos,
             CurrentHand =
             [
-                new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-                new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-                new Card { Suit = Suit.Clubs, Rank = Rank.Jack },
-                new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-                new Card { Suit = Suit.Spades, Rank = Rank.King },
+                new Card(Suit.Hearts, Rank.Nine),
+                new Card(Suit.Hearts, Rank.Ten),
+                new Card(Suit.Clubs, Rank.Jack),
+                new Card(Suit.Diamonds, Rank.Queen),
+                new Card(Suit.Spades, Rank.King),
             ],
         };
 

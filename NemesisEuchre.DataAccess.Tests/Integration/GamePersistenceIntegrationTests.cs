@@ -124,7 +124,7 @@ public class GamePersistenceIntegrationTests
         };
 
         deal.Deck.AddRange(CreateFullDeck());
-        deal.UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Jack };
+        deal.UpCard = new Card(Suit.Hearts, Rank.Jack);
 
         foreach (var position in Enum.GetValues<PlayerPosition>())
         {
@@ -137,7 +137,7 @@ public class GamePersistenceIntegrationTests
 
         deal.CallTrumpDecisions.Add(new CallTrumpDecisionRecord
         {
-            CardsInHand = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
+            CardsInHand = [new Card(Suit.Hearts, Rank.Nine)],
             UpCard = deal.UpCard,
             DealerPosition = PlayerPosition.North,
             PlayerPosition = PlayerPosition.South,
@@ -161,15 +161,11 @@ public class GamePersistenceIntegrationTests
 
             foreach (var position in Enum.GetValues<PlayerPosition>())
             {
-                trick.CardsPlayed.Add(new PlayedCard
-                {
-                    Card = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-                    PlayerPosition = position,
-                });
+                trick.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Nine), position));
 
                 trick.PlayCardDecisions.Add(new PlayCardDecisionRecord
                 {
-                    CardsInHand = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
+                    CardsInHand = [new Card(Suit.Hearts, Rank.Nine)],
                     PlayerPosition = position,
                     TeamScore = 0,
                     OpponentScore = 0,
@@ -178,8 +174,8 @@ public class GamePersistenceIntegrationTests
                     LeadSuit = Suit.Hearts,
                     PlayedCards = [],
                     WinningTrickPlayer = null,
-                    ValidCardsToPlay = [new Card { Suit = Suit.Hearts, Rank = Rank.Nine }],
-                    ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+                    ValidCardsToPlay = [new Card(Suit.Hearts, Rank.Nine)],
+                    ChosenCard = new Card(Suit.Hearts, Rank.Nine),
                 });
             }
 
@@ -198,7 +194,7 @@ public class GamePersistenceIntegrationTests
         {
             foreach (var rank in new[] { Rank.Nine, Rank.Ten, Rank.Jack, Rank.Queen, Rank.King, Rank.Ace })
             {
-                deck.Add(new Card { Suit = suit, Rank = rank });
+                deck.Add(new Card(suit, rank));
             }
         }
 

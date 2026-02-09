@@ -76,7 +76,7 @@ public class DealValidatorTests
         {
             DealStatus = DealStatus.NotStarted,
             DealerPosition = PlayerPosition.North,
-            UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            UpCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         for (int i = 0; i < playerCount; i++)
@@ -97,7 +97,7 @@ public class DealValidatorTests
         {
             DealStatus = DealStatus.NotStarted,
             DealerPosition = PlayerPosition.North,
-            UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            UpCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         deal.Players.Add(PlayerPosition.North, new DealPlayer());

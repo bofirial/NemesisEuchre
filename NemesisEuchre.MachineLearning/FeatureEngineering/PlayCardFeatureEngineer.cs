@@ -9,8 +9,7 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
     {
         var context = PlayCardEntityDeserializer.Deserialize(entity);
 
-        var chosenCardIndex = Array.FindIndex(context.CardsInHand, c =>
-            c.Rank == context.ChosenCard.Rank && c.Suit == context.ChosenCard.Suit);
+        var chosenCardIndex = Array.FindIndex(context.CardsInHand, c => c == context.ChosenCard);
 
         if (chosenCardIndex == -1)
         {

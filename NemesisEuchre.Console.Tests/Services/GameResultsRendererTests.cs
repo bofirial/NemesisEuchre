@@ -97,29 +97,29 @@ public class GameResultsRendererTests
         };
 
         var trick1 = new Trick { TrickNumber = 1, LeadPosition = PlayerPosition.North, WinningPosition = PlayerPosition.North };
-        trick1.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.North, Card = new Card { Rank = Rank.Nine, Suit = Suit.Hearts } });
-        trick1.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.East, Card = new Card { Rank = Rank.Ten, Suit = Suit.Hearts } });
-        trick1.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.West, Card = new Card { Rank = Rank.Jack, Suit = Suit.Hearts } });
+        trick1.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Nine), PlayerPosition.North));
+        trick1.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Ten), PlayerPosition.East));
+        trick1.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Jack), PlayerPosition.West));
 
         var trick2 = new Trick { TrickNumber = 2, LeadPosition = PlayerPosition.North, WinningPosition = PlayerPosition.North };
-        trick2.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.North, Card = new Card { Rank = Rank.Queen, Suit = Suit.Hearts } });
-        trick2.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.East, Card = new Card { Rank = Rank.King, Suit = Suit.Hearts } });
-        trick2.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.West, Card = new Card { Rank = Rank.Ace, Suit = Suit.Hearts } });
+        trick2.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Queen), PlayerPosition.North));
+        trick2.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.King), PlayerPosition.East));
+        trick2.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Ace), PlayerPosition.West));
 
         var trick3 = new Trick { TrickNumber = 3, LeadPosition = PlayerPosition.North, WinningPosition = PlayerPosition.North };
-        trick3.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.North, Card = new Card { Rank = Rank.Nine, Suit = Suit.Clubs } });
-        trick3.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.East, Card = new Card { Rank = Rank.Ten, Suit = Suit.Clubs } });
-        trick3.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.West, Card = new Card { Rank = Rank.Jack, Suit = Suit.Clubs } });
+        trick3.CardsPlayed.Add(new PlayedCard(new Card(Suit.Clubs, Rank.Nine), PlayerPosition.North));
+        trick3.CardsPlayed.Add(new PlayedCard(new Card(Suit.Clubs, Rank.Ten), PlayerPosition.East));
+        trick3.CardsPlayed.Add(new PlayedCard(new Card(Suit.Clubs, Rank.Jack), PlayerPosition.West));
 
         var trick4 = new Trick { TrickNumber = 4, LeadPosition = PlayerPosition.North, WinningPosition = PlayerPosition.North };
-        trick4.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.North, Card = new Card { Rank = Rank.Queen, Suit = Suit.Clubs } });
-        trick4.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.East, Card = new Card { Rank = Rank.King, Suit = Suit.Clubs } });
-        trick4.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.West, Card = new Card { Rank = Rank.Ace, Suit = Suit.Clubs } });
+        trick4.CardsPlayed.Add(new PlayedCard(new Card(Suit.Clubs, Rank.Queen), PlayerPosition.North));
+        trick4.CardsPlayed.Add(new PlayedCard(new Card(Suit.Clubs, Rank.King), PlayerPosition.East));
+        trick4.CardsPlayed.Add(new PlayedCard(new Card(Suit.Clubs, Rank.Ace), PlayerPosition.West));
 
         var trick5 = new Trick { TrickNumber = 5, LeadPosition = PlayerPosition.North, WinningPosition = PlayerPosition.North };
-        trick5.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.North, Card = new Card { Rank = Rank.Nine, Suit = Suit.Diamonds } });
-        trick5.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.East, Card = new Card { Rank = Rank.Ten, Suit = Suit.Diamonds } });
-        trick5.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.West, Card = new Card { Rank = Rank.Jack, Suit = Suit.Diamonds } });
+        trick5.CardsPlayed.Add(new PlayedCard(new Card(Suit.Diamonds, Rank.Nine), PlayerPosition.North));
+        trick5.CardsPlayed.Add(new PlayedCard(new Card(Suit.Diamonds, Rank.Ten), PlayerPosition.East));
+        trick5.CardsPlayed.Add(new PlayedCard(new Card(Suit.Diamonds, Rank.Jack), PlayerPosition.West));
 
         game.CompletedDeals.Add(new Deal
         {
@@ -127,7 +127,7 @@ public class GameResultsRendererTests
             ChosenDecision = CallTrumpDecision.CallHeartsAndGoAlone,
             CallingPlayer = PlayerPosition.North,
             DealerPosition = PlayerPosition.South,
-            UpCard = new Card { Rank = Rank.Nine, Suit = Suit.Hearts },
+            UpCard = new Card(Suit.Hearts, Rank.Nine),
             WinningTeam = Team.Team1,
             Players = new Dictionary<PlayerPosition, DealPlayer>
             {
@@ -163,8 +163,8 @@ public class GameResultsRendererTests
         var deal = CreateMinimalDeal(Suit.Spades);
         deal.Players[PlayerPosition.North].StartingHand =
         [
-            new Card { Rank = Rank.Jack, Suit = Suit.Spades },
-            new Card { Rank = Rank.Ace, Suit = Suit.Hearts },
+            new Card(Suit.Spades, Rank.Jack),
+            new Card(Suit.Hearts, Rank.Ace),
         ];
 
         game.CompletedDeals.Add(deal);
@@ -193,8 +193,8 @@ public class GameResultsRendererTests
         var deal = CreateMinimalDeal(Suit.Spades);
         deal.Players[PlayerPosition.North].StartingHand =
         [
-            new Card { Rank = Rank.Ace, Suit = Suit.Hearts },
-            new Card { Rank = Rank.King, Suit = Suit.Diamonds },
+            new Card(Suit.Hearts, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.King),
         ];
 
         game.CompletedDeals.Add(deal);
@@ -223,9 +223,9 @@ public class GameResultsRendererTests
         var deal = CreateMinimalDeal(Suit.Spades);
         deal.Players[PlayerPosition.North].StartingHand =
         [
-            new Card { Rank = Rank.Ace, Suit = Suit.Hearts },
-            new Card { Rank = Rank.Jack, Suit = Suit.Spades },
-            new Card { Rank = Rank.Nine, Suit = Suit.Spades },
+            new Card(Suit.Hearts, Rank.Ace),
+            new Card(Suit.Spades, Rank.Jack),
+            new Card(Suit.Spades, Rank.Nine),
         ];
 
         game.CompletedDeals.Add(deal);
@@ -309,34 +309,34 @@ public class GameResultsRendererTests
         var nonTrumpSuit = trump == Suit.Clubs ? Suit.Diamonds : Suit.Clubs;
 
         var trick1 = new Trick { TrickNumber = 1, LeadPosition = PlayerPosition.North, WinningPosition = PlayerPosition.North };
-        trick1.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.North, Card = new Card { Rank = Rank.King, Suit = nonTrumpSuit } });
-        trick1.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.East, Card = new Card { Rank = Rank.Queen, Suit = nonTrumpSuit } });
-        trick1.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.South, Card = new Card { Rank = Rank.Ten, Suit = nonTrumpSuit } });
-        trick1.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.West, Card = new Card { Rank = Rank.Nine, Suit = nonTrumpSuit } });
+        trick1.CardsPlayed.Add(new PlayedCard(new Card(nonTrumpSuit, Rank.King), PlayerPosition.North));
+        trick1.CardsPlayed.Add(new PlayedCard(new Card(nonTrumpSuit, Rank.Queen), PlayerPosition.East));
+        trick1.CardsPlayed.Add(new PlayedCard(new Card(nonTrumpSuit, Rank.Ten), PlayerPosition.South));
+        trick1.CardsPlayed.Add(new PlayedCard(new Card(nonTrumpSuit, Rank.Nine), PlayerPosition.West));
 
         var trick2 = new Trick { TrickNumber = 2, LeadPosition = PlayerPosition.North, WinningPosition = PlayerPosition.North };
-        trick2.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.North, Card = new Card { Rank = Rank.King, Suit = trump } });
-        trick2.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.East, Card = new Card { Rank = Rank.Queen, Suit = trump } });
-        trick2.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.South, Card = new Card { Rank = Rank.Ten, Suit = trump } });
-        trick2.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.West, Card = new Card { Rank = Rank.Nine, Suit = trump } });
+        trick2.CardsPlayed.Add(new PlayedCard(new Card(trump, Rank.King), PlayerPosition.North));
+        trick2.CardsPlayed.Add(new PlayedCard(new Card(trump, Rank.Queen), PlayerPosition.East));
+        trick2.CardsPlayed.Add(new PlayedCard(new Card(trump, Rank.Ten), PlayerPosition.South));
+        trick2.CardsPlayed.Add(new PlayedCard(new Card(trump, Rank.Nine), PlayerPosition.West));
 
         var trick3 = new Trick { TrickNumber = 3, LeadPosition = PlayerPosition.North, WinningPosition = PlayerPosition.North };
-        trick3.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.North, Card = new Card { Rank = Rank.Ace, Suit = nonTrumpSuit } });
-        trick3.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.East, Card = new Card { Rank = Rank.King, Suit = nonTrumpSuit } });
-        trick3.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.South, Card = new Card { Rank = Rank.Queen, Suit = nonTrumpSuit } });
-        trick3.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.West, Card = new Card { Rank = Rank.Ten, Suit = nonTrumpSuit } });
+        trick3.CardsPlayed.Add(new PlayedCard(new Card(nonTrumpSuit, Rank.Ace), PlayerPosition.North));
+        trick3.CardsPlayed.Add(new PlayedCard(new Card(nonTrumpSuit, Rank.King), PlayerPosition.East));
+        trick3.CardsPlayed.Add(new PlayedCard(new Card(nonTrumpSuit, Rank.Queen), PlayerPosition.South));
+        trick3.CardsPlayed.Add(new PlayedCard(new Card(nonTrumpSuit, Rank.Ten), PlayerPosition.West));
 
         var trick4 = new Trick { TrickNumber = 4, LeadPosition = PlayerPosition.North, WinningPosition = PlayerPosition.North };
-        trick4.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.North, Card = new Card { Rank = Rank.Ace, Suit = trump } });
-        trick4.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.East, Card = new Card { Rank = Rank.King, Suit = trump } });
-        trick4.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.South, Card = new Card { Rank = Rank.Queen, Suit = trump } });
-        trick4.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.West, Card = new Card { Rank = Rank.Ten, Suit = trump } });
+        trick4.CardsPlayed.Add(new PlayedCard(new Card(trump, Rank.Ace), PlayerPosition.North));
+        trick4.CardsPlayed.Add(new PlayedCard(new Card(trump, Rank.King), PlayerPosition.East));
+        trick4.CardsPlayed.Add(new PlayedCard(new Card(trump, Rank.Queen), PlayerPosition.South));
+        trick4.CardsPlayed.Add(new PlayedCard(new Card(trump, Rank.Ten), PlayerPosition.West));
 
         var trick5 = new Trick { TrickNumber = 5, LeadPosition = PlayerPosition.North, WinningPosition = PlayerPosition.North };
-        trick5.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.North, Card = new Card { Rank = Rank.Ace, Suit = nonTrumpSuit } });
-        trick5.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.East, Card = new Card { Rank = Rank.Ace, Suit = trump } });
-        trick5.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.South, Card = new Card { Rank = Rank.King, Suit = nonTrumpSuit } });
-        trick5.CardsPlayed.Add(new PlayedCard { PlayerPosition = PlayerPosition.West, Card = new Card { Rank = Rank.Queen, Suit = nonTrumpSuit } });
+        trick5.CardsPlayed.Add(new PlayedCard(new Card(nonTrumpSuit, Rank.Ace), PlayerPosition.North));
+        trick5.CardsPlayed.Add(new PlayedCard(new Card(trump, Rank.Ace), PlayerPosition.East));
+        trick5.CardsPlayed.Add(new PlayedCard(new Card(nonTrumpSuit, Rank.King), PlayerPosition.South));
+        trick5.CardsPlayed.Add(new PlayedCard(new Card(nonTrumpSuit, Rank.Queen), PlayerPosition.West));
 
         return new Deal
         {
@@ -344,7 +344,7 @@ public class GameResultsRendererTests
             DealerPosition = PlayerPosition.North,
             CallingPlayer = PlayerPosition.East,
             ChosenDecision = CallTrumpDecision.CallHearts,
-            UpCard = new Card { Rank = Rank.Nine, Suit = trump },
+            UpCard = new Card(trump, Rank.Nine),
             WinningTeam = Team.Team1,
             Players = new Dictionary<PlayerPosition, DealPlayer>
             {

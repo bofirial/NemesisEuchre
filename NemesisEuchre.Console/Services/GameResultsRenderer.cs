@@ -138,7 +138,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
 
     internal static string GetPlayCardDecisionCardDisplay(Card card, PlayCardDecisionRecord playCardDecision, Suit trump)
     {
-        var decisionPredictedPoints = playCardDecision.DecisionPredictedPoints.First(p => p.Key.Rank == card.Rank && p.Key.Suit == card.Suit).Value;
+        var decisionPredictedPoints = playCardDecision.DecisionPredictedPoints.First(p => p.Key == card).Value;
 
         var cardDisplay = $"{GetDisplayCard(card, trump)} {decisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)}";
 
@@ -225,9 +225,9 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
 
         if (dealPlayer.Position == deal.DealerPosition
             && deal.ChosenDecision is CallTrumpDecision.OrderItUp or CallTrumpDecision.OrderItUpAndGoAlone
-            && (deal.UpCard!.Rank != deal.DiscardedCard!.Rank || deal.UpCard!.Suit != deal.DiscardedCard!.Suit))
+            && deal.UpCard != deal.DiscardedCard)
         {
-            playerHand = [.. playerHand.Where(c => c.Rank != deal.DiscardedCard!.Rank || c.Suit != deal.DiscardedCard!.Suit), deal.UpCard!];
+            playerHand = [.. playerHand.Where(c => c != deal.DiscardedCard), deal.UpCard!];
         }
 
         playerHand = playerHand.SortByTrump(deal.Trump);

@@ -17,7 +17,7 @@ public class CallTrumpDecisionRecord
 
     public PlayerPosition DealerPosition { get; set; }
 
-    public Card UpCard { get; set; } = new();
+    public Card? UpCard { get; set; }
 
     public CallTrumpDecision[] ValidCallTrumpDecisions { get; set; } = [];
 

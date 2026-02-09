@@ -176,11 +176,7 @@ public class CallTrumpFeatureEngineerTests
 
     private Card CreateCard(Rank? rank = null, Suit? suit = null)
     {
-        return new Card
-        {
-            Rank = rank ?? _faker.PickRandom<Rank>(),
-            Suit = suit ?? _faker.PickRandom<Suit>(),
-        };
+        return new Card(suit ?? _faker.PickRandom<Suit>(), rank ?? _faker.PickRandom<Rank>());
     }
 
     private Card[] CreateCards(int count)

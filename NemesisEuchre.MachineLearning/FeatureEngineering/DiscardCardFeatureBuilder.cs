@@ -14,8 +14,7 @@ public static class DiscardCardFeatureBuilder
         short opponentScore,
         RelativeCard chosenCard)
     {
-        var chosenCardIndex = Array.FindIndex(cards, c =>
-            c.Rank == chosenCard.Rank && c.Suit == chosenCard.Suit);
+        var chosenCardIndex = Array.FindIndex(cards, c => c == chosenCard);
 
         return new DiscardCardTrainingData
         {

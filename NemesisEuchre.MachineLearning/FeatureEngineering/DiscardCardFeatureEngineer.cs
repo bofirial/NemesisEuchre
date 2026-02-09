@@ -17,8 +17,7 @@ public class DiscardCardFeatureEngineer : IFeatureEngineer<DiscardCardDecisionEn
                 $"Expected 6 cards in hand but found {context.CardsInHand.Length}");
         }
 
-        var chosenCardIndex = Array.FindIndex(context.CardsInHand, c =>
-            c.Rank == context.ChosenCard.Rank && c.Suit == context.ChosenCard.Suit);
+        var chosenCardIndex = Array.FindIndex(context.CardsInHand, c => c == context.ChosenCard);
 
         if (chosenCardIndex == -1)
         {

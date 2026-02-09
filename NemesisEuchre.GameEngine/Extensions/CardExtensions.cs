@@ -93,10 +93,8 @@ public static class CardExtensions
             rank = Rank.LeftBower;
         }
 
-        return new RelativeCard
+        return new RelativeCard(rank, card.Suit.ToRelativeSuit(trump, rank))
         {
-            Rank = rank,
-            Suit = card.Suit.ToRelativeSuit(trump, rank),
             Card = card,
         };
     }

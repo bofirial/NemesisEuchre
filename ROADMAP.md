@@ -470,7 +470,7 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 3. ~~Display Choices and Decisions made during a Euchre game~~
 4. ~~Rework BotBase to record EstimatedPoints for each valid decision~~
 5. ~~Implement Gen1TrainerBot using Boltzmann/Softmax with a temperature to allow the bot to explore "suboptimal" decisions~~
-6. Protect against game state mutations in IPlayerActor implementations
+6. ~~Protect against game state mutations in IPlayerActor implementations~~
 7. Database Changes
    * "Minify" json in the database to reduce memory?
    * Convert json columns to metadata tables and FKs?
