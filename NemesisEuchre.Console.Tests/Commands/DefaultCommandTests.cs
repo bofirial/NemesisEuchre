@@ -222,6 +222,10 @@ public class DefaultCommandTests
             Team2Wins = 4,
             FailedGames = 0,
             TotalDeals = 50,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromSeconds(5),
         };
 
@@ -270,6 +274,10 @@ public class DefaultCommandTests
             Team2Wins = 4,
             FailedGames = 0,
             TotalDeals = 50,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromSeconds(5),
         };
 
@@ -315,6 +323,10 @@ public class DefaultCommandTests
             Team2Wins = 4,
             FailedGames = 0,
             TotalDeals = 50,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromSeconds(5),
         };
 
@@ -360,6 +372,10 @@ public class DefaultCommandTests
             Team2Wins = 2,
             FailedGames = 0,
             TotalDeals = 25,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromSeconds(2),
         };
 
@@ -569,6 +585,10 @@ public class DefaultCommandTests
             Team2Wins = 4,
             FailedGames = 0,
             TotalDeals = 50,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromSeconds(5),
         };
 
@@ -616,6 +636,10 @@ public class DefaultCommandTests
             Team2Wins = 4,
             FailedGames = 0,
             TotalDeals = 50,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromSeconds(5),
         };
 
@@ -670,6 +694,10 @@ public class DefaultCommandTests
             Team2Wins = 4,
             FailedGames = 0,
             TotalDeals = 50,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromSeconds(5),
         };
 
@@ -724,6 +752,10 @@ public class DefaultCommandTests
             Team2Wins = 4,
             FailedGames = 0,
             TotalDeals = 50,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromSeconds(5),
         };
 

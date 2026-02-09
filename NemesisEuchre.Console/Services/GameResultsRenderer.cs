@@ -55,6 +55,10 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         table.AddRow("Team 2 Wins", $"{results.Team2Wins} ([{Team2Color}]{results.Team2WinRate:P1}[/])");
         table.AddRow("Failed Games", results.FailedGames.ToString(CultureInfo.InvariantCulture));
         table.AddRow("Total Deals Played", results.TotalDeals.ToString(CultureInfo.InvariantCulture));
+        table.AddRow("Total Tricks Played", results.TotalTricks.ToString(CultureInfo.InvariantCulture));
+        table.AddRow("Total Call Trump Decisions", results.TotalCallTrumpDecisions.ToString(CultureInfo.InvariantCulture));
+        table.AddRow("Total Discard Card Decisions", results.TotalDiscardCardDecisions.ToString(CultureInfo.InvariantCulture));
+        table.AddRow("Total Play Card Decisions", results.TotalPlayCardDecisions.ToString(CultureInfo.InvariantCulture));
         table.AddRow("Elapsed Time", $"{results.ElapsedTime.TotalSeconds:F2}s");
 
         ansiConsole.Write(table);

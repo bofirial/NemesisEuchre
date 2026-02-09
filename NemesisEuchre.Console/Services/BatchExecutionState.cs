@@ -22,6 +22,14 @@ public sealed class BatchExecutionState(int batchSize) : IDisposable
 
     public int TotalDeals { get; set; }
 
+    public int TotalTricks { get; set; }
+
+    public int TotalCallTrumpDecisions { get; set; }
+
+    public int TotalDiscardCardDecisions { get; set; }
+
+    public int TotalPlayCardDecisions { get; set; }
+
     public async Task<T> ExecuteWithLockAsync<T>(Func<T> action, CancellationToken cancellationToken = default)
     {
         await _semaphore.WaitAsync(cancellationToken);
