@@ -191,4 +191,52 @@ public class PlayerPositionExtensionsTests
         self.GetTeam().Should().NotBe(leftAbsolute.GetTeam());
         self.GetTeam().Should().NotBe(rightAbsolute.GetTeam());
     }
+
+    [Theory]
+    [InlineData(PlayerPosition.North, RelativePlayerPosition.Self, PlayerPosition.North)]
+    [InlineData(PlayerPosition.North, RelativePlayerPosition.LeftHandOpponent, PlayerPosition.West)]
+    [InlineData(PlayerPosition.North, RelativePlayerPosition.Partner, PlayerPosition.South)]
+    [InlineData(PlayerPosition.North, RelativePlayerPosition.RightHandOpponent, PlayerPosition.East)]
+    [InlineData(PlayerPosition.East, RelativePlayerPosition.Self, PlayerPosition.East)]
+    [InlineData(PlayerPosition.East, RelativePlayerPosition.LeftHandOpponent, PlayerPosition.North)]
+    [InlineData(PlayerPosition.East, RelativePlayerPosition.Partner, PlayerPosition.West)]
+    [InlineData(PlayerPosition.East, RelativePlayerPosition.RightHandOpponent, PlayerPosition.South)]
+    [InlineData(PlayerPosition.South, RelativePlayerPosition.Self, PlayerPosition.South)]
+    [InlineData(PlayerPosition.South, RelativePlayerPosition.LeftHandOpponent, PlayerPosition.East)]
+    [InlineData(PlayerPosition.South, RelativePlayerPosition.Partner, PlayerPosition.North)]
+    [InlineData(PlayerPosition.South, RelativePlayerPosition.RightHandOpponent, PlayerPosition.West)]
+    [InlineData(PlayerPosition.West, RelativePlayerPosition.Self, PlayerPosition.West)]
+    [InlineData(PlayerPosition.West, RelativePlayerPosition.LeftHandOpponent, PlayerPosition.South)]
+    [InlineData(PlayerPosition.West, RelativePlayerPosition.Partner, PlayerPosition.East)]
+    [InlineData(PlayerPosition.West, RelativePlayerPosition.RightHandOpponent, PlayerPosition.North)]
+    public void DeriveAbsolutePosition_WithReferenceAndRelative_ReturnsSelfPosition(
+        PlayerPosition referenceAbsolute,
+        RelativePlayerPosition referenceRelative,
+        PlayerPosition expectedSelf)
+    {
+        var result = PlayerPositionExtensions.DeriveAbsolutePosition(referenceAbsolute, referenceRelative);
+
+        result.Should().Be(expectedSelf);
+    }
+
+    [Theory]
+    [InlineData(PlayerPosition.North)]
+    [InlineData(PlayerPosition.East)]
+    [InlineData(PlayerPosition.South)]
+    [InlineData(PlayerPosition.West)]
+    public void DeriveAbsolutePosition_RoundTrip_IsConsistentWithToRelativePosition(PlayerPosition dealer)
+    {
+        foreach (var self in new[] { PlayerPosition.North, PlayerPosition.East, PlayerPosition.South, PlayerPosition.West })
+        {
+            var dealerRelative = dealer.ToRelativePosition(self);
+            var derivedSelf = PlayerPositionExtensions.DeriveAbsolutePosition(dealer, dealerRelative);
+
+            derivedSelf.Should().Be(
+                self,
+                "DeriveAbsolutePosition should recover self={0} from dealer={1}, dealerRelative={2}",
+                self,
+                dealer,
+                dealerRelative);
+        }
+    }
 }

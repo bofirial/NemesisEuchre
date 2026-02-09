@@ -26,6 +26,29 @@ public static class SuitExtensions
         return suit is Suit.Spades or Suit.Clubs;
     }
 
+    public static Suit ToAbsoluteSuit(this RelativeSuit relativeSuit, Suit trump)
+    {
+        if (relativeSuit == RelativeSuit.Trump)
+        {
+            return trump;
+        }
+
+        var sameColorSuit = trump.GetSameColorSuit();
+        if (relativeSuit == RelativeSuit.NonTrumpSameColor)
+        {
+            return sameColorSuit;
+        }
+
+        var oppositeColors = new[] { Suit.Spades, Suit.Hearts, Suit.Clubs, Suit.Diamonds }
+            .Where(s => s != trump && s != sameColorSuit)
+            .OrderBy(s => (int)s)
+            .ToArray();
+
+        return relativeSuit == RelativeSuit.NonTrumpOppositeColor1
+            ? oppositeColors[0]
+            : oppositeColors[1];
+    }
+
     public static RelativeSuit ToRelativeSuit(this Suit suit, Suit trump, Rank? rank = null)
     {
         if (suit == trump)

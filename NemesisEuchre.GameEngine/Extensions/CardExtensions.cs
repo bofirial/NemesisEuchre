@@ -79,6 +79,22 @@ public static class CardExtensions
         return rankSymbol + suitSymbol;
     }
 
+    public static Card ToAbsolute(this RelativeCard relativeCard, Suit trump)
+    {
+        if (relativeCard.Rank == Rank.RightBower)
+        {
+            return new Card(trump, Rank.Jack);
+        }
+
+        if (relativeCard.Rank == Rank.LeftBower)
+        {
+            return new Card(trump.GetSameColorSuit(), Rank.Jack);
+        }
+
+        var absoluteSuit = relativeCard.Suit.ToAbsoluteSuit(trump);
+        return new Card(absoluteSuit, relativeCard.Rank);
+    }
+
     public static RelativeCard ToRelative(this Card card, Suit trump)
     {
         var rank = card.Rank;

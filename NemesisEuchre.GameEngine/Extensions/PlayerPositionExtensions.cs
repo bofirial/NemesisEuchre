@@ -74,6 +74,22 @@ public static class PlayerPositionExtensions
         return (PlayerPosition)(((int)self + offset) % TotalPlayerPositions);
     }
 
+    public static PlayerPosition DeriveAbsolutePosition(
+        PlayerPosition referenceAbsolute,
+        RelativePlayerPosition referenceRelative)
+    {
+        var offset = referenceRelative switch
+        {
+            RelativePlayerPosition.Self => 0,
+            RelativePlayerPosition.LeftHandOpponent => 1,
+            RelativePlayerPosition.Partner => 2,
+            RelativePlayerPosition.RightHandOpponent => 3,
+            _ => throw new ArgumentOutOfRangeException(nameof(referenceRelative)),
+        };
+
+        return (PlayerPosition)(((int)referenceAbsolute - offset + TotalPlayerPositions) % TotalPlayerPositions);
+    }
+
     public static Player GetPlayerAtRelativePosition(
         this Dictionary<PlayerPosition, Player> players,
         PlayerPosition self,
