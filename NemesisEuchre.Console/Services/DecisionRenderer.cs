@@ -207,6 +207,8 @@ public class DecisionRenderer : IDecisionRenderer
         {
             foreach (var playCardDecision in trick.PlayCardDecisions)
             {
+                playCardDecision.ValidCardsToPlay.Sort((a, b) => playCardDecision.DecisionPredictedPoints.First(p => p.Key == b).Value.CompareTo(playCardDecision.DecisionPredictedPoints.First(p => p.Key == a).Value));
+
                 playCardDecisionsTable.AddRow(
                     trick.TrickNumber.ToString(CultureInfo.InvariantCulture),
                     GameResultsRenderer.GetDisplayPlayer(playCardDecision.PlayerPosition, deal),
