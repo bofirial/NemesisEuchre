@@ -2,6 +2,7 @@ using FluentAssertions;
 
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.Tests.TestHelpers;
 using NemesisEuchre.GameEngine.Utilities;
 
 namespace NemesisEuchre.GameEngine.Tests;
@@ -38,7 +39,7 @@ public class DealFactoryTests
     public Task CreateDealAsync_WithMoreThan4Players_ThrowsArgumentException()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
         game.Players.Add((PlayerPosition)99, new Player { Position = (PlayerPosition)99 });
 
         var act = async () => await factory.CreateDealAsync(game);
@@ -52,7 +53,7 @@ public class DealFactoryTests
     public Task CreateDealAsync_WithPreviousDealHavingNullDealer_ThrowsInvalidOperationException()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
         var previousDeal = new Deal { DealerPosition = null };
 
         var act = async () => await factory.CreateDealAsync(game, previousDeal);
@@ -65,7 +66,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_WithNoPreviousDeal_SetsDealerToValidPosition()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -80,7 +81,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_WithNoPreviousDeal_RandomizesInitialDealerDistribution()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
         var dealerCounts = new Dictionary<PlayerPosition, int>();
 
         for (int i = 0; i < 1000; i++)
@@ -100,7 +101,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_WithPreviousDealerNorth_SetsDealerToEast()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
         var previousDeal = new Deal { DealerPosition = PlayerPosition.North };
 
         var deal = await factory.CreateDealAsync(game, previousDeal);
@@ -112,7 +113,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_WithPreviousDealerEast_SetsDealerToSouth()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
         var previousDeal = new Deal { DealerPosition = PlayerPosition.East };
 
         var deal = await factory.CreateDealAsync(game, previousDeal);
@@ -124,7 +125,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_WithPreviousDealerSouth_SetsDealerToWest()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
         var previousDeal = new Deal { DealerPosition = PlayerPosition.South };
 
         var deal = await factory.CreateDealAsync(game, previousDeal);
@@ -136,7 +137,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_WithPreviousDealerWest_SetsDealerToNorth()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
         var previousDeal = new Deal { DealerPosition = PlayerPosition.West };
 
         var deal = await factory.CreateDealAsync(game, previousDeal);
@@ -148,7 +149,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_DealsExactly5CardsToEachPlayer()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -167,7 +168,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_InitializesStartingHandsAndCurrentHandsWithSameCards()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -181,7 +182,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_EachPlayerReceivesUniqueCards()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -196,7 +197,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_SetsUpCardCorrectly()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -207,7 +208,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_SetsRemainingDeckTo3Cards()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -218,7 +219,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_AllCardsAreUnique()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -236,7 +237,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_SetsDealStatusToNotStarted()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -247,7 +248,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_SetsDealerPositionCorrectly()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -258,7 +259,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_InitializesNullablePropertiesToNull()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -272,7 +273,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_SetsCallingPlayerIsGoingAloneToFalse()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -283,7 +284,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_TotalCardsAccountedFor_Is24Cards()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -298,7 +299,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_StartingHandsAreImmutableArrays()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -312,7 +313,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_CurrentHandsAreMutableLists()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -326,7 +327,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_DealPlayerPositionsAreSetCorrectly()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
 
         var deal = await factory.CreateDealAsync(game);
 
@@ -340,7 +341,7 @@ public class DealFactoryTests
     public async Task CreateDealAsync_CopiesActorTypeFromGamePlayer()
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
-        var game = CreateTestGame();
+        var game = TestDataBuilders.CreateGame();
         game.Players[PlayerPosition.North].ActorType = ActorType.Chaos;
         game.Players[PlayerPosition.South].ActorType = ActorType.Chad;
 
@@ -350,16 +351,6 @@ public class DealFactoryTests
         deal.Players[PlayerPosition.East].ActorType.Should().BeNull();
         deal.Players[PlayerPosition.South].ActorType.Should().Be(ActorType.Chad);
         deal.Players[PlayerPosition.West].ActorType.Should().BeNull();
-    }
-
-    private static Game CreateTestGame()
-    {
-        var game = new Game();
-        game.Players.Add(PlayerPosition.North, new Player { Position = PlayerPosition.North });
-        game.Players.Add(PlayerPosition.East, new Player { Position = PlayerPosition.East });
-        game.Players.Add(PlayerPosition.South, new Player { Position = PlayerPosition.South });
-        game.Players.Add(PlayerPosition.West, new Player { Position = PlayerPosition.West });
-        return game;
     }
 
     private sealed class NoOpShuffler : ICardShuffler
