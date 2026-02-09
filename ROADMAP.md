@@ -473,8 +473,8 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 6. ~~Protect against game state mutations in IPlayerActor implementations~~
 7. ~~Database Changes~~
    * ~~Convert json columns to metadata tables and FKs?~~
-8. Add Command to display results from a Game in the Database
-9. Consider Bulk Game display improvements?
+8. ~~Add Command to display results from a Game in the Database~~
+9. ~~Consider Bulk Game display improvements?~~
 
 ## Interactive Play 0.7
 
