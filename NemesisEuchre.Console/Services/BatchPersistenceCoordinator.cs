@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
+using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.GameEngine.Models;
@@ -9,67 +11,77 @@ namespace NemesisEuchre.Console.Services;
 
 public interface IPersistenceCoordinator
 {
-    Task SavePendingGamesAsync(
+    Task ConsumeAndPersistAsync(
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
         bool doNotPersist,
-        bool force,
         CancellationToken cancellationToken = default);
 }
 
 public class BatchPersistenceCoordinator(
     IServiceScopeFactory serviceScopeFactory,
+    IOptions<PersistenceOptions> persistenceOptions,
     ILogger<BatchPersistenceCoordinator> logger) : IPersistenceCoordinator
 {
-    public async Task SavePendingGamesAsync(
+    private readonly PersistenceOptions _persistenceOptions = persistenceOptions.Value;
+
+    public async Task ConsumeAndPersistAsync(
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
         bool doNotPersist,
-        bool force,
         CancellationToken cancellationToken = default)
     {
-        var gamesToSave = await state.ExecuteWithLockAsync(
-            () =>
-                {
-                    if ((force && state.PendingGames.Count > 0) ||
-                        state.PendingGames.Count >= state.BatchSize)
-                    {
-                        var games = new List<Game>(state.PendingGames);
-                        state.PendingGames.Clear();
-                        return games;
-                    }
+        var batch = new List<Game>(_persistenceOptions.BatchSize);
 
-                    return null;
-                },
-            cancellationToken).ConfigureAwait(false);
-
-        if (gamesToSave?.Count > 0)
+        await foreach (var game in state.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
         {
-            if (doNotPersist)
-            {
-                LoggerMessages.LogBatchGamePersistenceSkipped(logger, gamesToSave.Count);
+            batch.Add(game);
 
-                state.SavedGames += gamesToSave.Count;
-                progressReporter?.ReportGamesSaved(state.SavedGames);
+            if (batch.Count >= _persistenceOptions.BatchSize)
+            {
+                await FlushBatchAsync(batch, state, progressReporter, doNotPersist, cancellationToken).ConfigureAwait(false);
+                batch.Clear();
             }
-            else
-            {
-                try
-                {
-                    var saveProgress = new Progress<int>(count =>
-                    {
-                        state.SavedGames += count;
-                        progressReporter?.ReportGamesSaved(state.SavedGames);
-                    });
+        }
 
-                    using var scope = serviceScopeFactory.CreateScope();
-                    var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
-                    await gameRepository.SaveCompletedGamesBulkAsync(gamesToSave, saveProgress, cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception ex)
+        if (batch.Count > 0)
+        {
+            await FlushBatchAsync(batch, state, progressReporter, doNotPersist, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    private async Task FlushBatchAsync(
+        List<Game> games,
+        BatchExecutionState state,
+        IBatchProgressReporter? progressReporter,
+        bool doNotPersist,
+        CancellationToken cancellationToken)
+    {
+        if (doNotPersist)
+        {
+            LoggerMessages.LogBatchGamePersistenceSkipped(logger, games.Count);
+
+            state.SavedGames += games.Count;
+            progressReporter?.ReportGamesSaved(state.SavedGames);
+        }
+        else
+        {
+            try
+            {
+                var saveProgress = new Progress<int>(count =>
                 {
-                    LoggerMessages.LogGamePersistenceFailed(logger, ex);
-                }
+                    state.SavedGames += count;
+                    progressReporter?.ReportGamesSaved(state.SavedGames);
+                });
+
+                var snapshot = new List<Game>(games);
+                using var scope = serviceScopeFactory.CreateScope();
+                var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
+                await gameRepository.SaveCompletedGamesBulkAsync(snapshot, saveProgress, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                LoggerMessages.LogGamePersistenceFailed(logger, ex);
             }
         }
     }

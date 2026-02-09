@@ -1,14 +1,24 @@
+using System.Threading.Channels;
+
 using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.Console.Services;
 
-public sealed class BatchExecutionState(int batchSize) : IDisposable
+public sealed class BatchExecutionState(int channelCapacity) : IDisposable
 {
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-    public int BatchSize { get; } = batchSize;
+    private readonly Channel<Game> _channel = Channel.CreateBounded<Game>(
+        new BoundedChannelOptions(channelCapacity)
+        {
+            SingleWriter = false,
+            SingleReader = true,
+            FullMode = BoundedChannelFullMode.Wait,
+        });
 
-    public List<Game> PendingGames { get; } = [];
+    public ChannelWriter<Game> Writer => _channel.Writer;
+
+    public ChannelReader<Game> Reader => _channel.Reader;
 
     public int Team1Wins { get; set; }
 

@@ -104,15 +104,25 @@ public class BatchGameOrchestrator(
         ActorType[]? team2ActorTypes,
         CancellationToken cancellationToken)
     {
-        using var state = new BatchExecutionState(_persistenceOptions.BatchSize);
-        var tasks = parallelismCoordinator.CreateParallelTasks(
-            numberOfGames,
-            state,
-            (gameNumber, s, ct) => RunSingleGameAsync(gameNumber, s, progressReporter, doNotPersist, team1ActorTypes, team2ActorTypes, ct),
-            cancellationToken);
+        var channelCapacity = _persistenceOptions.BatchSize * 4;
+        using var state = new BatchExecutionState(channelCapacity);
 
-        await Task.WhenAll(tasks).ConfigureAwait(false);
-        await persistenceCoordinator.SavePendingGamesAsync(state, progressReporter, doNotPersist, force: true, cancellationToken).ConfigureAwait(false);
+        var consumerTask = persistenceCoordinator.ConsumeAndPersistAsync(state, progressReporter, doNotPersist, cancellationToken);
+
+        var effectiveParallelism = parallelismCoordinator.CalculateEffectiveParallelism();
+        var parallelOptions = new ParallelOptions
+        {
+            MaxDegreeOfParallelism = effectiveParallelism,
+            CancellationToken = cancellationToken,
+        };
+
+        await Parallel.ForEachAsync(
+            Enumerable.Range(0, numberOfGames),
+            parallelOptions,
+            async (gameNumber, ct) => await RunSingleGameAsync(gameNumber, state, progressReporter, team1ActorTypes, team2ActorTypes, ct).ConfigureAwait(false)).ConfigureAwait(false);
+
+        state.Writer.Complete();
+        await consumerTask.ConfigureAwait(false);
 
         return AggregateResults(numberOfGames, state, TimeSpan.Zero);
     }
@@ -188,7 +198,6 @@ public class BatchGameOrchestrator(
         int gameNumber,
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
-        bool doNotPersist,
         ActorType[]? team1ActorTypes = null,
         ActorType[]? team2ActorTypes = null,
         CancellationToken cancellationToken = default)
@@ -217,12 +226,11 @@ public class BatchGameOrchestrator(
                     state.TotalDiscardCardDecisions += game.CompletedDeals.Sum(d => d.DiscardCardDecisions.Count);
                     state.TotalPlayCardDecisions += game.CompletedDeals.Sum(d => GetPlayCardDecisions(d));
                     state.CompletedGames++;
-                    state.PendingGames.Add(game);
                     progressReporter?.ReportGameCompleted(state.CompletedGames);
                 },
                 cancellationToken).ConfigureAwait(false);
 
-            await persistenceCoordinator.SavePendingGamesAsync(state, progressReporter, doNotPersist, force: false, cancellationToken).ConfigureAwait(false);
+            await state.Writer.WriteAsync(game, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

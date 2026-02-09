@@ -1,7 +1,6 @@
 using FluentAssertions;
 
 using NemesisEuchre.Console.Services;
-using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.Console.Tests.Services;
@@ -9,25 +8,9 @@ namespace NemesisEuchre.Console.Tests.Services;
 public class BatchExecutionStateTests
 {
     [Fact]
-    public void Constructor_InitializesBatchSize()
-    {
-        using var state = new BatchExecutionState(100);
-
-        state.BatchSize.Should().Be(100);
-    }
-
-    [Fact]
-    public void Constructor_InitializesEmptyPendingGames()
-    {
-        using var state = new BatchExecutionState(100);
-
-        state.PendingGames.Should().BeEmpty();
-    }
-
-    [Fact]
     public void Constructor_InitializesCountersToZero()
     {
-        using var state = new BatchExecutionState(100);
+        using var state = new BatchExecutionState(10);
 
         state.Team1Wins.Should().Be(0);
         state.Team2Wins.Should().Be(0);
@@ -39,7 +22,7 @@ public class BatchExecutionStateTests
     [Fact]
     public async Task ExecuteWithLockAsync_ExecutesActionSafely()
     {
-        using var state = new BatchExecutionState(100);
+        using var state = new BatchExecutionState(10);
         var counter = 0;
 
         await state.ExecuteWithLockAsync(() => counter++, cancellationToken: TestContext.Current.CancellationToken);
@@ -50,7 +33,7 @@ public class BatchExecutionStateTests
     [Fact]
     public async Task ExecuteWithLockAsync_WithReturnValue_ReturnsValue()
     {
-        using var state = new BatchExecutionState(100);
+        using var state = new BatchExecutionState(10);
 
         var result = await state.ExecuteWithLockAsync(() => 42, cancellationToken: TestContext.Current.CancellationToken);
 
@@ -60,7 +43,7 @@ public class BatchExecutionStateTests
     [Fact]
     public void Team1Wins_CanBeIncremented()
     {
-        using var state = new BatchExecutionState(100);
+        using var state = new BatchExecutionState(10);
 
         state.Team1Wins++;
         state.Team1Wins++;
@@ -71,7 +54,7 @@ public class BatchExecutionStateTests
     [Fact]
     public void Team2Wins_CanBeIncremented()
     {
-        using var state = new BatchExecutionState(100);
+        using var state = new BatchExecutionState(10);
 
         state.Team2Wins++;
         state.Team2Wins++;
@@ -83,7 +66,7 @@ public class BatchExecutionStateTests
     [Fact]
     public void FailedGames_CanBeIncremented()
     {
-        using var state = new BatchExecutionState(100);
+        using var state = new BatchExecutionState(10);
 
         state.FailedGames++;
 
@@ -93,7 +76,7 @@ public class BatchExecutionStateTests
     [Fact]
     public void CompletedGames_CanBeIncremented()
     {
-        using var state = new BatchExecutionState(100);
+        using var state = new BatchExecutionState(10);
 
         state.CompletedGames++;
         state.CompletedGames++;
@@ -106,7 +89,7 @@ public class BatchExecutionStateTests
     [Fact]
     public void TotalDeals_CanBeIncremented()
     {
-        using var state = new BatchExecutionState(100);
+        using var state = new BatchExecutionState(10);
 
         state.TotalDeals += 5;
         state.TotalDeals += 3;
@@ -115,46 +98,54 @@ public class BatchExecutionStateTests
     }
 
     [Fact]
-    public void PendingGames_CanAddGames()
+    public async Task Channel_CanWriteAndReadGames()
     {
-        using var state = new BatchExecutionState(100);
-        var game = new Game
+        using var state = new BatchExecutionState(10);
+        var game = new Game();
+
+        await state.Writer.WriteAsync(game, TestContext.Current.CancellationToken);
+        state.Writer.Complete();
+
+        var items = new List<Game>();
+        await foreach (var item in state.Reader.ReadAllAsync(TestContext.Current.CancellationToken))
         {
-            GameStatus = GameStatus.Complete,
-            Team1Score = 10,
-            Team2Score = 5,
-            WinningTeam = Team.Team1,
-        };
+            items.Add(item);
+        }
 
-        state.PendingGames.Add(game);
-
-        state.PendingGames.Should().HaveCount(1);
-        state.PendingGames[0].Should().Be(game);
+        items.Should().HaveCount(1);
+        items[0].Should().Be(game);
     }
 
     [Fact]
-    public void PendingGames_CanBeClearedAfterBatch()
+    public async Task Channel_RespectsCapacity()
     {
         using var state = new BatchExecutionState(2);
-        var game1 = new Game
-        {
-            GameStatus = GameStatus.Complete,
-            Team1Score = 10,
-            Team2Score = 5,
-            WinningTeam = Team.Team1,
-        };
-        var game2 = new Game
-        {
-            GameStatus = GameStatus.Complete,
-            Team1Score = 8,
-            Team2Score = 10,
-            WinningTeam = Team.Team2,
-        };
 
-        state.PendingGames.Add(game1);
-        state.PendingGames.Add(game2);
-        state.PendingGames.Clear();
+        await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
+        await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
 
-        state.PendingGames.Should().BeEmpty();
+        var writeTask = state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
+
+        writeTask.IsCompleted.Should().BeFalse("channel is bounded at capacity 2");
+
+        await state.Reader.ReadAsync(TestContext.Current.CancellationToken);
+        await writeTask;
+    }
+
+    [Fact]
+    public async Task Channel_WriterComplete_SignalsNoMoreData()
+    {
+        using var state = new BatchExecutionState(10);
+        await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
+        state.Writer.Complete();
+
+        var items = new List<Game>();
+        await foreach (var item in state.Reader.ReadAllAsync(TestContext.Current.CancellationToken))
+        {
+            items.Add(item);
+        }
+
+        items.Should().HaveCount(1);
+        state.Reader.Completion.IsCompleted.Should().BeTrue();
     }
 }

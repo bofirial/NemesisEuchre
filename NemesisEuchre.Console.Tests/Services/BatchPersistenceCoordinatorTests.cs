@@ -2,10 +2,12 @@ using FluentAssertions;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using Moq;
 
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.GameEngine.Models;
 
@@ -27,78 +29,56 @@ public class BatchPersistenceCoordinatorTests
         _mockServiceProvider.Setup(x => x.GetService(typeof(IGameRepository))).Returns(_mockGameRepository.Object);
         _coordinator = new BatchPersistenceCoordinator(
             _mockScopeFactory.Object,
+            Options.Create(new PersistenceOptions { BatchSize = 2 }),
             Mock.Of<ILogger<BatchPersistenceCoordinator>>());
     }
 
     [Fact]
-    public async Task SavePendingGamesAsync_ShouldExtractGames_WhenCountMeetsBatchSize()
+    public async Task ConsumeAndPersistAsync_ShouldFlushBatch_WhenCountMeetsBatchSize()
     {
-        using var state = new BatchExecutionState(2);
-        state.PendingGames.AddRange([new Game(), new Game()]);
+        using var state = new BatchExecutionState(10);
         _mockGameRepository
             .Setup(x => x.SaveCompletedGamesBulkAsync(It.IsAny<List<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        await _coordinator.SavePendingGamesAsync(state, _mockProgressReporter.Object, false, false, TestContext.Current.CancellationToken);
+        await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
+        await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
+        state.Writer.Complete();
 
-        state.PendingGames.Should().BeEmpty();
+        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, false, TestContext.Current.CancellationToken);
+
         _mockGameRepository.Verify(
             x => x.SaveCompletedGamesBulkAsync(It.Is<List<Game>>(g => g.Count == 2), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
     [Fact]
-    public async Task SavePendingGamesAsync_ShouldNotExtractGames_WhenCountBelowBatchSizeAndNotForced()
+    public async Task ConsumeAndPersistAsync_ShouldFlushPartialBatch_WhenChannelCompletes()
     {
         using var state = new BatchExecutionState(10);
-        state.PendingGames.Add(new Game());
-
-        await _coordinator.SavePendingGamesAsync(state, _mockProgressReporter.Object, false, false, TestContext.Current.CancellationToken);
-
-        state.PendingGames.Should().HaveCount(1);
-        _mockGameRepository.Verify(
-            x => x.SaveCompletedGamesBulkAsync(It.IsAny<List<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),
-            Times.Never);
-    }
-
-    [Fact]
-    public async Task SavePendingGamesAsync_ShouldExtractGames_WhenForceIsTrue()
-    {
-        using var state = new BatchExecutionState(100);
-        state.PendingGames.Add(new Game());
         _mockGameRepository
             .Setup(x => x.SaveCompletedGamesBulkAsync(It.IsAny<List<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        await _coordinator.SavePendingGamesAsync(state, _mockProgressReporter.Object, false, true, TestContext.Current.CancellationToken);
+        await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
+        state.Writer.Complete();
 
-        state.PendingGames.Should().BeEmpty();
+        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, false, TestContext.Current.CancellationToken);
+
         _mockGameRepository.Verify(
             x => x.SaveCompletedGamesBulkAsync(It.Is<List<Game>>(g => g.Count == 1), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
     [Fact]
-    public async Task SavePendingGamesAsync_ShouldNotExtractGames_WhenForceIsTrueButNoGames()
+    public async Task ConsumeAndPersistAsync_ShouldSkipPersistence_WhenDoNotPersistIsTrue()
     {
         using var state = new BatchExecutionState(10);
+        await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
+        state.Writer.Complete();
 
-        await _coordinator.SavePendingGamesAsync(state, _mockProgressReporter.Object, false, true, TestContext.Current.CancellationToken);
+        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, true, TestContext.Current.CancellationToken);
 
-        _mockGameRepository.Verify(
-            x => x.SaveCompletedGamesBulkAsync(It.IsAny<List<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),
-            Times.Never);
-    }
-
-    [Fact]
-    public async Task SavePendingGamesAsync_ShouldSkipPersistence_WhenDoNotPersistIsTrue()
-    {
-        using var state = new BatchExecutionState(1);
-        state.PendingGames.Add(new Game());
-
-        await _coordinator.SavePendingGamesAsync(state, _mockProgressReporter.Object, true, false, TestContext.Current.CancellationToken);
-
-        state.PendingGames.Should().BeEmpty();
         state.SavedGames.Should().Be(1);
         _mockGameRepository.Verify(
             x => x.SaveCompletedGamesBulkAsync(It.IsAny<List<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),
@@ -106,40 +86,79 @@ public class BatchPersistenceCoordinatorTests
     }
 
     [Fact]
-    public async Task SavePendingGamesAsync_ShouldReportProgress_WhenDoNotPersistIsTrue()
+    public async Task ConsumeAndPersistAsync_ShouldReportProgress_WhenDoNotPersistIsTrue()
     {
-        using var state = new BatchExecutionState(1);
-        state.PendingGames.Add(new Game());
+        using var state = new BatchExecutionState(10);
+        await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
+        state.Writer.Complete();
 
-        await _coordinator.SavePendingGamesAsync(state, _mockProgressReporter.Object, true, false, TestContext.Current.CancellationToken);
+        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, true, TestContext.Current.CancellationToken);
 
         _mockProgressReporter.Verify(x => x.ReportGamesSaved(1), Times.Once);
     }
 
     [Fact]
-    public async Task SavePendingGamesAsync_ShouldHandleExceptionDuringPersistence()
+    public async Task ConsumeAndPersistAsync_ShouldHandleExceptionDuringPersistence()
     {
-        using var state = new BatchExecutionState(1);
-        state.PendingGames.Add(new Game());
+        using var state = new BatchExecutionState(10);
+        await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
+        state.Writer.Complete();
         _mockGameRepository
             .Setup(x => x.SaveCompletedGamesBulkAsync(It.IsAny<List<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("DB error"));
 
-        var act = () => _coordinator.SavePendingGamesAsync(state, _mockProgressReporter.Object, false, false, TestContext.Current.CancellationToken);
+        var act = () => _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, false, TestContext.Current.CancellationToken);
 
         await act.Should().NotThrowAsync();
-        state.PendingGames.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task SavePendingGamesAsync_ShouldWorkWithoutProgressReporter()
+    public async Task ConsumeAndPersistAsync_ShouldWorkWithoutProgressReporter()
     {
-        using var state = new BatchExecutionState(1);
-        state.PendingGames.Add(new Game());
+        using var state = new BatchExecutionState(10);
+        await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
+        state.Writer.Complete();
 
-        var act = () => _coordinator.SavePendingGamesAsync(state, null, true, false, TestContext.Current.CancellationToken);
+        var act = () => _coordinator.ConsumeAndPersistAsync(state, null, true, TestContext.Current.CancellationToken);
 
         await act.Should().NotThrowAsync();
         state.SavedGames.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task ConsumeAndPersistAsync_ShouldCompleteSilently_WhenChannelIsEmpty()
+    {
+        using var state = new BatchExecutionState(10);
+        state.Writer.Complete();
+
+        var act = () => _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, false, TestContext.Current.CancellationToken);
+
+        await act.Should().NotThrowAsync();
+        _mockGameRepository.Verify(
+            x => x.SaveCompletedGamesBulkAsync(It.IsAny<List<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task ConsumeAndPersistAsync_ShouldFlushMultipleBatches()
+    {
+        using var state = new BatchExecutionState(10);
+        _mockGameRepository
+            .Setup(x => x.SaveCompletedGamesBulkAsync(It.IsAny<List<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        for (int i = 0; i < 5; i++)
+        {
+            await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
+        }
+
+        state.Writer.Complete();
+
+        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, false, TestContext.Current.CancellationToken);
+
+        _mockGameRepository.Verify(
+            x => x.SaveCompletedGamesBulkAsync(It.IsAny<List<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),
+            Times.Exactly(3),
+            "Should flush 2 full batches (2 games each) and 1 partial batch (1 game)");
     }
 }
