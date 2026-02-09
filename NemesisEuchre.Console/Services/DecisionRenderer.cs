@@ -18,6 +18,14 @@ public interface IDecisionRenderer
 
 public class DecisionRenderer : IDecisionRenderer
 {
+    private static readonly (Suit suit, CallTrumpDecision callDecision, CallTrumpDecision aloneDecision)[] SuitDecisionMap =
+    [
+        (suit: Suit.Clubs, callDecision: CallTrumpDecision.CallClubs, aloneDecision: CallTrumpDecision.CallClubsAndGoAlone),
+        (suit: Suit.Diamonds, callDecision: CallTrumpDecision.CallDiamonds, aloneDecision: CallTrumpDecision.CallDiamondsAndGoAlone),
+        (suit: Suit.Hearts, callDecision: CallTrumpDecision.CallHearts, aloneDecision: CallTrumpDecision.CallHeartsAndGoAlone),
+        (suit: Suit.Spades, callDecision: CallTrumpDecision.CallSpades, aloneDecision: CallTrumpDecision.CallSpadesAndGoAlone),
+    ];
+
     public List<IRenderable> RenderDecisions(Deal deal)
     {
         var renderables = new List<IRenderable>();
@@ -54,28 +62,13 @@ public class DecisionRenderer : IDecisionRenderer
             .AddColumn("[bold]Up Card[/]", c => c.Centered())
             .AddColumn($"[bold]{CallTrumpDecision.Pass.Humanize()}[/]", c => c.Centered());
 
-        if (deal.UpCard!.Suit != Suit.Clubs)
+        foreach (var (suitValue, _, _) in SuitDecisionMap)
         {
-            round2Table.AddColumn("[bold]Clubs[/]", c => c.Centered());
-            round2Table.AddColumn("[bold]Clubs Alone[/]", c => c.Centered());
-        }
-
-        if (deal.UpCard!.Suit != Suit.Diamonds)
-        {
-            round2Table.AddColumn("[bold]Diamonds[/]", c => c.Centered());
-            round2Table.AddColumn("[bold]Diamonds Alone[/]", c => c.Centered());
-        }
-
-        if (deal.UpCard!.Suit != Suit.Hearts)
-        {
-            round2Table.AddColumn("[bold]Hearts[/]", c => c.Centered());
-            round2Table.AddColumn("[bold]Hearts Alone[/]", c => c.Centered());
-        }
-
-        if (deal.UpCard!.Suit != Suit.Spades)
-        {
-            round2Table.AddColumn("[bold]Spades[/]", c => c.Centered());
-            round2Table.AddColumn("[bold]Spades Alone[/]", c => c.Centered());
+            if (deal.UpCard!.Suit != suitValue)
+            {
+                round2Table.AddColumn($"[bold]{suitValue}[/]", c => c.Centered());
+                round2Table.AddColumn($"[bold]{suitValue} Alone[/]", c => c.Centered());
+            }
         }
 
         foreach (var callDecision in deal.CallTrumpDecisions)
@@ -111,9 +104,9 @@ public class DecisionRenderer : IDecisionRenderer
             new Markup(deal.Players[callDecision.PlayerPosition].ActorType!.Value.Humanize()),
             new Columns(callDecision.CardsInHand.Select(c => GameResultsRenderer.GetDisplayCard(c, deal.Trump!.Value))),
             new Markup(GameResultsRenderer.GetDisplayCard(callDecision.UpCard!)),
-            callDecision.ChosenDecision == CallTrumpDecision.Pass ? new Markup($":diamond_with_a_dot: {passDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(passDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)),
-            callDecision.ChosenDecision == CallTrumpDecision.OrderItUp ? new Markup($":diamond_with_a_dot: {orderItUpDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(orderItUpDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)),
-            callDecision.ChosenDecision == CallTrumpDecision.OrderItUpAndGoAlone ? new Markup($":diamond_with_a_dot: {orderItUpAndGoAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(orderItUpAndGoAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)),
+            FormatDecisionScore(passDecisionPredictedPoints, callDecision.ChosenDecision == CallTrumpDecision.Pass),
+            FormatDecisionScore(orderItUpDecisionPredictedPoints, callDecision.ChosenDecision == CallTrumpDecision.OrderItUp),
+            FormatDecisionScore(orderItUpAndGoAloneDecisionPredictedPoints, callDecision.ChosenDecision == CallTrumpDecision.OrderItUpAndGoAlone),
         };
 
         table.AddRow(cells);
@@ -132,48 +125,23 @@ public class DecisionRenderer : IDecisionRenderer
         if (callDecision.ValidCallTrumpDecisions.Contains(CallTrumpDecision.Pass))
         {
             callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.Pass, out float passDecisionPredictedPoints);
-
-            cells.Add(callDecision.ChosenDecision == CallTrumpDecision.Pass ? new Markup($":diamond_with_a_dot: {passDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(passDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
+            cells.Add(FormatDecisionScore(passDecisionPredictedPoints, callDecision.ChosenDecision == CallTrumpDecision.Pass));
         }
         else
         {
             cells.Add(new Text(string.Empty));
         }
 
-        if (deal.UpCard!.Suit != Suit.Clubs)
+        foreach (var (suitValue, callDecisionType, aloneDecisionType) in SuitDecisionMap)
         {
-            callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallClubs, out float clubsDecisionPredictedPoints);
-            callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallClubsAndGoAlone, out float clubsAloneDecisionPredictedPoints);
+            if (deal.UpCard!.Suit != suitValue)
+            {
+                callDecision.DecisionPredictedPoints.TryGetValue(callDecisionType, out float suitPoints);
+                callDecision.DecisionPredictedPoints.TryGetValue(aloneDecisionType, out float alonePoints);
 
-            cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallClubs ? new Markup($":diamond_with_a_dot: {clubsDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(clubsDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-            cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallClubsAndGoAlone ? new Markup($":diamond_with_a_dot: {clubsAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(clubsAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-        }
-
-        if (deal.UpCard!.Suit != Suit.Diamonds)
-        {
-            callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallDiamonds, out float diamondsDecisionPredictedPoints);
-            callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallDiamondsAndGoAlone, out float diamondsAloneDecisionPredictedPoints);
-
-            cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallDiamonds ? new Markup($":diamond_with_a_dot: {diamondsDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(diamondsDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-            cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallDiamondsAndGoAlone ? new Markup($":diamond_with_a_dot: {diamondsAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(diamondsAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-        }
-
-        if (deal.UpCard!.Suit != Suit.Hearts)
-        {
-            callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallHearts, out float heartsDecisionPredictedPoints);
-            callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallHeartsAndGoAlone, out float heartsAloneDecisionPredictedPoints);
-
-            cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallHearts ? new Markup($":diamond_with_a_dot: {heartsDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(heartsDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-            cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallHeartsAndGoAlone ? new Markup($":diamond_with_a_dot: {heartsAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(heartsAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-        }
-
-        if (deal.UpCard!.Suit != Suit.Spades)
-        {
-            callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallSpades, out float spadesDecisionPredictedPoints);
-            callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.CallSpadesAndGoAlone, out float spadesAloneDecisionPredictedPoints);
-
-            cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallSpades ? new Markup($":diamond_with_a_dot: {spadesDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(spadesDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
-            cells.Add(callDecision.ChosenDecision == CallTrumpDecision.CallSpadesAndGoAlone ? new Markup($":diamond_with_a_dot: {spadesAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:") : new Markup(spadesAloneDecisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)));
+                cells.Add(FormatDecisionScore(suitPoints, callDecision.ChosenDecision == callDecisionType));
+                cells.Add(FormatDecisionScore(alonePoints, callDecision.ChosenDecision == aloneDecisionType));
+            }
         }
 
         table.AddRow(cells);
@@ -255,5 +223,13 @@ public class DecisionRenderer : IDecisionRenderer
         renderables.Add(playCardDecisionsTable);
 
         return renderables;
+    }
+
+    private static Markup FormatDecisionScore(float score, bool isChosen)
+    {
+        var scoreText = score.ToString("F3", CultureInfo.InvariantCulture);
+        return isChosen
+            ? new Markup($":diamond_with_a_dot: {scoreText} :diamond_with_a_dot:")
+            : new Markup(scoreText);
     }
 }

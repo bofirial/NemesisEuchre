@@ -26,10 +26,33 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
     private static readonly Color Team1Color = Color.Green;
     private static readonly Color Team2Color = Color.Blue;
 
-    private static readonly Color SpadesColor = Color.Yellow;
-    private static readonly Color HeartsColor = Color.Red;
-    private static readonly Color ClubsColor = Color.Orange1;
-    private static readonly Color DiamondsColor = Color.Pink1;
+    private static readonly Dictionary<Suit, Color> SuitColors = new()
+    {
+        [Suit.Spades] = Color.Yellow,
+        [Suit.Hearts] = Color.Red,
+        [Suit.Clubs] = Color.Orange1,
+        [Suit.Diamonds] = Color.Pink1,
+    };
+
+    private static readonly Dictionary<Suit, string> SuitSymbols = new()
+    {
+        [Suit.Spades] = ":spade_suit:",
+        [Suit.Hearts] = ":heart_suit: ",
+        [Suit.Clubs] = ":club_suit:",
+        [Suit.Diamonds] = ":diamond_suit:",
+    };
+
+    private static readonly Dictionary<Rank, string> RankSymbols = new()
+    {
+        [Rank.Nine] = "9",
+        [Rank.Ten] = "10",
+        [Rank.Jack] = "J",
+        [Rank.Queen] = "Q",
+        [Rank.King] = "K",
+        [Rank.Ace] = "A",
+        [Rank.LeftBower] = "J",
+        [Rank.RightBower] = "J",
+    };
 
     public void RenderResults(Game game, bool showDecisions)
     {
@@ -83,37 +106,9 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
 
     internal static string GetDisplayCard(Card card, Suit? trump = null)
     {
-        var rankSymbol = card.Rank switch
-        {
-            Rank.Nine => "9",
-            Rank.Ten => "10",
-            Rank.Jack => "J",
-            Rank.Queen => "Q",
-            Rank.King => "K",
-            Rank.Ace => "A",
-            Rank.LeftBower => "J",
-            Rank.RightBower => "J",
-            _ => "?",
-        };
-
-        var suitSymbol = card.Suit switch
-        {
-            Suit.Spades => ":spade_suit:",
-            Suit.Hearts => ":heart_suit: ",
-            Suit.Clubs => ":club_suit:",
-            Suit.Diamonds => ":diamond_suit:",
-            _ => "?",
-        };
-
-        var suitColor = card.Suit switch
-        {
-            Suit.Spades => SpadesColor,
-            Suit.Hearts => HeartsColor,
-            Suit.Clubs => ClubsColor,
-            Suit.Diamonds => DiamondsColor,
-            _ => Color.Grey,
-        };
-
+        var rankSymbol = RankSymbols.GetValueOrDefault(card.Rank, "?");
+        var suitSymbol = SuitSymbols.GetValueOrDefault(card.Suit, "?");
+        var suitColor = SuitColors.GetValueOrDefault(card.Suit, Color.Grey);
         var backgroundColor = trump != null && card.IsTrump(trump!.Value) ? " on grey30" : string.Empty;
 
         return $"[{suitColor}{backgroundColor}]{rankSymbol}{suitSymbol}[/]";
@@ -121,22 +116,8 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
 
     internal static string GetDisplaySuit(Suit suit)
     {
-        var suitSymbol = suit switch
-        {
-            Suit.Spades => ":spade_suit:",
-            Suit.Hearts => ":heart_suit: ",
-            Suit.Clubs => ":club_suit:",
-            Suit.Diamonds => ":diamond_suit:",
-            _ => "?",
-        };
-        var suitColor = suit switch
-        {
-            Suit.Spades => SpadesColor,
-            Suit.Hearts => HeartsColor,
-            Suit.Clubs => ClubsColor,
-            Suit.Diamonds => DiamondsColor,
-            _ => Color.Grey,
-        };
+        var suitSymbol = SuitSymbols.GetValueOrDefault(suit, "?");
+        var suitColor = SuitColors.GetValueOrDefault(suit, Color.Grey);
         return $"[{suitColor}]{suit} {suitSymbol}[/]";
     }
 
