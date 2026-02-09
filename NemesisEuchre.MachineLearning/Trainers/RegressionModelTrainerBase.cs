@@ -11,6 +11,26 @@ using NemesisEuchre.MachineLearning.Services;
 
 namespace NemesisEuchre.MachineLearning.Trainers;
 
+public interface IModelTrainer<TData>
+    where TData : class, new()
+{
+    Task<TrainingResult> TrainAsync(
+        IEnumerable<TData> trainingData,
+        bool preShuffled = false,
+        CancellationToken cancellationToken = default);
+
+    Task<EvaluationMetrics> EvaluateAsync(
+        IDataView testData,
+        CancellationToken cancellationToken = default);
+
+    Task SaveModelAsync(
+        string modelsDirectory,
+        int generation,
+        ActorType actorType,
+        TrainingResult trainingResult,
+        CancellationToken cancellationToken = default);
+}
+
 public abstract class RegressionModelTrainerBase<TData>(
     MLContext mlContext,
     IDataSplitter dataSplitter,
@@ -36,13 +56,14 @@ public abstract class RegressionModelTrainerBase<TData>(
 
     public async Task<TrainingResult> TrainAsync(
         IEnumerable<TData> trainingData,
+        bool preShuffled = false,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(trainingData);
 
         LoggerMessages.LogStartingTraining(Logger, GetModelType());
 
-        var dataSplit = DataSplitter.Split(trainingData);
+        var dataSplit = DataSplitter.Split(trainingData, preShuffled: preShuffled);
 
         LoggerMessages.LogDataSplitComplete(
             Logger,

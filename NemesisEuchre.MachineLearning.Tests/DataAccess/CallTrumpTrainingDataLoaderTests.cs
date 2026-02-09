@@ -233,6 +233,119 @@ public class CallTrumpTrainingDataLoaderTests
             Times.AtLeastOnce);
     }
 
+    [Fact]
+    public void StreamTrainingData_WithValidEntities_TransformsCorrectly()
+    {
+        var entities = _entityFaker.Generate(10);
+
+        foreach (var entity in entities)
+        {
+            var trainingData = new CallTrumpTrainingData
+            {
+                Card1Rank = entity.CallTrumpDecisionId % 6,
+                ExpectedDealPoints = (short)((entity.CallTrumpDecisionId % 5) - 2),
+            };
+            _mockFeatureEngineer.Setup(x => x.Transform(entity)).Returns(trainingData);
+        }
+
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionData<CallTrumpDecisionEntity>(
+            It.IsAny<ActorType>(),
+            It.IsAny<int>(),
+            It.IsAny<bool>(),
+            It.IsAny<bool>()))
+            .Returns(entities);
+
+        var loader = new CallTrumpTrainingDataLoader(
+            _mockTrainingDataRepository.Object,
+            _mockFeatureEngineer.Object,
+            _mockLogger.Object);
+
+        var result = loader.StreamTrainingData(
+            ActorType.Chaos, 10, cancellationToken: TestContext.Current.CancellationToken).ToList();
+
+        result.Should().HaveCount(10);
+        _mockFeatureEngineer.Verify(x => x.Transform(It.IsAny<CallTrumpDecisionEntity>()), Times.Exactly(10));
+    }
+
+    [Fact]
+    public void StreamTrainingData_WithTransformError_ContinuesProcessing()
+    {
+        var entities = _entityFaker.Generate(5);
+        var processedCount = 0;
+
+        _mockFeatureEngineer.Setup(x => x.Transform(It.IsAny<CallTrumpDecisionEntity>()))
+            .Returns<CallTrumpDecisionEntity>(entity =>
+            {
+                var currentCount = processedCount++;
+                if (currentCount == 2)
+                {
+                    throw new InvalidOperationException("Transform error");
+                }
+
+                return new CallTrumpTrainingData
+                {
+                    ExpectedDealPoints = (short)((entity.CallTrumpDecisionId % 5) - 2),
+                };
+            });
+
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionData<CallTrumpDecisionEntity>(
+            It.IsAny<ActorType>(),
+            It.IsAny<int>(),
+            It.IsAny<bool>(),
+            It.IsAny<bool>()))
+            .Returns(entities);
+
+        var loader = new CallTrumpTrainingDataLoader(
+            _mockTrainingDataRepository.Object,
+            _mockFeatureEngineer.Object,
+            _mockLogger.Object);
+
+        var result = loader.StreamTrainingData(
+            ActorType.Chaos, cancellationToken: TestContext.Current.CancellationToken).ToList();
+
+        result.Should().HaveCount(4);
+    }
+
+    [Fact]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "xUnit1051:Intentionally using own CancellationTokenSource to test cancellation behavior", Justification = "Testing cancellation")]
+    public void StreamTrainingData_WithCancellation_ThrowsOperationCanceledException()
+    {
+        using var cts = new CancellationTokenSource();
+        var entities = _entityFaker.Generate(1000);
+        var processedCount = 0;
+
+        _mockFeatureEngineer.Setup(x => x.Transform(It.IsAny<CallTrumpDecisionEntity>()))
+            .Returns<CallTrumpDecisionEntity>(entity =>
+            {
+                processedCount++;
+                if (processedCount > 5)
+                {
+                    cts.Cancel();
+                }
+
+                return new CallTrumpTrainingData
+                {
+                    ExpectedDealPoints = (short)((entity.CallTrumpDecisionId % 5) - 2),
+                };
+            });
+
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionData<CallTrumpDecisionEntity>(
+            It.IsAny<ActorType>(),
+            It.IsAny<int>(),
+            It.IsAny<bool>(),
+            It.IsAny<bool>()))
+            .Returns(entities);
+
+        var loader = new CallTrumpTrainingDataLoader(
+            _mockTrainingDataRepository.Object,
+            _mockFeatureEngineer.Object,
+            _mockLogger.Object);
+
+        var act = () => loader.StreamTrainingData(ActorType.Chaos, 1000, false, false, cts.Token).ToList();
+
+        act.Should().Throw<OperationCanceledException>();
+    }
+
     private static async IAsyncEnumerable<T> CreateAsyncEnumerable<T>(IEnumerable<T> items)
     {
         foreach (var item in items)

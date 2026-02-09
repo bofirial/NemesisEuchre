@@ -17,6 +17,19 @@ public interface ITrainingDataRepository
         bool winningTeamOnly = false,
         CancellationToken cancellationToken = default)
         where TEntity : class, IDecisionEntity;
+
+    IEnumerable<TEntity> GetDecisionData<TEntity>(
+        ActorType actorType,
+        int limit = 0,
+        bool winningTeamOnly = false,
+        bool shuffle = false)
+        where TEntity : class, IDecisionEntity;
+
+    int GetDecisionDataCount<TEntity>(
+        ActorType actorType,
+        int limit = 0,
+        bool winningTeamOnly = false)
+        where TEntity : class, IDecisionEntity;
 }
 
 public class TrainingDataRepository(
@@ -37,6 +50,54 @@ public class TrainingDataRepository(
             limit,
             winningTeamOnly);
 
+        var query = BuildQuery<TEntity>(actorType, limit, winningTeamOnly);
+
+        await foreach (var entity in query.AsAsyncEnumerable().WithCancellation(cancellationToken))
+        {
+            yield return entity;
+        }
+    }
+
+    public IEnumerable<TEntity> GetDecisionData<TEntity>(
+        ActorType actorType,
+        int limit = 0,
+        bool winningTeamOnly = false,
+        bool shuffle = false)
+        where TEntity : class, IDecisionEntity
+    {
+        LoggerMessages.LogRetrievingTrainingData(
+            logger,
+            typeof(TEntity).Name,
+            actorType.ToString(),
+            limit,
+            winningTeamOnly);
+
+        var query = BuildQuery<TEntity>(actorType, limit, winningTeamOnly);
+
+        if (shuffle)
+        {
+            query = query.OrderBy(_ => Guid.NewGuid());
+        }
+
+        return query.AsEnumerable();
+    }
+
+    public int GetDecisionDataCount<TEntity>(
+        ActorType actorType,
+        int limit = 0,
+        bool winningTeamOnly = false)
+        where TEntity : class, IDecisionEntity
+    {
+        var query = BuildQuery<TEntity>(actorType, limit, winningTeamOnly);
+        return query.Count();
+    }
+
+    private IQueryable<TEntity> BuildQuery<TEntity>(
+        ActorType actorType,
+        int limit,
+        bool winningTeamOnly)
+        where TEntity : class, IDecisionEntity
+    {
         var dbSet = GetDbSet<TEntity>();
         var query = dbSet.AsNoTracking().Where(d => d.ActorType == actorType);
 
@@ -50,10 +111,7 @@ public class TrainingDataRepository(
             query = query.Take(limit);
         }
 
-        await foreach (var entity in query.AsAsyncEnumerable().WithCancellation(cancellationToken))
-        {
-            yield return entity;
-        }
+        return query;
     }
 
     private DbSet<TEntity> GetDbSet<TEntity>()

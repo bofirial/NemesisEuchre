@@ -20,12 +20,19 @@ public class TrainerExecutorTests
     {
         var mockTrainer = new Mock<IModelTrainer<CallTrumpTrainingData>>();
         var mockDataLoader = new Mock<ITrainingDataLoader<CallTrumpTrainingData>>();
-        mockDataLoader.Setup(l => l.LoadTrainingDataAsync(
+        mockDataLoader.Setup(l => l.StreamTrainingData(
             It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
+            It.IsAny<bool>(),
             It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
+            .Returns([]);
+
+        mockTrainer.Setup(t => t.TrainAsync(
+            It.IsAny<IEnumerable<CallTrumpTrainingData>>(),
+            It.IsAny<bool>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new TrainingResult(null!, new RegressionEvaluationMetrics(0, 0, 0, 0, 0), 0, 0, 0));
 
         var mockLogger = Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>();
         var executor = new CallTrumpRegressionTrainerExecutor(

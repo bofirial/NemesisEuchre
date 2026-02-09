@@ -11,7 +11,8 @@ public interface IDataSplitter
         IEnumerable<T> data,
         double trainRatio = 0.7,
         double validationRatio = 0.15,
-        double testRatio = 0.15)
+        double testRatio = 0.15,
+        bool preShuffled = false)
         where T : class;
 }
 
@@ -33,7 +34,8 @@ public class DataSplitter : IDataSplitter
         IEnumerable<T> data,
         double trainRatio = 0.7,
         double validationRatio = 0.15,
-        double testRatio = 0.15)
+        double testRatio = 0.15,
+        bool preShuffled = false)
         where T : class
     {
         ArgumentNullException.ThrowIfNull(data);
@@ -54,7 +56,9 @@ public class DataSplitter : IDataSplitter
             throw new InvalidOperationException($"Dataset must contain at least 3 samples for splitting. Found {rowCount} samples.");
         }
 
-        var shuffledData = _mlContext.Data.ShuffleRows(dataView, seed: _options.RandomSeed);
+        var shuffledData = preShuffled
+            ? dataView
+            : _mlContext.Data.ShuffleRows(dataView, seed: _options.RandomSeed);
 
         var trainFraction = trainRatio;
         var firstSplit = _mlContext.Data.TrainTestSplit(shuffledData, testFraction: 1.0 - trainFraction, seed: _options.RandomSeed);
