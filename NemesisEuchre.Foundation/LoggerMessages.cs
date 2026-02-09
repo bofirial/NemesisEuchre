@@ -415,4 +415,17 @@ public static partial class LoggerMessages
         Level = LogLevel.Warning,
         Message = "PlayCard engine not available, selecting random card to play.")]
     public static partial void LogPlayCardEngineNotAvailable(ILogger logger);
+
+    // EventID 56-57: Bulk insert operations
+    [LoggerMessage(
+        EventId = 56,
+        Level = LogLevel.Information,
+        Message = "Bulk insert starting: {ParentCount} parent rows (EF Core), {LeafCount} leaf rows (SqlBulkCopy)")]
+    public static partial void LogBulkInsertStarting(ILogger logger, int parentCount, int leafCount);
+
+    [LoggerMessage(
+        EventId = 57,
+        Level = LogLevel.Information,
+        Message = "Bulk insert completed: {ParentCount} parent rows, {LeafCount} leaf rows in {Elapsed}")]
+    public static partial void LogBulkInsertCompleted(ILogger logger, int parentCount, int leafCount, TimeSpan elapsed);
 }

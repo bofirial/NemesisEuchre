@@ -10,6 +10,7 @@ using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
+using NemesisEuchre.DataAccess.Services;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 
@@ -36,11 +37,12 @@ public class GameRepositoryTests
                 CreatedAt = DateTime.UtcNow,
             });
 
+        var mockBulkInsertService = new Mock<IBulkInsertService>();
         var mockOptions = new Mock<IOptions<PersistenceOptions>>();
         mockOptions.Setup(x => x.Value).Returns(new PersistenceOptions());
 
         await using var context = new NemesisEuchreDbContext(options);
-        var repository = new GameRepository(context, mockLogger.Object, mockMapper.Object, mockOptions.Object);
+        var repository = new GameRepository(context, mockLogger.Object, mockMapper.Object, mockBulkInsertService.Object, mockOptions.Object);
 
         var game = new Game { GameStatus = GameStatus.Complete };
         await repository.SaveCompletedGameAsync(game, TestContext.Current.CancellationToken);

@@ -1,10 +1,15 @@
+using System.Diagnostics;
+
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.DataAccess.Options;
+using NemesisEuchre.DataAccess.Services;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.GameEngine.Models;
 
@@ -28,6 +33,7 @@ public class GameRepository(
     NemesisEuchreDbContext context,
     ILogger<GameRepository> logger,
     IGameToEntityMapper mapper,
+    IBulkInsertService bulkInsertService,
     IOptions<PersistenceOptions> options) : IGameRepository
 {
     private readonly PersistenceOptions _options = options.Value;
@@ -126,11 +132,7 @@ public class GameRepository(
 
             if (_options.UseBulkInsert && gamesList.Count >= _options.BulkInsertThreshold)
             {
-                await ExecuteWithChangeTrackerOptimizationAsync(
-                    gamesList,
-                    disableChangeTracking: true,
-                    clearTrackerAfter: true,
-                    cancellationToken).ConfigureAwait(false);
+                await ExecuteHybridBulkInsertAsync(gamesList, cancellationToken).ConfigureAwait(false);
 
                 LoggerMessages.LogBatchGamesPersisted(logger, gamesList.Count);
                 progress?.Report(gamesList.Count);
@@ -144,6 +146,63 @@ public class GameRepository(
         catch (Exception ex)
         {
             LoggerMessages.LogBatchGamePersistenceFailed(logger, gamesList.Count, ex);
+        }
+    }
+
+    private async Task ExecuteHybridBulkInsertAsync(
+        List<Game> gamesList,
+        CancellationToken cancellationToken)
+    {
+        var stopwatch = Stopwatch.StartNew();
+
+        var entities = gamesList.ConvertAll(mapper.Map);
+        var cache = new LeafCollectionCache(entities);
+
+        LoggerMessages.LogBulkInsertStarting(logger, entities.Count, cache.LeafCount);
+
+        var originalChangeTrackingSetting = context.ChangeTracker.AutoDetectChangesEnabled;
+
+        try
+        {
+            context.ChangeTracker.AutoDetectChangesEnabled = false;
+
+            context.Games!.AddRange(entities);
+
+            context.ChangeTracker.DetectChanges();
+
+            var strategy = context.Database.CreateExecutionStrategy();
+
+            await strategy.ExecuteAsync(
+                async ct =>
+                {
+                    await using var transaction = await context.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
+
+                    await context.SaveChangesAsync(ct).ConfigureAwait(false);
+
+                    cache.PopulateForeignKeys();
+
+                    var dbConnection = context.Database.GetDbConnection();
+                    var sqlConnection = (SqlConnection)dbConnection;
+                    var sqlTransaction = (SqlTransaction)transaction.GetDbTransaction();
+
+                    await bulkInsertService.BulkInsertLeafEntitiesAsync(
+                        cache,
+                        sqlConnection,
+                        sqlTransaction,
+                        _options.BulkCopyTimeout,
+                        ct).ConfigureAwait(false);
+
+                    await transaction.CommitAsync(ct).ConfigureAwait(false);
+                },
+                cancellationToken).ConfigureAwait(false);
+
+            stopwatch.Stop();
+            LoggerMessages.LogBulkInsertCompleted(logger, entities.Count, cache.LeafCount, stopwatch.Elapsed);
+        }
+        finally
+        {
+            context.ChangeTracker.AutoDetectChangesEnabled = originalChangeTrackingSetting;
+            context.ChangeTracker.Clear();
         }
     }
 

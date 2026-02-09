@@ -9,6 +9,7 @@ using Moq;
 using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
+using NemesisEuchre.DataAccess.Services;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
@@ -32,9 +33,10 @@ public class GamePersistenceIntegrationTests
             var trickMapper = new TrickToEntityMapper();
             var dealMapper = new DealToEntityMapper(trickMapper);
             var gameMapper = new GameToEntityMapper(dealMapper);
+            var mockBulkInsertService = new Mock<IBulkInsertService>();
             var mockOptions = new Mock<IOptions<PersistenceOptions>>();
             mockOptions.Setup(x => x.Value).Returns(new PersistenceOptions());
-            var repository = new GameRepository(context, mockLogger.Object, gameMapper, mockOptions.Object);
+            var repository = new GameRepository(context, mockLogger.Object, gameMapper, mockBulkInsertService.Object, mockOptions.Object);
 
             await repository.SaveCompletedGameAsync(game, TestContext.Current.CancellationToken);
         }
