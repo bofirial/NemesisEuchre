@@ -1,6 +1,3 @@
-using System.Text.Json;
-
-using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.DataAccess.Extensions;
 using NemesisEuchre.Foundation.Constants;
@@ -34,25 +31,38 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
         var dealEntity = new DealEntity
         {
             DealNumber = dealNumber,
-            DealStatus = deal.DealStatus,
-            DealerPosition = deal.DealerPosition,
-            DeckJson = JsonSerializer.Serialize(deal.Deck.SortByTrump(deal.Trump), JsonSerializationOptions.Default),
-            UpCardJson = deal.UpCard != null ? JsonSerializer.Serialize(deal.UpCard, JsonSerializationOptions.Default) : null,
-            DiscardedCardJson = deal.DiscardedCard != null ? JsonSerializer.Serialize(deal.DiscardedCard, JsonSerializationOptions.Default) : null,
-            Trump = deal.Trump,
-            CallingPlayer = deal.CallingPlayer,
+            DealStatusId = (int)deal.DealStatus,
+            DealerPositionId = deal.DealerPosition.HasValue ? (int)deal.DealerPosition.Value : null,
+            UpCardId = deal.UpCard != null ? CardIdHelper.ToCardId(deal.UpCard) : null,
+            DiscardedCardId = deal.DiscardedCard != null ? CardIdHelper.ToCardId(deal.DiscardedCard) : null,
+            TrumpSuitId = deal.Trump.HasValue ? (int)deal.Trump.Value : null,
+            CallingPlayerPositionId = deal.CallingPlayer.HasValue ? (int)deal.CallingPlayer.Value : null,
             CallingPlayerIsGoingAlone = deal.CallingPlayerIsGoingAlone,
-            ChosenDecision = deal.ChosenDecision,
-            DealResult = deal.DealResult,
-            WinningTeam = deal.WinningTeam,
+            ChosenCallTrumpDecisionId = deal.ChosenDecision.HasValue ? (int)deal.ChosenDecision.Value : null,
+            DealResultId = deal.DealResult.HasValue ? (int)deal.DealResult.Value : null,
+            WinningTeamId = deal.WinningTeam.HasValue ? (int)deal.WinningTeam.Value : null,
             Team1Score = deal.Team1Score,
             Team2Score = deal.Team2Score,
-            KnownPlayerSuitVoidsJson = deal.KnownPlayerSuitVoids.Count > 0
-                ? JsonSerializer.Serialize(
-                    deal.KnownPlayerSuitVoids.Select(v => new { v.PlayerPosition, v.Suit }),
-                    JsonSerializationOptions.Default)
-                : null,
-            PlayersJson = JsonSerializer.Serialize(deal.Players, JsonSerializationOptions.Default),
+            DealDeckCards = [.. deal.Deck.SortByTrump(deal.Trump).Select((card, index) => new DealDeckCard
+            {
+                CardId = CardIdHelper.ToCardId(card),
+                SortOrder = index,
+            })],
+            DealPlayers = [.. deal.Players.Select(kvp => new DealPlayerEntity
+            {
+                PlayerPositionId = (int)kvp.Key,
+                ActorTypeId = kvp.Value.ActorType.HasValue ? (int)kvp.Value.ActorType.Value : null,
+                StartingHandCards = [.. kvp.Value.StartingHand.Select((card, index) => new DealPlayerStartingHandCard
+                {
+                    CardId = CardIdHelper.ToCardId(card),
+                    SortOrder = index,
+                })],
+            })],
+            DealKnownPlayerSuitVoids = [.. deal.KnownPlayerSuitVoids.Select(v => new DealKnownPlayerSuitVoid
+            {
+                PlayerPositionId = (int)v.PlayerPosition,
+                SuitId = (int)v.Suit,
+            })],
             Tricks = [.. deal.CompletedTricks.Select((trick, index) => trickMapper.Map(trick, index + 1, gamePlayers, didTeam1WinGame, didTeam2WinGame, deal.WinningTeam, deal.DealResult))],
         };
 
@@ -78,21 +88,30 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
 
             return new CallTrumpDecisionEntity
             {
-                CardsInHandJson = JsonSerializer.Serialize(decision.CardsInHand.SortByTrump(null), JsonSerializationOptions.Default),
-                UpCardJson = JsonSerializer.Serialize(decision.UpCard, JsonSerializationOptions.Default),
-                DealerPosition = decision.DealerPosition.ToRelativePosition(decision.PlayerPosition),
+                DealerRelativePositionId = (int)decision.DealerPosition.ToRelativePosition(decision.PlayerPosition),
+                UpCardId = CardIdHelper.ToCardId(decision.UpCard!),
                 TeamScore = decision.TeamScore,
                 OpponentScore = decision.OpponentScore,
-                ValidDecisionsJson = JsonSerializer.Serialize(decision.ValidCallTrumpDecisions, JsonSerializationOptions.Default),
-                ChosenDecisionJson = JsonSerializer.Serialize(decision.ChosenDecision, JsonSerializationOptions.Default),
+                ChosenDecisionValueId = (int)decision.ChosenDecision,
                 DecisionOrder = (byte)decision.DecisionOrder,
-                ActorType = actorType,
+                ActorTypeId = actorType.HasValue ? (int)actorType.Value : null,
                 DidTeamWinDeal = didTeamWinDeal,
                 RelativeDealPoints = deal.DealResult.CalculateRelativeDealPoints(decision.PlayerPosition, deal.WinningTeam),
                 DidTeamWinGame = didTeamWinGame,
-                DecisionPredictedPointsJson = decision.DecisionPredictedPoints.Count > 0
-                    ? JsonSerializer.Serialize(decision.DecisionPredictedPoints, JsonSerializationOptions.Default)
-                    : null,
+                CardsInHand = [.. decision.CardsInHand.SortByTrump(null).Select((card, index) => new CallTrumpDecisionCardsInHand
+                {
+                    CardId = CardIdHelper.ToCardId(card),
+                    SortOrder = index,
+                })],
+                ValidDecisions = [.. decision.ValidCallTrumpDecisions.Select(d => new CallTrumpDecisionValidDecision
+                {
+                    CallTrumpDecisionValueId = (int)d,
+                })],
+                PredictedPoints = [.. decision.DecisionPredictedPoints.Select(kvp => new CallTrumpDecisionPredictedPoints
+                {
+                    CallTrumpDecisionValueId = (int)kvp.Key,
+                    PredictedPoints = kvp.Value,
+                })],
             };
         })];
     }
@@ -111,25 +130,25 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
 
             return new DiscardCardDecisionEntity
             {
-                CardsInHandJson = JsonSerializer.Serialize(decision.CardsInHand.SortByTrump(deal.Trump!.Value).Select(c => c.ToRelative(deal.Trump!.Value)), JsonSerializationOptions.Default),
-                CallingPlayer = deal.CallingPlayer!.Value.ToRelativePosition(decision.PlayerPosition),
+                CallingRelativePlayerPositionId = (int)deal.CallingPlayer!.Value.ToRelativePosition(decision.PlayerPosition),
                 TeamScore = decision.TeamScore,
                 OpponentScore = decision.OpponentScore,
-                ChosenCardJson = JsonSerializer.Serialize(decision.ChosenCard.ToRelative(deal.Trump!.Value), JsonSerializationOptions.Default),
+                ChosenRelativeCardId = CardIdHelper.ToRelativeCardId(decision.ChosenCard.ToRelative(deal.Trump!.Value)),
                 CallingPlayerGoingAlone = deal.CallingPlayerIsGoingAlone,
-                ActorType = actorType,
+                ActorTypeId = actorType.HasValue ? (int)actorType.Value : null,
                 DidTeamWinDeal = didTeamWinDeal,
                 RelativeDealPoints = deal.DealResult.CalculateRelativeDealPoints(decision.PlayerPosition, deal.WinningTeam),
                 DidTeamWinGame = didTeamWinGame,
-                DecisionPredictedPointsJson = decision.DecisionPredictedPoints.Count > 0
-                    ? JsonSerializer.Serialize(
-                        decision.DecisionPredictedPoints.Select(kvp => new
-                        {
-                            Card = kvp.Key.ToRelative(deal.Trump!.Value),
-                            Points = kvp.Value,
-                        }),
-                        JsonSerializationOptions.Default)
-                    : null,
+                CardsInHand = [.. decision.CardsInHand.SortByTrump(deal.Trump!.Value).Select((card, index) => new DiscardCardDecisionCardsInHand
+                {
+                    RelativeCardId = CardIdHelper.ToRelativeCardId(card.ToRelative(deal.Trump!.Value)),
+                    SortOrder = index,
+                })],
+                PredictedPoints = [.. decision.DecisionPredictedPoints.Select(kvp => new DiscardCardDecisionPredictedPoints
+                {
+                    RelativeCardId = CardIdHelper.ToRelativeCardId(kvp.Key.ToRelative(deal.Trump!.Value)),
+                    PredictedPoints = kvp.Value,
+                })],
             };
         })];
     }

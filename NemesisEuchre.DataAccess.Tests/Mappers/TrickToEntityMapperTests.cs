@@ -1,12 +1,8 @@
-using System.Text.Json;
-
 using FluentAssertions;
 
-using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
-using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.DataAccess.Tests.Mappers;
 
@@ -22,11 +18,11 @@ public class TrickToEntityMapperTests
         var entity = mapper.Map(trick, trickNumber: 3, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         entity.TrickNumber.Should().Be(3);
-        entity.LeadPosition.Should().Be(PlayerPosition.North);
-        entity.LeadSuit.Should().Be(Suit.Hearts);
-        entity.WinningPosition.Should().Be(PlayerPosition.South);
-        entity.WinningTeam.Should().Be(Team.Team1);
-        entity.CardsPlayedJson.Should().NotBeNullOrEmpty();
+        entity.LeadPlayerPositionId.Should().Be((int)PlayerPosition.North);
+        entity.LeadSuitId.Should().Be((int)Suit.Hearts);
+        entity.WinningPlayerPositionId.Should().Be((int)PlayerPosition.South);
+        entity.WinningTeamId.Should().Be((int)Team.Team1);
+        entity.TrickCardsPlayed.Should().HaveCount(2);
     }
 
     [Fact]
@@ -52,12 +48,12 @@ public class TrickToEntityMapperTests
         var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: true, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
-        decision.CardsInHandJson.Should().NotBeNullOrEmpty();
+        decision.CardsInHand.Should().NotBeEmpty();
         decision.TeamScore.Should().Be(2);
         decision.OpponentScore.Should().Be(0);
-        decision.ValidCardsToPlayJson.Should().NotBeNullOrEmpty();
-        decision.ChosenCardJson.Should().NotBeNullOrEmpty();
-        decision.ActorType.Should().Be(ActorType.Chaos);
+        decision.ValidCards.Should().NotBeEmpty();
+        decision.ChosenRelativeCardId.Should().BeGreaterThan(0);
+        decision.ActorTypeId.Should().Be((int)ActorType.Chaos);
     }
 
     [Fact]
@@ -70,10 +66,10 @@ public class TrickToEntityMapperTests
         var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var northDecision = entity.PlayCardDecisions[0];
-        northDecision.LeadPlayer.Should().Be(RelativePlayerPosition.Self);
+        northDecision.LeadRelativePlayerPositionId.Should().Be((int)RelativePlayerPosition.Self);
 
         entity.PlayCardDecisions.Should().HaveCountGreaterThan(1);
-        entity.PlayCardDecisions.Should().Contain(d => d.LeadPlayer != RelativePlayerPosition.Self);
+        entity.PlayCardDecisions.Should().Contain(d => d.LeadRelativePlayerPositionId != (int)RelativePlayerPosition.Self);
     }
 
     [Fact]
@@ -86,7 +82,7 @@ public class TrickToEntityMapperTests
         var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
-        decision.LeadSuit.Should().Be(RelativeSuit.Trump);
+        decision.LeadRelativeSuitId.Should().Be((int)RelativeSuit.Trump);
     }
 
     [Fact]
@@ -99,17 +95,13 @@ public class TrickToEntityMapperTests
         var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
-        var cardsInHand = JsonSerializer.Deserialize<List<RelativeCard>>(decision.CardsInHandJson, JsonSerializationOptions.Default);
-        cardsInHand.Should().NotBeNull();
-        cardsInHand.Should().AllBeOfType<RelativeCard>();
+        decision.CardsInHand.Should().NotBeEmpty();
+        decision.CardsInHand.Should().AllSatisfy(c => c.RelativeCardId.Should().BeGreaterThan(0));
 
-        var validCards = JsonSerializer.Deserialize<List<RelativeCard>>(decision.ValidCardsToPlayJson, JsonSerializationOptions.Default);
-        validCards.Should().NotBeNull();
-        validCards.Should().AllBeOfType<RelativeCard>();
+        decision.ValidCards.Should().NotBeEmpty();
+        decision.ValidCards.Should().AllSatisfy(c => c.RelativeCardId.Should().BeGreaterThan(0));
 
-        var chosenCard = JsonSerializer.Deserialize<RelativeCard>(decision.ChosenCardJson, JsonSerializationOptions.Default);
-        chosenCard.Should().NotBeNull();
-        chosenCard.Suit.Should().BeDefined();
+        decision.ChosenRelativeCardId.Should().BeGreaterThan(0);
     }
 
     [Fact]
@@ -122,12 +114,12 @@ public class TrickToEntityMapperTests
         var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
-        var playedCards = JsonSerializer.Deserialize<Dictionary<RelativePlayerPosition, RelativeCard>>(decision.PlayedCardsJson, JsonSerializationOptions.Default);
-
-        playedCards.Should().NotBeNull();
-        playedCards.Should().NotBeEmpty();
-        playedCards!.Keys.Should().AllBeOfType<RelativePlayerPosition>();
-        playedCards.Values.Should().AllBeOfType<RelativeCard>();
+        decision.PlayedCards.Should().NotBeEmpty();
+        decision.PlayedCards.Should().AllSatisfy(p =>
+        {
+            p.RelativePlayerPositionId.Should().BeGreaterThanOrEqualTo(0);
+            p.RelativeCardId.Should().BeGreaterThan(0);
+        });
     }
 
     [Fact]
@@ -192,12 +184,12 @@ public class TrickToEntityMapperTests
         var decisions = entity.PlayCardDecisions.ToList();
         foreach (var decision in decisions)
         {
-            decision.ActorType.Should().NotBeNull();
+            decision.ActorTypeId.Should().NotBeNull();
         }
 
         var northDecision = decisions[0];
         var firstPosition = trick.PlayCardDecisions[0].PlayerPosition;
-        northDecision.ActorType.Should().Be(gamePlayers[firstPosition].ActorType);
+        northDecision.ActorTypeId.Should().Be((int?)gamePlayers[firstPosition].ActorType);
     }
 
     [Fact]
@@ -210,16 +202,13 @@ public class TrickToEntityMapperTests
         var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
-        decision.DecisionPredictedPointsJson.Should().NotBeNull();
-
-        var items = JsonSerializer.Deserialize<List<CardPointsPair>>(decision.DecisionPredictedPointsJson!, JsonSerializationOptions.Default);
-        items.Should().HaveCount(2);
-        items.Should().Contain(i => Math.Abs(i.Points - 1.5f) < 0.001f);
-        items.Should().Contain(i => Math.Abs(i.Points - 0.8f) < 0.001f);
+        decision.PredictedPoints.Should().HaveCount(2);
+        decision.PredictedPoints.Should().Contain(p => Math.Abs(p.PredictedPoints - 1.5f) < 0.001f);
+        decision.PredictedPoints.Should().Contain(p => Math.Abs(p.PredictedPoints - 0.8f) < 0.001f);
     }
 
     [Fact]
-    public void Map_WithEmptyDecisionPredictedPoints_SetsJsonToNull()
+    public void Map_WithEmptyDecisionPredictedPoints_SetsCollectionToEmpty()
     {
         var mapper = new TrickToEntityMapper();
         var trick = CreateTrickWithDecisions();
@@ -232,7 +221,22 @@ public class TrickToEntityMapperTests
 
         var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
-        entity.PlayCardDecisions.Should().AllSatisfy(d => d.DecisionPredictedPointsJson.Should().BeNull());
+        entity.PlayCardDecisions.Should().AllSatisfy(d => d.PredictedPoints.Should().BeEmpty());
+    }
+
+    [Fact]
+    public void Map_ShouldMapTrickCardsPlayed()
+    {
+        var mapper = new TrickToEntityMapper();
+        var trick = CreateSampleTrick();
+        var gamePlayers = CreateSamplePlayers();
+
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+
+        entity.TrickCardsPlayed.Should().HaveCount(2);
+        entity.TrickCardsPlayed.Should().Contain(c =>
+            c.PlayerPositionId == (int)PlayerPosition.North &&
+            c.CardId == CardIdHelper.ToCardId(new Card(Suit.Hearts, Rank.Ace)));
     }
 
     private static Trick CreateSampleTrick()
@@ -305,6 +309,4 @@ public class TrickToEntityMapperTests
             { PlayerPosition.West, new Player { Position = PlayerPosition.West, ActorType = ActorType.Chaos } },
         };
     }
-
-    private sealed record CardPointsPair(RelativeCard Card, float Points);
 }

@@ -1,11 +1,9 @@
-using System.Text.Json;
-
 using Bogus;
 
 using FluentAssertions;
 
-using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Entities;
+using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
@@ -144,12 +142,12 @@ public class DiscardCardFeatureEngineerTests
         var cards = CreateRelativeCards(6);
         var entity = new DiscardCardDecisionEntity
         {
-            CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
-            CallingPlayer = _faker.PickRandom<RelativePlayerPosition>(),
+            CardsInHand = [.. cards.Select((c, i) => new DiscardCardDecisionCardsInHand { RelativeCardId = CardIdHelper.ToRelativeCardId(c), SortOrder = i })],
+            CallingRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
             CallingPlayerGoingAlone = _faker.Random.Bool(),
             TeamScore = (short)_faker.Random.Int(0, 9),
             OpponentScore = (short)_faker.Random.Int(0, 9),
-            ChosenCardJson = JsonSerializer.Serialize(cards[0], JsonSerializationOptions.Default),
+            ChosenRelativeCardId = CardIdHelper.ToRelativeCardId(cards[0]),
             RelativeDealPoints = -1,
         };
 
@@ -194,12 +192,12 @@ public class DiscardCardFeatureEngineerTests
 
         return new DiscardCardDecisionEntity
         {
-            CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
-            CallingPlayer = callingPlayer ?? _faker.PickRandom<RelativePlayerPosition>(),
+            CardsInHand = [.. cards.Select((c, i) => new DiscardCardDecisionCardsInHand { RelativeCardId = CardIdHelper.ToRelativeCardId(c), SortOrder = i })],
+            CallingRelativePlayerPositionId = (int)(callingPlayer ?? _faker.PickRandom<RelativePlayerPosition>()),
             CallingPlayerGoingAlone = callingPlayerGoingAlone ?? _faker.Random.Bool(),
             TeamScore = teamScore ?? (short)_faker.Random.Int(0, 9),
             OpponentScore = opponentScore ?? (short)_faker.Random.Int(0, 9),
-            ChosenCardJson = JsonSerializer.Serialize(chosenCard, JsonSerializationOptions.Default),
+            ChosenRelativeCardId = CardIdHelper.ToRelativeCardId(chosenCard),
             RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
         };
     }

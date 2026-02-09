@@ -92,6 +92,33 @@ public class TrainingDataRepository(
         return query.Count();
     }
 
+    private static IQueryable<TEntity> ApplyIncludes<TEntity>(IQueryable<TEntity> query)
+        where TEntity : class, IDecisionEntity
+    {
+        return typeof(TEntity).Name switch
+        {
+            nameof(CallTrumpDecisionEntity) =>
+                (IQueryable<TEntity>)(object)((IQueryable<CallTrumpDecisionEntity>)(object)query)
+                    .Include(e => e.CardsInHand)
+                    .Include(e => e.ValidDecisions),
+
+            nameof(DiscardCardDecisionEntity) =>
+                (IQueryable<TEntity>)(object)((IQueryable<DiscardCardDecisionEntity>)(object)query)
+                    .Include(e => e.CardsInHand),
+
+            nameof(PlayCardDecisionEntity) =>
+                (IQueryable<TEntity>)(object)((IQueryable<PlayCardDecisionEntity>)(object)query)
+                    .Include(e => e.CardsInHand)
+                    .Include(e => e.PlayedCards)
+                    .Include(e => e.ValidCards)
+                    .Include(e => e.KnownVoids)
+                    .Include(e => e.CardsAccountedFor)
+                    .AsSplitQuery(),
+
+            _ => query,
+        };
+    }
+
     private IQueryable<TEntity> BuildQuery<TEntity>(
         ActorType actorType,
         int limit,
@@ -99,7 +126,9 @@ public class TrainingDataRepository(
         where TEntity : class, IDecisionEntity
     {
         var dbSet = GetDbSet<TEntity>();
-        var query = dbSet.AsNoTracking().Where(d => d.ActorType == actorType);
+        var query = ApplyIncludes(dbSet.AsNoTracking());
+
+        query = query.Where(d => d.ActorTypeId == (int)actorType);
 
         if (winningTeamOnly)
         {

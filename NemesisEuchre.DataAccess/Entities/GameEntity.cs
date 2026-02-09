@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.DataAccess.Entities.Metadata;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
@@ -9,17 +9,21 @@ public class GameEntity
 {
     public int GameId { get; set; }
 
-    public GameStatus GameStatus { get; set; }
-
-    public required string PlayersJson { get; set; }
+    public int GameStatusId { get; set; }
 
     public short Team1Score { get; set; }
 
     public short Team2Score { get; set; }
 
-    public Team? WinningTeam { get; set; }
+    public int? WinningTeamId { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public GameStatusMetadata? GameStatus { get; set; }
+
+    public TeamMetadata? WinningTeam { get; set; }
+
+    public ICollection<GamePlayer> GamePlayers { get; set; } = [];
 
     public ICollection<DealEntity> Deals { get; set; } = [];
 }
@@ -35,14 +39,8 @@ public class GameEntityConfiguration : IEntityTypeConfiguration<GameEntity>
         builder.Property(e => e.GameId)
             .ValueGeneratedOnAdd();
 
-        builder.Property(e => e.GameStatus)
-            .IsRequired()
-            .HasConversion<string>()
-            .HasMaxLength(20);
-
-        builder.Property(e => e.PlayersJson)
-            .IsRequired()
-            .HasMaxLength(500);
+        builder.Property(e => e.GameStatusId)
+            .IsRequired();
 
         builder.Property(e => e.Team1Score)
             .IsRequired();
@@ -50,13 +48,19 @@ public class GameEntityConfiguration : IEntityTypeConfiguration<GameEntity>
         builder.Property(e => e.Team2Score)
             .IsRequired();
 
-        builder.Property(e => e.WinningTeam)
-            .HasConversion<string>()
-            .HasMaxLength(10);
-
         builder.Property(e => e.CreatedAt)
             .IsRequired()
             .HasDefaultValueSql("GETUTCDATE()");
+
+        builder.HasOne(e => e.GameStatus)
+            .WithMany()
+            .HasForeignKey(e => e.GameStatusId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.WinningTeam)
+            .WithMany()
+            .HasForeignKey(e => e.WinningTeamId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(e => e.Deals)
             .WithOne(d => d.Game)
@@ -66,7 +70,7 @@ public class GameEntityConfiguration : IEntityTypeConfiguration<GameEntity>
         builder.HasIndex(e => e.CreatedAt)
             .HasDatabaseName("IX_Games_CreatedAt");
 
-        builder.HasIndex(e => e.WinningTeam)
-            .HasDatabaseName("IX_Games_WinningTeam");
+        builder.HasIndex(e => e.WinningTeamId)
+            .HasDatabaseName("IX_Games_WinningTeamId");
     }
 }

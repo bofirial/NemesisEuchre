@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 using FluentAssertions;
 
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +6,6 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
-using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
@@ -45,52 +42,55 @@ public class GamePersistenceIntegrationTests
         await using (var context = new NemesisEuchreDbContext(options))
         {
             var savedGame = await context.Games!
+                .Include(g => g.GamePlayers)
                 .Include(g => g.Deals)
                     .ThenInclude(d => d.Tricks)
                         .ThenInclude(t => t.PlayCardDecisions)
+                .Include(g => g.Deals)
+                    .ThenInclude(d => d.Tricks)
+                        .ThenInclude(t => t.TrickCardsPlayed)
                 .Include(g => g.Deals)
                     .ThenInclude(d => d.CallTrumpDecisions)
                 .Include(g => g.Deals)
                     .ThenInclude(d => d.DiscardCardDecisions)
                 .Include(g => g.Deals)
                     .ThenInclude(d => d.PlayCardDecisions)
+                .Include(g => g.Deals)
+                    .ThenInclude(d => d.DealDeckCards)
+                .Include(g => g.Deals)
+                    .ThenInclude(d => d.DealPlayers)
                 .FirstOrDefaultAsync(TestContext.Current.CancellationToken);
 
             savedGame.Should().NotBeNull();
-            savedGame!.GameStatus.Should().Be(GameStatus.Complete);
+            savedGame!.GameStatusId.Should().Be((int)GameStatus.Complete);
             savedGame.Team1Score.Should().Be(10);
-            savedGame.WinningTeam.Should().Be(Team.Team1);
+            savedGame.WinningTeamId.Should().Be((int)Team.Team1);
+            savedGame.GamePlayers.Should().HaveCount(4);
             savedGame.Deals.Should().HaveCount(1);
 
             var deal = savedGame.Deals.First();
             deal.DealNumber.Should().Be(1);
-            deal.Trump.Should().Be(Suit.Hearts);
+            deal.TrumpSuitId.Should().Be((int)Suit.Hearts);
             deal.Tricks.Should().HaveCount(5);
             deal.CallTrumpDecisions.Should().HaveCountGreaterThan(0);
+            deal.DealDeckCards.Should().HaveCount(24);
+            deal.DealPlayers.Should().HaveCount(4);
 
             deal.Tricks.Should().AllSatisfy(trick =>
             {
                 trick.TrickNumber.Should().BeInRange(1, 5);
                 trick.PlayCardDecisions.Should().HaveCount(4);
+                trick.TrickCardsPlayed.Should().HaveCount(4);
             });
 
             var firstTrick = deal.Tricks.First();
             firstTrick.TrickNumber.Should().Be(1);
             var playDecision = firstTrick.PlayCardDecisions[0];
-            playDecision.ActorType.Should().Be(ActorType.Chaos);
+            playDecision.ActorTypeId.Should().Be((int)ActorType.Chaos);
             playDecision.DidTeamWinGame.Should().NotBeNull();
-            playDecision.LeadPlayer.Should().BeDefined();
+            playDecision.LeadRelativePlayerPositionId.Should().BeGreaterThanOrEqualTo(0);
             playDecision.DealId.Should().Be(deal.DealId);
             playDecision.TrickId.Should().Be(firstTrick.TrickId);
-
-            var cardsInHand = JsonSerializer.Deserialize<List<RelativeCard>>(playDecision.CardsInHandJson, JsonSerializationOptions.Default);
-            cardsInHand.Should().NotBeNull();
-            cardsInHand.Should().AllBeOfType<RelativeCard>();
-
-            var playedCards = JsonSerializer.Deserialize<Dictionary<RelativePlayerPosition, RelativeCard>>(playDecision.PlayedCardsJson, JsonSerializationOptions.Default);
-            playedCards.Should().NotBeNull();
-            playedCards!.Keys.Should().AllBeOfType<RelativePlayerPosition>();
-            playedCards.Values.Should().AllBeOfType<RelativeCard>();
         }
     }
 
