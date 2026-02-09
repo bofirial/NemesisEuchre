@@ -95,35 +95,13 @@ public class GameRepository(
         {
             LoggerMessages.LogPersistingBatchedGames(logger, gamesList.Count);
 
-            var shouldDisableChangeTracking = gamesList.Count >= _options.MaxBatchSizeForChangeTracking;
-            var originalChangeTrackingSetting = context.ChangeTracker.AutoDetectChangesEnabled;
+            await ExecuteWithChangeTrackerOptimizationAsync(
+                gamesList,
+                gamesList.Count >= _options.MaxBatchSizeForChangeTracking,
+                clearTrackerAfter: false,
+                cancellationToken).ConfigureAwait(false);
 
-            try
-            {
-                if (shouldDisableChangeTracking)
-                {
-                    context.ChangeTracker.AutoDetectChangesEnabled = false;
-                }
-
-                foreach (var game in gamesList)
-                {
-                    var gameEntity = mapper.Map(game);
-                    context.Games!.Add(gameEntity);
-                }
-
-                if (shouldDisableChangeTracking)
-                {
-                    context.ChangeTracker.DetectChanges();
-                }
-
-                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                LoggerMessages.LogBatchGamesPersisted(logger, gamesList.Count);
-            }
-            finally
-            {
-                context.ChangeTracker.AutoDetectChangesEnabled = originalChangeTrackingSetting;
-            }
+            LoggerMessages.LogBatchGamesPersisted(logger, gamesList.Count);
         }
         catch (Exception ex)
         {
@@ -148,28 +126,14 @@ public class GameRepository(
 
             if (_options.UseBulkInsert && gamesList.Count >= _options.BulkInsertThreshold)
             {
-                var originalChangeTrackingSetting = context.ChangeTracker.AutoDetectChangesEnabled;
+                await ExecuteWithChangeTrackerOptimizationAsync(
+                    gamesList,
+                    disableChangeTracking: true,
+                    clearTrackerAfter: true,
+                    cancellationToken).ConfigureAwait(false);
 
-                try
-                {
-                    context.ChangeTracker.AutoDetectChangesEnabled = false;
-
-                    foreach (var game in gamesList)
-                    {
-                        var gameEntity = mapper.Map(game);
-                        context.Games!.Add(gameEntity);
-                    }
-
-                    context.ChangeTracker.DetectChanges();
-                    await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    LoggerMessages.LogBatchGamesPersisted(logger, gamesList.Count);
-                    progress?.Report(gamesList.Count);
-                }
-                finally
-                {
-                    context.ChangeTracker.AutoDetectChangesEnabled = originalChangeTrackingSetting;
-                    context.ChangeTracker.Clear();
-                }
+                LoggerMessages.LogBatchGamesPersisted(logger, gamesList.Count);
+                progress?.Report(gamesList.Count);
             }
             else
             {
@@ -180,6 +144,45 @@ public class GameRepository(
         catch (Exception ex)
         {
             LoggerMessages.LogBatchGamePersistenceFailed(logger, gamesList.Count, ex);
+        }
+    }
+
+    private async Task ExecuteWithChangeTrackerOptimizationAsync(
+        List<Game> gamesList,
+        bool disableChangeTracking,
+        bool clearTrackerAfter,
+        CancellationToken cancellationToken)
+    {
+        var originalChangeTrackingSetting = context.ChangeTracker.AutoDetectChangesEnabled;
+
+        try
+        {
+            if (disableChangeTracking)
+            {
+                context.ChangeTracker.AutoDetectChangesEnabled = false;
+            }
+
+            foreach (var game in gamesList)
+            {
+                var gameEntity = mapper.Map(game);
+                context.Games!.Add(gameEntity);
+            }
+
+            if (disableChangeTracking)
+            {
+                context.ChangeTracker.DetectChanges();
+            }
+
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            context.ChangeTracker.AutoDetectChangesEnabled = originalChangeTrackingSetting;
+
+            if (clearTrackerAfter)
+            {
+                context.ChangeTracker.Clear();
+            }
         }
     }
 }

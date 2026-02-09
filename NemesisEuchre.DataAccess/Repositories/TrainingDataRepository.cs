@@ -32,10 +32,32 @@ public interface ITrainingDataRepository
         where TEntity : class, IDecisionEntity;
 }
 
-public class TrainingDataRepository(
+public partial class TrainingDataRepository(
     NemesisEuchreDbContext context,
     ILogger<TrainingDataRepository> logger) : ITrainingDataRepository
 {
+    private static readonly Dictionary<Type, IEntityTypeConfig> EntityConfigs = new()
+    {
+        [typeof(CallTrumpDecisionEntity)] = new EntityTypeConfig<CallTrumpDecisionEntity>(
+            ctx => ctx.CallTrumpDecisions!,
+            query => query
+                .Include(e => e.CardsInHand)
+                .Include(e => e.ValidDecisions)),
+        [typeof(DiscardCardDecisionEntity)] = new EntityTypeConfig<DiscardCardDecisionEntity>(
+            ctx => ctx.DiscardCardDecisions!,
+            query => query
+                .Include(e => e.CardsInHand)),
+        [typeof(PlayCardDecisionEntity)] = new EntityTypeConfig<PlayCardDecisionEntity>(
+            ctx => ctx.PlayCardDecisions!,
+            query => query
+                .Include(e => e.CardsInHand)
+                .Include(e => e.PlayedCards)
+                .Include(e => e.ValidCards)
+                .Include(e => e.KnownVoids)
+                .Include(e => e.CardsAccountedFor)
+                .AsSplitQuery()),
+    };
+
     public async IAsyncEnumerable<TEntity> GetDecisionDataAsync<TEntity>(
         ActorType actorType,
         int limit = 0,
@@ -92,31 +114,12 @@ public class TrainingDataRepository(
         return query.Count();
     }
 
-    private static IQueryable<TEntity> ApplyIncludes<TEntity>(IQueryable<TEntity> query)
+    private static IEntityTypeConfig GetConfig<TEntity>()
         where TEntity : class, IDecisionEntity
     {
-        return typeof(TEntity).Name switch
-        {
-            nameof(CallTrumpDecisionEntity) =>
-                (IQueryable<TEntity>)(object)((IQueryable<CallTrumpDecisionEntity>)(object)query)
-                    .Include(e => e.CardsInHand)
-                    .Include(e => e.ValidDecisions),
-
-            nameof(DiscardCardDecisionEntity) =>
-                (IQueryable<TEntity>)(object)((IQueryable<DiscardCardDecisionEntity>)(object)query)
-                    .Include(e => e.CardsInHand),
-
-            nameof(PlayCardDecisionEntity) =>
-                (IQueryable<TEntity>)(object)((IQueryable<PlayCardDecisionEntity>)(object)query)
-                    .Include(e => e.CardsInHand)
-                    .Include(e => e.PlayedCards)
-                    .Include(e => e.ValidCards)
-                    .Include(e => e.KnownVoids)
-                    .Include(e => e.CardsAccountedFor)
-                    .AsSplitQuery(),
-
-            _ => query,
-        };
+        return EntityConfigs.TryGetValue(typeof(TEntity), out var config)
+            ? config
+            : throw new NotSupportedException($"Entity type {typeof(TEntity).Name} is not supported for training data retrieval");
     }
 
     private IQueryable<TEntity> BuildQuery<TEntity>(
@@ -125,8 +128,9 @@ public class TrainingDataRepository(
         bool winningTeamOnly)
         where TEntity : class, IDecisionEntity
     {
-        var dbSet = GetDbSet<TEntity>();
-        var query = ApplyIncludes(dbSet.AsNoTracking());
+        var config = GetConfig<TEntity>();
+        var dbSet = ((EntityTypeConfig<TEntity>)config).GetDbSet(context);
+        var query = ((EntityTypeConfig<TEntity>)config).ApplyIncludes(dbSet.AsNoTracking());
 
         query = query.Where(d => d.ActorTypeId == (int)actorType);
 
@@ -141,17 +145,5 @@ public class TrainingDataRepository(
         }
 
         return query;
-    }
-
-    private DbSet<TEntity> GetDbSet<TEntity>()
-        where TEntity : class, IDecisionEntity
-    {
-        return typeof(TEntity).Name switch
-        {
-            nameof(CallTrumpDecisionEntity) => (DbSet<TEntity>)(object)context.CallTrumpDecisions!,
-            nameof(DiscardCardDecisionEntity) => (DbSet<TEntity>)(object)context.DiscardCardDecisions!,
-            nameof(PlayCardDecisionEntity) => (DbSet<TEntity>)(object)context.PlayCardDecisions!,
-            _ => throw new NotSupportedException($"Entity type {typeof(TEntity).Name} is not supported for training data retrieval"),
-        };
     }
 }
