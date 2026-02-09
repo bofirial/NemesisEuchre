@@ -24,7 +24,7 @@ public class Gen1TrainerBot(
         random,
         logger)
 {
-    private const float Temperature = 2.0f;
+    private const float Temperature = 0.2f;
 
     public override ActorType ActorType => ActorType.Gen1Trainer;
 
