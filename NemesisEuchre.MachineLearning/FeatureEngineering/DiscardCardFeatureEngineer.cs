@@ -1,4 +1,5 @@
 using NemesisEuchre.DataAccess.Entities;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.FeatureEngineering;
@@ -9,7 +10,7 @@ public class DiscardCardFeatureEngineer : IFeatureEngineer<DiscardCardDecisionEn
 
     public DiscardCardTrainingData Transform(DiscardCardDecisionEntity entity)
     {
-        var context = DiscardCardEntityDeserializer.Deserialize(entity);
+        var context = DiscardCardFeatureContextBuilder.Build(entity);
 
         if (context.CardsInHand.Length != ExpectedCardsInHand)
         {
@@ -27,7 +28,7 @@ public class DiscardCardFeatureEngineer : IFeatureEngineer<DiscardCardDecisionEn
 
         var result = DiscardCardFeatureBuilder.BuildFeatures(
             context.CardsInHand,
-            entity.CallingPlayer,
+            (RelativePlayerPosition)entity.CallingRelativePlayerPositionId,
             entity.CallingPlayerGoingAlone,
             entity.TeamScore,
             entity.OpponentScore,

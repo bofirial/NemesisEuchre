@@ -1,4 +1,5 @@
 using NemesisEuchre.DataAccess.Entities;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.FeatureEngineering;
@@ -7,7 +8,7 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
 {
     public PlayCardTrainingData Transform(PlayCardDecisionEntity entity)
     {
-        var context = PlayCardEntityDeserializer.Deserialize(entity);
+        var context = PlayCardFeatureContextBuilder.Build(entity);
 
         var chosenCardIndex = Array.FindIndex(context.CardsInHand, c => c == context.ChosenCard);
 
@@ -23,15 +24,15 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
             context.PlayedCards,
             entity.TeamScore,
             entity.OpponentScore,
-            entity.LeadPlayer,
-            entity.LeadSuit,
-            entity.CallingPlayer,
+            (RelativePlayerPosition)entity.LeadRelativePlayerPositionId,
+            entity.LeadRelativeSuitId.HasValue ? (RelativeSuit)entity.LeadRelativeSuitId.Value : null,
+            (RelativePlayerPosition)entity.CallingRelativePlayerPositionId,
             entity.CallingPlayerGoingAlone,
-            entity.DealerPosition,
+            (RelativePlayerPosition)entity.DealerRelativePlayerPositionId,
             context.DealerPickedUpCard,
             context.KnownPlayerSuitVoids,
             context.CardsAccountedFor,
-            entity.WinningTrickPlayer,
+            entity.WinningTrickRelativePlayerPositionId.HasValue ? (RelativePlayerPosition)entity.WinningTrickRelativePlayerPositionId.Value : null,
             entity.TrickNumber,
             context.ChosenCard);
 

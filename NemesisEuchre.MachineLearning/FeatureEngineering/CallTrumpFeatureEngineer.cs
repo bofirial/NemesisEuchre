@@ -1,4 +1,5 @@
 using NemesisEuchre.DataAccess.Entities;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.FeatureEngineering;
@@ -7,7 +8,7 @@ public class CallTrumpFeatureEngineer : IFeatureEngineer<CallTrumpDecisionEntity
 {
     public CallTrumpTrainingData Transform(CallTrumpDecisionEntity entity)
     {
-        var context = CallTrumpEntityDeserializer.Deserialize(entity);
+        var context = CallTrumpFeatureContextBuilder.Build(entity);
 
         if (!context.ValidDecisions.Contains(context.ChosenDecision))
         {
@@ -18,7 +19,7 @@ public class CallTrumpFeatureEngineer : IFeatureEngineer<CallTrumpDecisionEntity
         var result = CallTrumpFeatureBuilder.BuildFeatures(
             context.Cards,
             context.UpCard,
-            entity.DealerPosition,
+            (RelativePlayerPosition)entity.DealerRelativePositionId,
             entity.TeamScore,
             entity.OpponentScore,
             entity.DecisionOrder,
