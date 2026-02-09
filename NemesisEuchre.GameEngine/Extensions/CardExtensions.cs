@@ -64,7 +64,7 @@ public static class CardExtensions
             Rank.Ace => "A",
             Rank.LeftBower => "J",
             Rank.RightBower => "J",
-            _ => "?"
+            _ => "?",
         };
 
         var suitSymbol = card.Suit switch
@@ -73,10 +73,26 @@ public static class CardExtensions
             Suit.Hearts => "♥ ",
             Suit.Clubs => "♣ ",
             Suit.Diamonds => "♦ ",
-            _ => "?"
+            _ => "?",
         };
 
         return rankSymbol + suitSymbol;
+    }
+
+    public static Card ToAbsolute(this RelativeCard relativeCard, Suit trump)
+    {
+        if (relativeCard.Rank == Rank.RightBower)
+        {
+            return new Card(trump, Rank.Jack);
+        }
+
+        if (relativeCard.Rank == Rank.LeftBower)
+        {
+            return new Card(trump.GetSameColorSuit(), Rank.Jack);
+        }
+
+        var absoluteSuit = relativeCard.Suit.ToAbsoluteSuit(trump);
+        return new Card(absoluteSuit, relativeCard.Rank);
     }
 
     public static RelativeCard ToRelative(this Card card, Suit trump)
@@ -93,10 +109,8 @@ public static class CardExtensions
             rank = Rank.LeftBower;
         }
 
-        return new RelativeCard
+        return new RelativeCard(rank, card.Suit.ToRelativeSuit(trump, rank))
         {
-            Rank = rank,
-            Suit = card.Suit.ToRelativeSuit(trump, rank),
             Card = card,
         };
     }

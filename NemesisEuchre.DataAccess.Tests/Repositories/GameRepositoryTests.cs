@@ -29,11 +29,10 @@ public class GameRepositoryTests
         mockMapper.Setup(m => m.Map(It.IsAny<Game>()))
             .Returns(new GameEntity
             {
-                GameStatus = GameStatus.Complete,
-                PlayersJson = "{}",
+                GameStatusId = (int)GameStatus.Complete,
                 Team1Score = 10,
                 Team2Score = 0,
-                WinningTeam = Team.Team1,
+                WinningTeamId = (int)Team.Team1,
                 CreatedAt = DateTime.UtcNow,
             });
 
@@ -48,6 +47,6 @@ public class GameRepositoryTests
 
         var savedGame = await context.Games!.FirstOrDefaultAsync(TestContext.Current.CancellationToken);
         savedGame.Should().NotBeNull();
-        savedGame!.GameStatus.Should().Be(GameStatus.Complete);
+        savedGame!.GameStatusId.Should().Be((int)GameStatus.Complete);
     }
 }

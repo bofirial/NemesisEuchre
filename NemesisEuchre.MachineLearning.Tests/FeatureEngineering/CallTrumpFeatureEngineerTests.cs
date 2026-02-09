@@ -1,11 +1,9 @@
-using System.Text.Json;
-
 using Bogus;
 
 using FluentAssertions;
 
-using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Entities;
+using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
@@ -158,14 +156,14 @@ public class CallTrumpFeatureEngineerTests
         var upCard = CreateCard();
         var entity = new CallTrumpDecisionEntity
         {
-            CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
-            UpCardJson = JsonSerializer.Serialize(upCard, JsonSerializationOptions.Default),
-            DealerPosition = _faker.PickRandom<RelativePlayerPosition>(),
+            CardsInHand = [.. cards.Select((c, i) => new CallTrumpDecisionCardsInHand { CardId = CardIdHelper.ToCardId(c), SortOrder = i })],
+            UpCardId = CardIdHelper.ToCardId(upCard),
+            DealerRelativePositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
             TeamScore = (short)_faker.Random.Int(0, 9),
             OpponentScore = (short)_faker.Random.Int(0, 9),
             DecisionOrder = (byte)_faker.Random.Int(0, 7),
-            ValidDecisionsJson = JsonSerializer.Serialize(new[] { CallTrumpDecision.Pass }, JsonSerializationOptions.Default),
-            ChosenDecisionJson = JsonSerializer.Serialize(CallTrumpDecision.Pass, JsonSerializationOptions.Default),
+            ValidDecisions = [new CallTrumpDecisionValidDecision { CallTrumpDecisionValueId = (int)CallTrumpDecision.Pass }],
+            ChosenDecisionValueId = (int)CallTrumpDecision.Pass,
             RelativeDealPoints = 4,
         };
 
@@ -176,11 +174,7 @@ public class CallTrumpFeatureEngineerTests
 
     private Card CreateCard(Rank? rank = null, Suit? suit = null)
     {
-        return new Card
-        {
-            Rank = rank ?? _faker.PickRandom<Rank>(),
-            Suit = suit ?? _faker.PickRandom<Suit>(),
-        };
+        return new Card(suit ?? _faker.PickRandom<Suit>(), rank ?? _faker.PickRandom<Rank>());
     }
 
     private Card[] CreateCards(int count)
@@ -205,14 +199,14 @@ public class CallTrumpFeatureEngineerTests
 
         return new CallTrumpDecisionEntity
         {
-            CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
-            UpCardJson = JsonSerializer.Serialize(upCard, JsonSerializationOptions.Default),
-            DealerPosition = dealerPosition ?? _faker.PickRandom<RelativePlayerPosition>(),
+            CardsInHand = [.. cards.Select((c, i) => new CallTrumpDecisionCardsInHand { CardId = CardIdHelper.ToCardId(c), SortOrder = i })],
+            UpCardId = CardIdHelper.ToCardId(upCard),
+            DealerRelativePositionId = (int)(dealerPosition ?? _faker.PickRandom<RelativePlayerPosition>()),
             TeamScore = teamScore ?? (short)_faker.Random.Int(0, 9),
             OpponentScore = opponentScore ?? (short)_faker.Random.Int(0, 9),
             DecisionOrder = decisionOrder ?? (byte)_faker.Random.Int(0, 7),
-            ValidDecisionsJson = JsonSerializer.Serialize(validDecisions, JsonSerializationOptions.Default),
-            ChosenDecisionJson = JsonSerializer.Serialize(chosenDecision, JsonSerializationOptions.Default),
+            ValidDecisions = [.. validDecisions.Select(d => new CallTrumpDecisionValidDecision { CallTrumpDecisionValueId = (int)d })],
+            ChosenDecisionValueId = (int)chosenDecision,
             RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
         };
     }

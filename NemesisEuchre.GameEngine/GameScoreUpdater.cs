@@ -59,7 +59,7 @@ public class GameScoreUpdater : IGameScoreUpdater
             DealResult.OpponentsEuchred => 2,
             DealResult.WonAndWentAlone => 4,
             DealResult.ThrowIn => 0,
-            _ => throw new ArgumentOutOfRangeException(nameof(deal), $"Unknown DealResult: {deal.DealResult}")
+            _ => throw new ArgumentOutOfRangeException(nameof(deal), $"Unknown DealResult: {deal.DealResult}"),
         };
     }
 

@@ -33,26 +33,24 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
     {
         try
         {
-            progress.Report(new TrainingProgress(ModelType, TrainingPhase.LoadingData, 0, "Loading training data..."));
+            progress.Report(new TrainingProgress(ModelType, TrainingPhase.LoadingData, 0, "Streaming training data..."));
 
-            var trainingData = await _dataLoader.LoadTrainingDataAsync(
+            var streamingData = _dataLoader.StreamTrainingData(
                 actorType,
                 sampleLimit,
                 winningTeamOnly: false,
+                shuffle: true,
                 cancellationToken);
 
-            var dataList = trainingData.ToList();
-            if (dataList.Count == 0)
+            progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 25, "Training model (streaming)..."));
+            var trainingResult = await _trainer.TrainAsync(streamingData, preShuffled: true, cancellationToken);
+
+            if (trainingResult.TrainingSamples == 0)
             {
                 LoggerMessages.LogNoTrainingDataFound(_logger, actorType, ModelType);
                 progress.Report(new TrainingProgress(ModelType, TrainingPhase.Failed, 0, "No training data available"));
                 return new ModelTrainingResult(ModelType, false, ErrorMessage: "No training data available");
             }
-
-            progress.Report(new TrainingProgress(ModelType, TrainingPhase.LoadingData, 25, $"Loaded {dataList.Count:N0} samples"));
-
-            progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 25, "Training model..."));
-            var trainingResult = await _trainer.TrainAsync(dataList, cancellationToken);
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 75, "Training complete"));
 

@@ -23,8 +23,8 @@ public class CardAccountingServiceTests
         var currentTrick = new Trick();
         var playerHand = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
+            new Card(Suit.Hearts, Rank.Nine),
+            new Card(Suit.Hearts, Rank.Ten),
         };
 
         var result = _service.GetAccountedForCards(deal, currentTrick, PlayerPosition.North, playerHand);
@@ -37,8 +37,8 @@ public class CardAccountingServiceTests
     public void GetAccountedForCards_IncludesCompletedTricksCards()
     {
         var completedTrick = new Trick();
-        completedTrick.CardsPlayed.Add(new PlayedCard { Card = new Card { Suit = Suit.Hearts, Rank = Rank.Nine }, PlayerPosition = PlayerPosition.North });
-        completedTrick.CardsPlayed.Add(new PlayedCard { Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ten }, PlayerPosition = PlayerPosition.East });
+        completedTrick.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Nine), PlayerPosition.North));
+        completedTrick.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Ten), PlayerPosition.East));
 
         var deal = new Deal
         {
@@ -49,7 +49,7 @@ public class CardAccountingServiceTests
         var currentTrick = new Trick();
         var playerHand = new[]
         {
-            new Card { Suit = Suit.Spades, Rank = Rank.Nine },
+            new Card(Suit.Spades, Rank.Nine),
         };
 
         var result = _service.GetAccountedForCards(deal, currentTrick, PlayerPosition.North, playerHand);
@@ -63,8 +63,8 @@ public class CardAccountingServiceTests
     public void GetAccountedForCards_IncludesCurrentTrickCards()
     {
         var currentTrick = new Trick();
-        currentTrick.CardsPlayed.Add(new PlayedCard { Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ace }, PlayerPosition = PlayerPosition.North });
-        currentTrick.CardsPlayed.Add(new PlayedCard { Card = new Card { Suit = Suit.Hearts, Rank = Rank.King }, PlayerPosition = PlayerPosition.East });
+        currentTrick.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Ace), PlayerPosition.North));
+        currentTrick.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.King), PlayerPosition.East));
 
         var deal = new Deal
         {
@@ -74,7 +74,7 @@ public class CardAccountingServiceTests
         };
         var playerHand = new[]
         {
-            new Card { Suit = Suit.Spades, Rank = Rank.Nine },
+            new Card(Suit.Spades, Rank.Nine),
         };
 
         var result = _service.GetAccountedForCards(deal, currentTrick, PlayerPosition.South, playerHand);
@@ -91,13 +91,13 @@ public class CardAccountingServiceTests
         {
             CompletedTricks = [],
             ChosenDecision = CallTrumpDecision.OrderItUp,
-            UpCard = new Card { Suit = Suit.Diamonds, Rank = Rank.Jack },
+            UpCard = new Card(Suit.Diamonds, Rank.Jack),
             DealerPosition = PlayerPosition.South,
         };
         var currentTrick = new Trick();
         var playerHand = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            new Card(Suit.Hearts, Rank.Nine),
         };
 
         var result = _service.GetAccountedForCards(deal, currentTrick, PlayerPosition.North, playerHand);
@@ -113,13 +113,13 @@ public class CardAccountingServiceTests
         {
             CompletedTricks = [],
             ChosenDecision = CallTrumpDecision.OrderItUpAndGoAlone,
-            UpCard = new Card { Suit = Suit.Diamonds, Rank = Rank.Jack },
+            UpCard = new Card(Suit.Diamonds, Rank.Jack),
             DealerPosition = PlayerPosition.South,
         };
         var currentTrick = new Trick();
         var playerHand = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            new Card(Suit.Hearts, Rank.Nine),
         };
 
         var result = _service.GetAccountedForCards(deal, currentTrick, PlayerPosition.North, playerHand);
@@ -135,13 +135,13 @@ public class CardAccountingServiceTests
         {
             CompletedTricks = [],
             ChosenDecision = CallTrumpDecision.CallSpades,
-            UpCard = new Card { Suit = Suit.Diamonds, Rank = Rank.Jack },
+            UpCard = new Card(Suit.Diamonds, Rank.Jack),
             DealerPosition = PlayerPosition.South,
         };
         var currentTrick = new Trick();
         var playerHand = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            new Card(Suit.Hearts, Rank.Nine),
         };
 
         var result = _service.GetAccountedForCards(deal, currentTrick, PlayerPosition.North, playerHand);
@@ -157,13 +157,13 @@ public class CardAccountingServiceTests
         {
             CompletedTricks = [],
             ChosenDecision = CallTrumpDecision.CallSpadesAndGoAlone,
-            UpCard = new Card { Suit = Suit.Diamonds, Rank = Rank.Jack },
+            UpCard = new Card(Suit.Diamonds, Rank.Jack),
             DealerPosition = PlayerPosition.South,
         };
         var currentTrick = new Trick();
         var playerHand = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            new Card(Suit.Hearts, Rank.Nine),
         };
 
         var result = _service.GetAccountedForCards(deal, currentTrick, PlayerPosition.North, playerHand);
@@ -185,7 +185,7 @@ public class CardAccountingServiceTests
         var currentTrick = new Trick();
         var playerHand = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            new Card(Suit.Hearts, Rank.Nine),
         };
 
         var result = _service.GetAccountedForCards(deal, currentTrick, PlayerPosition.North, playerHand);
@@ -201,12 +201,12 @@ public class CardAccountingServiceTests
             CompletedTricks = [],
             ChosenDecision = CallTrumpDecision.OrderItUp,
             DealerPosition = PlayerPosition.South,
-            DiscardedCard = new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
+            DiscardedCard = new Card(Suit.Clubs, Rank.Nine),
         };
         var currentTrick = new Trick();
         var playerHand = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            new Card(Suit.Hearts, Rank.Nine),
         };
 
         var result = _service.GetAccountedForCards(deal, currentTrick, PlayerPosition.South, playerHand);
@@ -223,12 +223,12 @@ public class CardAccountingServiceTests
             CompletedTricks = [],
             ChosenDecision = CallTrumpDecision.OrderItUp,
             DealerPosition = PlayerPosition.South,
-            DiscardedCard = new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
+            DiscardedCard = new Card(Suit.Clubs, Rank.Nine),
         };
         var currentTrick = new Trick();
         var playerHand = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            new Card(Suit.Hearts, Rank.Nine),
         };
 
         var result = _service.GetAccountedForCards(deal, currentTrick, PlayerPosition.North, playerHand);
@@ -250,7 +250,7 @@ public class CardAccountingServiceTests
         var currentTrick = new Trick();
         var playerHand = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            new Card(Suit.Hearts, Rank.Nine),
         };
 
         var result = _service.GetAccountedForCards(deal, currentTrick, PlayerPosition.South, playerHand);
@@ -262,30 +262,30 @@ public class CardAccountingServiceTests
     public void GetAccountedForCards_ComplexScenario_IncludesAllApplicableCards()
     {
         var completedTrick1 = new Trick();
-        completedTrick1.CardsPlayed.Add(new PlayedCard { Card = new Card { Suit = Suit.Hearts, Rank = Rank.Nine }, PlayerPosition = PlayerPosition.North });
-        completedTrick1.CardsPlayed.Add(new PlayedCard { Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ten }, PlayerPosition = PlayerPosition.East });
-        completedTrick1.CardsPlayed.Add(new PlayedCard { Card = new Card { Suit = Suit.Hearts, Rank = Rank.Jack }, PlayerPosition = PlayerPosition.South });
-        completedTrick1.CardsPlayed.Add(new PlayedCard { Card = new Card { Suit = Suit.Hearts, Rank = Rank.Queen }, PlayerPosition = PlayerPosition.West });
+        completedTrick1.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Nine), PlayerPosition.North));
+        completedTrick1.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Ten), PlayerPosition.East));
+        completedTrick1.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Jack), PlayerPosition.South));
+        completedTrick1.CardsPlayed.Add(new PlayedCard(new Card(Suit.Hearts, Rank.Queen), PlayerPosition.West));
 
         var completedTrick2 = new Trick();
-        completedTrick2.CardsPlayed.Add(new PlayedCard { Card = new Card { Suit = Suit.Spades, Rank = Rank.Ace }, PlayerPosition = PlayerPosition.East });
-        completedTrick2.CardsPlayed.Add(new PlayedCard { Card = new Card { Suit = Suit.Spades, Rank = Rank.King }, PlayerPosition = PlayerPosition.South });
+        completedTrick2.CardsPlayed.Add(new PlayedCard(new Card(Suit.Spades, Rank.Ace), PlayerPosition.East));
+        completedTrick2.CardsPlayed.Add(new PlayedCard(new Card(Suit.Spades, Rank.King), PlayerPosition.South));
 
         var currentTrick = new Trick();
-        currentTrick.CardsPlayed.Add(new PlayedCard { Card = new Card { Suit = Suit.Diamonds, Rank = Rank.Ace }, PlayerPosition = PlayerPosition.West });
+        currentTrick.CardsPlayed.Add(new PlayedCard(new Card(Suit.Diamonds, Rank.Ace), PlayerPosition.West));
         var deal = new Deal
         {
             CompletedTricks = [completedTrick1, completedTrick2],
             ChosenDecision = CallTrumpDecision.CallSpades,
-            UpCard = new Card { Suit = Suit.Clubs, Rank = Rank.Jack },
+            UpCard = new Card(Suit.Clubs, Rank.Jack),
             DealerPosition = PlayerPosition.South,
-            DiscardedCard = new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
+            DiscardedCard = new Card(Suit.Clubs, Rank.Nine),
         };
         var playerHand = new[]
         {
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Nine },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ten },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.King },
+            new Card(Suit.Diamonds, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Ten),
+            new Card(Suit.Diamonds, Rank.King),
         };
 
         var result = _service.GetAccountedForCards(deal, currentTrick, PlayerPosition.South, playerHand);

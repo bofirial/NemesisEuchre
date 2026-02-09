@@ -14,7 +14,6 @@ public interface ICallTrumpDecisionMapper
     bool IsGoingAloneDecision(CallTrumpDecision decision);
 }
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Record positional parameters")]
 internal sealed record CallTrumpDecisionMetadata(
     Suit? Suit,
     bool IsGoingAlone,
@@ -37,12 +36,12 @@ public class CallTrumpDecisionMapper : ICallTrumpDecisionMapper
         [CallTrumpDecision.CallSpadesAndGoAlone] = new(Suit.Spades, true, CallTrumpDecision.CallSpades),
     };
 
-    private static readonly Dictionary<Suit, (CallTrumpDecision Base, CallTrumpDecision Alone)> SuitToDecisions = new()
+    private static readonly Dictionary<Suit, (CallTrumpDecision decision, CallTrumpDecision alone)> SuitToDecisions = new()
     {
-        [Suit.Clubs] = (CallTrumpDecision.CallClubs, CallTrumpDecision.CallClubsAndGoAlone),
-        [Suit.Diamonds] = (CallTrumpDecision.CallDiamonds, CallTrumpDecision.CallDiamondsAndGoAlone),
-        [Suit.Hearts] = (CallTrumpDecision.CallHearts, CallTrumpDecision.CallHeartsAndGoAlone),
-        [Suit.Spades] = (CallTrumpDecision.CallSpades, CallTrumpDecision.CallSpadesAndGoAlone),
+        [Suit.Clubs] = (decision: CallTrumpDecision.CallClubs, alone: CallTrumpDecision.CallClubsAndGoAlone),
+        [Suit.Diamonds] = (decision: CallTrumpDecision.CallDiamonds, alone: CallTrumpDecision.CallDiamondsAndGoAlone),
+        [Suit.Hearts] = (decision: CallTrumpDecision.CallHearts, alone: CallTrumpDecision.CallHeartsAndGoAlone),
+        [Suit.Spades] = (decision: CallTrumpDecision.CallSpades, alone: CallTrumpDecision.CallSpadesAndGoAlone),
     };
 
     public CallTrumpDecision[] GetValidRound1Decisions()

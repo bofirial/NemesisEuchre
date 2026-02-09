@@ -16,16 +16,8 @@ public class TrickExtensionsTests
             LeadPosition = PlayerPosition.East,
             LeadSuit = Suit.Spades,
         };
-        trick.CardsPlayed.Add(new PlayedCard
-        {
-            Card = new Card { Suit = Suit.Spades, Rank = Rank.King },
-            PlayerPosition = PlayerPosition.East,
-        });
-        trick.CardsPlayed.Add(new PlayedCard
-        {
-            Card = new Card { Suit = Suit.Clubs, Rank = Rank.Queen },
-            PlayerPosition = PlayerPosition.South,
-        });
+        trick.CardsPlayed.Add(new PlayedCard(new Card(Suit.Spades, Rank.King), PlayerPosition.East));
+        trick.CardsPlayed.Add(new PlayedCard(new Card(Suit.Clubs, Rank.Queen), PlayerPosition.South));
 
         var relative = trick.ToRelative(PlayerPosition.North, Suit.Hearts);
 

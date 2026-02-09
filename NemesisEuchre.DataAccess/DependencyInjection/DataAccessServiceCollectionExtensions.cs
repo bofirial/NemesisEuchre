@@ -24,6 +24,9 @@ public static class DataAccessServiceCollectionExtensions
         services.AddScoped<ITrickToEntityMapper, TrickToEntityMapper>();
         services.AddScoped<IDealToEntityMapper, DealToEntityMapper>();
         services.AddScoped<IGameToEntityMapper, GameToEntityMapper>();
+        services.AddScoped<IEntityToTrickMapper, EntityToTrickMapper>();
+        services.AddScoped<IEntityToDealMapper, EntityToDealMapper>();
+        services.AddScoped<IEntityToGameMapper, EntityToGameMapper>();
         services.AddScoped<IGameRepository, GameRepository>();
         services.AddScoped<ITrainingDataRepository, TrainingDataRepository>();
 

@@ -16,6 +16,10 @@ public class BatchGameResultsTests
             Team2Wins = 0,
             FailedGames = 0,
             TotalDeals = 50,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromSeconds(5),
         };
 
@@ -32,6 +36,10 @@ public class BatchGameResultsTests
             Team2Wins = 10,
             FailedGames = 0,
             TotalDeals = 50,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromSeconds(5),
         };
 
@@ -48,6 +56,10 @@ public class BatchGameResultsTests
             Team2Wins = 0,
             FailedGames = 0,
             TotalDeals = 0,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.Zero,
         };
 
@@ -64,6 +76,10 @@ public class BatchGameResultsTests
             Team2Wins = 0,
             FailedGames = 0,
             TotalDeals = 0,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.Zero,
         };
 
@@ -80,6 +96,10 @@ public class BatchGameResultsTests
             Team2Wins = 0,
             FailedGames = 10,
             TotalDeals = 0,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromSeconds(5),
         };
 
@@ -96,6 +116,10 @@ public class BatchGameResultsTests
             Team2Wins = 0,
             FailedGames = 10,
             TotalDeals = 0,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromSeconds(5),
         };
 
@@ -112,6 +136,10 @@ public class BatchGameResultsTests
             Team2Wins = 40,
             FailedGames = 0,
             TotalDeals = 500,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromMinutes(1),
         };
 
@@ -129,6 +157,10 @@ public class BatchGameResultsTests
             Team2Wins = 40,
             FailedGames = 10,
             TotalDeals = 500,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromMinutes(1),
         };
 
@@ -146,6 +178,10 @@ public class BatchGameResultsTests
             Team2Wins = 50,
             FailedGames = 0,
             TotalDeals = 500,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromMinutes(1),
         };
 
@@ -162,6 +198,10 @@ public class BatchGameResultsTests
             Team2Wins = 50,
             FailedGames = 0,
             TotalDeals = 500,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
             ElapsedTime = TimeSpan.FromMinutes(1),
         };
 

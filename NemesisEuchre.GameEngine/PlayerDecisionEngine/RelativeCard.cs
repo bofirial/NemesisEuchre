@@ -5,12 +5,8 @@ using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
-public class RelativeCard
+public record RelativeCard(Rank Rank, RelativeSuit Suit)
 {
-    public Rank Rank { get; set; }
-
-    public RelativeSuit Suit { get; set; }
-
     [JsonIgnore]
-    public Card? Card { get; set; }
+    public Card? Card { get; init; }
 }

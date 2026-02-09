@@ -9,7 +9,7 @@ namespace NemesisEuchre.Console.Services;
 
 public interface ISingleGameRunner
 {
-    Task<Game> RunAsync(bool doNotPersist = false, ActorType[]? team1ActorTypes = null, ActorType[]? team2ActorTypes = null, CancellationToken cancellationToken = default);
+    Task<Game> RunAsync(bool doNotPersist = false, ActorType[]? team1ActorTypes = null, ActorType[]? team2ActorTypes = null, bool showDecisions = false, CancellationToken cancellationToken = default);
 }
 
 public class SingleGameRunner(
@@ -18,7 +18,7 @@ public class SingleGameRunner(
     IGameResultsRenderer gameResultsRenderer,
     ILogger<SingleGameRunner> logger) : ISingleGameRunner
 {
-    public async Task<Game> RunAsync(bool doNotPersist = false, ActorType[]? team1ActorTypes = null, ActorType[]? team2ActorTypes = null, CancellationToken cancellationToken = default)
+    public async Task<Game> RunAsync(bool doNotPersist = false, ActorType[]? team1ActorTypes = null, ActorType[]? team2ActorTypes = null, bool showDecisions = false, CancellationToken cancellationToken = default)
     {
         var game = await gameOrchestrator.OrchestrateGameAsync(team1ActorTypes, team2ActorTypes);
 
@@ -38,7 +38,7 @@ public class SingleGameRunner(
             Foundation.LoggerMessages.LogGamePersistenceSkipped(logger);
         }
 
-        gameResultsRenderer.RenderResults(game);
+        gameResultsRenderer.RenderResults(game, showDecisions);
 
         return game;
     }

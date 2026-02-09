@@ -1,11 +1,9 @@
-using System.Text.Json;
-
 using Bogus;
 
 using FluentAssertions;
 
-using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Entities;
+using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
@@ -99,16 +97,11 @@ public class DiscardCardFeatureEngineerTests
     public void Transform_WithChosenCardNotInHand_ThrowsInvalidOperationException()
     {
         var cards = CreateRelativeCards(6);
-        var chosenCard = new RelativeCard
-        {
-            Rank = Rank.Ace,
-            Suit = RelativeSuit.Trump,
-        };
+        var chosenCard = new RelativeCard(Rank.Ace, RelativeSuit.Trump);
 
-        while (cards.Any(c => c.Rank == chosenCard.Rank && c.Suit == chosenCard.Suit))
+        while (cards.Any(c => c == chosenCard))
         {
-            chosenCard.Rank = _faker.PickRandom<Rank>();
-            chosenCard.Suit = _faker.PickRandom<RelativeSuit>();
+            chosenCard = new RelativeCard(_faker.PickRandom<Rank>(), _faker.PickRandom<RelativeSuit>());
         }
 
         var entity = CreateDiscardCardDecisionEntity(cards, chosenCard);
@@ -149,12 +142,12 @@ public class DiscardCardFeatureEngineerTests
         var cards = CreateRelativeCards(6);
         var entity = new DiscardCardDecisionEntity
         {
-            CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
-            CallingPlayer = _faker.PickRandom<RelativePlayerPosition>(),
+            CardsInHand = [.. cards.Select((c, i) => new DiscardCardDecisionCardsInHand { RelativeCardId = CardIdHelper.ToRelativeCardId(c), SortOrder = i })],
+            CallingRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
             CallingPlayerGoingAlone = _faker.Random.Bool(),
             TeamScore = (short)_faker.Random.Int(0, 9),
             OpponentScore = (short)_faker.Random.Int(0, 9),
-            ChosenCardJson = JsonSerializer.Serialize(cards[0], JsonSerializationOptions.Default),
+            ChosenRelativeCardId = CardIdHelper.ToRelativeCardId(cards[0]),
             RelativeDealPoints = -1,
         };
 
@@ -165,11 +158,7 @@ public class DiscardCardFeatureEngineerTests
 
     private RelativeCard CreateRelativeCard(Rank? rank = null, RelativeSuit? suit = null)
     {
-        return new RelativeCard
-        {
-            Rank = rank ?? _faker.PickRandom<Rank>(),
-            Suit = suit ?? _faker.PickRandom<RelativeSuit>(),
-        };
+        return new RelativeCard(rank ?? _faker.PickRandom<Rank>(), suit ?? _faker.PickRandom<RelativeSuit>());
     }
 
     private RelativeCard[] CreateRelativeCards(int count)
@@ -182,7 +171,7 @@ public class DiscardCardFeatureEngineerTests
             {
                 card = CreateRelativeCard();
             }
-            while (cards.Any(c => c.Rank == card.Rank && c.Suit == card.Suit));
+            while (cards.Any(c => c == card));
 
             cards.Add(card);
         }
@@ -203,12 +192,12 @@ public class DiscardCardFeatureEngineerTests
 
         return new DiscardCardDecisionEntity
         {
-            CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
-            CallingPlayer = callingPlayer ?? _faker.PickRandom<RelativePlayerPosition>(),
+            CardsInHand = [.. cards.Select((c, i) => new DiscardCardDecisionCardsInHand { RelativeCardId = CardIdHelper.ToRelativeCardId(c), SortOrder = i })],
+            CallingRelativePlayerPositionId = (int)(callingPlayer ?? _faker.PickRandom<RelativePlayerPosition>()),
             CallingPlayerGoingAlone = callingPlayerGoingAlone ?? _faker.Random.Bool(),
             TeamScore = teamScore ?? (short)_faker.Random.Int(0, 9),
             OpponentScore = opponentScore ?? (short)_faker.Random.Int(0, 9),
-            ChosenCardJson = JsonSerializer.Serialize(chosenCard, JsonSerializationOptions.Default),
+            ChosenRelativeCardId = CardIdHelper.ToRelativeCardId(chosenCard),
             RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
         };
     }

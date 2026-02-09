@@ -1,11 +1,9 @@
-using System.Text.Json;
-
 using Bogus;
 
 using FluentAssertions;
 
-using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.DataAccess.Entities;
+using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
@@ -63,23 +61,25 @@ public class PlayCardFeatureEngineerTests
     public void Transform_WithNullLeadSuit_UsesNegativeOneSentinel()
     {
         var cards = CreateRelativeCards(5);
+        var playedCardsDict = CreatePlayedCardsDict(1);
         var entity = new PlayCardDecisionEntity
         {
-            CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
-            PlayedCardsJson = JsonSerializer.Serialize(CreatePlayedCardsDict(1), JsonSerializationOptions.Default),
-            ValidCardsToPlayJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
-            ChosenCardJson = JsonSerializer.Serialize(cards[0], JsonSerializationOptions.Default),
-            KnownPlayerSuitVoidsJson = JsonSerializer.Serialize(Array.Empty<(RelativePlayerPosition, RelativeSuit)>(), JsonSerializationOptions.Default),
-            CardsAccountedForJson = JsonSerializer.Serialize(Array.Empty<RelativeCard>(), JsonSerializationOptions.Default),
-            LeadPlayer = _faker.PickRandom<RelativePlayerPosition>(),
-            LeadSuit = null,
-            WinningTrickPlayer = _faker.PickRandom<RelativePlayerPosition>(),
+            CardsInHand = [.. cards.Select((c, i) => new PlayCardDecisionCardsInHand { RelativeCardId = CardIdHelper.ToRelativeCardId(c), SortOrder = i })],
+            PlayedCards = [.. playedCardsDict.Select(kvp => new PlayCardDecisionPlayedCard { RelativePlayerPositionId = (int)kvp.Key, RelativeCardId = CardIdHelper.ToRelativeCardId(kvp.Value) })],
+            ValidCards = [.. cards.Select(c => new PlayCardDecisionValidCard { RelativeCardId = CardIdHelper.ToRelativeCardId(c) })],
+            ChosenRelativeCardId = CardIdHelper.ToRelativeCardId(cards[0]),
+            KnownVoids = [],
+            CardsAccountedFor = [],
+            LeadRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
+            LeadRelativeSuitId = null,
+            WinningTrickRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
             TeamScore = (short)_faker.Random.Int(0, 9),
             OpponentScore = (short)_faker.Random.Int(0, 9),
-            CallingPlayer = _faker.PickRandom<RelativePlayerPosition>(),
+            CallingRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
             CallingPlayerGoingAlone = _faker.Random.Bool(),
+            DealerRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
+            TrickNumber = (short)_faker.Random.Int(1, 5),
             RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
-            Trick = new TrickEntity { TrickNumber = (byte)_faker.Random.Int(1, 5), CardsPlayedJson = JsonSerializer.Serialize(new Dictionary<RelativePlayerPosition, RelativeCard>(), JsonSerializationOptions.Default) },
         };
 
         var result = _engineer.Transform(entity);
@@ -91,23 +91,25 @@ public class PlayCardFeatureEngineerTests
     public void Transform_WithNullWinningTrickPlayer_UsesNegativeOneSentinel()
     {
         var cards = CreateRelativeCards(5);
+        var playedCardsDict = CreatePlayedCardsDict(1);
         var entity = new PlayCardDecisionEntity
         {
-            CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
-            PlayedCardsJson = JsonSerializer.Serialize(CreatePlayedCardsDict(1), JsonSerializationOptions.Default),
-            ValidCardsToPlayJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
-            ChosenCardJson = JsonSerializer.Serialize(cards[0], JsonSerializationOptions.Default),
-            KnownPlayerSuitVoidsJson = JsonSerializer.Serialize(Array.Empty<(RelativePlayerPosition, RelativeSuit)>(), JsonSerializationOptions.Default),
-            CardsAccountedForJson = JsonSerializer.Serialize(Array.Empty<RelativeCard>(), JsonSerializationOptions.Default),
-            LeadPlayer = _faker.PickRandom<RelativePlayerPosition>(),
-            LeadSuit = _faker.PickRandom<RelativeSuit>(),
-            WinningTrickPlayer = null,
+            CardsInHand = [.. cards.Select((c, i) => new PlayCardDecisionCardsInHand { RelativeCardId = CardIdHelper.ToRelativeCardId(c), SortOrder = i })],
+            PlayedCards = [.. playedCardsDict.Select(kvp => new PlayCardDecisionPlayedCard { RelativePlayerPositionId = (int)kvp.Key, RelativeCardId = CardIdHelper.ToRelativeCardId(kvp.Value) })],
+            ValidCards = [.. cards.Select(c => new PlayCardDecisionValidCard { RelativeCardId = CardIdHelper.ToRelativeCardId(c) })],
+            ChosenRelativeCardId = CardIdHelper.ToRelativeCardId(cards[0]),
+            KnownVoids = [],
+            CardsAccountedFor = [],
+            LeadRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
+            LeadRelativeSuitId = (int)_faker.PickRandom<RelativeSuit>(),
+            WinningTrickRelativePlayerPositionId = null,
             TeamScore = (short)_faker.Random.Int(0, 9),
             OpponentScore = (short)_faker.Random.Int(0, 9),
-            CallingPlayer = _faker.PickRandom<RelativePlayerPosition>(),
+            CallingRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
             CallingPlayerGoingAlone = _faker.Random.Bool(),
+            DealerRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
+            TrickNumber = (short)_faker.Random.Int(1, 5),
             RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
-            Trick = new TrickEntity { TrickNumber = (byte)_faker.Random.Int(1, 5), CardsPlayedJson = JsonSerializer.Serialize(new Dictionary<RelativePlayerPosition, RelativeCard>(), JsonSerializationOptions.Default) },
         };
 
         var result = _engineer.Transform(entity);
@@ -176,16 +178,11 @@ public class PlayCardFeatureEngineerTests
     public void Transform_WithChosenCardNotInHand_ThrowsInvalidOperationException()
     {
         var cards = CreateRelativeCards(5);
-        var chosenCard = new RelativeCard
-        {
-            Rank = Rank.Ace,
-            Suit = RelativeSuit.Trump,
-        };
+        var chosenCard = new RelativeCard(Rank.Ace, RelativeSuit.Trump);
 
-        while (cards.Any(c => c.Rank == chosenCard.Rank && c.Suit == chosenCard.Suit))
+        while (cards.Any(c => c == chosenCard))
         {
-            chosenCard.Rank = _faker.PickRandom<Rank>();
-            chosenCard.Suit = _faker.PickRandom<RelativeSuit>();
+            chosenCard = new RelativeCard(_faker.PickRandom<Rank>(), _faker.PickRandom<RelativeSuit>());
         }
 
         var entity = CreatePlayCardDecisionEntity(cards, chosenCard: chosenCard);
@@ -200,23 +197,25 @@ public class PlayCardFeatureEngineerTests
     public void Transform_WithValidEntity_MapsExpectedDealPoints()
     {
         var cards = CreateRelativeCards(5);
+        var playedCardsDict = CreatePlayedCardsDict(1);
         var entity = new PlayCardDecisionEntity
         {
-            CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
-            PlayedCardsJson = JsonSerializer.Serialize(CreatePlayedCardsDict(1), JsonSerializationOptions.Default),
-            ValidCardsToPlayJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
-            ChosenCardJson = JsonSerializer.Serialize(cards[0], JsonSerializationOptions.Default),
-            KnownPlayerSuitVoidsJson = JsonSerializer.Serialize(Array.Empty<(RelativePlayerPosition, RelativeSuit)>(), JsonSerializationOptions.Default),
-            CardsAccountedForJson = JsonSerializer.Serialize(Array.Empty<RelativeCard>(), JsonSerializationOptions.Default),
-            LeadPlayer = _faker.PickRandom<RelativePlayerPosition>(),
-            LeadSuit = _faker.PickRandom<RelativeSuit>(),
-            WinningTrickPlayer = _faker.PickRandom<RelativePlayerPosition>(),
+            CardsInHand = [.. cards.Select((c, i) => new PlayCardDecisionCardsInHand { RelativeCardId = CardIdHelper.ToRelativeCardId(c), SortOrder = i })],
+            PlayedCards = [.. playedCardsDict.Select(kvp => new PlayCardDecisionPlayedCard { RelativePlayerPositionId = (int)kvp.Key, RelativeCardId = CardIdHelper.ToRelativeCardId(kvp.Value) })],
+            ValidCards = [.. cards.Select(c => new PlayCardDecisionValidCard { RelativeCardId = CardIdHelper.ToRelativeCardId(c) })],
+            ChosenRelativeCardId = CardIdHelper.ToRelativeCardId(cards[0]),
+            KnownVoids = [],
+            CardsAccountedFor = [],
+            LeadRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
+            LeadRelativeSuitId = (int)_faker.PickRandom<RelativeSuit>(),
+            WinningTrickRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
             TeamScore = (short)_faker.Random.Int(0, 9),
             OpponentScore = (short)_faker.Random.Int(0, 9),
-            CallingPlayer = _faker.PickRandom<RelativePlayerPosition>(),
+            CallingRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
             CallingPlayerGoingAlone = _faker.Random.Bool(),
+            DealerRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
+            TrickNumber = (short)_faker.Random.Int(1, 5),
             RelativeDealPoints = 2,
-            Trick = new TrickEntity { TrickNumber = (byte)_faker.Random.Int(1, 5), CardsPlayedJson = JsonSerializer.Serialize(new Dictionary<RelativePlayerPosition, RelativeCard>(), JsonSerializationOptions.Default) },
         };
 
         var result = _engineer.Transform(entity);
@@ -257,11 +256,7 @@ public class PlayCardFeatureEngineerTests
 
     private RelativeCard CreateRelativeCard(Rank? rank = null, RelativeSuit? suit = null)
     {
-        return new RelativeCard
-        {
-            Rank = rank ?? _faker.PickRandom<Rank>(),
-            Suit = suit ?? _faker.PickRandom<RelativeSuit>(),
-        };
+        return new RelativeCard(rank ?? _faker.PickRandom<Rank>(), suit ?? _faker.PickRandom<RelativeSuit>());
     }
 
     private RelativeCard[] CreateRelativeCards(int count)
@@ -274,7 +269,7 @@ public class PlayCardFeatureEngineerTests
             {
                 card = CreateRelativeCard();
             }
-            while (cards.Any(c => c.Rank == card.Rank && c.Suit == card.Suit));
+            while (cards.Any(c => c == card));
 
             cards.Add(card);
         }
@@ -310,7 +305,7 @@ public class PlayCardFeatureEngineerTests
         RelativePlayerPosition? winningTrickPlayer = default,
         short? teamScore = null,
         short? opponentScore = null,
-        byte? trickNumber = null,
+        short? trickNumber = null,
         RelativePlayerPosition? callingPlayer = null,
         bool? callingPlayerGoingAlone = null)
     {
@@ -319,22 +314,25 @@ public class PlayCardFeatureEngineerTests
         validCards ??= cards;
         chosenCard ??= cards[0];
 
+        var resolvedLeadSuit = leadSuit ?? (_faker.Random.Bool() ? _faker.PickRandom<RelativeSuit>() : null);
+
         return new PlayCardDecisionEntity
         {
-            CardsInHandJson = JsonSerializer.Serialize(cards, JsonSerializationOptions.Default),
-            PlayedCardsJson = JsonSerializer.Serialize(playedCards, JsonSerializationOptions.Default),
-            ValidCardsToPlayJson = JsonSerializer.Serialize(validCards, JsonSerializationOptions.Default),
-            ChosenCardJson = JsonSerializer.Serialize(chosenCard, JsonSerializationOptions.Default),
-            KnownPlayerSuitVoidsJson = JsonSerializer.Serialize(Array.Empty<(RelativePlayerPosition, RelativeSuit)>(), JsonSerializationOptions.Default),
-            CardsAccountedForJson = JsonSerializer.Serialize(Array.Empty<RelativeCard>(), JsonSerializationOptions.Default),
-            LeadPlayer = leadPlayer ?? _faker.PickRandom<RelativePlayerPosition>(),
-            LeadSuit = leadSuit ?? (_faker.Random.Bool() ? _faker.PickRandom<RelativeSuit>() : null),
-            WinningTrickPlayer = winningTrickPlayer,
+            CardsInHand = [.. cards.Select((c, i) => new PlayCardDecisionCardsInHand { RelativeCardId = CardIdHelper.ToRelativeCardId(c), SortOrder = i })],
+            PlayedCards = [.. playedCards.Select(kvp => new PlayCardDecisionPlayedCard { RelativePlayerPositionId = (int)kvp.Key, RelativeCardId = CardIdHelper.ToRelativeCardId(kvp.Value) })],
+            ValidCards = [.. validCards.Select(c => new PlayCardDecisionValidCard { RelativeCardId = CardIdHelper.ToRelativeCardId(c) })],
+            ChosenRelativeCardId = CardIdHelper.ToRelativeCardId(chosenCard),
+            KnownVoids = [],
+            CardsAccountedFor = [],
+            LeadRelativePlayerPositionId = (int)(leadPlayer ?? _faker.PickRandom<RelativePlayerPosition>()),
+            LeadRelativeSuitId = resolvedLeadSuit.HasValue ? (int)resolvedLeadSuit.Value : null,
+            WinningTrickRelativePlayerPositionId = winningTrickPlayer.HasValue ? (int)winningTrickPlayer.Value : null,
             TeamScore = teamScore ?? (short)_faker.Random.Int(0, 9),
             OpponentScore = opponentScore ?? (short)_faker.Random.Int(0, 9),
             TrickNumber = trickNumber ?? (short)_faker.Random.Int(1, 5),
-            CallingPlayer = callingPlayer ?? _faker.PickRandom<RelativePlayerPosition>(),
+            CallingRelativePlayerPositionId = (int)(callingPlayer ?? _faker.PickRandom<RelativePlayerPosition>()),
             CallingPlayerGoingAlone = callingPlayerGoingAlone ?? _faker.Random.Bool(),
+            DealerRelativePlayerPositionId = (int)_faker.PickRandom<RelativePlayerPosition>(),
             RelativeDealPoints = (short)_faker.Random.Int(-2, 4),
         };
     }

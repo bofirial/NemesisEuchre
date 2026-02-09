@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.DataAccess.Entities.Metadata;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
@@ -13,17 +13,25 @@ public class TrickEntity
 
     public int TrickNumber { get; set; }
 
-    public PlayerPosition LeadPosition { get; set; }
+    public int LeadPlayerPositionId { get; set; }
 
-    public Suit? LeadSuit { get; set; }
+    public int? LeadSuitId { get; set; }
 
-    public required string CardsPlayedJson { get; set; }
+    public int? WinningPlayerPositionId { get; set; }
 
-    public PlayerPosition? WinningPosition { get; set; }
-
-    public Team? WinningTeam { get; set; }
+    public int? WinningTeamId { get; set; }
 
     public DealEntity? Deal { get; set; }
+
+    public PlayerPositionMetadata? LeadPosition { get; set; }
+
+    public SuitMetadata? LeadSuit { get; set; }
+
+    public PlayerPositionMetadata? WinningPosition { get; set; }
+
+    public TeamMetadata? WinningTeam { get; set; }
+
+    public ICollection<TrickCardPlayed> TrickCardsPlayed { get; set; } = [];
 
     public List<PlayCardDecisionEntity> PlayCardDecisions { get; set; } = [];
 }
@@ -45,31 +53,33 @@ public class TrickEntityConfiguration : IEntityTypeConfiguration<TrickEntity>
         builder.Property(e => e.TrickNumber)
             .IsRequired();
 
-        builder.Property(e => e.LeadPosition)
-            .IsRequired()
-            .HasConversion<string>()
-            .HasMaxLength(10);
-
-        builder.Property(e => e.CardsPlayedJson)
-            .IsRequired()
-            .HasMaxLength(400);
-
-        builder.Property(e => e.LeadSuit)
-            .HasConversion<string>()
-            .HasMaxLength(10);
-
-        builder.Property(e => e.WinningPosition)
-            .HasConversion<string>()
-            .HasMaxLength(10);
-
-        builder.Property(e => e.WinningTeam)
-            .HasConversion<string>()
-            .HasMaxLength(10);
+        builder.Property(e => e.LeadPlayerPositionId)
+            .IsRequired();
 
         builder.HasOne(e => e.Deal)
             .WithMany(d => d.Tricks)
             .HasForeignKey(e => e.DealId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(e => e.LeadPosition)
+            .WithMany()
+            .HasForeignKey(e => e.LeadPlayerPositionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.LeadSuit)
+            .WithMany()
+            .HasForeignKey(e => e.LeadSuitId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.WinningPosition)
+            .WithMany()
+            .HasForeignKey(e => e.WinningPlayerPositionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.WinningTeam)
+            .WithMany()
+            .HasForeignKey(e => e.WinningTeamId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(e => e.DealId)
             .HasDatabaseName("IX_Tricks_DealId");

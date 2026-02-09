@@ -31,55 +31,37 @@ public class Gen1Bot(
 
     public override ActorType ActorType => ActorType.Gen1;
 
-    public override async Task<CallTrumpDecision> CallTrumpAsync(
+    public override async Task<CallTrumpDecisionContext> CallTrumpAsync(
         Card[] cardsInHand,
-        PlayerPosition playerPosition,
         short teamScore,
         short opponentScore,
-        PlayerPosition dealerPosition,
+        RelativePlayerPosition dealerPosition,
         Card upCard,
         CallTrumpDecision[] validCallTrumpDecisions)
     {
-        if (_callTrumpEngine == null)
+        var (bestOption, scores) = PredictBestOption(
+            _callTrumpEngine,
+            validCallTrumpDecisions,
+            decision => _callTrumpFeatureBuilder.BuildFeatures(
+                cardsInHand,
+                upCard,
+                dealerPosition,
+                teamScore,
+                opponentScore,
+                validCallTrumpDecisions,
+                decision),
+            prediction => prediction.PredictedPoints,
+            LoggerMessages.LogCallTrumpEngineNotAvailable,
+            LoggerMessages.LogCallTrumpPredictionError);
+
+        return new CallTrumpDecisionContext
         {
-            return await SelectRandomAsync(validCallTrumpDecisions);
-        }
-
-        try
-        {
-            var bestDecision = CallTrumpDecision.Pass;
-            var bestScore = float.MinValue;
-
-            foreach (var decision in validCallTrumpDecisions)
-            {
-                var trainingData = _callTrumpFeatureBuilder.BuildFeatures(
-                    cardsInHand,
-                    upCard,
-                    dealerPosition,
-                    teamScore,
-                    opponentScore,
-                    validCallTrumpDecisions,
-                    decision);
-
-                var prediction = _callTrumpEngine.Predict(trainingData);
-
-                if (prediction.PredictedPoints > bestScore)
-                {
-                    bestScore = prediction.PredictedPoints;
-                    bestDecision = decision;
-                }
-            }
-
-            return bestDecision;
-        }
-        catch (Exception ex)
-        {
-            LoggerMessages.LogCallTrumpPredictionError(_logger, ex);
-            return await SelectRandomAsync(validCallTrumpDecisions);
-        }
+            ChosenCallTrumpDecision = bestOption,
+            DecisionPredictedPoints = scores,
+        };
     }
 
-    public override async Task<RelativeCard> DiscardCardAsync(
+    public override async Task<RelativeCardDecisionContext> DiscardCardAsync(
         RelativeCard[] cardsInHand,
         short teamScore,
         short opponentScore,
@@ -92,45 +74,28 @@ public class Gen1Bot(
             throw new InvalidOperationException($"Expected 6 cards in hand for discard, got {cardsInHand.Length}");
         }
 
-        if (_discardCardEngine == null)
+        var (bestOption, scores) = PredictBestOption(
+            _discardCardEngine,
+            validCardsToDiscard,
+            card => _discardCardFeatureBuilder.BuildFeatures(
+                cardsInHand,
+                callingPlayer,
+                callingPlayerGoingAlone,
+                teamScore,
+                opponentScore,
+                card),
+            prediction => prediction.PredictedPoints,
+            LoggerMessages.LogDiscardCardEngineNotAvailable,
+            LoggerMessages.LogDiscardCardPredictionError);
+
+        return new RelativeCardDecisionContext
         {
-            return await SelectRandomAsync(validCardsToDiscard);
-        }
-
-        try
-        {
-            var bestCard = validCardsToDiscard[0];
-            var bestScore = float.MinValue;
-
-            foreach (var card in validCardsToDiscard)
-            {
-                var trainingData = _discardCardFeatureBuilder.BuildFeatures(
-                    cardsInHand,
-                    callingPlayer,
-                    callingPlayerGoingAlone,
-                    teamScore,
-                    opponentScore,
-                    card);
-
-                var prediction = _discardCardEngine.Predict(trainingData);
-
-                if (prediction.PredictedPoints > bestScore)
-                {
-                    bestScore = prediction.PredictedPoints;
-                    bestCard = card;
-                }
-            }
-
-            return bestCard;
-        }
-        catch (Exception ex)
-        {
-            LoggerMessages.LogDiscardCardPredictionError(_logger, ex);
-            return await SelectRandomAsync(validCardsToDiscard);
-        }
+            ChosenCard = bestOption,
+            DecisionPredictedPoints = scores,
+        };
     }
 
-    public override async Task<RelativeCard> PlayCardAsync(
+    public override async Task<RelativeCardDecisionContext> PlayCardAsync(
         RelativeCard[] cardsInHand,
         short teamScore,
         short opponentScore,
@@ -140,58 +105,88 @@ public class Gen1Bot(
         RelativeCard? dealerPickedUpCard,
         RelativePlayerPosition leadPlayer,
         RelativeSuit? leadSuit,
-        (RelativePlayerPosition PlayerPosition, RelativeSuit Suit)[] knownPlayerSuitVoids,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids,
         RelativeCard[] cardsAccountedFor,
         Dictionary<RelativePlayerPosition, RelativeCard> playedCardsInTrick,
         RelativePlayerPosition? currentlyWinningTrickPlayer,
         short trickNumber,
         RelativeCard[] validCardsToPlay)
     {
-        if (_playCardEngine == null)
+        var (bestOption, scores) = PredictBestOption(
+            _playCardEngine,
+            validCardsToPlay,
+            card => _playCardFeatureBuilder.BuildFeatures(
+                cardsInHand,
+                leadPlayer,
+                leadSuit,
+                playedCardsInTrick,
+                teamScore,
+                opponentScore,
+                callingPlayer,
+                callingPlayerGoingAlone,
+                dealer,
+                dealerPickedUpCard,
+                knownPlayerSuitVoids,
+                cardsAccountedFor,
+                currentlyWinningTrickPlayer,
+                trickNumber,
+                validCardsToPlay,
+                card),
+            prediction => prediction.PredictedPoints,
+            LoggerMessages.LogPlayCardEngineNotAvailable,
+            LoggerMessages.LogPlayCardPredictionError);
+
+        return new RelativeCardDecisionContext
         {
-            return await SelectRandomAsync(validCardsToPlay);
+            ChosenCard = bestOption,
+            DecisionPredictedPoints = scores,
+        };
+    }
+
+    private (TOption bestOption, Dictionary<TOption, float> scores) PredictBestOption<TOption, TData, TPrediction>(
+        PredictionEngine<TData, TPrediction>? engine,
+        TOption[] options,
+        Func<TOption, TData> buildFeatures,
+        Func<TPrediction, float> getScore,
+        Action<ILogger> logEngineNotAvailable,
+        Action<ILogger, Exception> logPredictionError)
+        where TOption : notnull
+        where TData : class, new()
+        where TPrediction : class, new()
+    {
+        if (engine == null)
+        {
+            logEngineNotAvailable(_logger);
+            return (SelectRandom(options), options.ToDictionary(o => o, _ => 0f));
         }
 
         try
         {
-            var bestCard = validCardsToPlay[0];
+            var bestOption = options[0];
             var bestScore = float.MinValue;
+            var scores = new Dictionary<TOption, float>();
 
-            foreach (var card in validCardsToPlay)
+            foreach (var option in options)
             {
-                var trainingData = _playCardFeatureBuilder.BuildFeatures(
-                    cardsInHand,
-                    leadPlayer,
-                    leadSuit,
-                    playedCardsInTrick,
-                    teamScore,
-                    opponentScore,
-                    callingPlayer,
-                    callingPlayerGoingAlone,
-                    dealer,
-                    dealerPickedUpCard,
-                    knownPlayerSuitVoids,
-                    cardsAccountedFor,
-                    currentlyWinningTrickPlayer,
-                    trickNumber,
-                    validCardsToPlay,
-                    card);
+                var trainingData = buildFeatures(option);
+                var prediction = engine.Predict(trainingData);
+                var score = getScore(prediction);
 
-                var prediction = _playCardEngine.Predict(trainingData);
+                scores.Add(option, score);
 
-                if (prediction.PredictedPoints > bestScore)
+                if (score > bestScore)
                 {
-                    bestScore = prediction.PredictedPoints;
-                    bestCard = card;
+                    bestScore = score;
+                    bestOption = option;
                 }
             }
 
-            return bestCard;
+            return (bestOption, scores);
         }
         catch (Exception ex)
         {
-            LoggerMessages.LogPlayCardPredictionError(_logger, ex);
-            return await SelectRandomAsync(validCardsToPlay);
+            logPredictionError(_logger, ex);
+            return (SelectRandom(options), options.ToDictionary(o => o, _ => 0f));
         }
     }
 }

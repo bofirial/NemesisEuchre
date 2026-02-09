@@ -17,10 +17,28 @@ namespace NemesisEuchre.DataAccess.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "10.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.CallTrumpDecisionCardsInHand", b =>
+                {
+                    b.Property<int>("CallTrumpDecisionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CardId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("CallTrumpDecisionId", "CardId");
+
+                    b.HasIndex("CardId");
+
+                    b.ToTable("CallTrumpDecisionCardsInHand", (string)null);
+                });
 
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.CallTrumpDecisionEntity", b =>
                 {
@@ -30,26 +48,17 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CallTrumpDecisionId"));
 
-                    b.Property<string>("ActorType")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<int?>("ActorTypeId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("CardsInHandJson")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("ChosenDecisionJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ChosenDecisionValueId")
+                        .HasColumnType("int");
 
                     b.Property<int>("DealId")
                         .HasColumnType("int");
 
-                    b.Property<string>("DealerPosition")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
+                    b.Property<int>("DealerRelativePositionId")
+                        .HasColumnType("int");
 
                     b.Property<byte>("DecisionOrder")
                         .HasColumnType("tinyint");
@@ -69,25 +78,75 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<short>("TeamScore")
                         .HasColumnType("smallint");
 
-                    b.Property<string>("UpCardJson")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ValidDecisionsJson")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                    b.Property<int>("UpCardId")
+                        .HasColumnType("int");
 
                     b.HasKey("CallTrumpDecisionId");
 
-                    b.HasIndex("ActorType")
-                        .HasDatabaseName("IX_CallTrumpDecisions_ActorType");
+                    b.HasIndex("ActorTypeId")
+                        .HasDatabaseName("IX_CallTrumpDecisions_ActorTypeId");
+
+                    b.HasIndex("ChosenDecisionValueId");
 
                     b.HasIndex("DealId")
                         .HasDatabaseName("IX_CallTrumpDecisions_DealId");
 
+                    b.HasIndex("DealerRelativePositionId");
+
+                    b.HasIndex("UpCardId");
+
                     b.ToTable("CallTrumpDecisions", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.CallTrumpDecisionPredictedPoints", b =>
+                {
+                    b.Property<int>("CallTrumpDecisionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CallTrumpDecisionValueId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("PredictedPoints")
+                        .HasColumnType("real");
+
+                    b.HasKey("CallTrumpDecisionId", "CallTrumpDecisionValueId");
+
+                    b.HasIndex("CallTrumpDecisionValueId");
+
+                    b.ToTable("CallTrumpDecisionPredictedPoints", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.CallTrumpDecisionValidDecision", b =>
+                {
+                    b.Property<int>("CallTrumpDecisionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CallTrumpDecisionValueId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CallTrumpDecisionId", "CallTrumpDecisionValueId");
+
+                    b.HasIndex("CallTrumpDecisionValueId");
+
+                    b.ToTable("CallTrumpValidDecisions", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DealDeckCard", b =>
+                {
+                    b.Property<int>("DealId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CardId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("DealId", "CardId");
+
+                    b.HasIndex("CardId");
+
+                    b.ToTable("DealDeckCards", (string)null);
                 });
 
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DealEntity", b =>
@@ -98,53 +157,32 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DealId"));
 
-                    b.Property<string>("CallingPlayer")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
                     b.Property<bool>("CallingPlayerIsGoingAlone")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ChosenDecision")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                    b.Property<int?>("CallingPlayerPositionId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ChosenCallTrumpDecisionId")
+                        .HasColumnType("int");
 
                     b.Property<int>("DealNumber")
                         .HasColumnType("int");
 
-                    b.Property<string>("DealResult")
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
+                    b.Property<int?>("DealResultId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("DealStatus")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<int>("DealStatusId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("DealerPosition")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<int?>("DealerPositionId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("DeckJson")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("DiscardedCardJson")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int?>("DiscardedCardId")
+                        .HasColumnType("int");
 
                     b.Property<int>("GameId")
                         .HasColumnType("int");
-
-                    b.Property<string>("KnownPlayerSuitVoidsJson")
-                        .HasMaxLength(600)
-                        .HasColumnType("nvarchar(600)");
-
-                    b.Property<string>("PlayersJson")
-                        .IsRequired()
-                        .HasMaxLength(1500)
-                        .HasColumnType("nvarchar(1500)");
 
                     b.Property<short>("Team1Score")
                         .HasColumnType("smallint");
@@ -152,24 +190,125 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<short>("Team2Score")
                         .HasColumnType("smallint");
 
-                    b.Property<string>("Trump")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<int?>("TrumpSuitId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("UpCardJson")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int?>("UpCardId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("WinningTeam")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<int?>("WinningTeamId")
+                        .HasColumnType("int");
 
                     b.HasKey("DealId");
+
+                    b.HasIndex("CallingPlayerPositionId");
+
+                    b.HasIndex("ChosenCallTrumpDecisionId");
+
+                    b.HasIndex("DealResultId");
+
+                    b.HasIndex("DealStatusId");
+
+                    b.HasIndex("DealerPositionId");
+
+                    b.HasIndex("DiscardedCardId");
 
                     b.HasIndex("GameId")
                         .HasDatabaseName("IX_Deals_GameId");
 
+                    b.HasIndex("TrumpSuitId");
+
+                    b.HasIndex("UpCardId");
+
+                    b.HasIndex("WinningTeamId");
+
                     b.ToTable("Deals", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DealKnownPlayerSuitVoid", b =>
+                {
+                    b.Property<int>("DealId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerPositionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SuitId")
+                        .HasColumnType("int");
+
+                    b.HasKey("DealId", "PlayerPositionId", "SuitId");
+
+                    b.HasIndex("PlayerPositionId");
+
+                    b.HasIndex("SuitId");
+
+                    b.ToTable("DealKnownPlayerSuitVoids", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DealPlayerEntity", b =>
+                {
+                    b.Property<int>("DealPlayerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DealPlayerId"));
+
+                    b.Property<int?>("ActorTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DealId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerPositionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("DealPlayerId");
+
+                    b.HasIndex("ActorTypeId");
+
+                    b.HasIndex("PlayerPositionId");
+
+                    b.HasIndex("DealId", "PlayerPositionId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_DealPlayers_DealId_PlayerPositionId");
+
+                    b.ToTable("DealPlayers", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DealPlayerStartingHandCard", b =>
+                {
+                    b.Property<int>("DealPlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CardId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("DealPlayerId", "CardId");
+
+                    b.HasIndex("CardId");
+
+                    b.ToTable("DealPlayerStartingHandCards", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DiscardCardDecisionCardsInHand", b =>
+                {
+                    b.Property<int>("DiscardCardDecisionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelativeCardId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("DiscardCardDecisionId", "RelativeCardId");
+
+                    b.HasIndex("RelativeCardId");
+
+                    b.ToTable("DiscardCardDecisionCardsInHand", (string)null);
                 });
 
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DiscardCardDecisionEntity", b =>
@@ -180,27 +319,17 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DiscardCardDecisionId"));
 
-                    b.Property<string>("ActorType")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("CallingPlayer")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
+                    b.Property<int?>("ActorTypeId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("CallingPlayerGoingAlone")
                         .HasColumnType("bit");
 
-                    b.Property<string>("CardsInHandJson")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                    b.Property<int>("CallingRelativePlayerPositionId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("ChosenCardJson")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("ChosenRelativeCardId")
+                        .HasColumnType("int");
 
                     b.Property<int>("DealId")
                         .HasColumnType("int");
@@ -222,13 +351,35 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     b.HasKey("DiscardCardDecisionId");
 
-                    b.HasIndex("ActorType")
-                        .HasDatabaseName("IX_DiscardCardDecisions_ActorType");
+                    b.HasIndex("ActorTypeId")
+                        .HasDatabaseName("IX_DiscardCardDecisions_ActorTypeId");
+
+                    b.HasIndex("CallingRelativePlayerPositionId");
+
+                    b.HasIndex("ChosenRelativeCardId");
 
                     b.HasIndex("DealId")
                         .HasDatabaseName("IX_DiscardCardDecisions_DealId");
 
                     b.ToTable("DiscardCardDecisions", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DiscardCardDecisionPredictedPoints", b =>
+                {
+                    b.Property<int>("DiscardCardDecisionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelativeCardId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("PredictedPoints")
+                        .HasColumnType("real");
+
+                    b.HasKey("DiscardCardDecisionId", "RelativeCardId");
+
+                    b.HasIndex("RelativeCardId");
+
+                    b.ToTable("DiscardCardDecisionPredictedPoints", (string)null);
                 });
 
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.GameEntity", b =>
@@ -244,15 +395,8 @@ namespace NemesisEuchre.DataAccess.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<string>("GameStatus")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("PlayersJson")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<int>("GameStatusId")
+                        .HasColumnType("int");
 
                     b.Property<short>("Team1Score")
                         .HasColumnType("smallint");
@@ -260,19 +404,920 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<short>("Team2Score")
                         .HasColumnType("smallint");
 
-                    b.Property<string>("WinningTeam")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<int?>("WinningTeamId")
+                        .HasColumnType("int");
 
                     b.HasKey("GameId");
 
                     b.HasIndex("CreatedAt")
                         .HasDatabaseName("IX_Games_CreatedAt");
 
-                    b.HasIndex("WinningTeam")
-                        .HasDatabaseName("IX_Games_WinningTeam");
+                    b.HasIndex("GameStatusId");
+
+                    b.HasIndex("WinningTeamId")
+                        .HasDatabaseName("IX_Games_WinningTeamId");
 
                     b.ToTable("Games", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.GamePlayer", b =>
+                {
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerPositionId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ActorTypeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("GameId", "PlayerPositionId");
+
+                    b.HasIndex("ActorTypeId");
+
+                    b.HasIndex("PlayerPositionId");
+
+                    b.ToTable("GamePlayers", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.ActorTypeMetadata", b =>
+                {
+                    b.Property<int>("ActorTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("ActorTypeId");
+
+                    b.ToTable("ActorTypes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            ActorTypeId = 0,
+                            Name = "User"
+                        },
+                        new
+                        {
+                            ActorTypeId = 1,
+                            Name = "Chaos"
+                        },
+                        new
+                        {
+                            ActorTypeId = 2,
+                            Name = "Chad"
+                        },
+                        new
+                        {
+                            ActorTypeId = 3,
+                            Name = "Beta"
+                        },
+                        new
+                        {
+                            ActorTypeId = 10,
+                            Name = "Gen1"
+                        },
+                        new
+                        {
+                            ActorTypeId = 11,
+                            Name = "Gen1Trainer"
+                        });
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.CallTrumpDecisionValueMetadata", b =>
+                {
+                    b.Property<int>("CallTrumpDecisionValueId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("CallTrumpDecisionValueId");
+
+                    b.ToTable("CallTrumpDecisionValues", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            CallTrumpDecisionValueId = 0,
+                            Name = "Pass"
+                        },
+                        new
+                        {
+                            CallTrumpDecisionValueId = 1,
+                            Name = "CallSpades"
+                        },
+                        new
+                        {
+                            CallTrumpDecisionValueId = 2,
+                            Name = "CallHearts"
+                        },
+                        new
+                        {
+                            CallTrumpDecisionValueId = 3,
+                            Name = "CallClubs"
+                        },
+                        new
+                        {
+                            CallTrumpDecisionValueId = 4,
+                            Name = "CallDiamonds"
+                        },
+                        new
+                        {
+                            CallTrumpDecisionValueId = 5,
+                            Name = "CallSpadesAndGoAlone"
+                        },
+                        new
+                        {
+                            CallTrumpDecisionValueId = 6,
+                            Name = "CallHeartsAndGoAlone"
+                        },
+                        new
+                        {
+                            CallTrumpDecisionValueId = 7,
+                            Name = "CallClubsAndGoAlone"
+                        },
+                        new
+                        {
+                            CallTrumpDecisionValueId = 8,
+                            Name = "CallDiamondsAndGoAlone"
+                        },
+                        new
+                        {
+                            CallTrumpDecisionValueId = 9,
+                            Name = "OrderItUp"
+                        },
+                        new
+                        {
+                            CallTrumpDecisionValueId = 10,
+                            Name = "OrderItUpAndGoAlone"
+                        });
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.CardMetadata", b =>
+                {
+                    b.Property<int>("CardId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RankId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SuitId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CardId");
+
+                    b.HasIndex("RankId");
+
+                    b.HasIndex("SuitId");
+
+                    b.ToTable("Cards", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            CardId = 109,
+                            RankId = 9,
+                            SuitId = 1
+                        },
+                        new
+                        {
+                            CardId = 110,
+                            RankId = 10,
+                            SuitId = 1
+                        },
+                        new
+                        {
+                            CardId = 111,
+                            RankId = 11,
+                            SuitId = 1
+                        },
+                        new
+                        {
+                            CardId = 112,
+                            RankId = 12,
+                            SuitId = 1
+                        },
+                        new
+                        {
+                            CardId = 113,
+                            RankId = 13,
+                            SuitId = 1
+                        },
+                        new
+                        {
+                            CardId = 114,
+                            RankId = 14,
+                            SuitId = 1
+                        },
+                        new
+                        {
+                            CardId = 209,
+                            RankId = 9,
+                            SuitId = 2
+                        },
+                        new
+                        {
+                            CardId = 210,
+                            RankId = 10,
+                            SuitId = 2
+                        },
+                        new
+                        {
+                            CardId = 211,
+                            RankId = 11,
+                            SuitId = 2
+                        },
+                        new
+                        {
+                            CardId = 212,
+                            RankId = 12,
+                            SuitId = 2
+                        },
+                        new
+                        {
+                            CardId = 213,
+                            RankId = 13,
+                            SuitId = 2
+                        },
+                        new
+                        {
+                            CardId = 214,
+                            RankId = 14,
+                            SuitId = 2
+                        },
+                        new
+                        {
+                            CardId = 309,
+                            RankId = 9,
+                            SuitId = 3
+                        },
+                        new
+                        {
+                            CardId = 310,
+                            RankId = 10,
+                            SuitId = 3
+                        },
+                        new
+                        {
+                            CardId = 311,
+                            RankId = 11,
+                            SuitId = 3
+                        },
+                        new
+                        {
+                            CardId = 312,
+                            RankId = 12,
+                            SuitId = 3
+                        },
+                        new
+                        {
+                            CardId = 313,
+                            RankId = 13,
+                            SuitId = 3
+                        },
+                        new
+                        {
+                            CardId = 314,
+                            RankId = 14,
+                            SuitId = 3
+                        },
+                        new
+                        {
+                            CardId = 409,
+                            RankId = 9,
+                            SuitId = 4
+                        },
+                        new
+                        {
+                            CardId = 410,
+                            RankId = 10,
+                            SuitId = 4
+                        },
+                        new
+                        {
+                            CardId = 411,
+                            RankId = 11,
+                            SuitId = 4
+                        },
+                        new
+                        {
+                            CardId = 412,
+                            RankId = 12,
+                            SuitId = 4
+                        },
+                        new
+                        {
+                            CardId = 413,
+                            RankId = 13,
+                            SuitId = 4
+                        },
+                        new
+                        {
+                            CardId = 414,
+                            RankId = 14,
+                            SuitId = 4
+                        });
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.DealResultMetadata", b =>
+                {
+                    b.Property<int>("DealResultId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.HasKey("DealResultId");
+
+                    b.ToTable("DealResults", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            DealResultId = 1,
+                            Name = "WonStandardBid"
+                        },
+                        new
+                        {
+                            DealResultId = 2,
+                            Name = "WonGotAllTricks"
+                        },
+                        new
+                        {
+                            DealResultId = 3,
+                            Name = "OpponentsEuchred"
+                        },
+                        new
+                        {
+                            DealResultId = 4,
+                            Name = "WonAndWentAlone"
+                        },
+                        new
+                        {
+                            DealResultId = 5,
+                            Name = "ThrowIn"
+                        });
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.DealStatusMetadata", b =>
+                {
+                    b.Property<int>("DealStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("DealStatusId");
+
+                    b.ToTable("DealStatuses", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            DealStatusId = 0,
+                            Name = "NotStarted"
+                        },
+                        new
+                        {
+                            DealStatusId = 1,
+                            Name = "SelectingTrump"
+                        },
+                        new
+                        {
+                            DealStatusId = 2,
+                            Name = "Playing"
+                        },
+                        new
+                        {
+                            DealStatusId = 3,
+                            Name = "Scoring"
+                        },
+                        new
+                        {
+                            DealStatusId = 4,
+                            Name = "Complete"
+                        });
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.GameStatusMetadata", b =>
+                {
+                    b.Property<int>("GameStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("GameStatusId");
+
+                    b.ToTable("GameStatuses", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            GameStatusId = 0,
+                            Name = "NotStarted"
+                        },
+                        new
+                        {
+                            GameStatusId = 1,
+                            Name = "Playing"
+                        },
+                        new
+                        {
+                            GameStatusId = 2,
+                            Name = "Complete"
+                        });
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.PlayerPositionMetadata", b =>
+                {
+                    b.Property<int>("PlayerPositionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.HasKey("PlayerPositionId");
+
+                    b.ToTable("PlayerPositions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            PlayerPositionId = 0,
+                            Name = "North"
+                        },
+                        new
+                        {
+                            PlayerPositionId = 1,
+                            Name = "East"
+                        },
+                        new
+                        {
+                            PlayerPositionId = 2,
+                            Name = "South"
+                        },
+                        new
+                        {
+                            PlayerPositionId = 3,
+                            Name = "West"
+                        });
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.RankMetadata", b =>
+                {
+                    b.Property<int>("RankId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("RankId");
+
+                    b.ToTable("Ranks", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            RankId = 9,
+                            Name = "Nine"
+                        },
+                        new
+                        {
+                            RankId = 10,
+                            Name = "Ten"
+                        },
+                        new
+                        {
+                            RankId = 11,
+                            Name = "Jack"
+                        },
+                        new
+                        {
+                            RankId = 12,
+                            Name = "Queen"
+                        },
+                        new
+                        {
+                            RankId = 13,
+                            Name = "King"
+                        },
+                        new
+                        {
+                            RankId = 14,
+                            Name = "Ace"
+                        },
+                        new
+                        {
+                            RankId = 15,
+                            Name = "LeftBower"
+                        },
+                        new
+                        {
+                            RankId = 16,
+                            Name = "RightBower"
+                        });
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.RelativeCardMetadata", b =>
+                {
+                    b.Property<int>("RelativeCardId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RankId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelativeSuitId")
+                        .HasColumnType("int");
+
+                    b.HasKey("RelativeCardId");
+
+                    b.HasIndex("RankId");
+
+                    b.HasIndex("RelativeSuitId");
+
+                    b.ToTable("RelativeCards", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            RelativeCardId = 9,
+                            RankId = 9,
+                            RelativeSuitId = 0
+                        },
+                        new
+                        {
+                            RelativeCardId = 10,
+                            RankId = 10,
+                            RelativeSuitId = 0
+                        },
+                        new
+                        {
+                            RelativeCardId = 11,
+                            RankId = 11,
+                            RelativeSuitId = 0
+                        },
+                        new
+                        {
+                            RelativeCardId = 12,
+                            RankId = 12,
+                            RelativeSuitId = 0
+                        },
+                        new
+                        {
+                            RelativeCardId = 13,
+                            RankId = 13,
+                            RelativeSuitId = 0
+                        },
+                        new
+                        {
+                            RelativeCardId = 14,
+                            RankId = 14,
+                            RelativeSuitId = 0
+                        },
+                        new
+                        {
+                            RelativeCardId = 15,
+                            RankId = 15,
+                            RelativeSuitId = 0
+                        },
+                        new
+                        {
+                            RelativeCardId = 16,
+                            RankId = 16,
+                            RelativeSuitId = 0
+                        },
+                        new
+                        {
+                            RelativeCardId = 109,
+                            RankId = 9,
+                            RelativeSuitId = 1
+                        },
+                        new
+                        {
+                            RelativeCardId = 110,
+                            RankId = 10,
+                            RelativeSuitId = 1
+                        },
+                        new
+                        {
+                            RelativeCardId = 111,
+                            RankId = 11,
+                            RelativeSuitId = 1
+                        },
+                        new
+                        {
+                            RelativeCardId = 112,
+                            RankId = 12,
+                            RelativeSuitId = 1
+                        },
+                        new
+                        {
+                            RelativeCardId = 113,
+                            RankId = 13,
+                            RelativeSuitId = 1
+                        },
+                        new
+                        {
+                            RelativeCardId = 114,
+                            RankId = 14,
+                            RelativeSuitId = 1
+                        },
+                        new
+                        {
+                            RelativeCardId = 115,
+                            RankId = 15,
+                            RelativeSuitId = 1
+                        },
+                        new
+                        {
+                            RelativeCardId = 116,
+                            RankId = 16,
+                            RelativeSuitId = 1
+                        },
+                        new
+                        {
+                            RelativeCardId = 209,
+                            RankId = 9,
+                            RelativeSuitId = 2
+                        },
+                        new
+                        {
+                            RelativeCardId = 210,
+                            RankId = 10,
+                            RelativeSuitId = 2
+                        },
+                        new
+                        {
+                            RelativeCardId = 211,
+                            RankId = 11,
+                            RelativeSuitId = 2
+                        },
+                        new
+                        {
+                            RelativeCardId = 212,
+                            RankId = 12,
+                            RelativeSuitId = 2
+                        },
+                        new
+                        {
+                            RelativeCardId = 213,
+                            RankId = 13,
+                            RelativeSuitId = 2
+                        },
+                        new
+                        {
+                            RelativeCardId = 214,
+                            RankId = 14,
+                            RelativeSuitId = 2
+                        },
+                        new
+                        {
+                            RelativeCardId = 215,
+                            RankId = 15,
+                            RelativeSuitId = 2
+                        },
+                        new
+                        {
+                            RelativeCardId = 216,
+                            RankId = 16,
+                            RelativeSuitId = 2
+                        },
+                        new
+                        {
+                            RelativeCardId = 309,
+                            RankId = 9,
+                            RelativeSuitId = 3
+                        },
+                        new
+                        {
+                            RelativeCardId = 310,
+                            RankId = 10,
+                            RelativeSuitId = 3
+                        },
+                        new
+                        {
+                            RelativeCardId = 311,
+                            RankId = 11,
+                            RelativeSuitId = 3
+                        },
+                        new
+                        {
+                            RelativeCardId = 312,
+                            RankId = 12,
+                            RelativeSuitId = 3
+                        },
+                        new
+                        {
+                            RelativeCardId = 313,
+                            RankId = 13,
+                            RelativeSuitId = 3
+                        },
+                        new
+                        {
+                            RelativeCardId = 314,
+                            RankId = 14,
+                            RelativeSuitId = 3
+                        },
+                        new
+                        {
+                            RelativeCardId = 315,
+                            RankId = 15,
+                            RelativeSuitId = 3
+                        },
+                        new
+                        {
+                            RelativeCardId = 316,
+                            RankId = 16,
+                            RelativeSuitId = 3
+                        });
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.RelativePlayerPositionMetadata", b =>
+                {
+                    b.Property<int>("RelativePlayerPositionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.HasKey("RelativePlayerPositionId");
+
+                    b.ToTable("RelativePlayerPositions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            RelativePlayerPositionId = 0,
+                            Name = "Self"
+                        },
+                        new
+                        {
+                            RelativePlayerPositionId = 1,
+                            Name = "LeftHandOpponent"
+                        },
+                        new
+                        {
+                            RelativePlayerPositionId = 2,
+                            Name = "Partner"
+                        },
+                        new
+                        {
+                            RelativePlayerPositionId = 3,
+                            Name = "RightHandOpponent"
+                        });
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.RelativeSuitMetadata", b =>
+                {
+                    b.Property<int>("RelativeSuitId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("RelativeSuitId");
+
+                    b.ToTable("RelativeSuits", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            RelativeSuitId = 0,
+                            Name = "Trump"
+                        },
+                        new
+                        {
+                            RelativeSuitId = 1,
+                            Name = "NonTrumpSameColor"
+                        },
+                        new
+                        {
+                            RelativeSuitId = 2,
+                            Name = "NonTrumpOppositeColor1"
+                        },
+                        new
+                        {
+                            RelativeSuitId = 3,
+                            Name = "NonTrumpOppositeColor2"
+                        });
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.SuitMetadata", b =>
+                {
+                    b.Property<int>("SuitId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("SuitId");
+
+                    b.ToTable("Suits", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            SuitId = 1,
+                            Name = "Spades"
+                        },
+                        new
+                        {
+                            SuitId = 2,
+                            Name = "Hearts"
+                        },
+                        new
+                        {
+                            SuitId = 3,
+                            Name = "Clubs"
+                        },
+                        new
+                        {
+                            SuitId = 4,
+                            Name = "Diamonds"
+                        });
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.TeamMetadata", b =>
+                {
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.HasKey("TeamId");
+
+                    b.ToTable("Teams", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            TeamId = 0,
+                            Name = "Team1"
+                        },
+                        new
+                        {
+                            TeamId = 1,
+                            Name = "Team2"
+                        });
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionAccountedForCard", b =>
+                {
+                    b.Property<int>("PlayCardDecisionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelativeCardId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PlayCardDecisionId", "RelativeCardId");
+
+                    b.HasIndex("RelativeCardId");
+
+                    b.ToTable("PlayCardDecisionCardsAccountedFor", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionCardsInHand", b =>
+                {
+                    b.Property<int>("PlayCardDecisionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelativeCardId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("PlayCardDecisionId", "RelativeCardId");
+
+                    b.HasIndex("RelativeCardId");
+
+                    b.ToTable("PlayCardDecisionCardsInHand", (string)null);
                 });
 
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionEntity", b =>
@@ -283,44 +1328,26 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PlayCardDecisionId"));
 
-                    b.Property<string>("ActorType")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("CallingPlayer")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
+                    b.Property<int?>("ActorTypeId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("CallingPlayerGoingAlone")
                         .HasColumnType("bit");
 
-                    b.Property<string>("CardsAccountedForJson")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                    b.Property<int>("CallingRelativePlayerPositionId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("CardsInHandJson")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("ChosenCardJson")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("ChosenRelativeCardId")
+                        .HasColumnType("int");
 
                     b.Property<int>("DealId")
                         .HasColumnType("int");
 
-                    b.Property<string>("DealerPickedUpCardJson")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int?>("DealerPickedUpRelativeCardId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("DealerPosition")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
+                    b.Property<int>("DealerRelativePlayerPositionId")
+                        .HasColumnType("int");
 
                     b.Property<bool?>("DidTeamWinDeal")
                         .HasColumnType("bit");
@@ -331,27 +1358,14 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<bool?>("DidTeamWinTrick")
                         .HasColumnType("bit");
 
-                    b.Property<string>("KnownPlayerSuitVoidsJson")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                    b.Property<int>("LeadRelativePlayerPositionId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("LeadPlayer")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
-
-                    b.Property<string>("LeadSuit")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                    b.Property<int?>("LeadRelativeSuitId")
+                        .HasColumnType("int");
 
                     b.Property<short>("OpponentScore")
                         .HasColumnType("smallint");
-
-                    b.Property<string>("PlayedCardsJson")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
 
                     b.Property<short?>("RelativeDealPoints")
                         .HasColumnType("smallint");
@@ -365,27 +1379,131 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<short>("TrickNumber")
                         .HasColumnType("smallint");
 
-                    b.Property<string>("ValidCardsToPlayJson")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("WinningTrickPlayer")
-                        .HasMaxLength(25)
-                        .HasColumnType("nvarchar(25)");
+                    b.Property<int?>("WinningTrickRelativePlayerPositionId")
+                        .HasColumnType("int");
 
                     b.HasKey("PlayCardDecisionId");
 
-                    b.HasIndex("ActorType")
-                        .HasDatabaseName("IX_PlayCardDecisions_ActorType");
+                    b.HasIndex("ActorTypeId")
+                        .HasDatabaseName("IX_PlayCardDecisions_ActorTypeId");
+
+                    b.HasIndex("CallingRelativePlayerPositionId");
+
+                    b.HasIndex("ChosenRelativeCardId");
 
                     b.HasIndex("DealId")
                         .HasDatabaseName("IX_PlayCardDecisions_DealId");
 
+                    b.HasIndex("DealerPickedUpRelativeCardId");
+
+                    b.HasIndex("DealerRelativePlayerPositionId");
+
+                    b.HasIndex("LeadRelativePlayerPositionId");
+
+                    b.HasIndex("LeadRelativeSuitId");
+
                     b.HasIndex("TrickId")
                         .HasDatabaseName("IX_PlayCardDecisions_TrickId");
 
+                    b.HasIndex("WinningTrickRelativePlayerPositionId");
+
                     b.ToTable("PlayCardDecisions", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionKnownVoid", b =>
+                {
+                    b.Property<int>("PlayCardDecisionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelativePlayerPositionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelativeSuitId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PlayCardDecisionId", "RelativePlayerPositionId", "RelativeSuitId");
+
+                    b.HasIndex("RelativePlayerPositionId");
+
+                    b.HasIndex("RelativeSuitId");
+
+                    b.ToTable("PlayCardDecisionKnownVoids", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionPlayedCard", b =>
+                {
+                    b.Property<int>("PlayCardDecisionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelativePlayerPositionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelativeCardId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PlayCardDecisionId", "RelativePlayerPositionId");
+
+                    b.HasIndex("RelativeCardId");
+
+                    b.HasIndex("RelativePlayerPositionId");
+
+                    b.ToTable("PlayCardDecisionPlayedCards", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionPredictedPoints", b =>
+                {
+                    b.Property<int>("PlayCardDecisionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelativeCardId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("PredictedPoints")
+                        .HasColumnType("real");
+
+                    b.HasKey("PlayCardDecisionId", "RelativeCardId");
+
+                    b.HasIndex("RelativeCardId");
+
+                    b.ToTable("PlayCardDecisionPredictedPoints", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionValidCard", b =>
+                {
+                    b.Property<int>("PlayCardDecisionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RelativeCardId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PlayCardDecisionId", "RelativeCardId");
+
+                    b.HasIndex("RelativeCardId");
+
+                    b.ToTable("PlayCardDecisionValidCards", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.TrickCardPlayed", b =>
+                {
+                    b.Property<int>("TrickId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerPositionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CardId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("TrickId", "PlayerPositionId");
+
+                    b.HasIndex("CardId");
+
+                    b.HasIndex("PlayerPositionId");
+
+                    b.ToTable("TrickCardsPlayed", (string)null);
                 });
 
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.TrickEntity", b =>
@@ -396,82 +1514,543 @@ namespace NemesisEuchre.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TrickId"));
 
-                    b.Property<string>("CardsPlayedJson")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)");
-
                     b.Property<int>("DealId")
                         .HasColumnType("int");
 
-                    b.Property<string>("LeadPosition")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<int>("LeadPlayerPositionId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("LeadSuit")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<int?>("LeadSuitId")
+                        .HasColumnType("int");
 
                     b.Property<int>("TrickNumber")
                         .HasColumnType("int");
 
-                    b.Property<string>("WinningPosition")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<int?>("WinningPlayerPositionId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("WinningTeam")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<int?>("WinningTeamId")
+                        .HasColumnType("int");
 
                     b.HasKey("TrickId");
 
                     b.HasIndex("DealId")
                         .HasDatabaseName("IX_Tricks_DealId");
 
+                    b.HasIndex("LeadPlayerPositionId");
+
+                    b.HasIndex("LeadSuitId");
+
+                    b.HasIndex("WinningPlayerPositionId");
+
+                    b.HasIndex("WinningTeamId");
+
                     b.ToTable("Tricks", (string)null);
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.CallTrumpDecisionCardsInHand", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.CallTrumpDecisionEntity", "CallTrumpDecision")
+                        .WithMany("CardsInHand")
+                        .HasForeignKey("CallTrumpDecisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.CardMetadata", "Card")
+                        .WithMany()
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CallTrumpDecision");
+
+                    b.Navigation("Card");
                 });
 
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.CallTrumpDecisionEntity", b =>
                 {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.ActorTypeMetadata", "ActorTypeMetadata")
+                        .WithMany()
+                        .HasForeignKey("ActorTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.CallTrumpDecisionValueMetadata", "ChosenDecisionValue")
+                        .WithMany()
+                        .HasForeignKey("ChosenDecisionValueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("NemesisEuchre.DataAccess.Entities.DealEntity", "Deal")
                         .WithMany("CallTrumpDecisions")
                         .HasForeignKey("DealId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativePlayerPositionMetadata", "DealerPosition")
+                        .WithMany()
+                        .HasForeignKey("DealerRelativePositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.CardMetadata", "UpCard")
+                        .WithMany()
+                        .HasForeignKey("UpCardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ActorTypeMetadata");
+
+                    b.Navigation("ChosenDecisionValue");
+
+                    b.Navigation("Deal");
+
+                    b.Navigation("DealerPosition");
+
+                    b.Navigation("UpCard");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.CallTrumpDecisionPredictedPoints", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.CallTrumpDecisionEntity", "CallTrumpDecision")
+                        .WithMany("PredictedPoints")
+                        .HasForeignKey("CallTrumpDecisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.CallTrumpDecisionValueMetadata", "CallTrumpDecisionValue")
+                        .WithMany()
+                        .HasForeignKey("CallTrumpDecisionValueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CallTrumpDecision");
+
+                    b.Navigation("CallTrumpDecisionValue");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.CallTrumpDecisionValidDecision", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.CallTrumpDecisionEntity", "CallTrumpDecision")
+                        .WithMany("ValidDecisions")
+                        .HasForeignKey("CallTrumpDecisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.CallTrumpDecisionValueMetadata", "CallTrumpDecisionValue")
+                        .WithMany()
+                        .HasForeignKey("CallTrumpDecisionValueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CallTrumpDecision");
+
+                    b.Navigation("CallTrumpDecisionValue");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DealDeckCard", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.CardMetadata", "Card")
+                        .WithMany()
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.DealEntity", "Deal")
+                        .WithMany("DealDeckCards")
+                        .HasForeignKey("DealId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Card");
+
                     b.Navigation("Deal");
                 });
 
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DealEntity", b =>
                 {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.PlayerPositionMetadata", "CallingPlayer")
+                        .WithMany()
+                        .HasForeignKey("CallingPlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.CallTrumpDecisionValueMetadata", "ChosenDecision")
+                        .WithMany()
+                        .HasForeignKey("ChosenCallTrumpDecisionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.DealResultMetadata", "DealResult")
+                        .WithMany()
+                        .HasForeignKey("DealResultId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.DealStatusMetadata", "DealStatus")
+                        .WithMany()
+                        .HasForeignKey("DealStatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.PlayerPositionMetadata", "DealerPosition")
+                        .WithMany()
+                        .HasForeignKey("DealerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.CardMetadata", "DiscardedCard")
+                        .WithMany()
+                        .HasForeignKey("DiscardedCardId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("NemesisEuchre.DataAccess.Entities.GameEntity", "Game")
                         .WithMany("Deals")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.SuitMetadata", "TrumpSuit")
+                        .WithMany()
+                        .HasForeignKey("TrumpSuitId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.CardMetadata", "UpCard")
+                        .WithMany()
+                        .HasForeignKey("UpCardId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.TeamMetadata", "WinningTeam")
+                        .WithMany()
+                        .HasForeignKey("WinningTeamId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CallingPlayer");
+
+                    b.Navigation("ChosenDecision");
+
+                    b.Navigation("DealResult");
+
+                    b.Navigation("DealStatus");
+
+                    b.Navigation("DealerPosition");
+
+                    b.Navigation("DiscardedCard");
+
                     b.Navigation("Game");
+
+                    b.Navigation("TrumpSuit");
+
+                    b.Navigation("UpCard");
+
+                    b.Navigation("WinningTeam");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DealKnownPlayerSuitVoid", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.DealEntity", "Deal")
+                        .WithMany("DealKnownPlayerSuitVoids")
+                        .HasForeignKey("DealId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.PlayerPositionMetadata", "PlayerPosition")
+                        .WithMany()
+                        .HasForeignKey("PlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.SuitMetadata", "Suit")
+                        .WithMany()
+                        .HasForeignKey("SuitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Deal");
+
+                    b.Navigation("PlayerPosition");
+
+                    b.Navigation("Suit");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DealPlayerEntity", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.ActorTypeMetadata", "ActorType")
+                        .WithMany()
+                        .HasForeignKey("ActorTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.DealEntity", "Deal")
+                        .WithMany("DealPlayers")
+                        .HasForeignKey("DealId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.PlayerPositionMetadata", "PlayerPosition")
+                        .WithMany()
+                        .HasForeignKey("PlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ActorType");
+
+                    b.Navigation("Deal");
+
+                    b.Navigation("PlayerPosition");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DealPlayerStartingHandCard", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.CardMetadata", "Card")
+                        .WithMany()
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.DealPlayerEntity", "DealPlayer")
+                        .WithMany("StartingHandCards")
+                        .HasForeignKey("DealPlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Card");
+
+                    b.Navigation("DealPlayer");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DiscardCardDecisionCardsInHand", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.DiscardCardDecisionEntity", "DiscardCardDecision")
+                        .WithMany("CardsInHand")
+                        .HasForeignKey("DiscardCardDecisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativeCardMetadata", "RelativeCard")
+                        .WithMany()
+                        .HasForeignKey("RelativeCardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DiscardCardDecision");
+
+                    b.Navigation("RelativeCard");
                 });
 
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DiscardCardDecisionEntity", b =>
                 {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.ActorTypeMetadata", "ActorTypeMetadata")
+                        .WithMany()
+                        .HasForeignKey("ActorTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativePlayerPositionMetadata", "CallingPlayer")
+                        .WithMany()
+                        .HasForeignKey("CallingRelativePlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativeCardMetadata", "ChosenRelativeCard")
+                        .WithMany()
+                        .HasForeignKey("ChosenRelativeCardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("NemesisEuchre.DataAccess.Entities.DealEntity", "Deal")
                         .WithMany("DiscardCardDecisions")
                         .HasForeignKey("DealId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("ActorTypeMetadata");
+
+                    b.Navigation("CallingPlayer");
+
+                    b.Navigation("ChosenRelativeCard");
+
                     b.Navigation("Deal");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DiscardCardDecisionPredictedPoints", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.DiscardCardDecisionEntity", "DiscardCardDecision")
+                        .WithMany("PredictedPoints")
+                        .HasForeignKey("DiscardCardDecisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativeCardMetadata", "RelativeCard")
+                        .WithMany()
+                        .HasForeignKey("RelativeCardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DiscardCardDecision");
+
+                    b.Navigation("RelativeCard");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.GameEntity", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.GameStatusMetadata", "GameStatus")
+                        .WithMany()
+                        .HasForeignKey("GameStatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.TeamMetadata", "WinningTeam")
+                        .WithMany()
+                        .HasForeignKey("WinningTeamId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("GameStatus");
+
+                    b.Navigation("WinningTeam");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.GamePlayer", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.ActorTypeMetadata", "ActorType")
+                        .WithMany()
+                        .HasForeignKey("ActorTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.GameEntity", "Game")
+                        .WithMany("GamePlayers")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.PlayerPositionMetadata", "PlayerPosition")
+                        .WithMany()
+                        .HasForeignKey("PlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ActorType");
+
+                    b.Navigation("Game");
+
+                    b.Navigation("PlayerPosition");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.CardMetadata", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RankMetadata", "Rank")
+                        .WithMany()
+                        .HasForeignKey("RankId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.SuitMetadata", "Suit")
+                        .WithMany()
+                        .HasForeignKey("SuitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Rank");
+
+                    b.Navigation("Suit");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.Metadata.RelativeCardMetadata", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RankMetadata", "Rank")
+                        .WithMany()
+                        .HasForeignKey("RankId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativeSuitMetadata", "RelativeSuit")
+                        .WithMany()
+                        .HasForeignKey("RelativeSuitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Rank");
+
+                    b.Navigation("RelativeSuit");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionAccountedForCard", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.PlayCardDecisionEntity", "PlayCardDecision")
+                        .WithMany("CardsAccountedFor")
+                        .HasForeignKey("PlayCardDecisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativeCardMetadata", "RelativeCard")
+                        .WithMany()
+                        .HasForeignKey("RelativeCardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PlayCardDecision");
+
+                    b.Navigation("RelativeCard");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionCardsInHand", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.PlayCardDecisionEntity", "PlayCardDecision")
+                        .WithMany("CardsInHand")
+                        .HasForeignKey("PlayCardDecisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativeCardMetadata", "RelativeCard")
+                        .WithMany()
+                        .HasForeignKey("RelativeCardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PlayCardDecision");
+
+                    b.Navigation("RelativeCard");
                 });
 
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionEntity", b =>
                 {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.ActorTypeMetadata", "ActorTypeMetadata")
+                        .WithMany()
+                        .HasForeignKey("ActorTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativePlayerPositionMetadata", "CallingPlayerPosition")
+                        .WithMany()
+                        .HasForeignKey("CallingRelativePlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativeCardMetadata", "ChosenRelativeCard")
+                        .WithMany()
+                        .HasForeignKey("ChosenRelativeCardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("NemesisEuchre.DataAccess.Entities.DealEntity", "Deal")
                         .WithMany("PlayCardDecisions")
                         .HasForeignKey("DealId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativeCardMetadata", "DealerPickedUpRelativeCard")
+                        .WithMany()
+                        .HasForeignKey("DealerPickedUpRelativeCardId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativePlayerPositionMetadata", "DealerPosition")
+                        .WithMany()
+                        .HasForeignKey("DealerRelativePlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativePlayerPositionMetadata", "LeadPlayer")
+                        .WithMany()
+                        .HasForeignKey("LeadRelativePlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativeSuitMetadata", "LeadSuit")
+                        .WithMany()
+                        .HasForeignKey("LeadRelativeSuitId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("NemesisEuchre.DataAccess.Entities.TrickEntity", "Trick")
                         .WithMany("PlayCardDecisions")
@@ -479,7 +2058,147 @@ namespace NemesisEuchre.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativePlayerPositionMetadata", "WinningTrickPlayer")
+                        .WithMany()
+                        .HasForeignKey("WinningTrickRelativePlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ActorTypeMetadata");
+
+                    b.Navigation("CallingPlayerPosition");
+
+                    b.Navigation("ChosenRelativeCard");
+
                     b.Navigation("Deal");
+
+                    b.Navigation("DealerPickedUpRelativeCard");
+
+                    b.Navigation("DealerPosition");
+
+                    b.Navigation("LeadPlayer");
+
+                    b.Navigation("LeadSuit");
+
+                    b.Navigation("Trick");
+
+                    b.Navigation("WinningTrickPlayer");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionKnownVoid", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.PlayCardDecisionEntity", "PlayCardDecision")
+                        .WithMany("KnownVoids")
+                        .HasForeignKey("PlayCardDecisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativePlayerPositionMetadata", "RelativePlayerPosition")
+                        .WithMany()
+                        .HasForeignKey("RelativePlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativeSuitMetadata", "RelativeSuit")
+                        .WithMany()
+                        .HasForeignKey("RelativeSuitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PlayCardDecision");
+
+                    b.Navigation("RelativePlayerPosition");
+
+                    b.Navigation("RelativeSuit");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionPlayedCard", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.PlayCardDecisionEntity", "PlayCardDecision")
+                        .WithMany("PlayedCards")
+                        .HasForeignKey("PlayCardDecisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativeCardMetadata", "RelativeCard")
+                        .WithMany()
+                        .HasForeignKey("RelativeCardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativePlayerPositionMetadata", "RelativePlayerPosition")
+                        .WithMany()
+                        .HasForeignKey("RelativePlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PlayCardDecision");
+
+                    b.Navigation("RelativeCard");
+
+                    b.Navigation("RelativePlayerPosition");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionPredictedPoints", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.PlayCardDecisionEntity", "PlayCardDecision")
+                        .WithMany("PredictedPoints")
+                        .HasForeignKey("PlayCardDecisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativeCardMetadata", "RelativeCard")
+                        .WithMany()
+                        .HasForeignKey("RelativeCardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PlayCardDecision");
+
+                    b.Navigation("RelativeCard");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionValidCard", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.PlayCardDecisionEntity", "PlayCardDecision")
+                        .WithMany("ValidCards")
+                        .HasForeignKey("PlayCardDecisionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.RelativeCardMetadata", "RelativeCard")
+                        .WithMany()
+                        .HasForeignKey("RelativeCardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PlayCardDecision");
+
+                    b.Navigation("RelativeCard");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.TrickCardPlayed", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.CardMetadata", "Card")
+                        .WithMany()
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.PlayerPositionMetadata", "PlayerPosition")
+                        .WithMany()
+                        .HasForeignKey("PlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.TrickEntity", "Trick")
+                        .WithMany("TrickCardsPlayed")
+                        .HasForeignKey("TrickId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Card");
+
+                    b.Navigation("PlayerPosition");
 
                     b.Navigation("Trick");
                 });
@@ -492,12 +2211,56 @@ namespace NemesisEuchre.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.PlayerPositionMetadata", "LeadPosition")
+                        .WithMany()
+                        .HasForeignKey("LeadPlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.SuitMetadata", "LeadSuit")
+                        .WithMany()
+                        .HasForeignKey("LeadSuitId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.PlayerPositionMetadata", "WinningPosition")
+                        .WithMany()
+                        .HasForeignKey("WinningPlayerPositionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.Metadata.TeamMetadata", "WinningTeam")
+                        .WithMany()
+                        .HasForeignKey("WinningTeamId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Deal");
+
+                    b.Navigation("LeadPosition");
+
+                    b.Navigation("LeadSuit");
+
+                    b.Navigation("WinningPosition");
+
+                    b.Navigation("WinningTeam");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.CallTrumpDecisionEntity", b =>
+                {
+                    b.Navigation("CardsInHand");
+
+                    b.Navigation("PredictedPoints");
+
+                    b.Navigation("ValidDecisions");
                 });
 
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DealEntity", b =>
                 {
                     b.Navigation("CallTrumpDecisions");
+
+                    b.Navigation("DealDeckCards");
+
+                    b.Navigation("DealKnownPlayerSuitVoids");
+
+                    b.Navigation("DealPlayers");
 
                     b.Navigation("DiscardCardDecisions");
 
@@ -506,14 +2269,45 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Navigation("Tricks");
                 });
 
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DealPlayerEntity", b =>
+                {
+                    b.Navigation("StartingHandCards");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.DiscardCardDecisionEntity", b =>
+                {
+                    b.Navigation("CardsInHand");
+
+                    b.Navigation("PredictedPoints");
+                });
+
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.GameEntity", b =>
                 {
                     b.Navigation("Deals");
+
+                    b.Navigation("GamePlayers");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.PlayCardDecisionEntity", b =>
+                {
+                    b.Navigation("CardsAccountedFor");
+
+                    b.Navigation("CardsInHand");
+
+                    b.Navigation("KnownVoids");
+
+                    b.Navigation("PlayedCards");
+
+                    b.Navigation("PredictedPoints");
+
+                    b.Navigation("ValidCards");
                 });
 
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.TrickEntity", b =>
                 {
                     b.Navigation("PlayCardDecisions");
+
+                    b.Navigation("TrickCardsPlayed");
                 });
 #pragma warning restore 612, 618
         }

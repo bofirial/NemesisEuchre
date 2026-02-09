@@ -87,7 +87,10 @@ public class DealOrchestrator(
     {
         deal.DealStatus = DealStatus.Scoring;
 
-        (deal.DealResult, deal.WinningTeam) = dealResultCalculator.CalculateDealResult(deal);
+        (var dealResult, var winningTeam) = dealResultCalculator.CalculateDealResult(deal);
+
+        deal.DealResult = dealResult;
+        deal.WinningTeam = winningTeam;
 
         validator.ValidateDealCompleted(deal);
     }

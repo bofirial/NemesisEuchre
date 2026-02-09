@@ -26,11 +26,11 @@ public class CallTrumpDecisionRecordTests
         {
             CardsInHand =
             [
-                new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-                new Card { Suit = Suit.Hearts, Rank = Rank.King },
-                new Card { Suit = Suit.Hearts, Rank = Rank.Queen },
-                new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
-                new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
+                new Card(Suit.Hearts, Rank.Ace),
+                new Card(Suit.Hearts, Rank.King),
+                new Card(Suit.Hearts, Rank.Queen),
+                new Card(Suit.Hearts, Rank.Jack),
+                new Card(Suit.Hearts, Rank.Ten),
             ],
         };
 
@@ -108,14 +108,14 @@ public class CallTrumpDecisionRecordTests
     {
         Card[] hand =
         [
-            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-            new Card { Suit = Suit.Spades, Rank = Rank.King },
-            new Card { Suit = Suit.Spades, Rank = Rank.Queen },
-            new Card { Suit = Suit.Spades, Rank = Rank.Jack },
-            new Card { Suit = Suit.Spades, Rank = Rank.Nine },
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Spades, Rank.King),
+            new Card(Suit.Spades, Rank.Queen),
+            new Card(Suit.Spades, Rank.Jack),
+            new Card(Suit.Spades, Rank.Nine),
         ];
 
-        var upCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var upCard = new Card(Suit.Hearts, Rank.Ace);
 
         CallTrumpDecision[] validDecisions =
         [

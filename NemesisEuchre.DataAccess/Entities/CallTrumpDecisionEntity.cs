@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.DataAccess.Entities.Metadata;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
@@ -11,23 +11,19 @@ public class CallTrumpDecisionEntity : IDecisionEntity
 
     public int DealId { get; set; }
 
-    public required string CardsInHandJson { get; set; }
+    public int DealerRelativePositionId { get; set; }
+
+    public int UpCardId { get; set; }
 
     public short TeamScore { get; set; }
 
     public short OpponentScore { get; set; }
 
-    public RelativePlayerPosition DealerPosition { get; set; }
-
-    public required string UpCardJson { get; set; }
-
-    public required string ValidDecisionsJson { get; set; }
-
-    public required string ChosenDecisionJson { get; set; }
+    public int ChosenDecisionValueId { get; set; }
 
     public byte DecisionOrder { get; set; }
 
-    public ActorType? ActorType { get; set; }
+    public int? ActorTypeId { get; set; }
 
     public bool? DidTeamWinDeal { get; set; }
 
@@ -36,6 +32,20 @@ public class CallTrumpDecisionEntity : IDecisionEntity
     public bool? DidTeamWinGame { get; set; }
 
     public DealEntity? Deal { get; set; }
+
+    public RelativePlayerPositionMetadata? DealerPosition { get; set; }
+
+    public CardMetadata? UpCard { get; set; }
+
+    public CallTrumpDecisionValueMetadata? ChosenDecisionValue { get; set; }
+
+    public ActorTypeMetadata? ActorTypeMetadata { get; set; }
+
+    public ICollection<CallTrumpDecisionCardsInHand> CardsInHand { get; set; } = [];
+
+    public ICollection<CallTrumpDecisionValidDecision> ValidDecisions { get; set; } = [];
+
+    public ICollection<CallTrumpDecisionPredictedPoints> PredictedPoints { get; set; } = [];
 }
 
 public class CallTrumpDecisionEntityConfiguration : IEntityTypeConfiguration<CallTrumpDecisionEntity>
@@ -52,38 +62,14 @@ public class CallTrumpDecisionEntityConfiguration : IEntityTypeConfiguration<Cal
         builder.Property(e => e.DealId)
             .IsRequired();
 
-        builder.Property(e => e.CardsInHandJson)
-            .HasMaxLength(200)
-            .IsRequired();
-
         builder.Property(e => e.TeamScore)
             .IsRequired();
 
         builder.Property(e => e.OpponentScore)
             .IsRequired();
 
-        builder.Property(e => e.DealerPosition)
-            .IsRequired()
-            .HasConversion<string>()
-            .HasMaxLength(25);
-
-        builder.Property(e => e.UpCardJson)
-            .IsRequired()
-            .HasMaxLength(50);
-
-        builder.Property(e => e.ValidDecisionsJson)
-            .HasMaxLength(150)
-            .IsRequired();
-
-        builder.Property(e => e.ChosenDecisionJson)
-            .IsRequired();
-
         builder.Property(e => e.DecisionOrder)
             .IsRequired();
-
-        builder.Property(e => e.ActorType)
-            .HasConversion<string>()
-            .HasMaxLength(10);
 
         builder.Property(e => e.DidTeamWinDeal);
 
@@ -96,10 +82,30 @@ public class CallTrumpDecisionEntityConfiguration : IEntityTypeConfiguration<Cal
             .HasForeignKey(e => e.DealId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasOne(e => e.DealerPosition)
+            .WithMany()
+            .HasForeignKey(e => e.DealerRelativePositionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.UpCard)
+            .WithMany()
+            .HasForeignKey(e => e.UpCardId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.ChosenDecisionValue)
+            .WithMany()
+            .HasForeignKey(e => e.ChosenDecisionValueId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.ActorTypeMetadata)
+            .WithMany()
+            .HasForeignKey(e => e.ActorTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasIndex(e => e.DealId)
             .HasDatabaseName("IX_CallTrumpDecisions_DealId");
 
-        builder.HasIndex(e => e.ActorType)
-            .HasDatabaseName("IX_CallTrumpDecisions_ActorType");
+        builder.HasIndex(e => e.ActorTypeId)
+            .HasDatabaseName("IX_CallTrumpDecisions_ActorTypeId");
     }
 }

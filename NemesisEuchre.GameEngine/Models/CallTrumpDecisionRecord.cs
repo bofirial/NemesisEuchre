@@ -13,13 +13,15 @@ public class CallTrumpDecisionRecord
 
     public short OpponentScore { get; set; }
 
+    public short DecisionOrder { get; set; }
+
     public PlayerPosition DealerPosition { get; set; }
 
-    public Card UpCard { get; set; } = new();
+    public Card? UpCard { get; set; }
 
     public CallTrumpDecision[] ValidCallTrumpDecisions { get; set; } = [];
 
     public CallTrumpDecision ChosenDecision { get; set; }
 
-    public short DecisionOrder { get; set; }
+    public Dictionary<CallTrumpDecision, float> DecisionPredictedPoints { get; set; } = [];
 }

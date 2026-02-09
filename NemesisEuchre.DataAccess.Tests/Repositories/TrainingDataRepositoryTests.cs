@@ -37,33 +37,30 @@ public class TrainingDataRepositoryTests : IDisposable
             new CallTrumpDecisionEntity
             {
                 DealId = dealId,
-                ActorType = ActorType.Chaos,
-                CardsInHandJson = "[]",
-                UpCardJson = "{}",
-                ValidDecisionsJson = "[]",
-                ChosenDecisionJson = "{}",
+                ActorTypeId = (int)ActorType.Chaos,
+                UpCardId = 209,
+                ChosenDecisionValueId = 0,
+                DealerRelativePositionId = 0,
                 DecisionOrder = 1,
                 DidTeamWinGame = true,
             },
             new CallTrumpDecisionEntity
             {
                 DealId = dealId,
-                ActorType = ActorType.Beta,
-                CardsInHandJson = "[]",
-                UpCardJson = "{}",
-                ValidDecisionsJson = "[]",
-                ChosenDecisionJson = "{}",
+                ActorTypeId = (int)ActorType.Beta,
+                UpCardId = 209,
+                ChosenDecisionValueId = 0,
+                DealerRelativePositionId = 0,
                 DecisionOrder = 2,
                 DidTeamWinGame = false,
             },
             new CallTrumpDecisionEntity
             {
                 DealId = dealId,
-                ActorType = ActorType.Chaos,
-                CardsInHandJson = "[]",
-                UpCardJson = "{}",
-                ValidDecisionsJson = "[]",
-                ChosenDecisionJson = "{}",
+                ActorTypeId = (int)ActorType.Chaos,
+                UpCardId = 209,
+                ChosenDecisionValueId = 0,
+                DealerRelativePositionId = 0,
                 DecisionOrder = 3,
                 DidTeamWinGame = true,
             });
@@ -77,7 +74,7 @@ public class TrainingDataRepositoryTests : IDisposable
         }
 
         results.Should().HaveCount(2);
-        results.Should().AllSatisfy(e => e.ActorType.Should().Be(ActorType.Chaos));
+        results.Should().AllSatisfy(e => e.ActorTypeId.Should().Be((int)ActorType.Chaos));
     }
 
     [Fact]
@@ -89,14 +86,14 @@ public class TrainingDataRepositoryTests : IDisposable
             Enumerable.Range(0, 10).Select(i => new CallTrumpDecisionEntity
             {
                 DealId = dealId,
-                ActorType = ActorType.Chaos,
-                CardsInHandJson = "[]",
-                UpCardJson = "{}",
-                ValidDecisionsJson = "[]",
-                ChosenDecisionJson = "{}",
+                ActorTypeId = (int)ActorType.Chaos,
+                UpCardId = 209,
+                ChosenDecisionValueId = 0,
+                DealerRelativePositionId = 0,
                 DecisionOrder = (byte)i,
                 DidTeamWinGame = true,
-            }), TestContext.Current.CancellationToken);
+            }),
+            TestContext.Current.CancellationToken);
 
         await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
@@ -118,33 +115,30 @@ public class TrainingDataRepositoryTests : IDisposable
             new CallTrumpDecisionEntity
             {
                 DealId = dealId,
-                ActorType = ActorType.Chaos,
-                CardsInHandJson = "[]",
-                UpCardJson = "{}",
-                ValidDecisionsJson = "[]",
-                ChosenDecisionJson = "{}",
+                ActorTypeId = (int)ActorType.Chaos,
+                UpCardId = 209,
+                ChosenDecisionValueId = 0,
+                DealerRelativePositionId = 0,
                 DecisionOrder = 1,
                 DidTeamWinGame = true,
             },
             new CallTrumpDecisionEntity
             {
                 DealId = dealId,
-                ActorType = ActorType.Chaos,
-                CardsInHandJson = "[]",
-                UpCardJson = "{}",
-                ValidDecisionsJson = "[]",
-                ChosenDecisionJson = "{}",
+                ActorTypeId = (int)ActorType.Chaos,
+                UpCardId = 209,
+                ChosenDecisionValueId = 0,
+                DealerRelativePositionId = 0,
                 DecisionOrder = 2,
                 DidTeamWinGame = false,
             },
             new CallTrumpDecisionEntity
             {
                 DealId = dealId,
-                ActorType = ActorType.Chaos,
-                CardsInHandJson = "[]",
-                UpCardJson = "{}",
-                ValidDecisionsJson = "[]",
-                ChosenDecisionJson = "{}",
+                ActorTypeId = (int)ActorType.Chaos,
+                UpCardId = 209,
+                ChosenDecisionValueId = 0,
+                DealerRelativePositionId = 0,
                 DecisionOrder = 3,
                 DidTeamWinGame = true,
             });
@@ -171,6 +165,45 @@ public class TrainingDataRepositoryTests : IDisposable
         }
 
         results.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetDecisionDataAsync_CallTrumpDecision_IncludesNavigationProperties()
+    {
+        var decision = new CallTrumpDecisionEntity
+        {
+            DealId = 1,
+            ActorTypeId = (int)ActorType.Chaos,
+            UpCardId = 209,
+            ChosenDecisionValueId = 0,
+            DealerRelativePositionId = 0,
+            DecisionOrder = 1,
+            DidTeamWinGame = true,
+            CardsInHand =
+            [
+                new() { CardId = 101, SortOrder = 0 },
+                new() { CardId = 102, SortOrder = 1 },
+            ],
+            ValidDecisions =
+            [
+                new() { CallTrumpDecisionValueId = 0 },
+                new() { CallTrumpDecisionValueId = 1 },
+                new() { CallTrumpDecisionValueId = 2 },
+            ],
+        };
+
+        await _context.CallTrumpDecisions!.AddAsync(decision, TestContext.Current.CancellationToken);
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var results = new List<CallTrumpDecisionEntity>();
+        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(ActorType.Chaos, cancellationToken: TestContext.Current.CancellationToken))
+        {
+            results.Add(entity);
+        }
+
+        results.Should().ContainSingle();
+        results[0].CardsInHand.Should().HaveCount(2);
+        results[0].ValidDecisions.Should().HaveCount(3);
     }
 
     public void Dispose()

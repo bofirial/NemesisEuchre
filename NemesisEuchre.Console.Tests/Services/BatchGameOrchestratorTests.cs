@@ -8,7 +8,6 @@ using Moq;
 
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.Console.Services.Orchestration;
-using NemesisEuchre.Console.Services.Persistence;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation.Constants;
@@ -110,7 +109,8 @@ public class BatchGameOrchestratorTests
                             }
 
                             return null;
-                        }, ct).ConfigureAwait(false);
+                        },
+                        ct).ConfigureAwait(false);
 
                     if (gamesToSave?.Count > 0)
                     {

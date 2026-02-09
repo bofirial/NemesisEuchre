@@ -10,7 +10,7 @@ public class DiscardCardDecisionRecordTests
     [Fact]
     public void DiscardCardDecisionRecord_DefaultInitialization_SetsCollectionsToEmpty()
     {
-        var record = new DiscardCardDecisionRecord();
+        var record = new DiscardCardDecisionRecord() { ChosenCard = new(default, default) };
 
         record.CardsInHand.Should().NotBeNull();
         record.CardsInHand.Should().BeEmpty();
@@ -25,13 +25,14 @@ public class DiscardCardDecisionRecordTests
         {
             CardsInHand =
             [
-                new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-                new Card { Suit = Suit.Hearts, Rank = Rank.King },
-                new Card { Suit = Suit.Hearts, Rank = Rank.Queen },
-                new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
-                new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-                new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+                new Card(Suit.Hearts, Rank.Ace),
+                new Card(Suit.Hearts, Rank.King),
+                new Card(Suit.Hearts, Rank.Queen),
+                new Card(Suit.Hearts, Rank.Jack),
+                new Card(Suit.Hearts, Rank.Ten),
+                new Card(Suit.Hearts, Rank.Nine),
             ],
+            ChosenCard = new Card(Suit.Hearts, Rank.Nine),
         };
 
         record.CardsInHand.Should().HaveCount(6);
@@ -45,13 +46,14 @@ public class DiscardCardDecisionRecordTests
         {
             ValidCardsToDiscard =
             [
-                new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-                new Card { Suit = Suit.Spades, Rank = Rank.King },
-                new Card { Suit = Suit.Spades, Rank = Rank.Queen },
-                new Card { Suit = Suit.Spades, Rank = Rank.Jack },
-                new Card { Suit = Suit.Spades, Rank = Rank.Ten },
-                new Card { Suit = Suit.Spades, Rank = Rank.Nine },
+                new Card(Suit.Spades, Rank.Ace),
+                new Card(Suit.Spades, Rank.King),
+                new Card(Suit.Spades, Rank.Queen),
+                new Card(Suit.Spades, Rank.Jack),
+                new Card(Suit.Spades, Rank.Ten),
+                new Card(Suit.Spades, Rank.Nine),
             ],
+            ChosenCard = new Card(Suit.Hearts, Rank.Nine),
         };
 
         record.ValidCardsToDiscard.Should().HaveCount(6);
@@ -63,25 +65,25 @@ public class DiscardCardDecisionRecordTests
     {
         Card[] hand =
         [
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.King },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Queen },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            new Card(Suit.Hearts, Rank.Ace),
+            new Card(Suit.Hearts, Rank.King),
+            new Card(Suit.Hearts, Rank.Queen),
+            new Card(Suit.Hearts, Rank.Jack),
+            new Card(Suit.Hearts, Rank.Ten),
+            new Card(Suit.Hearts, Rank.Nine),
         ];
 
         Card[] validCardsToDiscard =
         [
-            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-            new Card { Suit = Suit.Spades, Rank = Rank.King },
-            new Card { Suit = Suit.Spades, Rank = Rank.Queen },
-            new Card { Suit = Suit.Spades, Rank = Rank.Jack },
-            new Card { Suit = Suit.Spades, Rank = Rank.Ten },
-            new Card { Suit = Suit.Spades, Rank = Rank.Nine },
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Spades, Rank.King),
+            new Card(Suit.Spades, Rank.Queen),
+            new Card(Suit.Spades, Rank.Jack),
+            new Card(Suit.Spades, Rank.Ten),
+            new Card(Suit.Spades, Rank.Nine),
         ];
 
-        var chosenCard = new Card { Suit = Suit.Diamonds, Rank = Rank.Ten };
+        var chosenCard = new Card(Suit.Diamonds, Rank.Ten);
 
         var record = new DiscardCardDecisionRecord
         {
@@ -127,7 +129,7 @@ public class DiscardCardDecisionRecordTests
             PlayerPosition = PlayerPosition.South,
             TeamScore = 2,
             OpponentScore = 4,
-            ChosenCard = new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
+            ChosenCard = new Card(Suit.Clubs, Rank.Nine),
         };
 
         deal.DiscardCardDecisions.Add(record);
@@ -147,12 +149,14 @@ public class DiscardCardDecisionRecordTests
         {
             PlayerPosition = PlayerPosition.North,
             TeamScore = 0,
+            ChosenCard = new Card(Suit.Hearts, Rank.Nine),
         };
 
         var record2 = new DiscardCardDecisionRecord
         {
             PlayerPosition = PlayerPosition.South,
             TeamScore = 5,
+            ChosenCard = new Card(Suit.Hearts, Rank.Nine),
         };
 
         deal.DiscardCardDecisions.Add(record1);

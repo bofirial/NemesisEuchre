@@ -6,7 +6,6 @@ using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services.Orchestration;
-using NemesisEuchre.Console.Services.Persistence;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine;
@@ -64,6 +63,10 @@ public class BatchGameOrchestrator(
             Team2Wins = results.Team2Wins,
             FailedGames = results.FailedGames,
             TotalDeals = results.TotalDeals,
+            TotalTricks = results.TotalTricks,
+            TotalCallTrumpDecisions = results.TotalCallTrumpDecisions,
+            TotalDiscardCardDecisions = results.TotalDiscardCardDecisions,
+            TotalPlayCardDecisions = results.TotalPlayCardDecisions,
             ElapsedTime = stopwatch.Elapsed,
         };
     }
@@ -80,8 +83,17 @@ public class BatchGameOrchestrator(
             Team2Wins = state.Team2Wins,
             FailedGames = state.FailedGames,
             TotalDeals = state.TotalDeals,
+            TotalTricks = state.TotalTricks,
+            TotalCallTrumpDecisions = state.TotalCallTrumpDecisions,
+            TotalDiscardCardDecisions = state.TotalDiscardCardDecisions,
+            TotalPlayCardDecisions = state.TotalPlayCardDecisions,
             ElapsedTime = elapsedTime,
         };
+    }
+
+    private static int GetPlayCardDecisions(GameEngine.Models.Deal d)
+    {
+        return d.CompletedTricks.Sum(t => t.PlayCardDecisions.Count);
     }
 
     private async Task<BatchGameResults> ExecuteSingleBatchAsync(
@@ -121,6 +133,10 @@ public class BatchGameOrchestrator(
         var totalTeam2Wins = 0;
         var totalFailedGames = 0;
         var totalDeals = 0;
+        var totalTricks = 0;
+        var totalCallTrumpDecisions = 0;
+        var totalDiscardCardDecisions = 0;
+        var totalPlayCardDecisions = 0;
 
         while (completedSoFar < totalGames)
         {
@@ -143,6 +159,10 @@ public class BatchGameOrchestrator(
             totalTeam2Wins += batchResults.Team2Wins;
             totalFailedGames += batchResults.FailedGames;
             totalDeals += batchResults.TotalDeals;
+            totalTricks += batchResults.TotalTricks;
+            totalCallTrumpDecisions += batchResults.TotalCallTrumpDecisions;
+            totalDiscardCardDecisions += batchResults.TotalDiscardCardDecisions;
+            totalPlayCardDecisions += batchResults.TotalPlayCardDecisions;
             completedSoFar += gamesInThisBatch;
             savedSoFar += batchResults.TotalGames;
         }
@@ -156,6 +176,10 @@ public class BatchGameOrchestrator(
             Team2Wins = totalTeam2Wins,
             FailedGames = totalFailedGames,
             TotalDeals = totalDeals,
+            TotalTricks = totalTricks,
+            TotalCallTrumpDecisions = totalCallTrumpDecisions,
+            TotalDiscardCardDecisions = totalDiscardCardDecisions,
+            TotalPlayCardDecisions = totalPlayCardDecisions,
             ElapsedTime = stopwatch.Elapsed,
         };
     }
@@ -177,21 +201,26 @@ public class BatchGameOrchestrator(
 
             await state.ExecuteWithLockAsync(
                 () =>
-            {
-                if (game.WinningTeam == Team.Team1)
                 {
-                    state.Team1Wins++;
-                }
-                else if (game.WinningTeam == Team.Team2)
-                {
-                    state.Team2Wins++;
-                }
+                    if (game.WinningTeam == Team.Team1)
+                    {
+                        state.Team1Wins++;
+                    }
+                    else if (game.WinningTeam == Team.Team2)
+                    {
+                        state.Team2Wins++;
+                    }
 
-                state.TotalDeals += game.CompletedDeals.Count;
-                state.CompletedGames++;
-                state.PendingGames.Add(game);
-                progressReporter?.ReportGameCompleted(state.CompletedGames);
-            }, cancellationToken).ConfigureAwait(false);
+                    state.TotalDeals += game.CompletedDeals.Count;
+                    state.TotalTricks += game.CompletedDeals.Sum(d => d.CompletedTricks.Count);
+                    state.TotalCallTrumpDecisions += game.CompletedDeals.Sum(d => d.CallTrumpDecisions.Count);
+                    state.TotalDiscardCardDecisions += game.CompletedDeals.Sum(d => d.DiscardCardDecisions.Count);
+                    state.TotalPlayCardDecisions += game.CompletedDeals.Sum(d => GetPlayCardDecisions(d));
+                    state.CompletedGames++;
+                    state.PendingGames.Add(game);
+                    progressReporter?.ReportGameCompleted(state.CompletedGames);
+                },
+                cancellationToken).ConfigureAwait(false);
 
             await persistenceCoordinator.SavePendingGamesAsync(state, progressReporter, doNotPersist, force: false, cancellationToken).ConfigureAwait(false);
         }
@@ -200,11 +229,12 @@ public class BatchGameOrchestrator(
             Foundation.LoggerMessages.LogGameFailed(logger, gameNumber, ex);
             await state.ExecuteWithLockAsync(
                 () =>
-            {
-                state.FailedGames++;
-                state.CompletedGames++;
-                progressReporter?.ReportGameCompleted(state.CompletedGames);
-            }, cancellationToken).ConfigureAwait(false);
+                    {
+                        state.FailedGames++;
+                        state.CompletedGames++;
+                        progressReporter?.ReportGameCompleted(state.CompletedGames);
+                    },
+                cancellationToken).ConfigureAwait(false);
         }
     }
 }

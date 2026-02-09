@@ -5,7 +5,6 @@ using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
-using NemesisEuchre.Console.Services.Training;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Options;

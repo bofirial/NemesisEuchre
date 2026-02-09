@@ -34,7 +34,7 @@ public sealed class PlayCardContext
 
     public required PlayerPosition? CurrentlyWinningTrickPlayer { get; init; }
 
-    public required (PlayerPosition PlayerPosition, Suit Suit)[] KnownPlayerSuitVoids { get; init; }
+    public required PlayerSuitVoid[] KnownPlayerSuitVoids { get; init; }
 
     public required Card[] CardsAccountedFor { get; init; }
 }

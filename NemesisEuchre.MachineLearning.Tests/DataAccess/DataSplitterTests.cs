@@ -288,6 +288,32 @@ public class DataSplitterTests
         testData.Should().AllSatisfy(item => item.Should().NotBeNull());
     }
 
+    [Fact]
+    public void Split_WithPreShuffled_SkipsInternalShuffle()
+    {
+        var data = _trainingDataFaker.Generate(100);
+
+        var splitter = CreateSplitter(randomSeed: 42);
+        var resultPreShuffled = splitter.Split(data, preShuffled: true);
+
+        resultPreShuffled.TrainRowCount.Should().BeInRange(63, 77);
+        (resultPreShuffled.TrainRowCount + resultPreShuffled.ValidationRowCount + resultPreShuffled.TestRowCount).Should().Be(100);
+    }
+
+    [Fact]
+    public void Split_WithPreShuffled_StillSplitsCorrectly()
+    {
+        var splitter = CreateSplitter();
+        var data = _trainingDataFaker.Generate(100);
+
+        var result = splitter.Split(data, preShuffled: true);
+
+        result.TrainRowCount.Should().BeInRange(63, 77);
+        result.ValidationRowCount.Should().BeInRange(8, 22);
+        result.TestRowCount.Should().BeInRange(8, 22);
+        (result.TrainRowCount + result.ValidationRowCount + result.TestRowCount).Should().Be(100);
+    }
+
     private DataSplitter CreateSplitter(int randomSeed = 42)
     {
         var options = Microsoft.Extensions.Options.Options.Create(new MachineLearningOptions

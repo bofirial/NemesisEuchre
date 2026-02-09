@@ -8,34 +8,32 @@ namespace NemesisEuchre.GameEngine.PlayerBots;
 
 public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
 {
-    private readonly IRandomNumberGenerator _random = random ?? throw new ArgumentNullException(nameof(random));
-
     public abstract ActorType ActorType { get; }
 
-    public Task<CallTrumpDecision> CallTrumpAsync(CallTrumpContext context)
+    protected IRandomNumberGenerator Random { get; } = random ?? throw new ArgumentNullException(nameof(random));
+
+    public Task<CallTrumpDecisionContext> CallTrumpAsync(CallTrumpContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
 
         return CallTrumpAsync(
             context.CardsInHand,
-            context.PlayerPosition,
             context.TeamScore,
             context.OpponentScore,
-            context.DealerPosition,
+            context.DealerPosition.ToRelativePosition(context.PlayerPosition),
             context.UpCard,
             context.ValidCallTrumpDecisions);
     }
 
-    public abstract Task<CallTrumpDecision> CallTrumpAsync(
+    public abstract Task<CallTrumpDecisionContext> CallTrumpAsync(
         Card[] cardsInHand,
-        PlayerPosition playerPosition,
         short teamScore,
         short opponentScore,
-        PlayerPosition dealerPosition,
+        RelativePlayerPosition dealerPosition,
         Card upCard,
         CallTrumpDecision[] validCallTrumpDecisions);
 
-    public abstract Task<RelativeCard> DiscardCardAsync(
+    public abstract Task<RelativeCardDecisionContext> DiscardCardAsync(
         RelativeCard[] cardsInHand,
         short teamScore,
         short opponentScore,
@@ -43,7 +41,7 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         bool callingPlayerGoingAlone,
         RelativeCard[] validCardsToDiscard);
 
-    public abstract Task<RelativeCard> PlayCardAsync(
+    public abstract Task<RelativeCardDecisionContext> PlayCardAsync(
         RelativeCard[] cardsInHand,
         short teamScore,
         short opponentScore,
@@ -53,14 +51,14 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         RelativeCard? dealerPickedUpCard,
         RelativePlayerPosition leadPlayer,
         RelativeSuit? leadSuit,
-        (RelativePlayerPosition PlayerPosition, RelativeSuit Suit)[] knownPlayerSuitVoids,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids,
         RelativeCard[] cardsAccountedFor,
         Dictionary<RelativePlayerPosition, RelativeCard> playedCardsInTrick,
         RelativePlayerPosition? currentlyWinningTrickPlayer,
         short trickNumber,
         RelativeCard[] validCardsToPlay);
 
-    public Task<Card> DiscardCardAsync(DiscardCardContext context)
+    public Task<CardDecisionContext> DiscardCardAsync(DiscardCardContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
 
@@ -75,7 +73,7 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
             context.ValidCardsToDiscard);
     }
 
-    public async Task<Card> DiscardCardAsync(
+    public async Task<CardDecisionContext> DiscardCardAsync(
         Card[] cardsInHand,
         PlayerPosition playerPosition,
         short teamScore,
@@ -89,10 +87,15 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         var relativeValidCards = validCardsToDiscard.Select(c => c.ToRelative(trumpSuit)).ToArray();
 
         var relativeChoice = await DiscardCardAsync(relativeHand, teamScore, opponentScore, callingPlayer.ToRelativePosition(playerPosition), callingPlayerGoingAlone, relativeValidCards);
-        return relativeChoice.Card!;
+
+        return new CardDecisionContext()
+        {
+            ChosenCard = relativeChoice.ChosenCard.Card!,
+            DecisionPredictedPoints = relativeChoice.DecisionPredictedPoints.ToDictionary(kvp => kvp.Key.Card!, kvp => kvp.Value),
+        };
     }
 
-    public Task<Card> PlayCardAsync(PlayCardContext context)
+    public Task<CardDecisionContext> PlayCardAsync(PlayCardContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
 
@@ -116,7 +119,7 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
             context.ValidCardsToPlay);
     }
 
-    public async Task<Card> PlayCardAsync(
+    public async Task<CardDecisionContext> PlayCardAsync(
         Card[] cardsInHand,
         PlayerPosition playerPosition,
         short teamScore,
@@ -128,7 +131,7 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         Card? dealerPickedUpCard,
         PlayerPosition leadPlayer,
         Suit? leadSuit,
-        (PlayerPosition PlayerPosition, Suit Suit)[] knownPlayerSuitVoids,
+        PlayerSuitVoid[] knownPlayerSuitVoids,
         Card[] cardsAccountedFor,
         Dictionary<PlayerPosition, Card> playedCardsInTrick,
         PlayerPosition? currentlyWinningTrickPlayer,
@@ -149,19 +152,24 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
             dealerPickedUpCard?.ToRelative(trumpSuit),
             leadPlayer.ToRelativePosition(playerPosition),
             leadSuit?.ToRelativeSuit(trumpSuit),
-            [.. knownPlayerSuitVoids.Select(kpv => (kpv.PlayerPosition.ToRelativePosition(playerPosition), kpv.Suit.ToRelativeSuit(trumpSuit)))],
+            [.. knownPlayerSuitVoids.Select(kpv => new RelativePlayerSuitVoid() { PlayerPosition = kpv.PlayerPosition.ToRelativePosition(playerPosition), Suit = kpv.Suit.ToRelativeSuit(trumpSuit) })],
             relativeAccountedForCards,
             playedCardsInTrick.ToDictionary(kvp => kvp.Key.ToRelativePosition(playerPosition), kvp => kvp.Value.ToRelative(trumpSuit)),
             currentlyWinningTrickPlayer?.ToRelativePosition(playerPosition),
             trickNumber,
             relativeValidCards);
-        return relativeChoice.Card!;
+
+        return new CardDecisionContext()
+        {
+            ChosenCard = relativeChoice.ChosenCard.Card!,
+            DecisionPredictedPoints = relativeChoice.DecisionPredictedPoints.ToDictionary(kvp => kvp.Key.Card!, kvp => kvp.Value),
+        };
     }
 
-    protected Task<T> SelectRandomAsync<T>(T[] options)
+    protected T SelectRandom<T>(T[] options)
     {
         return options.Length == 0
             ? throw new ArgumentException("Cannot select from empty array", nameof(options))
-            : Task.FromResult(options[_random.NextInt(options.Length)]);
+            : options[Random.NextInt(options.Length)];
     }
 }

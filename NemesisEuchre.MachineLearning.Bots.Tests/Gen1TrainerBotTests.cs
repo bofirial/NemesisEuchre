@@ -1,0 +1,174 @@
+using Bogus;
+
+using FluentAssertions;
+
+using Microsoft.Extensions.Logging;
+using Microsoft.ML;
+
+using Moq;
+
+using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
+using NemesisEuchre.GameEngine.Utilities;
+using NemesisEuchre.MachineLearning.FeatureEngineering;
+using NemesisEuchre.MachineLearning.Loading;
+using NemesisEuchre.MachineLearning.Models;
+
+using Xunit;
+
+namespace NemesisEuchre.MachineLearning.Bots.Tests;
+
+public class Gen1TrainerBotTests
+{
+    private readonly Faker _faker = new();
+    private readonly Mock<IPredictionEngineProvider> _mockEngineProvider = new();
+    private readonly Mock<ICallTrumpInferenceFeatureBuilder> _mockCallTrumpFeatureBuilder = new();
+    private readonly Mock<IDiscardCardInferenceFeatureBuilder> _mockDiscardCardFeatureBuilder = new();
+    private readonly Mock<IPlayCardInferenceFeatureBuilder> _mockPlayCardFeatureBuilder = new();
+    private readonly Mock<IRandomNumberGenerator> _mockRandom = new();
+    private readonly Mock<ILogger<Gen1TrainerBot>> _mockLogger = new();
+
+    [Fact]
+    public void ActorType_ShouldReturnGen1Trainer()
+    {
+        var bot = new Gen1TrainerBot(
+            _mockEngineProvider.Object,
+            _mockCallTrumpFeatureBuilder.Object,
+            _mockDiscardCardFeatureBuilder.Object,
+            _mockPlayCardFeatureBuilder.Object,
+            _mockRandom.Object,
+            _mockLogger.Object);
+
+        bot.ActorType.Should().Be(ActorType.Gen1Trainer);
+    }
+
+    [Fact]
+    public async Task CallTrumpAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
+    {
+        _mockEngineProvider
+            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1))
+            .Returns((PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>?)null);
+
+        _mockRandom.Setup(x => x.NextInt(It.IsAny<int>())).Returns(0);
+
+        var bot = new Gen1TrainerBot(
+            _mockEngineProvider.Object,
+            _mockCallTrumpFeatureBuilder.Object,
+            _mockDiscardCardFeatureBuilder.Object,
+            _mockPlayCardFeatureBuilder.Object,
+            _mockRandom.Object,
+            _mockLogger.Object);
+
+        var decisions = new[] { CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp };
+        var result = await bot.CallTrumpAsync(
+            GenerateCards(5),
+            0,
+            0,
+            RelativePlayerPosition.Partner,
+            GenerateCard(),
+            decisions);
+
+        result.ChosenCallTrumpDecision.Should().BeOneOf(decisions);
+        result.DecisionPredictedPoints.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task DiscardCardAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
+    {
+        _mockEngineProvider
+            .Setup(x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", 1))
+            .Returns((PredictionEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>?)null);
+
+        _mockRandom.Setup(x => x.NextInt(It.IsAny<int>())).Returns(0);
+
+        var bot = new Gen1TrainerBot(
+            _mockEngineProvider.Object,
+            _mockCallTrumpFeatureBuilder.Object,
+            _mockDiscardCardFeatureBuilder.Object,
+            _mockPlayCardFeatureBuilder.Object,
+            _mockRandom.Object,
+            _mockLogger.Object);
+
+        var validCards = GenerateRelativeCards(6);
+        var result = await bot.DiscardCardAsync(
+            validCards,
+            0,
+            0,
+            RelativePlayerPosition.Partner,
+            false,
+            validCards);
+
+        result.ChosenCard.Should().BeOneOf(validCards);
+        result.DecisionPredictedPoints.Should().HaveCount(6);
+    }
+
+    [Fact]
+    public async Task PlayCardAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
+    {
+        _mockEngineProvider
+            .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", 1))
+            .Returns((PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>?)null);
+
+        _mockRandom.Setup(x => x.NextInt(It.IsAny<int>())).Returns(0);
+
+        var bot = new Gen1TrainerBot(
+            _mockEngineProvider.Object,
+            _mockCallTrumpFeatureBuilder.Object,
+            _mockDiscardCardFeatureBuilder.Object,
+            _mockPlayCardFeatureBuilder.Object,
+            _mockRandom.Object,
+            _mockLogger.Object);
+
+        var validCards = GenerateRelativeCards(5);
+        var result = await bot.PlayCardAsync(
+            validCards,
+            0,
+            0,
+            RelativePlayerPosition.Partner,
+            false,
+            RelativePlayerPosition.LeftHandOpponent,
+            null,
+            RelativePlayerPosition.RightHandOpponent,
+            null,
+            [],
+            [],
+            [],
+            null,
+            1,
+            validCards);
+
+        result.ChosenCard.Should().BeOneOf(validCards);
+        result.DecisionPredictedPoints.Should().HaveCount(5);
+    }
+
+    private Card[] GenerateCards(int count)
+    {
+        var cards = new Card[count];
+        for (int i = 0; i < count; i++)
+        {
+            cards[i] = GenerateCard();
+        }
+
+        return cards;
+    }
+
+    private Card GenerateCard()
+    {
+        return new Card(_faker.PickRandom<Suit>(), _faker.PickRandom<Rank>());
+    }
+
+    private RelativeCard[] GenerateRelativeCards(int count)
+    {
+        var cards = new RelativeCard[count];
+        for (int i = 0; i < count; i++)
+        {
+            cards[i] = new RelativeCard(_faker.PickRandom<Rank>(), _faker.PickRandom<RelativeSuit>())
+            {
+                Card = GenerateCard(),
+            };
+        }
+
+        return cards;
+    }
+}

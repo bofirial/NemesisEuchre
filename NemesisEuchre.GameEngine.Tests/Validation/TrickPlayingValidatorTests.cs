@@ -103,11 +103,11 @@ public class TrickPlayingValidatorTests
     [Fact]
     public void ValidateCardChoice_WithCardNotInValidCards_ThrowsInvalidOperationException()
     {
-        var chosenCard = new Card { Suit = Suit.Spades, Rank = Rank.Ace };
+        var chosenCard = new Card(Suit.Spades, Rank.Ace);
         var validCards = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            new Card(Suit.Hearts, Rank.Jack),
+            new Card(Suit.Hearts, Rank.Ace),
         };
 
         var act = () => _validator.ValidateCardChoice(chosenCard, validCards);
@@ -119,10 +119,10 @@ public class TrickPlayingValidatorTests
     [Fact]
     public void ValidateCardChoice_WithCardInValidCards_DoesNotThrow()
     {
-        var aceOfHearts = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var aceOfHearts = new Card(Suit.Hearts, Rank.Ace);
         var validCards = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
+            new Card(Suit.Hearts, Rank.Jack),
             aceOfHearts,
         };
 

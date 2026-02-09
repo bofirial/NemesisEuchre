@@ -7,4 +7,5 @@ public enum ActorType
     Chad = 2,
     Beta = 3,
     Gen1 = 10,
+    Gen1Trainer = 11,
 }

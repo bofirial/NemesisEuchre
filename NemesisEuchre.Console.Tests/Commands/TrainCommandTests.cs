@@ -8,7 +8,6 @@ using Moq;
 using NemesisEuchre.Console.Commands;
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
-using NemesisEuchre.Console.Services.Training;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Options;
 
@@ -91,7 +90,8 @@ public class TrainCommandTests
             r => r.RenderTrainingResults(
             trainingResults,
             ActorType.Gen1,
-            DecisionType.All), Times.Once);
+            DecisionType.All),
+            Times.Once);
     }
 
     [Fact]
@@ -183,6 +183,7 @@ public class TrainCommandTests
             1000,
             2,
             It.IsAny<Spectre.Console.IAnsiConsole>(),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }

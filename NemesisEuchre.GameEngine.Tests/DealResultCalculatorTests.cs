@@ -95,10 +95,10 @@ public class DealResultCalculatorTests
     {
         var deal = CreateTestDeal(PlayerPosition.North, false, Team.Team1, Team.Team1, Team.Team1, Team.Team2, Team.Team2);
 
-        var result = _calculator.CalculateDealResult(deal);
+        var (dealResult, winningTeam) = _calculator.CalculateDealResult(deal);
 
-        result.DealResult.Should().Be(DealResult.WonStandardBid);
-        result.WinningTeam.Should().Be(Team.Team1);
+        dealResult.Should().Be(DealResult.WonStandardBid);
+        winningTeam.Should().Be(Team.Team1);
     }
 
     [Fact]
@@ -106,10 +106,10 @@ public class DealResultCalculatorTests
     {
         var deal = CreateTestDeal(PlayerPosition.North, false, Team.Team1, Team.Team1, Team.Team1, Team.Team1, Team.Team2);
 
-        var result = _calculator.CalculateDealResult(deal);
+        var (dealResult, winningTeam) = _calculator.CalculateDealResult(deal);
 
-        result.DealResult.Should().Be(DealResult.WonStandardBid);
-        result.WinningTeam.Should().Be(Team.Team1);
+        dealResult.Should().Be(DealResult.WonStandardBid);
+        winningTeam.Should().Be(Team.Team1);
     }
 
     [Fact]
@@ -117,10 +117,10 @@ public class DealResultCalculatorTests
     {
         var deal = CreateTestDeal(PlayerPosition.North, false, Team.Team1, Team.Team1, Team.Team1, Team.Team1, Team.Team1);
 
-        var result = _calculator.CalculateDealResult(deal);
+        var (dealResult, winningTeam) = _calculator.CalculateDealResult(deal);
 
-        result.DealResult.Should().Be(DealResult.WonGotAllTricks);
-        result.WinningTeam.Should().Be(Team.Team1);
+        dealResult.Should().Be(DealResult.WonGotAllTricks);
+        winningTeam.Should().Be(Team.Team1);
     }
 
     [Fact]
@@ -128,10 +128,10 @@ public class DealResultCalculatorTests
     {
         var deal = CreateTestDeal(PlayerPosition.North, true, Team.Team1, Team.Team1, Team.Team1, Team.Team1, Team.Team1);
 
-        var result = _calculator.CalculateDealResult(deal);
+        var (dealResult, winningTeam) = _calculator.CalculateDealResult(deal);
 
-        result.DealResult.Should().Be(DealResult.WonAndWentAlone);
-        result.WinningTeam.Should().Be(Team.Team1);
+        dealResult.Should().Be(DealResult.WonAndWentAlone);
+        winningTeam.Should().Be(Team.Team1);
     }
 
     [Fact]
@@ -139,10 +139,10 @@ public class DealResultCalculatorTests
     {
         var deal = CreateTestDeal(PlayerPosition.North, false, Team.Team2, Team.Team2, Team.Team2, Team.Team2, Team.Team2);
 
-        var result = _calculator.CalculateDealResult(deal);
+        var (dealResult, winningTeam) = _calculator.CalculateDealResult(deal);
 
-        result.DealResult.Should().Be(DealResult.OpponentsEuchred);
-        result.WinningTeam.Should().Be(Team.Team2);
+        dealResult.Should().Be(DealResult.OpponentsEuchred);
+        winningTeam.Should().Be(Team.Team2);
     }
 
     [Fact]
@@ -150,10 +150,10 @@ public class DealResultCalculatorTests
     {
         var deal = CreateTestDeal(PlayerPosition.North, false, Team.Team1, Team.Team2, Team.Team2, Team.Team2, Team.Team2);
 
-        var result = _calculator.CalculateDealResult(deal);
+        var (dealResult, winningTeam) = _calculator.CalculateDealResult(deal);
 
-        result.DealResult.Should().Be(DealResult.OpponentsEuchred);
-        result.WinningTeam.Should().Be(Team.Team2);
+        dealResult.Should().Be(DealResult.OpponentsEuchred);
+        winningTeam.Should().Be(Team.Team2);
     }
 
     [Fact]
@@ -161,10 +161,10 @@ public class DealResultCalculatorTests
     {
         var deal = CreateTestDeal(PlayerPosition.North, false, Team.Team1, Team.Team1, Team.Team2, Team.Team2, Team.Team2);
 
-        var result = _calculator.CalculateDealResult(deal);
+        var (dealResult, winningTeam) = _calculator.CalculateDealResult(deal);
 
-        result.DealResult.Should().Be(DealResult.OpponentsEuchred);
-        result.WinningTeam.Should().Be(Team.Team2);
+        dealResult.Should().Be(DealResult.OpponentsEuchred);
+        winningTeam.Should().Be(Team.Team2);
     }
 
     [Fact]
@@ -172,10 +172,10 @@ public class DealResultCalculatorTests
     {
         var deal = CreateTestDeal(PlayerPosition.East, false, Team.Team2, Team.Team2, Team.Team2, Team.Team1, Team.Team1);
 
-        var result = _calculator.CalculateDealResult(deal);
+        var (dealResult, winningTeam) = _calculator.CalculateDealResult(deal);
 
-        result.DealResult.Should().Be(DealResult.WonStandardBid);
-        result.WinningTeam.Should().Be(Team.Team2);
+        dealResult.Should().Be(DealResult.WonStandardBid);
+        winningTeam.Should().Be(Team.Team2);
     }
 
     [Fact]
@@ -183,10 +183,10 @@ public class DealResultCalculatorTests
     {
         var deal = CreateTestDeal(PlayerPosition.East, false, Team.Team1, Team.Team1, Team.Team1, Team.Team2, Team.Team2);
 
-        var result = _calculator.CalculateDealResult(deal);
+        var (dealResult, winningTeam) = _calculator.CalculateDealResult(deal);
 
-        result.DealResult.Should().Be(DealResult.OpponentsEuchred);
-        result.WinningTeam.Should().Be(Team.Team1);
+        dealResult.Should().Be(DealResult.OpponentsEuchred);
+        winningTeam.Should().Be(Team.Team1);
     }
 
     [Theory]
@@ -202,8 +202,8 @@ public class DealResultCalculatorTests
 
         var result = _calculator.CalculateDealResult(deal);
 
-        result.DealResult.Should().Be(DealResult.WonGotAllTricks);
-        result.WinningTeam.Should().Be(expectedWinningTeam);
+        result.dealResult.Should().Be(DealResult.WonGotAllTricks);
+        result.winningTeam.Should().Be(expectedWinningTeam);
     }
 
     [Fact]
@@ -211,10 +211,10 @@ public class DealResultCalculatorTests
     {
         var deal = CreateTestDeal(PlayerPosition.North, true, Team.Team1, Team.Team1, Team.Team1, Team.Team1, Team.Team2);
 
-        var result = _calculator.CalculateDealResult(deal);
+        var (dealResult, winningTeam) = _calculator.CalculateDealResult(deal);
 
-        result.DealResult.Should().Be(DealResult.WonStandardBid);
-        result.WinningTeam.Should().Be(Team.Team1);
+        dealResult.Should().Be(DealResult.WonStandardBid);
+        winningTeam.Should().Be(Team.Team1);
     }
 
     [Fact]
@@ -222,10 +222,10 @@ public class DealResultCalculatorTests
     {
         var deal = CreateTestDeal(PlayerPosition.North, true, Team.Team1, Team.Team1, Team.Team1, Team.Team2, Team.Team2);
 
-        var result = _calculator.CalculateDealResult(deal);
+        var (dealResult, winningTeam) = _calculator.CalculateDealResult(deal);
 
-        result.DealResult.Should().Be(DealResult.WonStandardBid);
-        result.WinningTeam.Should().Be(Team.Team1);
+        dealResult.Should().Be(DealResult.WonStandardBid);
+        winningTeam.Should().Be(Team.Team1);
     }
 
     [Fact]
@@ -233,10 +233,10 @@ public class DealResultCalculatorTests
     {
         var deal = CreateTestDeal(PlayerPosition.North, true, Team.Team2, Team.Team2, Team.Team2, Team.Team1, Team.Team1);
 
-        var result = _calculator.CalculateDealResult(deal);
+        var (dealResult, winningTeam) = _calculator.CalculateDealResult(deal);
 
-        result.DealResult.Should().Be(DealResult.OpponentsEuchred);
-        result.WinningTeam.Should().Be(Team.Team2);
+        dealResult.Should().Be(DealResult.OpponentsEuchred);
+        winningTeam.Should().Be(Team.Team2);
     }
 
     private static Deal CreateTestDeal(

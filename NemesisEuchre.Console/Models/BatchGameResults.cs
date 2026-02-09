@@ -12,6 +12,14 @@ public class BatchGameResults
 
     public required int TotalDeals { get; init; }
 
+    public required int TotalTricks { get; init; }
+
+    public required int TotalCallTrumpDecisions { get; init; }
+
+    public required int TotalDiscardCardDecisions { get; init; }
+
+    public required int TotalPlayCardDecisions { get; init; }
+
     public required TimeSpan ElapsedTime { get; init; }
 
     public double Team1WinRate => (Team1Wins + Team2Wins) > 0

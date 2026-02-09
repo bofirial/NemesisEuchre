@@ -377,7 +377,7 @@ public class DealOrchestratorTests
         {
             DealStatus = DealStatus.NotStarted,
             DealerPosition = PlayerPosition.North,
-            UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
+            UpCard = new Card(Suit.Hearts, Rank.Nine),
             Team1Score = 0,
             Team2Score = 0,
             Players = new Dictionary<PlayerPosition, DealPlayer>
@@ -413,6 +413,6 @@ public class DealOrchestratorTests
     private void SetupDealResultMock()
     {
         _dealResultMock.Setup(x => x.CalculateDealResult(It.IsAny<Deal>()))
-            .Returns((DealResult.WonStandardBid, Team.Team1));
+            .Returns((dealResult: DealResult.WonStandardBid, winningTeam: Team.Team1));
     }
 }

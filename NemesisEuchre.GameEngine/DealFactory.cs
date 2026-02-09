@@ -112,12 +112,12 @@ public class DealFactory(ICardShuffler cardShuffler, IRandomNumberGenerator rand
 
         foreach (var suit in Enum.GetValues<Suit>())
         {
-            deck[index++] = new Card { Suit = suit, Rank = Rank.Nine };
-            deck[index++] = new Card { Suit = suit, Rank = Rank.Ten };
-            deck[index++] = new Card { Suit = suit, Rank = Rank.Jack };
-            deck[index++] = new Card { Suit = suit, Rank = Rank.Queen };
-            deck[index++] = new Card { Suit = suit, Rank = Rank.King };
-            deck[index++] = new Card { Suit = suit, Rank = Rank.Ace };
+            deck[index++] = new Card(suit, Rank.Nine);
+            deck[index++] = new Card(suit, Rank.Ten);
+            deck[index++] = new Card(suit, Rank.Jack);
+            deck[index++] = new Card(suit, Rank.Queen);
+            deck[index++] = new Card(suit, Rank.King);
+            deck[index++] = new Card(suit, Rank.Ace);
         }
 
         return deck;

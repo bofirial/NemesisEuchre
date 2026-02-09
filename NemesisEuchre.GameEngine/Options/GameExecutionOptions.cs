@@ -14,10 +14,3 @@ public class GameExecutionOptions
     [Range(0, 16, ErrorMessage = "ReservedCores must be between 0 and 16")]
     public int ReservedCores { get; set; } = 1;
 }
-
-public enum ParallelismStrategy
-{
-    Fixed = 0,
-    Auto = 1,
-    Conservative = 2,
-}

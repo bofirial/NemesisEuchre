@@ -114,14 +114,13 @@ public class Gen1BotTests
 
         var result = await bot.CallTrumpAsync(
             cardsInHand,
-            PlayerPosition.North,
             0,
             0,
-            PlayerPosition.South,
+            RelativePlayerPosition.Self,
             upCard,
             validDecisions);
 
-        result.Should().BeOneOf(validDecisions);
+        result.ChosenCallTrumpDecision.Should().BeOneOf(validDecisions);
     }
 
     [Fact]
@@ -174,7 +173,7 @@ public class Gen1BotTests
             false,
             validCardsToDiscard);
 
-        result.Should().BeOneOf(validCardsToDiscard);
+        result.ChosenCard.Should().BeOneOf(validCardsToDiscard);
     }
 
     [Fact]
@@ -212,7 +211,7 @@ public class Gen1BotTests
             1,
             validCardsToPlay);
 
-        result.Should().BeOneOf(validCardsToPlay);
+        result.ChosenCard.Should().BeOneOf(validCardsToPlay);
     }
 
     private Card[] GenerateCards(int count)
@@ -228,11 +227,7 @@ public class Gen1BotTests
 
     private Card GenerateCard()
     {
-        return new Card
-        {
-            Rank = _faker.PickRandom<Rank>(),
-            Suit = _faker.PickRandom<Suit>(),
-        };
+        return new Card(_faker.PickRandom<Suit>(), _faker.PickRandom<Rank>());
     }
 
     private RelativeCard[] GenerateRelativeCards(int count)
@@ -240,10 +235,8 @@ public class Gen1BotTests
         var cards = new RelativeCard[count];
         for (int i = 0; i < count; i++)
         {
-            cards[i] = new RelativeCard
+            cards[i] = new RelativeCard(_faker.PickRandom<Rank>(), _faker.PickRandom<RelativeSuit>())
             {
-                Rank = _faker.PickRandom<Rank>(),
-                Suit = _faker.PickRandom<RelativeSuit>(),
                 Card = GenerateCard(),
             };
         }

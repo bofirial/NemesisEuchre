@@ -11,7 +11,6 @@ namespace NemesisEuchre.MachineLearning.Models;
 /// <param name="RootMeanSquaredError">Root mean squared error (RMSE).</param>
 /// <param name="MeanSquaredError">Mean squared error (MSE).</param>
 /// <param name="LossFunction">Value of the loss function.</param>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Records")]
 public record RegressionEvaluationReport(
     string ModelType,
     DateTime EvaluationDate,

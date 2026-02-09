@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.DataAccess.Entities.Metadata;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
@@ -11,19 +11,17 @@ public class DiscardCardDecisionEntity : IDecisionEntity
 
     public int DealId { get; set; }
 
-    public required string CardsInHandJson { get; set; }
+    public int CallingRelativePlayerPositionId { get; set; }
+
+    public bool CallingPlayerGoingAlone { get; set; }
 
     public short TeamScore { get; set; }
 
     public short OpponentScore { get; set; }
 
-    public RelativePlayerPosition CallingPlayer { get; set; }
+    public int ChosenRelativeCardId { get; set; }
 
-    public bool CallingPlayerGoingAlone { get; set; }
-
-    public required string ChosenCardJson { get; set; }
-
-    public ActorType? ActorType { get; set; }
+    public int? ActorTypeId { get; set; }
 
     public bool? DidTeamWinDeal { get; set; }
 
@@ -32,6 +30,16 @@ public class DiscardCardDecisionEntity : IDecisionEntity
     public bool? DidTeamWinGame { get; set; }
 
     public DealEntity? Deal { get; set; }
+
+    public RelativePlayerPositionMetadata? CallingPlayer { get; set; }
+
+    public RelativeCardMetadata? ChosenRelativeCard { get; set; }
+
+    public ActorTypeMetadata? ActorTypeMetadata { get; set; }
+
+    public ICollection<DiscardCardDecisionCardsInHand> CardsInHand { get; set; } = [];
+
+    public ICollection<DiscardCardDecisionPredictedPoints> PredictedPoints { get; set; } = [];
 }
 
 public class DiscardCardDecisionEntityConfiguration : IEntityTypeConfiguration<DiscardCardDecisionEntity>
@@ -48,28 +56,14 @@ public class DiscardCardDecisionEntityConfiguration : IEntityTypeConfiguration<D
         builder.Property(e => e.DealId)
             .IsRequired();
 
-        builder.Property(e => e.CardsInHandJson)
-            .IsRequired()
-            .HasMaxLength(300);
-
-        builder.Property(e => e.CallingPlayer)
-            .IsRequired()
-            .HasConversion<string>()
-            .HasMaxLength(25);
+        builder.Property(e => e.CallingPlayerGoingAlone)
+            .IsRequired();
 
         builder.Property(e => e.TeamScore)
             .IsRequired();
 
         builder.Property(e => e.OpponentScore)
             .IsRequired();
-
-        builder.Property(e => e.ChosenCardJson)
-            .IsRequired()
-            .HasMaxLength(50);
-
-        builder.Property(e => e.ActorType)
-            .HasConversion<string>()
-            .HasMaxLength(10);
 
         builder.Property(e => e.DidTeamWinDeal);
 
@@ -82,10 +76,25 @@ public class DiscardCardDecisionEntityConfiguration : IEntityTypeConfiguration<D
             .HasForeignKey(e => e.DealId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasOne(e => e.CallingPlayer)
+            .WithMany()
+            .HasForeignKey(e => e.CallingRelativePlayerPositionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.ChosenRelativeCard)
+            .WithMany()
+            .HasForeignKey(e => e.ChosenRelativeCardId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.ActorTypeMetadata)
+            .WithMany()
+            .HasForeignKey(e => e.ActorTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasIndex(e => e.DealId)
             .HasDatabaseName("IX_DiscardCardDecisions_DealId");
 
-        builder.HasIndex(e => e.ActorType)
-            .HasDatabaseName("IX_DiscardCardDecisions_ActorType");
+        builder.HasIndex(e => e.ActorTypeId)
+            .HasDatabaseName("IX_DiscardCardDecisions_ActorTypeId");
     }
 }

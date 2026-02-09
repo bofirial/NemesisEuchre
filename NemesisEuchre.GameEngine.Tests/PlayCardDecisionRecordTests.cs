@@ -12,7 +12,7 @@ public class PlayCardDecisionRecordTests
     {
         var record = new PlayCardDecisionRecord
         {
-            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            ChosenCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         record.CardsInHand.Should().NotBeNull();
@@ -34,13 +34,13 @@ public class PlayCardDecisionRecordTests
         var hand = new Card[cardCount];
         for (int i = 0; i < cardCount; i++)
         {
-            hand[i] = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+            hand[i] = new Card(Suit.Hearts, Rank.Ace);
         }
 
         var record = new PlayCardDecisionRecord
         {
             CardsInHand = hand,
-            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            ChosenCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         record.CardsInHand.Should().HaveCount(cardCount);
@@ -52,18 +52,18 @@ public class PlayCardDecisionRecordTests
     {
         Card[] hand =
         [
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.King },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new Card { Suit = Suit.Spades, Rank = Rank.Jack },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
+            new Card(Suit.Hearts, Rank.Ace),
+            new Card(Suit.Hearts, Rank.King),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Spades, Rank.Jack),
+            new Card(Suit.Clubs, Rank.Ten),
         ];
 
         var record = new PlayCardDecisionRecord
         {
             CardsInHand = hand,
             ValidCardsToPlay = hand,
-            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            ChosenCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         record.ValidCardsToPlay.Should().HaveCount(5);
@@ -75,23 +75,23 @@ public class PlayCardDecisionRecordTests
     {
         Card[] hand =
         [
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.King },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new Card { Suit = Suit.Spades, Rank = Rank.Jack },
+            new Card(Suit.Hearts, Rank.Ace),
+            new Card(Suit.Hearts, Rank.King),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Spades, Rank.Jack),
         ];
 
         Card[] validCards =
         [
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.King },
+            new Card(Suit.Hearts, Rank.Ace),
+            new Card(Suit.Hearts, Rank.King),
         ];
 
         var record = new PlayCardDecisionRecord
         {
             CardsInHand = hand,
             ValidCardsToPlay = validCards,
-            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            ChosenCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         record.ValidCardsToPlay.Should().HaveCount(2);
@@ -103,16 +103,16 @@ public class PlayCardDecisionRecordTests
     {
         Card[] hand =
         [
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new Card { Suit = Suit.Spades, Rank = Rank.Jack },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Spades, Rank.Jack),
+            new Card(Suit.Clubs, Rank.Ten),
         ];
 
         var record = new PlayCardDecisionRecord
         {
             CardsInHand = hand,
             ValidCardsToPlay = hand,
-            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            ChosenCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         record.ValidCardsToPlay.Should().HaveCount(3);
@@ -129,7 +129,7 @@ public class PlayCardDecisionRecordTests
         var record = new PlayCardDecisionRecord
         {
             LeadPlayer = position,
-            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            ChosenCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         record.LeadPlayer.Should().Be(position);
@@ -141,7 +141,7 @@ public class PlayCardDecisionRecordTests
         var record = new PlayCardDecisionRecord
         {
             LeadSuit = null,
-            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            ChosenCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         record.LeadSuit.Should().BeNull();
@@ -153,7 +153,7 @@ public class PlayCardDecisionRecordTests
         var record = new PlayCardDecisionRecord
         {
             LeadSuit = Suit.Hearts,
-            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            ChosenCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         record.LeadSuit.Should().Be(Suit.Hearts);
@@ -164,22 +164,22 @@ public class PlayCardDecisionRecordTests
     {
         Card[] hand =
         [
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.King },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
+            new Card(Suit.Hearts, Rank.Ace),
+            new Card(Suit.Hearts, Rank.King),
+            new Card(Suit.Diamonds, Rank.Queen),
         ];
 
         Card[] validCardsToPlay =
         [
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.King },
+            new Card(Suit.Hearts, Rank.Ace),
+            new Card(Suit.Hearts, Rank.King),
         ];
 
-        var chosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var chosenCard = new Card(Suit.Hearts, Rank.Ace);
 
         var playedCards = new Dictionary<PlayerPosition, Card>
         {
-            { PlayerPosition.East, new Card { Suit = Suit.Spades, Rank = Rank.Queen } },
+            { PlayerPosition.East, new Card(Suit.Spades, Rank.Queen) },
         };
 
         var record = new PlayCardDecisionRecord
@@ -234,7 +234,7 @@ public class PlayCardDecisionRecordTests
                 OpponentScore = 3,
                 TrumpSuit = Suit.Hearts,
                 LeadPlayer = PlayerPosition.North,
-                ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+                ChosenCard = new Card(Suit.Hearts, Rank.Ace),
             };
 
             trick.PlayCardDecisions.Add(record);
@@ -254,7 +254,7 @@ public class PlayCardDecisionRecordTests
             TeamScore = 0,
             TrumpSuit = Suit.Hearts,
             LeadPlayer = PlayerPosition.North,
-            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            ChosenCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         var record2 = new PlayCardDecisionRecord
@@ -263,7 +263,7 @@ public class PlayCardDecisionRecordTests
             TeamScore = 5,
             TrumpSuit = Suit.Hearts,
             LeadPlayer = PlayerPosition.East,
-            ChosenCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            ChosenCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         trick.PlayCardDecisions.Add(record1);

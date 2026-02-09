@@ -28,11 +28,12 @@ public class GameToEntityMapperTests
 
         var entity = mapper.Map(game);
 
-        entity.GameStatus.Should().Be(GameStatus.Complete);
+        entity.GameStatusId.Should().Be((int)GameStatus.Complete);
         entity.Team1Score.Should().Be(10);
         entity.Team2Score.Should().Be(7);
-        entity.WinningTeam.Should().Be(Team.Team1);
-        entity.PlayersJson.Should().NotBeNullOrEmpty();
+        entity.WinningTeamId.Should().Be((int)Team.Team1);
+        entity.GamePlayers.Should().HaveCount(1);
+        entity.GamePlayers.First().PlayerPositionId.Should().Be((int)PlayerPosition.North);
         entity.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 }

@@ -9,19 +9,22 @@ public class ChaosBot(IRandomNumberGenerator random) : BotBase(random)
 {
     public override ActorType ActorType => ActorType.Chaos;
 
-    public override Task<CallTrumpDecision> CallTrumpAsync(
+    public override Task<CallTrumpDecisionContext> CallTrumpAsync(
         Card[] cardsInHand,
-        PlayerPosition playerPosition,
         short teamScore,
         short opponentScore,
-        PlayerPosition dealerPosition,
+        RelativePlayerPosition dealerPosition,
         Card upCard,
         CallTrumpDecision[] validCallTrumpDecisions)
     {
-        return SelectRandomAsync(validCallTrumpDecisions);
+        return Task.FromResult(new CallTrumpDecisionContext()
+        {
+            ChosenCallTrumpDecision = SelectRandom(validCallTrumpDecisions),
+            DecisionPredictedPoints = validCallTrumpDecisions.ToDictionary(d => d, _ => 0f),
+        });
     }
 
-    public override Task<RelativeCard> DiscardCardAsync(
+    public override Task<RelativeCardDecisionContext> DiscardCardAsync(
         RelativeCard[] cardsInHand,
         short teamScore,
         short opponentScore,
@@ -29,10 +32,14 @@ public class ChaosBot(IRandomNumberGenerator random) : BotBase(random)
         bool callingPlayerGoingAlone,
         RelativeCard[] validCardsToDiscard)
     {
-        return SelectRandomAsync(validCardsToDiscard);
+        return Task.FromResult(new RelativeCardDecisionContext()
+        {
+            ChosenCard = SelectRandom(validCardsToDiscard),
+            DecisionPredictedPoints = validCardsToDiscard.ToDictionary(d => d, _ => 0f),
+        });
     }
 
-    public override Task<RelativeCard> PlayCardAsync(
+    public override Task<RelativeCardDecisionContext> PlayCardAsync(
         RelativeCard[] cardsInHand,
         short teamScore,
         short opponentScore,
@@ -42,13 +49,17 @@ public class ChaosBot(IRandomNumberGenerator random) : BotBase(random)
         RelativeCard? dealerPickedUpCard,
         RelativePlayerPosition leadPlayer,
         RelativeSuit? leadSuit,
-        (RelativePlayerPosition PlayerPosition, RelativeSuit Suit)[] knownPlayerSuitVoids,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids,
         RelativeCard[] cardsAccountedFor,
         Dictionary<RelativePlayerPosition, RelativeCard> playedCardsInTrick,
         RelativePlayerPosition? currentlyWinningTrickPlayer,
         short trickNumber,
         RelativeCard[] validCardsToPlay)
     {
-        return SelectRandomAsync(validCardsToPlay);
+        return Task.FromResult(new RelativeCardDecisionContext()
+        {
+            ChosenCard = SelectRandom(validCardsToPlay),
+            DecisionPredictedPoints = validCardsToPlay.ToDictionary(d => d, _ => 0f),
+        });
     }
 }

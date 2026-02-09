@@ -227,18 +227,18 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         deal.Trump = Suit.Hearts;
         deal.Players[PlayerPosition.North].CurrentHand = [
-            new Card { Suit = Suit.Spades, Rank = Rank.King },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+            new Card(Suit.Spades, Rank.King),
+            new Card(Suit.Hearts, Rank.Ten),
+            new Card(Suit.Clubs, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.King)
         ];
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Spades, Rank = Rank.Nine },
-            new Card { Suit = Suit.Spades, Rank = Rank.Ten },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ace },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace }
+            new Card(Suit.Spades, Rank.Nine),
+            new Card(Suit.Spades, Rank.Ten),
+            new Card(Suit.Hearts, Rank.Jack),
+            new Card(Suit.Clubs, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.Ace)
         ];
 
         Card[]? capturedValidCards = null;
@@ -267,18 +267,18 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         deal.Trump = Suit.Hearts;
         deal.Players[PlayerPosition.North].CurrentHand = [
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-            new Card { Suit = Suit.Spades, Rank = Rank.Nine },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+            new Card(Suit.Clubs, Rank.Ace),
+            new Card(Suit.Hearts, Rank.Ten),
+            new Card(Suit.Spades, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.King)
         ];
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
-            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ten }
+            new Card(Suit.Hearts, Rank.Nine),
+            new Card(Suit.Hearts, Rank.Jack),
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.Ten)
         ];
 
         Card[]? capturedValidCards = null;
@@ -306,13 +306,14 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         deal.Trump = Suit.Hearts;
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Spades, Rank = Rank.Nine },
-            new Card { Suit = Suit.Spades, Rank = Rank.Ten },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ace },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+            new Card(Suit.Spades, Rank.Nine),
+            new Card(Suit.Spades, Rank.Ten),
+            new Card(Suit.Hearts, Rank.Jack),
+            new Card(Suit.Clubs, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.King)
         ];
 
+        var invalidCard = new Card(Suit.Clubs, Rank.King);
         var callCount = 0;
         _playerActorMock.Setup(b => b.PlayCardAsync(It.IsAny<PlayCardContext>()))
             .Callback((PlayCardContext _) => callCount++)
@@ -320,10 +321,10 @@ public class TrickPlayingOrchestratorTests
             {
                 if (callCount == 2)
                 {
-                    return Task.FromResult(new Card { Suit = Suit.Hearts, Rank = Rank.Jack });
+                    return Task.FromResult(new CardDecisionContext { ChosenCard = invalidCard });
                 }
 
-                return Task.FromResult(ctx.ValidCardsToPlay[0]);
+                return Task.FromResult(new CardDecisionContext { ChosenCard = ctx.ValidCardsToPlay[0] });
             });
 
         var act = async () => await _sut.PlayTrickAsync(deal, PlayerPosition.North);
@@ -338,11 +339,11 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         deal.Trump = Suit.Clubs;
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Spades, Rank = Rank.Nine },
-            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.King },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen }
+            new Card(Suit.Spades, Rank.Nine),
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Hearts, Rank.King),
+            new Card(Suit.Clubs, Rank.Ten),
+            new Card(Suit.Diamonds, Rank.Queen)
         ];
 
         List<Card[]> allValidCards = [];
@@ -364,11 +365,11 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         deal.Trump = Suit.Hearts;
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Jack },
-            new Card { Suit = Suit.Spades, Rank = Rank.Nine },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ace },
-            new Card { Suit = Suit.Spades, Rank = Rank.King }
+            new Card(Suit.Diamonds, Rank.Jack),
+            new Card(Suit.Spades, Rank.Nine),
+            new Card(Suit.Clubs, Rank.Ten),
+            new Card(Suit.Clubs, Rank.Ace),
+            new Card(Suit.Spades, Rank.King)
         ];
 
         Card[]? capturedValidCards = null;
@@ -388,7 +389,7 @@ public class TrickPlayingOrchestratorTests
         var result = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
         result.LeadSuit.Should().Be(Suit.Hearts);
-        result.CardsPlayed[1].Card.Should().BeEquivalentTo(new Card { Suit = Suit.Diamonds, Rank = Rank.Jack });
+        result.CardsPlayed[1].Card.Should().BeEquivalentTo(new Card(Suit.Diamonds, Rank.Jack));
     }
 
     [Fact]
@@ -397,18 +398,18 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         deal.Trump = Suit.Clubs;
         deal.Players[PlayerPosition.North].CurrentHand = [
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-            new Card { Suit = Suit.Spades, Rank = Rank.Nine },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+            new Card(Suit.Clubs, Rank.Ace),
+            new Card(Suit.Hearts, Rank.Ten),
+            new Card(Suit.Spades, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.King)
         ];
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
-            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.King },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
-            new Card { Suit = Suit.Spades, Rank = Rank.Ten }
+            new Card(Suit.Clubs, Rank.Nine),
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Hearts, Rank.King),
+            new Card(Suit.Diamonds, Rank.Ace),
+            new Card(Suit.Spades, Rank.Ten)
         ];
 
         Card[]? capturedValidCards = null;
@@ -451,18 +452,18 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         deal.Trump = Suit.Spades;
         deal.Players[PlayerPosition.North].CurrentHand = [
-            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Hearts, Rank.Ten),
+            new Card(Suit.Clubs, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.King)
         ];
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Clubs, Rank = Rank.Jack },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Queen },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ten }
+            new Card(Suit.Clubs, Rank.Jack),
+            new Card(Suit.Hearts, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.Ace),
+            new Card(Suit.Hearts, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.Ten)
         ];
 
         Card[]? capturedValidCards = null;
@@ -492,11 +493,11 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         deal.Trump = Suit.Hearts;
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Jack },
-            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-            new Card { Suit = Suit.Clubs, Rank = Rank.King },
-            new Card { Suit = Suit.Spades, Rank = Rank.Queen },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ten }
+            new Card(Suit.Diamonds, Rank.Jack),
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Clubs, Rank.King),
+            new Card(Suit.Spades, Rank.Queen),
+            new Card(Suit.Clubs, Rank.Ten)
         ];
 
         Card[]? capturedValidCards = null;
@@ -655,10 +656,10 @@ public class TrickPlayingOrchestratorTests
         deal.Team1Score = 7;
         deal.Team2Score = 4;
 
-        List<(short Team, short Opponent)> capturedScores = [];
+        List<(short team, short opponent)> capturedScores = [];
 
         _playerActorMock.Setup(b => b.PlayCardAsync(It.IsAny<PlayCardContext>()))
-            .Callback((PlayCardContext ctx) => capturedScores.Add((ctx.TeamScore, ctx.OpponentScore)))
+            .Callback((PlayCardContext ctx) => capturedScores.Add((team: ctx.TeamScore, opponent: ctx.OpponentScore)))
             .ReturnsFirstValidCard();
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
@@ -734,18 +735,18 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         deal.Trump = Suit.Hearts;
         deal.Players[PlayerPosition.North].CurrentHand = [
-            new Card { Suit = Suit.Spades, Rank = Rank.King },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+            new Card(Suit.Spades, Rank.King),
+            new Card(Suit.Hearts, Rank.Ten),
+            new Card(Suit.Clubs, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.King)
         ];
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Spades, Rank = Rank.Nine },
-            new Card { Suit = Suit.Spades, Rank = Rank.Ten },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ace },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace }
+            new Card(Suit.Spades, Rank.Nine),
+            new Card(Suit.Spades, Rank.Ten),
+            new Card(Suit.Hearts, Rank.Jack),
+            new Card(Suit.Clubs, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.Ace)
         ];
 
         _playerActorMock.Setup(b => b.PlayCardAsync(It.IsAny<PlayCardContext>()))
@@ -864,18 +865,18 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         deal.Trump = Suit.Hearts;
         deal.Players[PlayerPosition.North].CurrentHand = [
-            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Hearts, Rank.Ten),
+            new Card(Suit.Clubs, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.King)
         ];
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ten },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Nine }
+            new Card(Suit.Hearts, Rank.Nine),
+            new Card(Suit.Clubs, Rank.Ten),
+            new Card(Suit.Diamonds, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.Ten),
+            new Card(Suit.Diamonds, Rank.Nine)
         ];
 
         _playerActorMock.Setup(b => b.PlayCardAsync(It.IsAny<PlayCardContext>()))
@@ -883,7 +884,7 @@ public class TrickPlayingOrchestratorTests
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
+        deal.KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
     }
 
     [Fact]
@@ -892,18 +893,18 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         deal.Trump = Suit.Hearts;
         deal.Players[PlayerPosition.North].CurrentHand = [
-            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Hearts, Rank.Ten),
+            new Card(Suit.Clubs, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.King)
         ];
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ten },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Nine }
+            new Card(Suit.Hearts, Rank.Nine),
+            new Card(Suit.Clubs, Rank.Ten),
+            new Card(Suit.Diamonds, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.Ten),
+            new Card(Suit.Diamonds, Rank.Nine)
         ];
 
         _playerActorMock.Setup(b => b.PlayCardAsync(It.IsAny<PlayCardContext>()))
@@ -913,8 +914,8 @@ public class TrickPlayingOrchestratorTests
 
         trick.PlayCardDecisions[0].KnownPlayerSuitVoids.Should().BeEmpty();
         trick.PlayCardDecisions[1].KnownPlayerSuitVoids.Should().BeEmpty();
-        trick.PlayCardDecisions[2].KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
-        trick.PlayCardDecisions[3].KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
+        trick.PlayCardDecisions[2].KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
+        trick.PlayCardDecisions[3].KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
     }
 
     [Fact]
@@ -923,25 +924,25 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         deal.Trump = Suit.Hearts;
         deal.Players[PlayerPosition.North].CurrentHand = [
-            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Hearts, Rank.Ten),
+            new Card(Suit.Clubs, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.King)
         ];
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ten },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Nine }
+            new Card(Suit.Hearts, Rank.Nine),
+            new Card(Suit.Clubs, Rank.Ten),
+            new Card(Suit.Diamonds, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.Ten),
+            new Card(Suit.Diamonds, Rank.Nine)
         ];
         deal.Players[PlayerPosition.South].CurrentHand = [
-            new Card { Suit = Suit.Hearts, Rank = Rank.King },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Jack },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Jack },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Queen }
+            new Card(Suit.Hearts, Rank.King),
+            new Card(Suit.Hearts, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.Jack),
+            new Card(Suit.Clubs, Rank.Jack),
+            new Card(Suit.Clubs, Rank.Queen)
         ];
 
         _playerActorMock.Setup(b => b.PlayCardAsync(It.IsAny<PlayCardContext>()))
@@ -949,8 +950,8 @@ public class TrickPlayingOrchestratorTests
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
-        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.South, Suit.Spades));
+        deal.KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
+        deal.KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.South, Suit.Spades));
         deal.KnownPlayerSuitVoids.Should().HaveCount(2);
     }
 
@@ -959,21 +960,21 @@ public class TrickPlayingOrchestratorTests
     {
         var deal = CreateTestDeal();
         deal.Trump = Suit.Hearts;
-        deal.KnownPlayerSuitVoids = [(PlayerPosition.East, Suit.Spades)];
+        deal.KnownPlayerSuitVoids = [new(PlayerPosition.East, Suit.Spades)];
 
         deal.Players[PlayerPosition.North].CurrentHand = [
-            new Card { Suit = Suit.Spades, Rank = Rank.Ace },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Hearts, Rank.Ten),
+            new Card(Suit.Clubs, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.King)
         ];
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ten },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Nine }
+            new Card(Suit.Hearts, Rank.Nine),
+            new Card(Suit.Clubs, Rank.Ten),
+            new Card(Suit.Diamonds, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.Ten),
+            new Card(Suit.Diamonds, Rank.Nine)
         ];
 
         _playerActorMock.Setup(b => b.PlayCardAsync(It.IsAny<PlayCardContext>()))
@@ -982,7 +983,7 @@ public class TrickPlayingOrchestratorTests
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
         deal.KnownPlayerSuitVoids.Should().HaveCount(1);
-        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Spades));
+        deal.KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
     }
 
     [Fact]
@@ -991,18 +992,18 @@ public class TrickPlayingOrchestratorTests
         var deal = CreateTestDeal();
         deal.Trump = Suit.Spades;
         deal.Players[PlayerPosition.North].CurrentHand = [
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-            new Card { Suit = Suit.Spades, Rank = Rank.Ten },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Queen },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.King }
+            new Card(Suit.Hearts, Rank.Ace),
+            new Card(Suit.Spades, Rank.Ten),
+            new Card(Suit.Clubs, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.King)
         ];
         deal.Players[PlayerPosition.East].CurrentHand = [
-            new Card { Suit = Suit.Clubs, Rank = Rank.Jack },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Ten },
-            new Card { Suit = Suit.Diamonds, Rank = Rank.Nine },
-            new Card { Suit = Suit.Clubs, Rank = Rank.Ten }
+            new Card(Suit.Clubs, Rank.Jack),
+            new Card(Suit.Diamonds, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.Ten),
+            new Card(Suit.Diamonds, Rank.Nine),
+            new Card(Suit.Clubs, Rank.Ten)
         ];
 
         _playerActorMock.Setup(b => b.PlayCardAsync(It.IsAny<PlayCardContext>()))
@@ -1010,7 +1011,7 @@ public class TrickPlayingOrchestratorTests
 
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        deal.KnownPlayerSuitVoids.Should().Contain((PlayerPosition.East, Suit.Hearts));
+        deal.KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Hearts));
     }
 
     private static Deal CreateTestDeal()
@@ -1040,37 +1041,37 @@ public class TrickPlayingOrchestratorTests
         {
             PlayerPosition.North => new[]
             {
-                new Card { Suit = Suit.Hearts, Rank = Rank.Nine },
-                new Card { Suit = Suit.Hearts, Rank = Rank.Ten },
-                new Card { Suit = Suit.Spades, Rank = Rank.Nine },
-                new Card { Suit = Suit.Clubs, Rank = Rank.Nine },
-                new Card { Suit = Suit.Diamonds, Rank = Rank.Nine },
+                new Card(Suit.Hearts, Rank.Nine),
+                new Card(Suit.Hearts, Rank.Ten),
+                new Card(Suit.Spades, Rank.Nine),
+                new Card(Suit.Clubs, Rank.Nine),
+                new Card(Suit.Diamonds, Rank.Nine),
             },
             PlayerPosition.East =>
             [
-                new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
-                new Card { Suit = Suit.Hearts, Rank = Rank.Queen },
-                new Card { Suit = Suit.Spades, Rank = Rank.Ten },
-                new Card { Suit = Suit.Clubs, Rank = Rank.Ten },
-                new Card { Suit = Suit.Diamonds, Rank = Rank.Ten }
+                new Card(Suit.Hearts, Rank.Jack),
+                new Card(Suit.Hearts, Rank.Queen),
+                new Card(Suit.Spades, Rank.Ten),
+                new Card(Suit.Clubs, Rank.Ten),
+                new Card(Suit.Diamonds, Rank.Ten)
             ],
             PlayerPosition.South =>
             [
-                new Card { Suit = Suit.Hearts, Rank = Rank.King },
-                new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-                new Card { Suit = Suit.Spades, Rank = Rank.Jack },
-                new Card { Suit = Suit.Clubs, Rank = Rank.Jack },
-                new Card { Suit = Suit.Diamonds, Rank = Rank.Jack }
+                new Card(Suit.Hearts, Rank.King),
+                new Card(Suit.Hearts, Rank.Ace),
+                new Card(Suit.Spades, Rank.Jack),
+                new Card(Suit.Clubs, Rank.Jack),
+                new Card(Suit.Diamonds, Rank.Jack)
             ],
             PlayerPosition.West =>
             [
-                new Card { Suit = Suit.Diamonds, Rank = Rank.Ace },
-                new Card { Suit = Suit.Diamonds, Rank = Rank.King },
-                new Card { Suit = Suit.Spades, Rank = Rank.Queen },
-                new Card { Suit = Suit.Clubs, Rank = Rank.Queen },
-                new Card { Suit = Suit.Diamonds, Rank = Rank.Queen }
+                new Card(Suit.Diamonds, Rank.Ace),
+                new Card(Suit.Diamonds, Rank.King),
+                new Card(Suit.Spades, Rank.Queen),
+                new Card(Suit.Clubs, Rank.Queen),
+                new Card(Suit.Diamonds, Rank.Queen)
             ],
-            _ => throw new ArgumentOutOfRangeException(nameof(position))
+            _ => throw new ArgumentOutOfRangeException(nameof(position)),
         };
 
         return new DealPlayer

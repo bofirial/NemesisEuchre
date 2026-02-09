@@ -77,7 +77,7 @@ public class TrumpSelectionValidatorTests
         {
             DealStatus = DealStatus.SelectingTrump,
             DealerPosition = PlayerPosition.North,
-            UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            UpCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         for (int i = 0; i < playerCount; i++)
@@ -127,11 +127,11 @@ public class TrumpSelectionValidatorTests
     [Fact]
     public void ValidateDiscard_WithCardNotInValidCards_ThrowsInvalidOperationException()
     {
-        var cardToDiscard = new Card { Suit = Suit.Spades, Rank = Rank.Ace };
+        var cardToDiscard = new Card(Suit.Spades, Rank.Ace);
         var validCards = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
-            new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            new Card(Suit.Hearts, Rank.Jack),
+            new Card(Suit.Hearts, Rank.Ace),
         };
 
         var act = () => _validator.ValidateDiscard(cardToDiscard, validCards);
@@ -143,10 +143,10 @@ public class TrumpSelectionValidatorTests
     [Fact]
     public void ValidateDiscard_WithCardInValidCards_DoesNotThrow()
     {
-        var aceOfHearts = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var aceOfHearts = new Card(Suit.Hearts, Rank.Ace);
         var validCards = new[]
         {
-            new Card { Suit = Suit.Hearts, Rank = Rank.Jack },
+            new Card(Suit.Hearts, Rank.Jack),
             aceOfHearts,
         };
 
@@ -161,7 +161,7 @@ public class TrumpSelectionValidatorTests
         {
             DealStatus = DealStatus.SelectingTrump,
             DealerPosition = PlayerPosition.North,
-            UpCard = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
+            UpCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
         deal.Players.Add(PlayerPosition.North, new DealPlayer());

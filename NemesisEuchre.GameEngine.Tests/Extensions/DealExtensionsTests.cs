@@ -15,7 +15,7 @@ public class DealExtensionsTests
         {
             DealStatus = DealStatus.Playing,
             DealerPosition = PlayerPosition.West,
-            UpCard = new Card { Suit = Suit.Diamonds, Rank = Rank.Nine },
+            UpCard = new Card(Suit.Diamonds, Rank.Nine),
             Trump = Suit.Diamonds,
             CallingPlayer = PlayerPosition.North,
             CallingPlayerIsGoingAlone = false,

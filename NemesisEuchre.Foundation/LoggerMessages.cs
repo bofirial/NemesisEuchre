@@ -396,4 +396,23 @@ public static partial class LoggerMessages
         Level = LogLevel.Information,
         Message = "Batch of {BatchSize} games persistence skipped (--do-not-persist flag enabled)")]
     public static partial void LogBatchGamePersistenceSkipped(ILogger logger, int batchSize);
+
+    // EventID 53-55: ML Bot engine availability
+    [LoggerMessage(
+        EventId = 53,
+        Level = LogLevel.Warning,
+        Message = "CallTrump engine not available, selecting random decision.")]
+    public static partial void LogCallTrumpEngineNotAvailable(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 54,
+        Level = LogLevel.Warning,
+        Message = "DiscardCard engine not available, selecting random card to discard.")]
+    public static partial void LogDiscardCardEngineNotAvailable(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 55,
+        Level = LogLevel.Warning,
+        Message = "PlayCard engine not available, selecting random card to play.")]
+    public static partial void LogPlayCardEngineNotAvailable(ILogger logger);
 }

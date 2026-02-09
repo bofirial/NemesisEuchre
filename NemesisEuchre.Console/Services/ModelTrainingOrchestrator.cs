@@ -24,6 +24,7 @@ public class ModelTrainingOrchestrator(
     ITrainerFactory trainerFactory,
     ILogger<ModelTrainingOrchestrator> logger) : IModelTrainingOrchestrator
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Critical Code Smell", "S1215:\"GC.Collect\" should not be called", Justification = "Intentional GC between model trainings to reclaim ~6 GB IDataView buffers")]
     public async Task<TrainingResults> TrainModelsAsync(
         ActorType actorType,
         DecisionType decisionType,
@@ -63,6 +64,10 @@ public class ModelTrainingOrchestrator(
                 cancellationToken);
 
             results.Add(result);
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
 
             if (!result.Success)
             {

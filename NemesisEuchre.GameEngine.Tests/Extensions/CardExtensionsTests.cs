@@ -19,7 +19,7 @@ public class CardExtensionsTests
     [InlineData(Suit.Hearts, Rank.Queen, Suit.Hearts, false)]
     public void IsRightBower_WithJackOfTrump_ReturnsTrue(Suit cardSuit, Rank cardRank, Suit trump, bool expected)
     {
-        var card = new Card { Suit = cardSuit, Rank = cardRank };
+        var card = new Card(cardSuit, cardRank);
 
         var result = card.IsRightBower(trump);
 
@@ -37,7 +37,7 @@ public class CardExtensionsTests
     [InlineData(Suit.Diamonds, Rank.Queen, Suit.Hearts, false)]
     public void IsLeftBower_WithJackOfSameColor_ReturnsTrue(Suit cardSuit, Rank cardRank, Suit trump, bool expected)
     {
-        var card = new Card { Suit = cardSuit, Rank = cardRank };
+        var card = new Card(cardSuit, cardRank);
 
         var result = card.IsLeftBower(trump);
 
@@ -54,7 +54,7 @@ public class CardExtensionsTests
     [InlineData(Suit.Hearts, Rank.Nine, Suit.Clubs, Suit.Hearts)]
     public void GetEffectiveSuit_WithAnyCard_ReturnsTrumpForLeftBowerOtherwiseOriginalSuit(Suit cardSuit, Rank cardRank, Suit trump, Suit expected)
     {
-        var card = new Card { Suit = cardSuit, Rank = cardRank };
+        var card = new Card(cardSuit, cardRank);
 
         var result = card.GetEffectiveSuit(trump);
 
@@ -71,7 +71,7 @@ public class CardExtensionsTests
     [InlineData(Suit.Clubs, Rank.King, Suit.Diamonds, false)]
     public void IsTrump_WithAnyCard_ReturnsTrueWhenCardBelongsToTrumpSuit(Suit cardSuit, Rank cardRank, Suit trump, bool expected)
     {
-        var card = new Card { Suit = cardSuit, Rank = cardRank };
+        var card = new Card(cardSuit, cardRank);
 
         var result = card.IsTrump(trump);
 
@@ -81,7 +81,7 @@ public class CardExtensionsTests
     [Fact]
     public void GetTrumpValue_WithRightBower_Returns16()
     {
-        var card = new Card { Suit = Suit.Spades, Rank = Rank.Jack };
+        var card = new Card(Suit.Spades, Rank.Jack);
 
         var result = card.GetTrumpValue(Suit.Spades);
 
@@ -91,7 +91,7 @@ public class CardExtensionsTests
     [Fact]
     public void GetTrumpValue_WithLeftBower_Returns15()
     {
-        var card = new Card { Suit = Suit.Clubs, Rank = Rank.Jack };
+        var card = new Card(Suit.Clubs, Rank.Jack);
 
         var result = card.GetTrumpValue(Suit.Spades);
 
@@ -101,7 +101,7 @@ public class CardExtensionsTests
     [Fact]
     public void GetTrumpValue_WithNonTrumpCard_ReturnsNegative1()
     {
-        var card = new Card { Suit = Suit.Hearts, Rank = Rank.Ace };
+        var card = new Card(Suit.Hearts, Rank.Ace);
 
         var result = card.GetTrumpValue(Suit.Spades);
 
@@ -117,7 +117,7 @@ public class CardExtensionsTests
     [InlineData(Suit.Hearts, Rank.Ace, Suit.Hearts, 14)]
     public void GetTrumpValue_WithTrumpCard_ReturnsRankValue(Suit cardSuit, Rank cardRank, Suit trump, int expected)
     {
-        var card = new Card { Suit = cardSuit, Rank = cardRank };
+        var card = new Card(cardSuit, cardRank);
 
         var result = card.GetTrumpValue(trump);
 
@@ -133,7 +133,7 @@ public class CardExtensionsTests
     [InlineData(Rank.Ace, Suit.Hearts, "A♥ ")]
     public void ToDisplayString_WithAnyCard_ReturnsCorrectSymbolRepresentation(Rank rank, Suit suit, string expected)
     {
-        var card = new Card { Suit = suit, Rank = rank };
+        var card = new Card(suit, rank);
 
         var result = card.ToDisplayString();
 
@@ -144,7 +144,7 @@ public class CardExtensionsTests
     public void ToDisplayString_WithAllRanks_CoversAllRanks()
     {
         var ranks = new[] { Rank.Nine, Rank.Ten, Rank.Jack, Rank.Queen, Rank.King, Rank.Ace };
-        var results = ranks.Select(r => new Card { Suit = Suit.Spades, Rank = r }.ToDisplayString()).ToList();
+        var results = ranks.Select(r => new Card(Suit.Spades, r).ToDisplayString()).ToList();
 
         results.Should().BeEquivalentTo("9♠ ", "10♠ ", "J♠ ", "Q♠ ", "K♠ ", "A♠ ");
     }
@@ -153,7 +153,7 @@ public class CardExtensionsTests
     public void ToDisplayString_WithAllSuits_CoversAllSuits()
     {
         var suits = new[] { Suit.Spades, Suit.Hearts, Suit.Clubs, Suit.Diamonds };
-        var results = suits.Select(s => new Card { Suit = s, Rank = Rank.Ace }.ToDisplayString()).ToList();
+        var results = suits.Select(s => new Card(s, Rank.Ace).ToDisplayString()).ToList();
 
         results.Should().BeEquivalentTo("A♠ ", "A♥ ", "A♣ ", "A♦ ");
     }
@@ -161,7 +161,7 @@ public class CardExtensionsTests
     [Fact]
     public void ToRelative_WithCard_ConvertsSuitAndKeepsRank()
     {
-        var card = new Card { Suit = Suit.Clubs, Rank = Rank.Ace };
+        var card = new Card(Suit.Clubs, Rank.Ace);
 
         var relativeCard = card.ToRelative(Suit.Spades);
 
@@ -176,7 +176,7 @@ public class CardExtensionsTests
     [InlineData(Suit.Diamonds, Suit.Clubs, Rank.Nine)]
     public void ToRelative_WithAllTrumpAndRanks_WorksCorrectly(Suit trump, Suit cardSuit, Rank rank)
     {
-        var card = new Card { Suit = cardSuit, Rank = rank };
+        var card = new Card(cardSuit, rank);
 
         var relativeCard = card.ToRelative(trump);
 
@@ -187,7 +187,7 @@ public class CardExtensionsTests
     [Fact]
     public void ToRelative_WithCard_SetsCardPropertyToOriginalCard()
     {
-        var card = new Card { Suit = Suit.Diamonds, Rank = Rank.King };
+        var card = new Card(Suit.Diamonds, Rank.King);
 
         var relativeCard = card.ToRelative(Suit.Hearts);
 

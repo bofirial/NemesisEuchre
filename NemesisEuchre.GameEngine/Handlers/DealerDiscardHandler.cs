@@ -25,15 +25,15 @@ public class DealerDiscardHandler(
         AddUpcardToDealerHand(dealer, deal.UpCard!);
 
         var hand = dealer.CurrentHand.SortByTrump(deal.Trump);
-        var cardToDiscard = await GetDealerDiscardDecisionAsync(deal, dealerPosition, dealer, hand);
+        var cardToDiscardContext = await GetDealerDiscardDecisionAsync(deal, dealerPosition, dealer, hand);
 
-        decisionRecorder.RecordDiscardDecision(deal, dealerPosition, hand, cardToDiscard);
+        decisionRecorder.RecordDiscardDecision(deal, dealerPosition, hand, cardToDiscardContext);
 
-        validator.ValidateDiscard(cardToDiscard, hand);
+        validator.ValidateDiscard(cardToDiscardContext.ChosenCard, hand);
 
-        deal.DiscardedCard = cardToDiscard;
+        deal.DiscardedCard = cardToDiscardContext.ChosenCard;
 
-        dealer.CurrentHand.Remove(cardToDiscard);
+        dealer.CurrentHand.Remove(cardToDiscardContext.ChosenCard);
     }
 
     private static void AddUpcardToDealerHand(DealPlayer dealer, Card upCard)
@@ -41,7 +41,7 @@ public class DealerDiscardHandler(
         dealer.CurrentHand.Add(upCard);
     }
 
-    private Task<Card> GetDealerDiscardDecisionAsync(
+    private Task<CardDecisionContext> GetDealerDiscardDecisionAsync(
         Deal deal,
         PlayerPosition dealerPosition,
         DealPlayer dealer,

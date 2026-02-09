@@ -11,11 +11,7 @@ public class PlayedCardExtensionsTests
     [Fact]
     public void ToRelative_WithPlayedCard_ConvertsPositionAndCardToRelative()
     {
-        var playedCard = new PlayedCard
-        {
-            Card = new Card { Suit = Suit.Hearts, Rank = Rank.Ace },
-            PlayerPosition = PlayerPosition.South,
-        };
+        var playedCard = new PlayedCard(new Card(Suit.Hearts, Rank.Ace), PlayerPosition.South);
 
         var relative = playedCard.ToRelative(PlayerPosition.North, Suit.Spades);
 

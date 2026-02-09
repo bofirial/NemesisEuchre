@@ -4,7 +4,7 @@ A console-based engine for training a high-performance Euchre AI using massive d
 
 ## Project Status
 
-🚀 **Version 0.6-preview** - Interactive play with ASCII card display and human opponent support.
+🚀 **Version 0.7-preview** - Interactive play with ASCII card display and human opponent support.
 
 ### Current State
 - ✅ **v0.1** - Project infrastructure and CLI framework
@@ -24,8 +24,8 @@ A console-based engine for training a high-performance Euchre AI using massive d
 - ✅ **v0.4** - Cached prediction engine provider for efficient model inference
 - ✅ **v0.5** - Model memory enhancements for game state tracking
 - ✅ **v0.5** - Enhanced feature engineering with historical context
-- 🚧 **v0.6** - Advanced Game Display (in progress)
-- 🚧 **v0.7** - Interactive play with ASCII card display
+- ✅ **v0.6** - Advanced game display, Gen1TrainerBot with exploration, database normalization, streaming training
+- 🚧 **v0.7** - Interactive play with ASCII card display (in progress)
 
 ## Quick Start
 
@@ -89,6 +89,32 @@ dotnet test --collect:"XPlat Code Coverage"
 - **Data Denormalization**: TrickNumber directly on PlayCardDecision for simplified feature engineering
 - **Void Tracking**: Capture known player suit voids discovered during trick play for improved inference
 
+### Advanced Game Display & Training Improvements (v0.6 - Completed)
+- **Rich Game Results Display**: Detailed rendering of tricks, deals, and game outcomes with Spectre.Console
+  - `show-game` CLI command to load and display any saved game from the database
+  - `--show-decisions` flag to inspect AI decision details including predicted points
+  - Dedicated DecisionRenderer for call trump, discard, and play card decision tables
+- **Gen1TrainerBot**: Exploration-capable training bot using Boltzmann/softmax selection
+  - Temperature-controlled stochastic decision making for discovering suboptimal-but-interesting strategies
+  - Generates more diverse training data than greedy-only selection
+- **Database Normalization**: Migrated JSON columns to normalized metadata tables with foreign keys
+  - Replaces serialized JSON blobs with proper relational structure for all decision entities
+  - Adds metadata reference tables for cards, suits, ranks, positions, and game status enums
+  - Enables efficient querying and indexing on previously opaque JSON fields
+- **Streaming Training Data**: Reduced ML training memory from ~26 GB to ~4-6 GB
+  - IAsyncEnumerable-based data streaming to ML.NET instead of loading entire dataset into memory
+  - TrainingDataLoaderBase with unified streaming pattern across all decision types
+- **Immutable Game Models**: Converted Card, RelativeCard, and PlayedCard to immutable records
+  - Protects against accidental state mutation in IPlayerActor implementations
+  - Strongly-typed PlayerSuitVoid and RelativePlayerSuitVoid records replace raw tuples
+- **Unified Feature Builders**: Extended the PlayCard consolidation pattern to CallTrump and DiscardCard
+  - CallTrumpFeatureBuilder and DiscardCardFeatureBuilder eliminate training/inference duplication
+  - FeatureContextBuilder pattern replaces EntityDeserializers for cleaner data transformation
+- **Decision Predicted Points**: IPlayerActor methods now return decision context objects with scored alternatives
+  - Persisted to database for post-hoc analysis of bot reasoning
+- **Batch Results Enhancements**: Richer statistics including total tricks and per-decision-type counters
+- **Legacy Cleanup**: Removed multiclass model trainers in favor of regression-only approach
+
 ### Code Quality & Performance (v0.5 - Completed)
 - **Context Objects**: Eliminated parameter bloat by introducing PlayCardContext, CallTrumpContext, and DiscardCardContext
   - Reduced 17-parameter methods to single-parameter methods (94% reduction)
@@ -145,6 +171,10 @@ NemesisEuchre.Console.Tests/    # Comprehensive test suite
 | **Context Objects** | Single-parameter methods with context objects eliminate parameter bloat and improve API clarity |
 | **Array Pooling** | Reusing arrays reduces GC pressure by 20-30% during high-throughput feature engineering |
 | **Unified Feature Builders** | Single source of truth eliminates duplication between training and inference code paths |
+| **Immutable Records** | Card, RelativeCard, PlayedCard as records prevent bot implementations from mutating shared game state |
+| **Boltzmann Exploration** | Temperature-controlled softmax selection generates diverse training data beyond greedy-optimal play |
+| **Normalized Schema** | Replacing JSON columns with relational tables enables indexing, querying, and referential integrity |
+| **Streaming Training** | IAsyncEnumerable data loading keeps memory at ~4-6 GB instead of ~26 GB for large datasets |
 
 ### Generational Training Vision
 

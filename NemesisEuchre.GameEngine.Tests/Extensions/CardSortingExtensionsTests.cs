@@ -13,12 +13,12 @@ public class CardSortingExtensionsTests
     {
         var cards = new[]
         {
-            new Card { Rank = Rank.Nine, Suit = Suit.Hearts },
-            new Card { Rank = Rank.Ace, Suit = Suit.Spades },
-            new Card { Rank = Rank.Jack, Suit = Suit.Clubs },
-            new Card { Rank = Rank.Ten, Suit = Suit.Diamonds },
-            new Card { Rank = Rank.King, Suit = Suit.Hearts },
-            new Card { Rank = Rank.Nine, Suit = Suit.Spades },
+            new Card(Suit.Hearts, Rank.Nine),
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Clubs, Rank.Jack),
+            new Card(Suit.Diamonds, Rank.Ten),
+            new Card(Suit.Hearts, Rank.King),
+            new Card(Suit.Spades, Rank.Nine),
         };
 
         var sorted = cards.SortByTrump(null);
@@ -44,12 +44,12 @@ public class CardSortingExtensionsTests
         const Suit trump = Suit.Hearts;
         var cards = new[]
         {
-            new Card { Rank = Rank.Nine, Suit = Suit.Spades },
-            new Card { Rank = Rank.Ace, Suit = Suit.Hearts },
-            new Card { Rank = Rank.Jack, Suit = Suit.Hearts },
-            new Card { Rank = Rank.Jack, Suit = Suit.Diamonds },
-            new Card { Rank = Rank.King, Suit = Suit.Clubs },
-            new Card { Rank = Rank.Nine, Suit = Suit.Hearts },
+            new Card(Suit.Spades, Rank.Nine),
+            new Card(Suit.Hearts, Rank.Ace),
+            new Card(Suit.Hearts, Rank.Jack),
+            new Card(Suit.Diamonds, Rank.Jack),
+            new Card(Suit.Clubs, Rank.King),
+            new Card(Suit.Hearts, Rank.Nine),
         };
 
         var sorted = cards.SortByTrump(trump);
@@ -75,9 +75,9 @@ public class CardSortingExtensionsTests
         const Suit trump = Suit.Clubs;
         var cards = new[]
         {
-            new Card { Rank = Rank.Jack, Suit = Suit.Spades },
-            new Card { Rank = Rank.Ace, Suit = Suit.Clubs },
-            new Card { Rank = Rank.Jack, Suit = Suit.Clubs },
+            new Card(Suit.Spades, Rank.Jack),
+            new Card(Suit.Clubs, Rank.Ace),
+            new Card(Suit.Clubs, Rank.Jack),
         };
 
         var sorted = cards.SortByTrump(trump);
@@ -97,11 +97,11 @@ public class CardSortingExtensionsTests
         const Suit trump = Suit.Hearts;
         var cards = new[]
         {
-            new Card { Rank = Rank.Nine, Suit = Suit.Spades },
-            new Card { Rank = Rank.King, Suit = Suit.Clubs },
-            new Card { Rank = Rank.Ten, Suit = Suit.Diamonds },
-            new Card { Rank = Rank.Ace, Suit = Suit.Clubs },
-            new Card { Rank = Rank.Queen, Suit = Suit.Spades },
+            new Card(Suit.Spades, Rank.Nine),
+            new Card(Suit.Clubs, Rank.King),
+            new Card(Suit.Diamonds, Rank.Ten),
+            new Card(Suit.Clubs, Rank.Ace),
+            new Card(Suit.Spades, Rank.Queen),
         };
 
         var sorted = cards.SortByTrump(trump);
@@ -132,7 +132,7 @@ public class CardSortingExtensionsTests
     [Fact]
     public void SortByTrump_WithSingleCard_ReturnsSingleCard()
     {
-        var cards = new[] { new Card { Rank = Rank.Ace, Suit = Suit.Spades } };
+        var cards = new[] { new Card(Suit.Spades, Rank.Ace) };
 
         var sorted = cards.SortByTrump(Suit.Hearts);
 
@@ -147,13 +147,13 @@ public class CardSortingExtensionsTests
         const Suit trump = Suit.Diamonds;
         var cards = new[]
         {
-            new Card { Rank = Rank.Nine, Suit = Suit.Diamonds },
-            new Card { Rank = Rank.Jack, Suit = Suit.Diamonds },
-            new Card { Rank = Rank.Ace, Suit = Suit.Diamonds },
-            new Card { Rank = Rank.Jack, Suit = Suit.Hearts },
-            new Card { Rank = Rank.Ten, Suit = Suit.Diamonds },
-            new Card { Rank = Rank.King, Suit = Suit.Diamonds },
-            new Card { Rank = Rank.Queen, Suit = Suit.Diamonds },
+            new Card(Suit.Diamonds, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Jack),
+            new Card(Suit.Diamonds, Rank.Ace),
+            new Card(Suit.Hearts, Rank.Jack),
+            new Card(Suit.Diamonds, Rank.Ten),
+            new Card(Suit.Diamonds, Rank.King),
+            new Card(Suit.Diamonds, Rank.Queen),
         };
 
         var sorted = cards.SortByTrump(trump);

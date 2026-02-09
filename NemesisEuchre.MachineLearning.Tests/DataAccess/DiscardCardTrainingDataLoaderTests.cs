@@ -33,13 +33,12 @@ public class DiscardCardTrainingDataLoaderTests
         _entityFaker = new Faker<DiscardCardDecisionEntity>()
             .RuleFor(x => x.DiscardCardDecisionId, f => f.IndexFaker)
             .RuleFor(x => x.DealId, f => f.Random.Int(1, 1000))
-            .RuleFor(x => x.CardsInHandJson, _ => "[1,2,3,4,5,6]")
             .RuleFor(x => x.TeamScore, f => (short)f.Random.Int(0, 10))
             .RuleFor(x => x.OpponentScore, f => (short)f.Random.Int(0, 10))
-            .RuleFor(x => x.CallingPlayer, f => f.PickRandom(RelativePlayerPosition.Self, RelativePlayerPosition.LeftHandOpponent, RelativePlayerPosition.Partner, RelativePlayerPosition.RightHandOpponent))
+            .RuleFor(x => x.CallingRelativePlayerPositionId, f => f.Random.Int(0, 3))
             .RuleFor(x => x.CallingPlayerGoingAlone, f => f.Random.Bool())
-            .RuleFor(x => x.ChosenCardJson, _ => /*lang=json,strict*/ "{\"Rank\":1,\"Suit\":1}")
-            .RuleFor(x => x.ActorType, f => f.PickRandom(ActorType.Chaos, ActorType.Chad, ActorType.Beta))
+            .RuleFor(x => x.ChosenRelativeCardId, f => f.Random.Int(9, 316))
+            .RuleFor(x => x.ActorTypeId, f => f.Random.Int(0, 3))
             .RuleFor(x => x.DidTeamWinDeal, f => f.Random.Bool())
             .RuleFor(x => x.RelativeDealPoints, f => (short)f.Random.Int(-2, 4))
             .RuleFor(x => x.DidTeamWinGame, f => f.Random.Bool());
@@ -229,6 +228,119 @@ public class DiscardCardTrainingDataLoaderTests
                 null,
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.AtLeastOnce);
+    }
+
+    [Fact]
+    public void StreamTrainingData_WithValidEntities_TransformsCorrectly()
+    {
+        var entities = _entityFaker.Generate(10);
+
+        foreach (var entity in entities)
+        {
+            var trainingData = new DiscardCardTrainingData
+            {
+                CallingPlayerPosition = entity.DiscardCardDecisionId % 4,
+                ExpectedDealPoints = (short)((entity.DiscardCardDecisionId % 5) - 2),
+            };
+            _mockFeatureEngineer.Setup(x => x.Transform(entity)).Returns(trainingData);
+        }
+
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionData<DiscardCardDecisionEntity>(
+            It.IsAny<ActorType>(),
+            It.IsAny<int>(),
+            It.IsAny<bool>(),
+            It.IsAny<bool>()))
+            .Returns(entities);
+
+        var loader = new DiscardCardTrainingDataLoader(
+            _mockTrainingDataRepository.Object,
+            _mockFeatureEngineer.Object,
+            _mockLogger.Object);
+
+        var result = loader.StreamTrainingData(
+            ActorType.Chaos, 10, cancellationToken: TestContext.Current.CancellationToken).ToList();
+
+        result.Should().HaveCount(10);
+        _mockFeatureEngineer.Verify(x => x.Transform(It.IsAny<DiscardCardDecisionEntity>()), Times.Exactly(10));
+    }
+
+    [Fact]
+    public void StreamTrainingData_WithTransformError_ContinuesProcessing()
+    {
+        var entities = _entityFaker.Generate(5);
+        var processedCount = 0;
+
+        _mockFeatureEngineer.Setup(x => x.Transform(It.IsAny<DiscardCardDecisionEntity>()))
+            .Returns<DiscardCardDecisionEntity>(entity =>
+            {
+                var currentCount = processedCount++;
+                if (currentCount == 2)
+                {
+                    throw new InvalidOperationException("Transform error");
+                }
+
+                return new DiscardCardTrainingData
+                {
+                    ExpectedDealPoints = (short)((entity.DiscardCardDecisionId % 5) - 2),
+                };
+            });
+
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionData<DiscardCardDecisionEntity>(
+            It.IsAny<ActorType>(),
+            It.IsAny<int>(),
+            It.IsAny<bool>(),
+            It.IsAny<bool>()))
+            .Returns(entities);
+
+        var loader = new DiscardCardTrainingDataLoader(
+            _mockTrainingDataRepository.Object,
+            _mockFeatureEngineer.Object,
+            _mockLogger.Object);
+
+        var result = loader.StreamTrainingData(
+            ActorType.Chaos, cancellationToken: TestContext.Current.CancellationToken).ToList();
+
+        result.Should().HaveCount(4);
+    }
+
+    [Fact]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "xUnit1051:Intentionally using own CancellationTokenSource to test cancellation behavior", Justification = "Testing cancellation")]
+    public void StreamTrainingData_WithCancellation_ThrowsOperationCanceledException()
+    {
+        using var cts = new CancellationTokenSource();
+        var entities = _entityFaker.Generate(1000);
+        var processedCount = 0;
+
+        _mockFeatureEngineer.Setup(x => x.Transform(It.IsAny<DiscardCardDecisionEntity>()))
+            .Returns<DiscardCardDecisionEntity>(entity =>
+            {
+                processedCount++;
+                if (processedCount > 5)
+                {
+                    cts.Cancel();
+                }
+
+                return new DiscardCardTrainingData
+                {
+                    ExpectedDealPoints = (short)((entity.DiscardCardDecisionId % 5) - 2),
+                };
+            });
+
+        _mockTrainingDataRepository.Setup(x => x.GetDecisionData<DiscardCardDecisionEntity>(
+            It.IsAny<ActorType>(),
+            It.IsAny<int>(),
+            It.IsAny<bool>(),
+            It.IsAny<bool>()))
+            .Returns(entities);
+
+        var loader = new DiscardCardTrainingDataLoader(
+            _mockTrainingDataRepository.Object,
+            _mockFeatureEngineer.Object,
+            _mockLogger.Object);
+
+        var act = () => loader.StreamTrainingData(ActorType.Chaos, 1000, false, false, cts.Token).ToList();
+
+        act.Should().Throw<OperationCanceledException>();
     }
 
     private static async IAsyncEnumerable<T> CreateAsyncEnumerable<T>(IEnumerable<T> items)

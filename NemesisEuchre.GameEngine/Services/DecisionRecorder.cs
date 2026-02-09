@@ -10,7 +10,7 @@ public interface IDecisionRecorder
         Deal deal,
         PlayerPosition playerPosition,
         CallTrumpDecision[] validDecisions,
-        CallTrumpDecision chosenDecision,
+        CallTrumpDecisionContext callTrumpDecisionContext,
         ref byte decisionOrderCounter);
 
     void RecordPlayCardDecision(
@@ -19,14 +19,14 @@ public interface IDecisionRecorder
         PlayerPosition playerPosition,
         Card[] hand,
         Card[] validCards,
-        Card chosenCard,
+        CardDecisionContext cardDecisionContext,
         ITrickWinnerCalculator trickWinnerCalculator);
 
     void RecordDiscardDecision(
         Deal deal,
         PlayerPosition playerPosition,
         Card[] hand,
-        Card chosenCard);
+        CardDecisionContext cardDecisionContext);
 }
 
 public class DecisionRecorder(IPlayerContextBuilder contextBuilder, ICardAccountingService cardAccountingService) : IDecisionRecorder
@@ -35,7 +35,7 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder, ICardAccount
         Deal deal,
         PlayerPosition playerPosition,
         CallTrumpDecision[] validDecisions,
-        CallTrumpDecision chosenDecision,
+        CallTrumpDecisionContext callTrumpDecisionContext,
         ref byte decisionOrderCounter)
     {
         var player = deal.Players[playerPosition];
@@ -50,7 +50,8 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder, ICardAccount
             TeamScore = teamScore,
             OpponentScore = opponentScore,
             ValidCallTrumpDecisions = [.. validDecisions],
-            ChosenDecision = chosenDecision,
+            ChosenDecision = callTrumpDecisionContext.ChosenCallTrumpDecision,
+            DecisionPredictedPoints = callTrumpDecisionContext.DecisionPredictedPoints,
             DecisionOrder = ++decisionOrderCounter,
         };
 
@@ -63,7 +64,7 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder, ICardAccount
         PlayerPosition playerPosition,
         Card[] hand,
         Card[] validCards,
-        Card chosenCard,
+        CardDecisionContext cardDecisionContext,
         ITrickWinnerCalculator trickWinnerCalculator)
     {
         var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
@@ -97,7 +98,8 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder, ICardAccount
             Dealer = deal.DealerPosition!.Value,
             DealerPickedUpCard = deal.UpCard,
             CardsAccountedFor = [.. accountedForCards],
-            ChosenCard = chosenCard,
+            ChosenCard = cardDecisionContext.ChosenCard,
+            DecisionPredictedPoints = cardDecisionContext.DecisionPredictedPoints,
         };
 
         trick.PlayCardDecisions.Add(record);
@@ -107,7 +109,7 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder, ICardAccount
         Deal deal,
         PlayerPosition playerPosition,
         Card[] hand,
-        Card chosenCard)
+        CardDecisionContext cardDecisionContext)
     {
         var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
 
@@ -121,7 +123,8 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder, ICardAccount
             CallingPlayer = deal.CallingPlayer!.Value,
             CallingPlayerGoingAlone = deal.CallingPlayerIsGoingAlone,
             ValidCardsToDiscard = [.. hand],
-            ChosenCard = chosenCard,
+            ChosenCard = cardDecisionContext.ChosenCard,
+            DecisionPredictedPoints = cardDecisionContext.DecisionPredictedPoints,
         };
 
         deal.DiscardCardDecisions.Add(record);
