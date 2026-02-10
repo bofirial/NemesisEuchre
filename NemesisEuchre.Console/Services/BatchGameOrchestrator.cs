@@ -17,7 +17,7 @@ public interface IBatchGameOrchestrator
     Task<BatchGameResults> RunBatchAsync(
         int numberOfGames,
         IBatchProgressReporter? progressReporter = null,
-        bool doNotPersist = false,
+        GamePersistenceOptions? persistenceOptions = null,
         ActorType[]? team1ActorTypes = null,
         ActorType[]? team2ActorTypes = null,
         CancellationToken cancellationToken = default);
@@ -36,7 +36,7 @@ public class BatchGameOrchestrator(
     public async Task<BatchGameResults> RunBatchAsync(
         int numberOfGames,
         IBatchProgressReporter? progressReporter = null,
-        bool doNotPersist = false,
+        GamePersistenceOptions? persistenceOptions = null,
         ActorType[]? team1ActorTypes = null,
         ActorType[]? team2ActorTypes = null,
         CancellationToken cancellationToken = default)
@@ -49,11 +49,11 @@ public class BatchGameOrchestrator(
         const int maxGamesPerSubBatch = 10000;
         if (subBatchStrategy.ShouldUseSubBatches(numberOfGames, maxGamesPerSubBatch))
         {
-            return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, doNotPersist, cancellationToken, team1ActorTypes, team2ActorTypes).ConfigureAwait(false);
+            return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, persistenceOptions, cancellationToken, team1ActorTypes, team2ActorTypes).ConfigureAwait(false);
         }
 
         var stopwatch = Stopwatch.StartNew();
-        var results = await ExecuteSingleBatchAsync(numberOfGames, progressReporter, doNotPersist, team1ActorTypes, team2ActorTypes, cancellationToken).ConfigureAwait(false);
+        var results = await ExecuteSingleBatchAsync(numberOfGames, progressReporter, persistenceOptions, team1ActorTypes, team2ActorTypes, cancellationToken).ConfigureAwait(false);
         stopwatch.Stop();
 
         return new BatchGameResults
@@ -99,7 +99,7 @@ public class BatchGameOrchestrator(
     private async Task<BatchGameResults> ExecuteSingleBatchAsync(
         int numberOfGames,
         IBatchProgressReporter? progressReporter,
-        bool doNotPersist,
+        GamePersistenceOptions? persistenceOptions,
         ActorType[]? team1ActorTypes,
         ActorType[]? team2ActorTypes,
         CancellationToken cancellationToken)
@@ -107,7 +107,7 @@ public class BatchGameOrchestrator(
         var channelCapacity = _persistenceOptions.BatchSize * 4;
         using var state = new BatchExecutionState(channelCapacity);
 
-        var consumerTask = persistenceCoordinator.ConsumeAndPersistAsync(state, progressReporter, doNotPersist, cancellationToken);
+        var consumerTask = persistenceCoordinator.ConsumeAndPersistAsync(state, progressReporter, persistenceOptions, cancellationToken);
 
         var effectiveParallelism = parallelismCoordinator.CalculateEffectiveParallelism();
         var parallelOptions = new ParallelOptions
@@ -131,7 +131,7 @@ public class BatchGameOrchestrator(
         int totalGames,
         int subBatchSize,
         IBatchProgressReporter? progressReporter,
-        bool doNotPersist,
+        GamePersistenceOptions? persistenceOptions,
         CancellationToken cancellationToken,
         ActorType[]? team1ActorTypes = null,
         ActorType[]? team2ActorTypes = null)
@@ -160,7 +160,7 @@ public class BatchGameOrchestrator(
             var batchResults = await ExecuteSingleBatchAsync(
                 gamesInThisBatch,
                 subProgressReporter,
-                doNotPersist,
+                persistenceOptions,
                 team1ActorTypes,
                 team2ActorTypes,
                 cancellationToken).ConfigureAwait(false);

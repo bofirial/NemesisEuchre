@@ -37,10 +37,11 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 1000,
                 1,
                 It.IsAny<IProgress<TrainingProgress>>(),
+                It.IsAny<string?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
-        var result = await _coordinator.CoordinateTrainingWithProgressAsync(ActorType.Chaos, DecisionType.CallTrump, "./models", 1000, 1, _testConsole, TestContext.Current.CancellationToken);
+        var result = await _coordinator.CoordinateTrainingWithProgressAsync(ActorType.Chaos, DecisionType.CallTrump, "./models", 1000, 1, _testConsole, cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(expectedResults);
 
@@ -52,6 +53,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 1000,
                 1,
                 It.IsAny<IProgress<TrainingProgress>>(),
+                It.IsAny<string?>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -74,9 +76,10 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<int>(),
                 It.IsAny<int>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
+                It.IsAny<string?>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<ActorType, DecisionType, string, int, int, IProgress<TrainingProgress>, CancellationToken>(
-                (actor, decision, path, limit, gen, _, _) =>
+            .Callback<ActorType, DecisionType, string, int, int, IProgress<TrainingProgress>, string?, CancellationToken>(
+                (actor, decision, path, limit, gen, _, _, _) =>
                 {
                     capturedActorType = actor;
                     capturedDecisionType = decision;
@@ -86,7 +89,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 })
             .ReturnsAsync(expectedResults);
 
-        await _coordinator.CoordinateTrainingWithProgressAsync(ActorType.Beta, DecisionType.All, "./output", 5000, 2, _testConsole, TestContext.Current.CancellationToken);
+        await _coordinator.CoordinateTrainingWithProgressAsync(ActorType.Beta, DecisionType.All, "./output", 5000, 2, _testConsole, cancellationToken: TestContext.Current.CancellationToken);
 
         capturedActorType.Should().Be(ActorType.Beta);
         capturedDecisionType.Should().Be(DecisionType.All);
@@ -109,6 +112,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<int>(),
                 It.IsAny<int>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
+                It.IsAny<string?>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new OperationCanceledException());
 
@@ -119,7 +123,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
             1000,
             1,
             _testConsole,
-            cts.Token);
+            cancellationToken: cts.Token);
 
         await act.Should().ThrowAsync<OperationCanceledException>();
 
@@ -137,6 +141,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<int>(),
                 It.IsAny<int>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
+                It.IsAny<string?>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Training failed"));
 
@@ -176,10 +181,11 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<int>(),
                 It.IsAny<int>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
+                It.IsAny<string?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
-        var result = await _coordinator.CoordinateTrainingWithProgressAsync(ActorType.Chaos, DecisionType.CallTrump, "./models", 0, 1, _testConsole, TestContext.Current.CancellationToken);
+        var result = await _coordinator.CoordinateTrainingWithProgressAsync(ActorType.Chaos, DecisionType.CallTrump, "./models", 0, 1, _testConsole, cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(expectedResults);
         result.SuccessfulModels.Should().Be(1);

@@ -388,13 +388,13 @@ public static partial class LoggerMessages
     [LoggerMessage(
         EventId = 51,
         Level = LogLevel.Information,
-        Message = "Game persistence skipped (--do-not-persist flag enabled)")]
+        Message = "Game persistence skipped")]
     public static partial void LogGamePersistenceSkipped(ILogger logger);
 
     [LoggerMessage(
         EventId = 52,
         Level = LogLevel.Information,
-        Message = "Batch of {BatchSize} games persistence skipped (--do-not-persist flag enabled)")]
+        Message = "Batch of {BatchSize} games persistence skipped")]
     public static partial void LogBatchGamePersistenceSkipped(ILogger logger, int batchSize);
 
     // EventID 53-55: ML Bot engine availability
@@ -427,4 +427,35 @@ public static partial class LoggerMessages
         Level = LogLevel.Debug,
         Message = "Bulk insert completed: {ParentCount} parent rows, {LeafCount} leaf rows in {Elapsed}")]
     public static partial void LogBulkInsertCompleted(ILogger logger, int parentCount, int leafCount, TimeSpan elapsed);
+
+    // EventID 58-62: IDV file operations
+    [LoggerMessage(
+        EventId = 58,
+        Level = LogLevel.Information,
+        Message = "Generating IDV training data for batch of {BatchSize} games")]
+    public static partial void LogIdvGeneratingBatch(ILogger logger, int batchSize);
+
+    [LoggerMessage(
+        EventId = 59,
+        Level = LogLevel.Information,
+        Message = "Saving IDV file: {FilePath} ({RowCount} rows)")]
+    public static partial void LogIdvFileSaving(ILogger logger, string filePath, int rowCount);
+
+    [LoggerMessage(
+        EventId = 60,
+        Level = LogLevel.Information,
+        Message = "IDV file saved: {FilePath} ({RowCount} rows)")]
+    public static partial void LogIdvFileSaved(ILogger logger, string filePath, int rowCount);
+
+    [LoggerMessage(
+        EventId = 61,
+        Level = LogLevel.Information,
+        Message = "Loading training data from IDV file: {FilePath}")]
+    public static partial void LogIdvFileLoading(ILogger logger, string filePath);
+
+    [LoggerMessage(
+        EventId = 62,
+        Level = LogLevel.Warning,
+        Message = "IDV training data generation skipped for single game")]
+    public static partial void LogIdvSkippedSingleGame(ILogger logger);
 }

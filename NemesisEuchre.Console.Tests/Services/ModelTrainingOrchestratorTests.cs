@@ -1,12 +1,14 @@
 using FluentAssertions;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using Moq;
 
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.Console.Services.TrainerExecutors;
+using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.Foundation.Constants;
 
 namespace NemesisEuchre.Console.Tests.Services;
@@ -21,7 +23,7 @@ public class ModelTrainingOrchestratorTests
             .Returns([]);
 
         var mockLogger = Mock.Of<ILogger<ModelTrainingOrchestrator>>();
-        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, mockLogger);
+        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, Options.Create(new PersistenceOptions()), mockLogger);
 
         var results = await orchestrator.TrainModelsAsync(
             ActorType.Gen1,
@@ -56,6 +58,7 @@ public class ModelTrainingOrchestratorTests
             It.IsAny<int>(),
             It.IsAny<int>(),
             It.IsAny<IProgress<TrainingProgress>>(),
+            It.IsAny<string?>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(successResult);
 
@@ -64,7 +67,7 @@ public class ModelTrainingOrchestratorTests
             .Returns([mockTrainer.Object]);
 
         var mockLogger = Mock.Of<ILogger<ModelTrainingOrchestrator>>();
-        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, mockLogger);
+        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, Options.Create(new PersistenceOptions()), mockLogger);
 
         var results = await orchestrator.TrainModelsAsync(
             ActorType.Gen1,
@@ -99,6 +102,7 @@ public class ModelTrainingOrchestratorTests
             It.IsAny<int>(),
             It.IsAny<int>(),
             It.IsAny<IProgress<TrainingProgress>>(),
+            It.IsAny<string?>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(failureResult);
 
@@ -107,7 +111,7 @@ public class ModelTrainingOrchestratorTests
             .Returns([mockTrainer.Object]);
 
         var mockLogger = Mock.Of<ILogger<ModelTrainingOrchestrator>>();
-        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, mockLogger);
+        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, Options.Create(new PersistenceOptions()), mockLogger);
 
         var results = await orchestrator.TrainModelsAsync(
             ActorType.Gen1,
@@ -139,6 +143,7 @@ public class ModelTrainingOrchestratorTests
             It.IsAny<int>(),
             It.IsAny<int>(),
             It.IsAny<IProgress<TrainingProgress>>(),
+            It.IsAny<string?>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(successResult);
 
@@ -150,6 +155,7 @@ public class ModelTrainingOrchestratorTests
             It.IsAny<int>(),
             It.IsAny<int>(),
             It.IsAny<IProgress<TrainingProgress>>(),
+            It.IsAny<string?>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(failureResult);
 
@@ -158,7 +164,7 @@ public class ModelTrainingOrchestratorTests
             .Returns([mockTrainer1.Object, mockTrainer2.Object]);
 
         var mockLogger = Mock.Of<ILogger<ModelTrainingOrchestrator>>();
-        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, mockLogger);
+        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, Options.Create(new PersistenceOptions()), mockLogger);
 
         var results = await orchestrator.TrainModelsAsync(
             ActorType.Gen1,

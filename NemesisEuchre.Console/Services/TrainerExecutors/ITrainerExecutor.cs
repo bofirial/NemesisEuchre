@@ -15,5 +15,6 @@ public interface ITrainerExecutor
         int sampleLimit,
         int generation,
         IProgress<TrainingProgress> progress,
+        string? idvFilePath = null,
         CancellationToken cancellationToken = default);
 }

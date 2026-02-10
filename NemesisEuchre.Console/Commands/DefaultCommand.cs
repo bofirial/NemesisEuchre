@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.Logging;
 
+using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
@@ -22,8 +23,11 @@ public class DefaultCommand(
     [CliOption(Description = "Number of games to play")]
     public int Count { get; set; } = 1;
 
-    [CliOption(Description = "Skip saving games to the database")]
-    public bool DoNotPersist { get; set; }
+    [CliOption(Description = "Persist games to SQL database")]
+    public bool PersistToSql { get; set; }
+
+    [CliOption(Description = "Persist training data to IDV files with the given generation name (e.g. gen2)")]
+    public string? PersistToIdv { get; set; }
 
     [CliOption(Description = "Show decisions made during the game")]
     public bool ShowDecisions { get; set; }
@@ -42,19 +46,21 @@ public class DefaultCommand(
 
         ansiConsole.MarkupLine("[green]Welcome to NemesisEuchre - AI-Powered Euchre Strategy[/]");
 
+        var persistenceOptions = new GamePersistenceOptions(PersistToSql, PersistToIdv);
+
         if (Count == 1)
         {
-            await RunSingleGameAsync();
+            await RunSingleGameAsync(persistenceOptions);
         }
         else
         {
-            await RunBatchGamesAsync();
+            await RunBatchGamesAsync(persistenceOptions);
         }
 
         return 0;
     }
 
-    private Task<Game> RunSingleGameAsync()
+    private Task<Game> RunSingleGameAsync(GamePersistenceOptions persistenceOptions)
     {
         ansiConsole.MarkupLine($"[dim]Playing a game between 2 {Team1 ?? ActorType.Chaos}Bots and 2 {Team2 ?? ActorType.Chaos}Bots...[/]");
         ansiConsole.WriteLine();
@@ -64,10 +70,10 @@ public class DefaultCommand(
 
         return ansiConsole.Status()
             .Spinner(Spinner.Known.Dots)
-            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(doNotPersist: DoNotPersist, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes, showDecisions: ShowDecisions));
+            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(persistenceOptions: persistenceOptions, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes, showDecisions: ShowDecisions));
     }
 
-    private async Task RunBatchGamesAsync()
+    private async Task RunBatchGamesAsync(GamePersistenceOptions persistenceOptions)
     {
         ansiConsole.MarkupLine($"[dim]Playing a game between 2 {Team1 ?? ActorType.Chaos}Bots and 2 {Team2 ?? ActorType.Chaos}Bots...[/]");
         ansiConsole.WriteLine();
@@ -83,7 +89,7 @@ public class DefaultCommand(
                 var team1ActorTypes = Team1.HasValue ? new[] { Team1.Value, Team1.Value } : null;
                 var team2ActorTypes = Team2.HasValue ? new[] { Team2.Value, Team2.Value } : null;
 
-                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, doNotPersist: DoNotPersist, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes);
+                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, persistenceOptions: persistenceOptions, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes);
             });
 
         gameResultsRenderer.RenderBatchResults(results);

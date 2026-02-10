@@ -14,6 +14,13 @@ public interface IDataSplitter
         double testRatio = 0.15,
         bool preShuffled = false)
         where T : class;
+
+    DataSplit Split(
+        IDataView dataView,
+        double trainRatio = 0.7,
+        double validationRatio = 0.15,
+        double testRatio = 0.15,
+        bool preShuffled = false);
 }
 
 public class DataSplitter : IDataSplitter
@@ -40,9 +47,20 @@ public class DataSplitter : IDataSplitter
     {
         ArgumentNullException.ThrowIfNull(data);
 
-        ValidateRatios(trainRatio, validationRatio, testRatio);
-
         var dataView = _mlContext.Data.LoadFromEnumerable(data);
+        return Split(dataView, trainRatio, validationRatio, testRatio, preShuffled);
+    }
+
+    public DataSplit Split(
+        IDataView dataView,
+        double trainRatio = 0.7,
+        double validationRatio = 0.15,
+        double testRatio = 0.15,
+        bool preShuffled = false)
+    {
+        ArgumentNullException.ThrowIfNull(dataView);
+
+        ValidateRatios(trainRatio, validationRatio, testRatio);
 
         var rowCount = (int)(dataView.GetRowCount() ?? 0);
 

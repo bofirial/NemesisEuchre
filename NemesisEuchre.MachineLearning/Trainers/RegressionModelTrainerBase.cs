@@ -19,6 +19,11 @@ public interface IModelTrainer<TData>
         bool preShuffled = false,
         CancellationToken cancellationToken = default);
 
+    Task<TrainingResult> TrainAsync(
+        IDataView dataView,
+        bool preShuffled = false,
+        CancellationToken cancellationToken = default);
+
     Task<EvaluationMetrics> EvaluateAsync(
         IDataView testData,
         CancellationToken cancellationToken = default);
@@ -54,45 +59,26 @@ public abstract class RegressionModelTrainerBase<TData>(
 
     protected ITransformer? TrainedModel { get; private set; }
 
-    public async Task<TrainingResult> TrainAsync(
+    public Task<TrainingResult> TrainAsync(
         IEnumerable<TData> trainingData,
         bool preShuffled = false,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(trainingData);
 
-        LoggerMessages.LogStartingTraining(Logger, GetModelType());
-
         var dataSplit = DataSplitter.Split(trainingData, preShuffled: preShuffled);
+        return TrainFromSplitAsync(dataSplit, cancellationToken);
+    }
 
-        LoggerMessages.LogDataSplitComplete(
-            Logger,
-            dataSplit.TrainRowCount,
-            dataSplit.ValidationRowCount,
-            dataSplit.TestRowCount);
+    public Task<TrainingResult> TrainAsync(
+        IDataView dataView,
+        bool preShuffled = false,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(dataView);
 
-        var pipeline = BuildPipeline(dataSplit.Train);
-
-        LoggerMessages.LogTrainingModel(Logger, Options.NumberOfIterations);
-
-        TrainedModel = await Task.Run(() => pipeline.Fit(dataSplit.Train), cancellationToken);
-
-        LoggerMessages.LogTrainingComplete(Logger);
-
-        var validationMetrics = await EvaluateAsync(dataSplit.Validation, cancellationToken);
-
-        LoggerMessages.LogRegressionValidationMetrics(
-            Logger,
-            validationMetrics.RSquared,
-            validationMetrics.MeanAbsoluteError,
-            validationMetrics.RootMeanSquaredError);
-
-        return new TrainingResult(
-            TrainedModel,
-            validationMetrics,
-            dataSplit.TrainRowCount,
-            dataSplit.ValidationRowCount,
-            dataSplit.TestRowCount);
+        var dataSplit = DataSplitter.Split(dataView, preShuffled: preShuffled);
+        return TrainFromSplitAsync(dataSplit, cancellationToken);
     }
 
     Task<EvaluationMetrics> IModelTrainer<TData>.EvaluateAsync(
@@ -166,6 +152,42 @@ public abstract class RegressionModelTrainerBase<TData>(
     protected abstract IEstimator<ITransformer> BuildPipeline(IDataView trainingData);
 
     protected abstract string GetModelType();
+
+    private async Task<TrainingResult> TrainFromSplitAsync(
+        DataSplit dataSplit,
+        CancellationToken cancellationToken)
+    {
+        LoggerMessages.LogStartingTraining(Logger, GetModelType());
+
+        LoggerMessages.LogDataSplitComplete(
+            Logger,
+            dataSplit.TrainRowCount,
+            dataSplit.ValidationRowCount,
+            dataSplit.TestRowCount);
+
+        var pipeline = BuildPipeline(dataSplit.Train);
+
+        LoggerMessages.LogTrainingModel(Logger, Options.NumberOfIterations);
+
+        TrainedModel = await Task.Run(() => pipeline.Fit(dataSplit.Train), cancellationToken);
+
+        LoggerMessages.LogTrainingComplete(Logger);
+
+        var validationMetrics = await EvaluateAsync(dataSplit.Validation, cancellationToken);
+
+        LoggerMessages.LogRegressionValidationMetrics(
+            Logger,
+            validationMetrics.RSquared,
+            validationMetrics.MeanAbsoluteError,
+            validationMetrics.RootMeanSquaredError);
+
+        return new TrainingResult(
+            TrainedModel,
+            validationMetrics,
+            dataSplit.TrainRowCount,
+            dataSplit.ValidationRowCount,
+            dataSplit.TestRowCount);
+    }
 
     private ModelMetadata CreateModelMetadata(
         int generation,

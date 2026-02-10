@@ -5,6 +5,7 @@ using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.Models;
+using NemesisEuchre.MachineLearning.Services;
 using NemesisEuchre.MachineLearning.Trainers;
 
 namespace NemesisEuchre.Console.Services.TrainerExecutors;
@@ -12,11 +13,13 @@ namespace NemesisEuchre.Console.Services.TrainerExecutors;
 public abstract class RegressionTrainerExecutorBase<TTrainingData>(
     IModelTrainer<TTrainingData> trainer,
     ITrainingDataLoader<TTrainingData> dataLoader,
+    IIdvFileService idvFileService,
     ILogger logger) : ITrainerExecutor
     where TTrainingData : class, new()
 {
     private readonly IModelTrainer<TTrainingData> _trainer = trainer ?? throw new ArgumentNullException(nameof(trainer));
     private readonly ITrainingDataLoader<TTrainingData> _dataLoader = dataLoader ?? throw new ArgumentNullException(nameof(dataLoader));
+    private readonly IIdvFileService _idvFileService = idvFileService ?? throw new ArgumentNullException(nameof(idvFileService));
     private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public abstract string ModelType { get; }
@@ -29,21 +32,35 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
         int sampleLimit,
         int generation,
         IProgress<TrainingProgress> progress,
+        string? idvFilePath = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.LoadingData, 0, "Streaming training data..."));
 
-            var streamingData = _dataLoader.StreamTrainingData(
-                actorType,
-                sampleLimit,
-                winningTeamOnly: false,
-                shuffle: true,
-                cancellationToken);
+            TrainingResult trainingResult;
 
-            progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 25, "Training model (streaming)..."));
-            var trainingResult = await _trainer.TrainAsync(streamingData, preShuffled: true, cancellationToken);
+            if (idvFilePath != null && File.Exists(idvFilePath))
+            {
+                LoggerMessages.LogIdvFileLoading(_logger, idvFilePath);
+                var dataView = _idvFileService.Load(idvFilePath);
+
+                progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 25, "Training model (IDV)..."));
+                trainingResult = await _trainer.TrainAsync(dataView, preShuffled: true, cancellationToken);
+            }
+            else
+            {
+                var streamingData = _dataLoader.StreamTrainingData(
+                    actorType,
+                    sampleLimit,
+                    winningTeamOnly: false,
+                    shuffle: true,
+                    cancellationToken);
+
+                progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 25, "Training model (streaming)..."));
+                trainingResult = await _trainer.TrainAsync(streamingData, preShuffled: true, cancellationToken);
+            }
 
             if (trainingResult.TrainingSamples == 0)
             {

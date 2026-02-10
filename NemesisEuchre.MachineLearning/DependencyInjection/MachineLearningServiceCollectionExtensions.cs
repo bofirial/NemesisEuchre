@@ -21,6 +21,7 @@ public static class MachineLearningServiceCollectionExtensions
         IConfiguration configuration)
     {
         services.AddSingleton<MLContext>();
+        services.AddSingleton<IIdvFileService, IdvFileService>();
         services.AddScoped<IDataSplitter, DataSplitter>();
         services.AddSingleton<IModelCache, ModelCache>();
         services.AddSingleton<IModelVersionManager, ModelVersionManager>();

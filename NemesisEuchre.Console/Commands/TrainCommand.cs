@@ -38,6 +38,9 @@ public class TrainCommand(
     [CliOption(Description = "Generation number for models")]
     public int Generation { get; set; } = 1;
 
+    [CliOption(Description = "Load training data from IDV files with the given generation name (e.g. gen2)")]
+    public string? IdvName { get; set; }
+
     public async Task<int> RunAsync()
     {
         LoggerMessages.LogTrainingStarting(logger, ActorType, DecisionType, Generation);
@@ -56,7 +59,8 @@ public class TrainCommand(
             outputPath,
             SampleLimit,
             Generation,
-            ansiConsole);
+            ansiConsole,
+            IdvName);
 
         resultsRenderer.RenderTrainingResults(results, ActorType, DecisionType);
 

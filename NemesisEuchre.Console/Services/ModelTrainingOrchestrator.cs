@@ -1,8 +1,10 @@
 using System.Diagnostics;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Console.Models;
+using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
 
@@ -17,11 +19,13 @@ public interface IModelTrainingOrchestrator
         int sampleLimit,
         int generation,
         IProgress<TrainingProgress> progress,
+        string? idvName = null,
         CancellationToken cancellationToken = default);
 }
 
 public class ModelTrainingOrchestrator(
     ITrainerFactory trainerFactory,
+    IOptions<PersistenceOptions> persistenceOptions,
     ILogger<ModelTrainingOrchestrator> logger) : IModelTrainingOrchestrator
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Critical Code Smell", "S1215:\"GC.Collect\" should not be called", Justification = "Intentional GC between model trainings to reclaim ~6 GB IDataView buffers")]
@@ -32,6 +36,7 @@ public class ModelTrainingOrchestrator(
         int sampleLimit,
         int generation,
         IProgress<TrainingProgress> progress,
+        string? idvName = null,
         CancellationToken cancellationToken = default)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -55,12 +60,17 @@ public class ModelTrainingOrchestrator(
         {
             LoggerMessages.LogTrainingModelType(logger, trainer.ModelType);
 
+            var idvFilePath = idvName != null
+                ? Path.Combine(persistenceOptions.Value.IdvOutputPath, $"{idvName}_{GetIdvFilePrefix(trainer.DecisionType)}.idv")
+                : null;
+
             var result = await trainer.ExecuteAsync(
                 actorType,
                 outputPath,
                 sampleLimit,
                 generation,
                 progress,
+                idvFilePath,
                 cancellationToken);
 
             results.Add(result);
@@ -83,5 +93,17 @@ public class ModelTrainingOrchestrator(
         LoggerMessages.LogTrainingCompleteWithResults(logger, successCount, failCount, stopwatch.Elapsed);
 
         return new TrainingResults(successCount, failCount, results, stopwatch.Elapsed);
+    }
+
+    private static string GetIdvFilePrefix(DecisionType type)
+    {
+        return type switch
+        {
+            DecisionType.Play => "PlayCard",
+            DecisionType.CallTrump => "CallTrump",
+            DecisionType.Discard => "DiscardCard",
+            DecisionType.All => throw new ArgumentOutOfRangeException(nameof(type), type, "DecisionType.All is not a valid individual decision type"),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unsupported decision type for IDV file prefix"),
+        };
     }
 }

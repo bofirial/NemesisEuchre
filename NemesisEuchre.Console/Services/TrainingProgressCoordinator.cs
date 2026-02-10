@@ -14,6 +14,7 @@ public interface ITrainingProgressCoordinator
         int sampleLimit,
         int generation,
         IAnsiConsole console,
+        string? idvName = null,
         CancellationToken cancellationToken = default);
 }
 
@@ -26,6 +27,7 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
         int sampleLimit,
         int generation,
         IAnsiConsole console,
+        string? idvName = null,
         CancellationToken cancellationToken = default)
     {
         return console.Progress()
@@ -76,7 +78,8 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
                     outputPath,
                     sampleLimit,
                     generation,
-                    progress);
+                    progress,
+                    idvName);
             });
     }
 }

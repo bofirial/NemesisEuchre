@@ -43,6 +43,8 @@ public static class Program
             services.AddScoped<ISingleGameRunner, SingleGameRunner>();
             services.AddScoped<IParallelismCoordinator, ParallelismCoordinator>();
             services.AddScoped<ISubBatchStrategy, SubBatchStrategy>();
+            services.AddScoped<IGameToTrainingDataConverter, GameToTrainingDataConverter>();
+            services.AddScoped<ITrainingDataAccumulator, TrainingDataAccumulator>();
             services.AddScoped<IPersistenceCoordinator, BatchPersistenceCoordinator>();
             services.AddScoped<IBatchGameOrchestrator, BatchGameOrchestrator>();
 

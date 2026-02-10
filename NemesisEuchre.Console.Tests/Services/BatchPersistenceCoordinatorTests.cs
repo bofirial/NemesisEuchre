@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 
 using Moq;
 
+using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
@@ -15,6 +16,9 @@ namespace NemesisEuchre.Console.Tests.Services;
 
 public class BatchPersistenceCoordinatorTests
 {
+    private static readonly GamePersistenceOptions SqlPersistence = new(true, null);
+    private static readonly GamePersistenceOptions NoPersistence = new(false, null);
+
     private readonly Mock<IServiceScopeFactory> _mockScopeFactory = new();
     private readonly Mock<IServiceScope> _mockScope = new();
     private readonly Mock<IServiceProvider> _mockServiceProvider = new();
@@ -29,6 +33,8 @@ public class BatchPersistenceCoordinatorTests
         _mockServiceProvider.Setup(x => x.GetService(typeof(IGameRepository))).Returns(_mockGameRepository.Object);
         _coordinator = new BatchPersistenceCoordinator(
             _mockScopeFactory.Object,
+            Mock.Of<IGameToTrainingDataConverter>(),
+            Mock.Of<ITrainingDataAccumulator>(),
             Options.Create(new PersistenceOptions { BatchSize = 2 }),
             Mock.Of<ILogger<BatchPersistenceCoordinator>>());
     }
@@ -45,7 +51,7 @@ public class BatchPersistenceCoordinatorTests
         await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
         state.Writer.Complete();
 
-        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, false, TestContext.Current.CancellationToken);
+        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, SqlPersistence, TestContext.Current.CancellationToken);
 
         _mockGameRepository.Verify(
             x => x.SaveCompletedGamesBulkAsync(It.Is<List<Game>>(g => g.Count == 2), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),
@@ -63,7 +69,7 @@ public class BatchPersistenceCoordinatorTests
         await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
         state.Writer.Complete();
 
-        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, false, TestContext.Current.CancellationToken);
+        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, SqlPersistence, TestContext.Current.CancellationToken);
 
         _mockGameRepository.Verify(
             x => x.SaveCompletedGamesBulkAsync(It.Is<List<Game>>(g => g.Count == 1), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),
@@ -77,7 +83,7 @@ public class BatchPersistenceCoordinatorTests
         await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
         state.Writer.Complete();
 
-        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, true, TestContext.Current.CancellationToken);
+        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, NoPersistence, TestContext.Current.CancellationToken);
 
         state.SavedGames.Should().Be(1);
         _mockGameRepository.Verify(
@@ -92,7 +98,7 @@ public class BatchPersistenceCoordinatorTests
         await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
         state.Writer.Complete();
 
-        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, true, TestContext.Current.CancellationToken);
+        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, NoPersistence, TestContext.Current.CancellationToken);
 
         _mockProgressReporter.Verify(x => x.ReportGamesSaved(1), Times.Once);
     }
@@ -107,7 +113,7 @@ public class BatchPersistenceCoordinatorTests
             .Setup(x => x.SaveCompletedGamesBulkAsync(It.IsAny<List<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("DB error"));
 
-        var act = () => _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, false, TestContext.Current.CancellationToken);
+        var act = () => _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, SqlPersistence, TestContext.Current.CancellationToken);
 
         await act.Should().NotThrowAsync();
     }
@@ -119,7 +125,7 @@ public class BatchPersistenceCoordinatorTests
         await state.Writer.WriteAsync(new Game(), TestContext.Current.CancellationToken);
         state.Writer.Complete();
 
-        var act = () => _coordinator.ConsumeAndPersistAsync(state, null, true, TestContext.Current.CancellationToken);
+        var act = () => _coordinator.ConsumeAndPersistAsync(state, null, NoPersistence, TestContext.Current.CancellationToken);
 
         await act.Should().NotThrowAsync();
         state.SavedGames.Should().Be(1);
@@ -131,7 +137,7 @@ public class BatchPersistenceCoordinatorTests
         using var state = new BatchExecutionState(10);
         state.Writer.Complete();
 
-        var act = () => _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, false, TestContext.Current.CancellationToken);
+        var act = () => _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, SqlPersistence, TestContext.Current.CancellationToken);
 
         await act.Should().NotThrowAsync();
         _mockGameRepository.Verify(
@@ -154,7 +160,7 @@ public class BatchPersistenceCoordinatorTests
 
         state.Writer.Complete();
 
-        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, false, TestContext.Current.CancellationToken);
+        await _coordinator.ConsumeAndPersistAsync(state, _mockProgressReporter.Object, SqlPersistence, TestContext.Current.CancellationToken);
 
         _mockGameRepository.Verify(
             x => x.SaveCompletedGamesBulkAsync(It.IsAny<List<Game>>(), It.IsAny<IProgress<int>>(), It.IsAny<CancellationToken>()),

@@ -17,4 +17,6 @@ public class PersistenceOptions
 
     [Range(1, int.MaxValue, ErrorMessage = "BulkCopyTimeout must be at least 1")]
     public int BulkCopyTimeout { get; set; } = 120;
+
+    public string IdvOutputPath { get; set; } = "./data";
 }
