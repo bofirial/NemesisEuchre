@@ -42,7 +42,8 @@ public class DataSplitter : IDataSplitter
 
         ValidateRatios(trainRatio, validationRatio, testRatio);
 
-        var dataView = _mlContext.Data.LoadFromEnumerable(data);
+        var materializedData = data as IList<T> ?? [.. data];
+        var dataView = _mlContext.Data.LoadFromEnumerable(materializedData);
 
         var rowCount = (int)(dataView.GetRowCount() ?? 0);
 

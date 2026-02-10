@@ -314,6 +314,28 @@ public class DataSplitterTests
         (result.TrainRowCount + result.ValidationRowCount + result.TestRowCount).Should().Be(100);
     }
 
+    [Fact]
+    public void Split_WithStreamingEnumerable_SplitsCorrectly()
+    {
+        var splitter = CreateSplitter();
+        var data = StreamData(_trainingDataFaker, 100);
+
+        var result = splitter.Split(data);
+
+        result.TrainRowCount.Should().BeInRange(63, 77);
+        result.ValidationRowCount.Should().BeInRange(8, 22);
+        result.TestRowCount.Should().BeInRange(8, 22);
+        (result.TrainRowCount + result.ValidationRowCount + result.TestRowCount).Should().Be(100);
+    }
+
+    private static IEnumerable<CallTrumpTrainingData> StreamData(Faker<CallTrumpTrainingData> faker, int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            yield return faker.Generate();
+        }
+    }
+
     private DataSplitter CreateSplitter(int randomSeed = 42)
     {
         var options = Microsoft.Extensions.Options.Options.Create(new MachineLearningOptions
