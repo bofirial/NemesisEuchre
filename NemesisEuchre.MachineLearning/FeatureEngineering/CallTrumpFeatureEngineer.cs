@@ -12,8 +12,11 @@ public class CallTrumpFeatureEngineer : IFeatureEngineer<CallTrumpDecisionEntity
 
         if (!context.ValidDecisions.Contains(context.ChosenDecision))
         {
+            var validStr = context.ValidDecisions.Length == 0
+                ? "(empty)"
+                : string.Join(", ", context.ValidDecisions);
             throw new InvalidOperationException(
-                $"Chosen decision {context.ChosenDecision} is not in the valid decisions array");
+                $"Chosen decision {context.ChosenDecision} is not in the valid decisions array [{validStr}] (entity ID: {entity.CallTrumpDecisionId}, ValidDecisions count: {entity.ValidDecisions.Count})");
         }
 
         var result = CallTrumpFeatureBuilder.BuildFeatures(
