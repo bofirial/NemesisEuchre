@@ -25,7 +25,8 @@ A console-based engine for training a high-performance Euchre AI using massive d
 - ✅ **v0.5** - Model memory enhancements for game state tracking
 - ✅ **v0.5** - Enhanced feature engineering with historical context
 - ✅ **v0.6** - Advanced game display, Gen1TrainerBot with exploration, database normalization, streaming training
-- 🚧 **v0.7** - Interactive play with ASCII card display (in progress)
+- ✅ **v0.7** - Machine Learning iteration improvments using idv files
+- 🚧 **v0.8** - Interactive play with ASCII card display (in progress)
 
 ## Quick Start
 
