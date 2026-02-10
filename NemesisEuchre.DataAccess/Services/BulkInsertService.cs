@@ -1,4 +1,4 @@
-using System.Data;
+using System.Data.Common;
 
 using Microsoft.Data.SqlClient;
 
@@ -25,22 +25,22 @@ public class BulkInsertService : IBulkInsertService
         int bulkCopyTimeout,
         CancellationToken cancellationToken = default)
     {
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "GamePlayers", cache.GamePlayers, BuildGamePlayersTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "DealDeckCards", cache.DealDeckCards, BuildDealDeckCardsTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "DealKnownPlayerSuitVoids", cache.DealKnownPlayerSuitVoids, BuildDealKnownPlayerSuitVoidsTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "DealPlayerStartingHandCards", cache.DealPlayerStartingHandCards, BuildDealPlayerStartingHandCardsTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "TrickCardsPlayed", cache.TrickCardsPlayed, BuildTrickCardsPlayedTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "CallTrumpDecisionCardsInHand", cache.CallTrumpCardsInHand, BuildCallTrumpCardsInHandTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "CallTrumpValidDecisions", cache.CallTrumpValidDecisions, BuildCallTrumpValidDecisionsTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "CallTrumpDecisionPredictedPoints", cache.CallTrumpPredictedPoints, BuildCallTrumpPredictedPointsTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "DiscardCardDecisionCardsInHand", cache.DiscardCardsInHand, BuildDiscardCardsInHandTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "DiscardCardDecisionPredictedPoints", cache.DiscardPredictedPoints, BuildDiscardPredictedPointsTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "PlayCardDecisionCardsInHand", cache.PlayCardCardsInHand, BuildPlayCardCardsInHandTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "PlayCardDecisionPlayedCards", cache.PlayCardPlayedCards, BuildPlayCardPlayedCardsTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "PlayCardDecisionValidCards", cache.PlayCardValidCards, BuildPlayCardValidCardsTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "PlayCardDecisionKnownVoids", cache.PlayCardKnownVoids, BuildPlayCardKnownVoidsTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "PlayCardDecisionCardsAccountedFor", cache.PlayCardAccountedForCards, BuildPlayCardAccountedForCardsTable, cancellationToken).ConfigureAwait(false);
-        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "PlayCardDecisionPredictedPoints", cache.PlayCardPredictedPoints, BuildPlayCardPredictedPointsTable, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "GamePlayers", cache.GamePlayers, CreateGamePlayersReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "DealDeckCards", cache.DealDeckCards, CreateDealDeckCardsReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "DealKnownPlayerSuitVoids", cache.DealKnownPlayerSuitVoids, CreateDealKnownPlayerSuitVoidsReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "DealPlayerStartingHandCards", cache.DealPlayerStartingHandCards, CreateDealPlayerStartingHandCardsReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "TrickCardsPlayed", cache.TrickCardsPlayed, CreateTrickCardsPlayedReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "CallTrumpDecisionCardsInHand", cache.CallTrumpCardsInHand, CreateCallTrumpCardsInHandReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "CallTrumpValidDecisions", cache.CallTrumpValidDecisions, CreateCallTrumpValidDecisionsReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "CallTrumpDecisionPredictedPoints", cache.CallTrumpPredictedPoints, CreateCallTrumpPredictedPointsReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "DiscardCardDecisionCardsInHand", cache.DiscardCardsInHand, CreateDiscardCardsInHandReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "DiscardCardDecisionPredictedPoints", cache.DiscardPredictedPoints, CreateDiscardPredictedPointsReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "PlayCardDecisionCardsInHand", cache.PlayCardCardsInHand, CreatePlayCardCardsInHandReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "PlayCardDecisionPlayedCards", cache.PlayCardPlayedCards, CreatePlayCardPlayedCardsReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "PlayCardDecisionValidCards", cache.PlayCardValidCards, CreatePlayCardValidCardsReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "PlayCardDecisionKnownVoids", cache.PlayCardKnownVoids, CreatePlayCardKnownVoidsReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "PlayCardDecisionCardsAccountedFor", cache.PlayCardAccountedForCards, CreatePlayCardAccountedForCardsReader, cancellationToken).ConfigureAwait(false);
+        await BulkInsertAsync(connection, transaction, bulkCopyTimeout, "PlayCardDecisionPredictedPoints", cache.PlayCardPredictedPoints, CreatePlayCardPredictedPointsReader, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task BulkInsertAsync<T>(
@@ -49,7 +49,7 @@ public class BulkInsertService : IBulkInsertService
         int bulkCopyTimeout,
         string tableName,
         IReadOnlyList<T> entities,
-        Func<IReadOnlyList<T>, DataTable> buildTable,
+        Func<IReadOnlyList<T>, DbDataReader> createReader,
         CancellationToken cancellationToken)
     {
         if (entities.Count == 0)
@@ -57,7 +57,7 @@ public class BulkInsertService : IBulkInsertService
             return;
         }
 
-        var dataTable = buildTable(entities);
+        await using var reader = createReader(entities);
 
         using var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction)
         {
@@ -65,249 +65,185 @@ public class BulkInsertService : IBulkInsertService
             BulkCopyTimeout = bulkCopyTimeout,
         };
 
-        foreach (DataColumn column in dataTable.Columns)
+        for (int i = 0; i < reader.FieldCount; i++)
         {
-            bulkCopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
+            bulkCopy.ColumnMappings.Add(reader.GetName(i), reader.GetName(i));
         }
 
-        await bulkCopy.WriteToServerAsync(dataTable, cancellationToken).ConfigureAwait(false);
+        await bulkCopy.WriteToServerAsync(reader, cancellationToken).ConfigureAwait(false);
     }
 
-    private static DataTable BuildGamePlayersTable(IReadOnlyList<GamePlayer> entities)
+    private static EntityListDataReader<GamePlayer> CreateGamePlayersReader(IReadOnlyList<GamePlayer> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("GameId", typeof(int));
-        table.Columns.Add("PlayerPositionId", typeof(int));
-        table.Columns.Add("ActorTypeId", typeof(int));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.GameId, e.PlayerPositionId, (object?)e.ActorTypeId ?? DBNull.Value);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("GameId", typeof(int), e => e.GameId),
+                ("PlayerPositionId", typeof(int), e => e.PlayerPositionId),
+                ("ActorTypeId", typeof(int), e => (object?)e.ActorTypeId ?? DBNull.Value),
+            ]);
     }
 
-    private static DataTable BuildDealDeckCardsTable(IReadOnlyList<DealDeckCard> entities)
+    private static EntityListDataReader<DealDeckCard> CreateDealDeckCardsReader(IReadOnlyList<DealDeckCard> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("DealId", typeof(int));
-        table.Columns.Add("CardId", typeof(int));
-        table.Columns.Add("SortOrder", typeof(int));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.DealId, e.CardId, e.SortOrder);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("DealId", typeof(int), e => e.DealId),
+                ("CardId", typeof(int), e => e.CardId),
+                ("SortOrder", typeof(int), e => e.SortOrder),
+            ]);
     }
 
-    private static DataTable BuildDealKnownPlayerSuitVoidsTable(IReadOnlyList<DealKnownPlayerSuitVoid> entities)
+    private static EntityListDataReader<DealKnownPlayerSuitVoid> CreateDealKnownPlayerSuitVoidsReader(IReadOnlyList<DealKnownPlayerSuitVoid> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("DealId", typeof(int));
-        table.Columns.Add("PlayerPositionId", typeof(int));
-        table.Columns.Add("SuitId", typeof(int));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.DealId, e.PlayerPositionId, e.SuitId);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("DealId", typeof(int), e => e.DealId),
+                ("PlayerPositionId", typeof(int), e => e.PlayerPositionId),
+                ("SuitId", typeof(int), e => e.SuitId),
+            ]);
     }
 
-    private static DataTable BuildDealPlayerStartingHandCardsTable(IReadOnlyList<DealPlayerStartingHandCard> entities)
+    private static EntityListDataReader<DealPlayerStartingHandCard> CreateDealPlayerStartingHandCardsReader(IReadOnlyList<DealPlayerStartingHandCard> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("DealPlayerId", typeof(int));
-        table.Columns.Add("CardId", typeof(int));
-        table.Columns.Add("SortOrder", typeof(int));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.DealPlayerId, e.CardId, e.SortOrder);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("DealPlayerId", typeof(int), e => e.DealPlayerId),
+                ("CardId", typeof(int), e => e.CardId),
+                ("SortOrder", typeof(int), e => e.SortOrder),
+            ]);
     }
 
-    private static DataTable BuildTrickCardsPlayedTable(IReadOnlyList<TrickCardPlayed> entities)
+    private static EntityListDataReader<TrickCardPlayed> CreateTrickCardsPlayedReader(IReadOnlyList<TrickCardPlayed> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("TrickId", typeof(int));
-        table.Columns.Add("PlayerPositionId", typeof(int));
-        table.Columns.Add("CardId", typeof(int));
-        table.Columns.Add("PlayOrder", typeof(int));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.TrickId, e.PlayerPositionId, e.CardId, e.PlayOrder);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("TrickId", typeof(int), e => e.TrickId),
+                ("PlayerPositionId", typeof(int), e => e.PlayerPositionId),
+                ("CardId", typeof(int), e => e.CardId),
+                ("PlayOrder", typeof(int), e => e.PlayOrder),
+            ]);
     }
 
-    private static DataTable BuildCallTrumpCardsInHandTable(IReadOnlyList<CallTrumpDecisionCardsInHand> entities)
+    private static EntityListDataReader<CallTrumpDecisionCardsInHand> CreateCallTrumpCardsInHandReader(IReadOnlyList<CallTrumpDecisionCardsInHand> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("CallTrumpDecisionId", typeof(int));
-        table.Columns.Add("CardId", typeof(int));
-        table.Columns.Add("SortOrder", typeof(int));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.CallTrumpDecisionId, e.CardId, e.SortOrder);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("CallTrumpDecisionId", typeof(int), e => e.CallTrumpDecisionId),
+                ("CardId", typeof(int), e => e.CardId),
+                ("SortOrder", typeof(int), e => e.SortOrder),
+            ]);
     }
 
-    private static DataTable BuildCallTrumpValidDecisionsTable(IReadOnlyList<CallTrumpDecisionValidDecision> entities)
+    private static EntityListDataReader<CallTrumpDecisionValidDecision> CreateCallTrumpValidDecisionsReader(IReadOnlyList<CallTrumpDecisionValidDecision> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("CallTrumpDecisionId", typeof(int));
-        table.Columns.Add("CallTrumpDecisionValueId", typeof(int));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.CallTrumpDecisionId, e.CallTrumpDecisionValueId);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("CallTrumpDecisionId", typeof(int), e => e.CallTrumpDecisionId),
+                ("CallTrumpDecisionValueId", typeof(int), e => e.CallTrumpDecisionValueId),
+            ]);
     }
 
-    private static DataTable BuildCallTrumpPredictedPointsTable(IReadOnlyList<CallTrumpDecisionPredictedPoints> entities)
+    private static EntityListDataReader<CallTrumpDecisionPredictedPoints> CreateCallTrumpPredictedPointsReader(IReadOnlyList<CallTrumpDecisionPredictedPoints> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("CallTrumpDecisionId", typeof(int));
-        table.Columns.Add("CallTrumpDecisionValueId", typeof(int));
-        table.Columns.Add("PredictedPoints", typeof(float));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.CallTrumpDecisionId, e.CallTrumpDecisionValueId, e.PredictedPoints);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("CallTrumpDecisionId", typeof(int), e => e.CallTrumpDecisionId),
+                ("CallTrumpDecisionValueId", typeof(int), e => e.CallTrumpDecisionValueId),
+                ("PredictedPoints", typeof(float), e => e.PredictedPoints),
+            ]);
     }
 
-    private static DataTable BuildDiscardCardsInHandTable(IReadOnlyList<DiscardCardDecisionCardsInHand> entities)
+    private static EntityListDataReader<DiscardCardDecisionCardsInHand> CreateDiscardCardsInHandReader(IReadOnlyList<DiscardCardDecisionCardsInHand> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("DiscardCardDecisionId", typeof(int));
-        table.Columns.Add("RelativeCardId", typeof(int));
-        table.Columns.Add("SortOrder", typeof(int));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.DiscardCardDecisionId, e.RelativeCardId, e.SortOrder);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("DiscardCardDecisionId", typeof(int), e => e.DiscardCardDecisionId),
+                ("RelativeCardId", typeof(int), e => e.RelativeCardId),
+                ("SortOrder", typeof(int), e => e.SortOrder),
+            ]);
     }
 
-    private static DataTable BuildDiscardPredictedPointsTable(IReadOnlyList<DiscardCardDecisionPredictedPoints> entities)
+    private static EntityListDataReader<DiscardCardDecisionPredictedPoints> CreateDiscardPredictedPointsReader(IReadOnlyList<DiscardCardDecisionPredictedPoints> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("DiscardCardDecisionId", typeof(int));
-        table.Columns.Add("RelativeCardId", typeof(int));
-        table.Columns.Add("PredictedPoints", typeof(float));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.DiscardCardDecisionId, e.RelativeCardId, e.PredictedPoints);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("DiscardCardDecisionId", typeof(int), e => e.DiscardCardDecisionId),
+                ("RelativeCardId", typeof(int), e => e.RelativeCardId),
+                ("PredictedPoints", typeof(float), e => e.PredictedPoints),
+            ]);
     }
 
-    private static DataTable BuildPlayCardCardsInHandTable(IReadOnlyList<PlayCardDecisionCardsInHand> entities)
+    private static EntityListDataReader<PlayCardDecisionCardsInHand> CreatePlayCardCardsInHandReader(IReadOnlyList<PlayCardDecisionCardsInHand> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("PlayCardDecisionId", typeof(int));
-        table.Columns.Add("RelativeCardId", typeof(int));
-        table.Columns.Add("SortOrder", typeof(int));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.PlayCardDecisionId, e.RelativeCardId, e.SortOrder);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("PlayCardDecisionId", typeof(int), e => e.PlayCardDecisionId),
+                ("RelativeCardId", typeof(int), e => e.RelativeCardId),
+                ("SortOrder", typeof(int), e => e.SortOrder),
+            ]);
     }
 
-    private static DataTable BuildPlayCardPlayedCardsTable(IReadOnlyList<PlayCardDecisionPlayedCard> entities)
+    private static EntityListDataReader<PlayCardDecisionPlayedCard> CreatePlayCardPlayedCardsReader(IReadOnlyList<PlayCardDecisionPlayedCard> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("PlayCardDecisionId", typeof(int));
-        table.Columns.Add("RelativePlayerPositionId", typeof(int));
-        table.Columns.Add("RelativeCardId", typeof(int));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.PlayCardDecisionId, e.RelativePlayerPositionId, e.RelativeCardId);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("PlayCardDecisionId", typeof(int), e => e.PlayCardDecisionId),
+                ("RelativePlayerPositionId", typeof(int), e => e.RelativePlayerPositionId),
+                ("RelativeCardId", typeof(int), e => e.RelativeCardId),
+            ]);
     }
 
-    private static DataTable BuildPlayCardValidCardsTable(IReadOnlyList<PlayCardDecisionValidCard> entities)
+    private static EntityListDataReader<PlayCardDecisionValidCard> CreatePlayCardValidCardsReader(IReadOnlyList<PlayCardDecisionValidCard> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("PlayCardDecisionId", typeof(int));
-        table.Columns.Add("RelativeCardId", typeof(int));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.PlayCardDecisionId, e.RelativeCardId);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("PlayCardDecisionId", typeof(int), e => e.PlayCardDecisionId),
+                ("RelativeCardId", typeof(int), e => e.RelativeCardId),
+            ]);
     }
 
-    private static DataTable BuildPlayCardKnownVoidsTable(IReadOnlyList<PlayCardDecisionKnownVoid> entities)
+    private static EntityListDataReader<PlayCardDecisionKnownVoid> CreatePlayCardKnownVoidsReader(IReadOnlyList<PlayCardDecisionKnownVoid> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("PlayCardDecisionId", typeof(int));
-        table.Columns.Add("RelativePlayerPositionId", typeof(int));
-        table.Columns.Add("RelativeSuitId", typeof(int));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.PlayCardDecisionId, e.RelativePlayerPositionId, e.RelativeSuitId);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("PlayCardDecisionId", typeof(int), e => e.PlayCardDecisionId),
+                ("RelativePlayerPositionId", typeof(int), e => e.RelativePlayerPositionId),
+                ("RelativeSuitId", typeof(int), e => e.RelativeSuitId),
+            ]);
     }
 
-    private static DataTable BuildPlayCardAccountedForCardsTable(IReadOnlyList<PlayCardDecisionAccountedForCard> entities)
+    private static EntityListDataReader<PlayCardDecisionAccountedForCard> CreatePlayCardAccountedForCardsReader(IReadOnlyList<PlayCardDecisionAccountedForCard> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("PlayCardDecisionId", typeof(int));
-        table.Columns.Add("RelativeCardId", typeof(int));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.PlayCardDecisionId, e.RelativeCardId);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("PlayCardDecisionId", typeof(int), e => e.PlayCardDecisionId),
+                ("RelativeCardId", typeof(int), e => e.RelativeCardId),
+            ]);
     }
 
-    private static DataTable BuildPlayCardPredictedPointsTable(IReadOnlyList<PlayCardDecisionPredictedPoints> entities)
+    private static EntityListDataReader<PlayCardDecisionPredictedPoints> CreatePlayCardPredictedPointsReader(IReadOnlyList<PlayCardDecisionPredictedPoints> entities)
     {
-        var table = new DataTable();
-        table.Columns.Add("PlayCardDecisionId", typeof(int));
-        table.Columns.Add("RelativeCardId", typeof(int));
-        table.Columns.Add("PredictedPoints", typeof(float));
-
-        foreach (var e in entities)
-        {
-            table.Rows.Add(e.PlayCardDecisionId, e.RelativeCardId, e.PredictedPoints);
-        }
-
-        return table;
+        return new(
+            entities,
+            [
+                ("PlayCardDecisionId", typeof(int), e => e.PlayCardDecisionId),
+                ("RelativeCardId", typeof(int), e => e.RelativeCardId),
+                ("PredictedPoints", typeof(float), e => e.PredictedPoints),
+            ]);
     }
 }

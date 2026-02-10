@@ -4,42 +4,58 @@ namespace NemesisEuchre.DataAccess.Services;
 
 public class LeafCollectionCache
 {
-    private readonly List<(GameEntity parent, GamePlayer leaf)> _gamePlayers = [];
-    private readonly List<(DealEntity parent, DealDeckCard leaf)> _dealDeckCards = [];
-    private readonly List<(DealEntity parent, DealKnownPlayerSuitVoid leaf)> _dealKnownPlayerSuitVoids = [];
-    private readonly List<(DealPlayerEntity parent, DealPlayerStartingHandCard leaf)> _dealPlayerStartingHandCards = [];
-    private readonly List<(TrickEntity parent, TrickCardPlayed leaf)> _trickCardsPlayed = [];
-    private readonly List<(CallTrumpDecisionEntity parent, CallTrumpDecisionCardsInHand leaf)> _callTrumpCardsInHand = [];
-    private readonly List<(CallTrumpDecisionEntity parent, CallTrumpDecisionValidDecision leaf)> _callTrumpValidDecisions = [];
-    private readonly List<(CallTrumpDecisionEntity parent, CallTrumpDecisionPredictedPoints leaf)> _callTrumpPredictedPoints = [];
-    private readonly List<(DiscardCardDecisionEntity parent, DiscardCardDecisionCardsInHand leaf)> _discardCardsInHand = [];
-    private readonly List<(DiscardCardDecisionEntity parent, DiscardCardDecisionPredictedPoints leaf)> _discardPredictedPoints = [];
-    private readonly List<(PlayCardDecisionEntity parent, PlayCardDecisionCardsInHand leaf)> _playCardCardsInHand = [];
-    private readonly List<(PlayCardDecisionEntity parent, PlayCardDecisionPlayedCard leaf)> _playCardPlayedCards = [];
-    private readonly List<(PlayCardDecisionEntity parent, PlayCardDecisionValidCard leaf)> _playCardValidCards = [];
-    private readonly List<(PlayCardDecisionEntity parent, PlayCardDecisionKnownVoid leaf)> _playCardKnownVoids = [];
-    private readonly List<(PlayCardDecisionEntity parent, PlayCardDecisionAccountedForCard leaf)> _playCardAccountedForCards = [];
-    private readonly List<(PlayCardDecisionEntity parent, PlayCardDecisionPredictedPoints leaf)> _playCardPredictedPoints = [];
+    private readonly List<GameEntity> _gamePlayerParents = [];
+    private readonly List<GamePlayer> _gamePlayerLeaves = [];
+    private readonly List<DealEntity> _dealDeckCardParents = [];
+    private readonly List<DealDeckCard> _dealDeckCardLeaves = [];
+    private readonly List<DealEntity> _dealKnownPlayerSuitVoidParents = [];
+    private readonly List<DealKnownPlayerSuitVoid> _dealKnownPlayerSuitVoidLeaves = [];
+    private readonly List<DealPlayerEntity> _dealPlayerStartingHandCardParents = [];
+    private readonly List<DealPlayerStartingHandCard> _dealPlayerStartingHandCardLeaves = [];
+    private readonly List<TrickEntity> _trickCardsPlayedParents = [];
+    private readonly List<TrickCardPlayed> _trickCardsPlayedLeaves = [];
+    private readonly List<CallTrumpDecisionEntity> _callTrumpCardsInHandParents = [];
+    private readonly List<CallTrumpDecisionCardsInHand> _callTrumpCardsInHandLeaves = [];
+    private readonly List<CallTrumpDecisionEntity> _callTrumpValidDecisionParents = [];
+    private readonly List<CallTrumpDecisionValidDecision> _callTrumpValidDecisionLeaves = [];
+    private readonly List<CallTrumpDecisionEntity> _callTrumpPredictedPointsParents = [];
+    private readonly List<CallTrumpDecisionPredictedPoints> _callTrumpPredictedPointsLeaves = [];
+    private readonly List<DiscardCardDecisionEntity> _discardCardsInHandParents = [];
+    private readonly List<DiscardCardDecisionCardsInHand> _discardCardsInHandLeaves = [];
+    private readonly List<DiscardCardDecisionEntity> _discardPredictedPointsParents = [];
+    private readonly List<DiscardCardDecisionPredictedPoints> _discardPredictedPointsLeaves = [];
+    private readonly List<PlayCardDecisionEntity> _playCardCardsInHandParents = [];
+    private readonly List<PlayCardDecisionCardsInHand> _playCardCardsInHandLeaves = [];
+    private readonly List<PlayCardDecisionEntity> _playCardPlayedCardParents = [];
+    private readonly List<PlayCardDecisionPlayedCard> _playCardPlayedCardLeaves = [];
+    private readonly List<PlayCardDecisionEntity> _playCardValidCardParents = [];
+    private readonly List<PlayCardDecisionValidCard> _playCardValidCardLeaves = [];
+    private readonly List<PlayCardDecisionEntity> _playCardKnownVoidParents = [];
+    private readonly List<PlayCardDecisionKnownVoid> _playCardKnownVoidLeaves = [];
+    private readonly List<PlayCardDecisionEntity> _playCardAccountedForCardParents = [];
+    private readonly List<PlayCardDecisionAccountedForCard> _playCardAccountedForCardLeaves = [];
+    private readonly List<PlayCardDecisionEntity> _playCardPredictedPointsParents = [];
+    private readonly List<PlayCardDecisionPredictedPoints> _playCardPredictedPointsLeaves = [];
 
     public LeafCollectionCache(IReadOnlyList<GameEntity> entities)
     {
         foreach (var game in entities)
         {
-            ExtractAndClear(game, game.GamePlayers, _gamePlayers);
+            ExtractAndClear(game, game.GamePlayers, _gamePlayerParents, _gamePlayerLeaves);
 
             foreach (var deal in game.Deals)
             {
-                ExtractAndClear(deal, deal.DealDeckCards, _dealDeckCards);
-                ExtractAndClear(deal, deal.DealKnownPlayerSuitVoids, _dealKnownPlayerSuitVoids);
+                ExtractAndClear(deal, deal.DealDeckCards, _dealDeckCardParents, _dealDeckCardLeaves);
+                ExtractAndClear(deal, deal.DealKnownPlayerSuitVoids, _dealKnownPlayerSuitVoidParents, _dealKnownPlayerSuitVoidLeaves);
 
                 foreach (var dealPlayer in deal.DealPlayers)
                 {
-                    ExtractAndClear(dealPlayer, dealPlayer.StartingHandCards, _dealPlayerStartingHandCards);
+                    ExtractAndClear(dealPlayer, dealPlayer.StartingHandCards, _dealPlayerStartingHandCardParents, _dealPlayerStartingHandCardLeaves);
                 }
 
                 foreach (var trick in deal.Tricks)
                 {
-                    ExtractAndClear(trick, trick.TrickCardsPlayed, _trickCardsPlayed);
+                    ExtractAndClear(trick, trick.TrickCardsPlayed, _trickCardsPlayedParents, _trickCardsPlayedLeaves);
 
                     foreach (var playCardDecision in trick.PlayCardDecisions)
                     {
@@ -49,161 +65,163 @@ public class LeafCollectionCache
 
                 foreach (var callTrumpDecision in deal.CallTrumpDecisions)
                 {
-                    ExtractAndClear(callTrumpDecision, callTrumpDecision.CardsInHand, _callTrumpCardsInHand);
-                    ExtractAndClear(callTrumpDecision, callTrumpDecision.ValidDecisions, _callTrumpValidDecisions);
-                    ExtractAndClear(callTrumpDecision, callTrumpDecision.PredictedPoints, _callTrumpPredictedPoints);
+                    ExtractAndClear(callTrumpDecision, callTrumpDecision.CardsInHand, _callTrumpCardsInHandParents, _callTrumpCardsInHandLeaves);
+                    ExtractAndClear(callTrumpDecision, callTrumpDecision.ValidDecisions, _callTrumpValidDecisionParents, _callTrumpValidDecisionLeaves);
+                    ExtractAndClear(callTrumpDecision, callTrumpDecision.PredictedPoints, _callTrumpPredictedPointsParents, _callTrumpPredictedPointsLeaves);
                 }
 
                 foreach (var discardDecision in deal.DiscardCardDecisions)
                 {
-                    ExtractAndClear(discardDecision, discardDecision.CardsInHand, _discardCardsInHand);
-                    ExtractAndClear(discardDecision, discardDecision.PredictedPoints, _discardPredictedPoints);
+                    ExtractAndClear(discardDecision, discardDecision.CardsInHand, _discardCardsInHandParents, _discardCardsInHandLeaves);
+                    ExtractAndClear(discardDecision, discardDecision.PredictedPoints, _discardPredictedPointsParents, _discardPredictedPointsLeaves);
                 }
             }
         }
     }
 
     public int LeafCount =>
-        _gamePlayers.Count +
-        _dealDeckCards.Count +
-        _dealKnownPlayerSuitVoids.Count +
-        _dealPlayerStartingHandCards.Count +
-        _trickCardsPlayed.Count +
-        _callTrumpCardsInHand.Count +
-        _callTrumpValidDecisions.Count +
-        _callTrumpPredictedPoints.Count +
-        _discardCardsInHand.Count +
-        _discardPredictedPoints.Count +
-        _playCardCardsInHand.Count +
-        _playCardPlayedCards.Count +
-        _playCardValidCards.Count +
-        _playCardKnownVoids.Count +
-        _playCardAccountedForCards.Count +
-        _playCardPredictedPoints.Count;
+        _gamePlayerLeaves.Count +
+        _dealDeckCardLeaves.Count +
+        _dealKnownPlayerSuitVoidLeaves.Count +
+        _dealPlayerStartingHandCardLeaves.Count +
+        _trickCardsPlayedLeaves.Count +
+        _callTrumpCardsInHandLeaves.Count +
+        _callTrumpValidDecisionLeaves.Count +
+        _callTrumpPredictedPointsLeaves.Count +
+        _discardCardsInHandLeaves.Count +
+        _discardPredictedPointsLeaves.Count +
+        _playCardCardsInHandLeaves.Count +
+        _playCardPlayedCardLeaves.Count +
+        _playCardValidCardLeaves.Count +
+        _playCardKnownVoidLeaves.Count +
+        _playCardAccountedForCardLeaves.Count +
+        _playCardPredictedPointsLeaves.Count;
 
-    public IReadOnlyList<GamePlayer> GamePlayers => _gamePlayers.ConvertAll(x => x.leaf);
+    public IReadOnlyList<GamePlayer> GamePlayers => _gamePlayerLeaves;
 
-    public IReadOnlyList<DealDeckCard> DealDeckCards => _dealDeckCards.ConvertAll(x => x.leaf);
+    public IReadOnlyList<DealDeckCard> DealDeckCards => _dealDeckCardLeaves;
 
-    public IReadOnlyList<DealKnownPlayerSuitVoid> DealKnownPlayerSuitVoids => _dealKnownPlayerSuitVoids.ConvertAll(x => x.leaf);
+    public IReadOnlyList<DealKnownPlayerSuitVoid> DealKnownPlayerSuitVoids => _dealKnownPlayerSuitVoidLeaves;
 
-    public IReadOnlyList<DealPlayerStartingHandCard> DealPlayerStartingHandCards => _dealPlayerStartingHandCards.ConvertAll(x => x.leaf);
+    public IReadOnlyList<DealPlayerStartingHandCard> DealPlayerStartingHandCards => _dealPlayerStartingHandCardLeaves;
 
-    public IReadOnlyList<TrickCardPlayed> TrickCardsPlayed => _trickCardsPlayed.ConvertAll(x => x.leaf);
+    public IReadOnlyList<TrickCardPlayed> TrickCardsPlayed => _trickCardsPlayedLeaves;
 
-    public IReadOnlyList<CallTrumpDecisionCardsInHand> CallTrumpCardsInHand => _callTrumpCardsInHand.ConvertAll(x => x.leaf);
+    public IReadOnlyList<CallTrumpDecisionCardsInHand> CallTrumpCardsInHand => _callTrumpCardsInHandLeaves;
 
-    public IReadOnlyList<CallTrumpDecisionValidDecision> CallTrumpValidDecisions => _callTrumpValidDecisions.ConvertAll(x => x.leaf);
+    public IReadOnlyList<CallTrumpDecisionValidDecision> CallTrumpValidDecisions => _callTrumpValidDecisionLeaves;
 
-    public IReadOnlyList<CallTrumpDecisionPredictedPoints> CallTrumpPredictedPoints => _callTrumpPredictedPoints.ConvertAll(x => x.leaf);
+    public IReadOnlyList<CallTrumpDecisionPredictedPoints> CallTrumpPredictedPoints => _callTrumpPredictedPointsLeaves;
 
-    public IReadOnlyList<DiscardCardDecisionCardsInHand> DiscardCardsInHand => _discardCardsInHand.ConvertAll(x => x.leaf);
+    public IReadOnlyList<DiscardCardDecisionCardsInHand> DiscardCardsInHand => _discardCardsInHandLeaves;
 
-    public IReadOnlyList<DiscardCardDecisionPredictedPoints> DiscardPredictedPoints => _discardPredictedPoints.ConvertAll(x => x.leaf);
+    public IReadOnlyList<DiscardCardDecisionPredictedPoints> DiscardPredictedPoints => _discardPredictedPointsLeaves;
 
-    public IReadOnlyList<PlayCardDecisionCardsInHand> PlayCardCardsInHand => _playCardCardsInHand.ConvertAll(x => x.leaf);
+    public IReadOnlyList<PlayCardDecisionCardsInHand> PlayCardCardsInHand => _playCardCardsInHandLeaves;
 
-    public IReadOnlyList<PlayCardDecisionPlayedCard> PlayCardPlayedCards => _playCardPlayedCards.ConvertAll(x => x.leaf);
+    public IReadOnlyList<PlayCardDecisionPlayedCard> PlayCardPlayedCards => _playCardPlayedCardLeaves;
 
-    public IReadOnlyList<PlayCardDecisionValidCard> PlayCardValidCards => _playCardValidCards.ConvertAll(x => x.leaf);
+    public IReadOnlyList<PlayCardDecisionValidCard> PlayCardValidCards => _playCardValidCardLeaves;
 
-    public IReadOnlyList<PlayCardDecisionKnownVoid> PlayCardKnownVoids => _playCardKnownVoids.ConvertAll(x => x.leaf);
+    public IReadOnlyList<PlayCardDecisionKnownVoid> PlayCardKnownVoids => _playCardKnownVoidLeaves;
 
-    public IReadOnlyList<PlayCardDecisionAccountedForCard> PlayCardAccountedForCards => _playCardAccountedForCards.ConvertAll(x => x.leaf);
+    public IReadOnlyList<PlayCardDecisionAccountedForCard> PlayCardAccountedForCards => _playCardAccountedForCardLeaves;
 
-    public IReadOnlyList<PlayCardDecisionPredictedPoints> PlayCardPredictedPoints => _playCardPredictedPoints.ConvertAll(x => x.leaf);
+    public IReadOnlyList<PlayCardDecisionPredictedPoints> PlayCardPredictedPoints => _playCardPredictedPointsLeaves;
 
     public void PopulateForeignKeys()
     {
-        foreach (var (parent, leaf) in _gamePlayers)
+        for (int i = 0; i < _gamePlayerParents.Count; i++)
         {
-            leaf.GameId = parent.GameId;
+            _gamePlayerLeaves[i].GameId = _gamePlayerParents[i].GameId;
         }
 
-        foreach (var (parent, leaf) in _dealDeckCards)
+        for (int i = 0; i < _dealDeckCardParents.Count; i++)
         {
-            leaf.DealId = parent.DealId;
+            _dealDeckCardLeaves[i].DealId = _dealDeckCardParents[i].DealId;
         }
 
-        foreach (var (parent, leaf) in _dealKnownPlayerSuitVoids)
+        for (int i = 0; i < _dealKnownPlayerSuitVoidParents.Count; i++)
         {
-            leaf.DealId = parent.DealId;
+            _dealKnownPlayerSuitVoidLeaves[i].DealId = _dealKnownPlayerSuitVoidParents[i].DealId;
         }
 
-        foreach (var (parent, leaf) in _dealPlayerStartingHandCards)
+        for (int i = 0; i < _dealPlayerStartingHandCardParents.Count; i++)
         {
-            leaf.DealPlayerId = parent.DealPlayerId;
+            _dealPlayerStartingHandCardLeaves[i].DealPlayerId = _dealPlayerStartingHandCardParents[i].DealPlayerId;
         }
 
-        foreach (var (parent, leaf) in _trickCardsPlayed)
+        for (int i = 0; i < _trickCardsPlayedParents.Count; i++)
         {
-            leaf.TrickId = parent.TrickId;
+            _trickCardsPlayedLeaves[i].TrickId = _trickCardsPlayedParents[i].TrickId;
         }
 
-        foreach (var (parent, leaf) in _callTrumpCardsInHand)
+        for (int i = 0; i < _callTrumpCardsInHandParents.Count; i++)
         {
-            leaf.CallTrumpDecisionId = parent.CallTrumpDecisionId;
+            _callTrumpCardsInHandLeaves[i].CallTrumpDecisionId = _callTrumpCardsInHandParents[i].CallTrumpDecisionId;
         }
 
-        foreach (var (parent, leaf) in _callTrumpValidDecisions)
+        for (int i = 0; i < _callTrumpValidDecisionParents.Count; i++)
         {
-            leaf.CallTrumpDecisionId = parent.CallTrumpDecisionId;
+            _callTrumpValidDecisionLeaves[i].CallTrumpDecisionId = _callTrumpValidDecisionParents[i].CallTrumpDecisionId;
         }
 
-        foreach (var (parent, leaf) in _callTrumpPredictedPoints)
+        for (int i = 0; i < _callTrumpPredictedPointsParents.Count; i++)
         {
-            leaf.CallTrumpDecisionId = parent.CallTrumpDecisionId;
+            _callTrumpPredictedPointsLeaves[i].CallTrumpDecisionId = _callTrumpPredictedPointsParents[i].CallTrumpDecisionId;
         }
 
-        foreach (var (parent, leaf) in _discardCardsInHand)
+        for (int i = 0; i < _discardCardsInHandParents.Count; i++)
         {
-            leaf.DiscardCardDecisionId = parent.DiscardCardDecisionId;
+            _discardCardsInHandLeaves[i].DiscardCardDecisionId = _discardCardsInHandParents[i].DiscardCardDecisionId;
         }
 
-        foreach (var (parent, leaf) in _discardPredictedPoints)
+        for (int i = 0; i < _discardPredictedPointsParents.Count; i++)
         {
-            leaf.DiscardCardDecisionId = parent.DiscardCardDecisionId;
+            _discardPredictedPointsLeaves[i].DiscardCardDecisionId = _discardPredictedPointsParents[i].DiscardCardDecisionId;
         }
 
-        foreach (var (parent, leaf) in _playCardCardsInHand)
+        for (int i = 0; i < _playCardCardsInHandParents.Count; i++)
         {
-            leaf.PlayCardDecisionId = parent.PlayCardDecisionId;
+            _playCardCardsInHandLeaves[i].PlayCardDecisionId = _playCardCardsInHandParents[i].PlayCardDecisionId;
         }
 
-        foreach (var (parent, leaf) in _playCardPlayedCards)
+        for (int i = 0; i < _playCardPlayedCardParents.Count; i++)
         {
-            leaf.PlayCardDecisionId = parent.PlayCardDecisionId;
+            _playCardPlayedCardLeaves[i].PlayCardDecisionId = _playCardPlayedCardParents[i].PlayCardDecisionId;
         }
 
-        foreach (var (parent, leaf) in _playCardValidCards)
+        for (int i = 0; i < _playCardValidCardParents.Count; i++)
         {
-            leaf.PlayCardDecisionId = parent.PlayCardDecisionId;
+            _playCardValidCardLeaves[i].PlayCardDecisionId = _playCardValidCardParents[i].PlayCardDecisionId;
         }
 
-        foreach (var (parent, leaf) in _playCardKnownVoids)
+        for (int i = 0; i < _playCardKnownVoidParents.Count; i++)
         {
-            leaf.PlayCardDecisionId = parent.PlayCardDecisionId;
+            _playCardKnownVoidLeaves[i].PlayCardDecisionId = _playCardKnownVoidParents[i].PlayCardDecisionId;
         }
 
-        foreach (var (parent, leaf) in _playCardAccountedForCards)
+        for (int i = 0; i < _playCardAccountedForCardParents.Count; i++)
         {
-            leaf.PlayCardDecisionId = parent.PlayCardDecisionId;
+            _playCardAccountedForCardLeaves[i].PlayCardDecisionId = _playCardAccountedForCardParents[i].PlayCardDecisionId;
         }
 
-        foreach (var (parent, leaf) in _playCardPredictedPoints)
+        for (int i = 0; i < _playCardPredictedPointsParents.Count; i++)
         {
-            leaf.PlayCardDecisionId = parent.PlayCardDecisionId;
+            _playCardPredictedPointsLeaves[i].PlayCardDecisionId = _playCardPredictedPointsParents[i].PlayCardDecisionId;
         }
     }
 
     private static void ExtractAndClear<TParent, TLeaf>(
         TParent parent,
         ICollection<TLeaf> collection,
-        List<(TParent parent, TLeaf leaf)> cache)
+        List<TParent> parentCache,
+        List<TLeaf> leafCache)
     {
         foreach (var leaf in collection)
         {
-            cache.Add((parent, leaf));
+            parentCache.Add(parent);
+            leafCache.Add(leaf);
         }
 
         collection.Clear();
@@ -211,11 +229,11 @@ public class LeafCollectionCache
 
     private void ExtractPlayCardDecisionLeaves(PlayCardDecisionEntity decision)
     {
-        ExtractAndClear(decision, decision.CardsInHand, _playCardCardsInHand);
-        ExtractAndClear(decision, decision.PlayedCards, _playCardPlayedCards);
-        ExtractAndClear(decision, decision.ValidCards, _playCardValidCards);
-        ExtractAndClear(decision, decision.KnownVoids, _playCardKnownVoids);
-        ExtractAndClear(decision, decision.CardsAccountedFor, _playCardAccountedForCards);
-        ExtractAndClear(decision, decision.PredictedPoints, _playCardPredictedPoints);
+        ExtractAndClear(decision, decision.CardsInHand, _playCardCardsInHandParents, _playCardCardsInHandLeaves);
+        ExtractAndClear(decision, decision.PlayedCards, _playCardPlayedCardParents, _playCardPlayedCardLeaves);
+        ExtractAndClear(decision, decision.ValidCards, _playCardValidCardParents, _playCardValidCardLeaves);
+        ExtractAndClear(decision, decision.KnownVoids, _playCardKnownVoidParents, _playCardKnownVoidLeaves);
+        ExtractAndClear(decision, decision.CardsAccountedFor, _playCardAccountedForCardParents, _playCardAccountedForCardLeaves);
+        ExtractAndClear(decision, decision.PredictedPoints, _playCardPredictedPointsParents, _playCardPredictedPointsLeaves);
     }
 }
