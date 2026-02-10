@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Foundation.Constants;
 
@@ -37,15 +39,13 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
                     $"[green]Training {decisionType} models for {actorType}[/]",
                     maxValue: 100);
 
-                var modelTasks = new Dictionary<string, ProgressTask>();
+                var modelTasks = new ConcurrentDictionary<string, ProgressTask>();
 
                 var progress = new Progress<TrainingProgress>(p =>
                 {
-                    if (!modelTasks.TryGetValue(p.ModelType, out var task))
-                    {
-                        task = ctx.AddTask($"[blue]{p.ModelType}[/]", maxValue: 100);
-                        modelTasks[p.ModelType] = task;
-                    }
+                    var task = modelTasks.GetOrAdd(
+                        p.ModelType,
+                        key => ctx.AddTask($"[blue]{key}[/]", maxValue: 100));
 
                     task.Value = p.PercentComplete;
 

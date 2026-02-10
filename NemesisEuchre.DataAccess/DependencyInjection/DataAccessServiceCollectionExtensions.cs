@@ -23,7 +23,7 @@ public static class DataAccessServiceCollectionExtensions
                 maxRetryCount: 5,
                 maxRetryDelay: TimeSpan.FromSeconds(30),
                 errorNumbersToAdd: null);
-            sqlOptions.CommandTimeout(120);
+            sqlOptions.CommandTimeout(600);
         }));
 
         services.AddScoped<ITrickToEntityMapper, TrickToEntityMapper>();

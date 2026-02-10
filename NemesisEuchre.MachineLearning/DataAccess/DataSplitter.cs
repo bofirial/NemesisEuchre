@@ -47,7 +47,8 @@ public class DataSplitter : IDataSplitter
     {
         ArgumentNullException.ThrowIfNull(data);
 
-        var dataView = _mlContext.Data.LoadFromEnumerable(data);
+        var materializedData = data as ICollection<T> ?? [.. data];
+        var dataView = _mlContext.Data.LoadFromEnumerable(materializedData);
         return Split(dataView, trainRatio, validationRatio, testRatio, preShuffled);
     }
 

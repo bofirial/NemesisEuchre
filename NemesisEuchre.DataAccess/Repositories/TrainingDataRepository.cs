@@ -54,8 +54,7 @@ public partial class TrainingDataRepository(
                 .Include(e => e.PlayedCards)
                 .Include(e => e.ValidCards)
                 .Include(e => e.KnownVoids)
-                .Include(e => e.CardsAccountedFor)
-                .AsSplitQuery()),
+                .Include(e => e.CardsAccountedFor)),
     };
 
     public async IAsyncEnumerable<TEntity> GetDecisionDataAsync<TEntity>(
@@ -74,7 +73,10 @@ public partial class TrainingDataRepository(
 
         var query = BuildQuery<TEntity>(actorType, limit, winningTeamOnly);
 
-        await foreach (var entity in query.AsAsyncEnumerable().WithCancellation(cancellationToken))
+        // Materialize fully so split queries complete before yielding entities.
+        var entities = await query.ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        foreach (var entity in entities)
         {
             yield return entity;
         }
@@ -101,7 +103,7 @@ public partial class TrainingDataRepository(
             query = query.OrderBy(_ => Guid.NewGuid());
         }
 
-        return query.AsEnumerable();
+        return [.. query];
     }
 
     public int GetDecisionDataCount<TEntity>(
@@ -130,7 +132,7 @@ public partial class TrainingDataRepository(
     {
         var config = GetConfig<TEntity>();
         var dbSet = ((EntityTypeConfig<TEntity>)config).GetDbSet(context);
-        var query = ((EntityTypeConfig<TEntity>)config).ApplyIncludes(dbSet.AsNoTracking());
+        var query = ((EntityTypeConfig<TEntity>)config).ApplyIncludes(dbSet.AsNoTrackingWithIdentityResolution());
 
         query = query.Where(d => d.ActorTypeId == (int)actorType);
 
