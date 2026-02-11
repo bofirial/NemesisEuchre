@@ -3,6 +3,7 @@ using Bogus;
 using FluentAssertions;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.ML;
 
 using Moq;
@@ -29,7 +30,7 @@ public class Gen1TrainerBotTests
     private readonly Mock<IPlayCardInferenceFeatureBuilder> _mockPlayCardFeatureBuilder = new();
     private readonly Mock<IRandomNumberGenerator> _mockRandom = new();
     private readonly Mock<ILogger<ModelTrainerBot>> _mockLogger = new();
-    private readonly MachineLearningOptions _machineLearningOptions = new();
+    private readonly IOptions<MachineLearningOptions> _machineLearningOptions = Microsoft.Extensions.Options.Options.Create(new MachineLearningOptions());
     private readonly Actor _actor = new(ActorType.ModelTrainer, "Gen1");
 
     [Fact]

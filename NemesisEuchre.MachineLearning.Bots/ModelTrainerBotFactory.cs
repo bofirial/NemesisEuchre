@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
@@ -15,7 +16,7 @@ public class ModelTrainerBotFactory(
     IDiscardCardInferenceFeatureBuilder discardCardFeatureBuilder,
     IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
     IRandomNumberGenerator random,
-    MachineLearningOptions machineLearningOptions,
+    IOptions<MachineLearningOptions> machineLearningOptions,
     ILogger<ModelTrainerBot> logger) : IPlayerActorFactory
 {
     public ActorType ActorType => ActorType.ModelTrainer;

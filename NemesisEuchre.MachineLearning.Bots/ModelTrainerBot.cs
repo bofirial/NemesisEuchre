@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
@@ -17,7 +18,7 @@ public class ModelTrainerBot(
     IDiscardCardInferenceFeatureBuilder discardCardFeatureBuilder,
     IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
     IRandomNumberGenerator random,
-    MachineLearningOptions machineLearningOptions,
+    IOptions<MachineLearningOptions> machineLearningOptions,
     ILogger<ModelTrainerBot> logger,
     Actor actor) : ModelBot(
         engineProvider,
@@ -30,7 +31,7 @@ public class ModelTrainerBot(
 {
     public override ActorType ActorType => ActorType.ModelTrainer;
 
-    private float Temperature => Actor.ExplorationTemperature != default ? Actor.ExplorationTemperature : machineLearningOptions.ExplorationTemperature;
+    private float Temperature => Actor.ExplorationTemperature != default ? Actor.ExplorationTemperature : machineLearningOptions.Value.ExplorationTemperature;
 
     public override async Task<CallTrumpDecisionContext> CallTrumpAsync(
         Card[] cardsInHand,
