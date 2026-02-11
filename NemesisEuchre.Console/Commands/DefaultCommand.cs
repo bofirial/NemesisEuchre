@@ -134,15 +134,8 @@ public class DefaultCommand(
             .StartAsync(async ctx =>
             {
                 var playingTask = ctx.AddTask("[green]Playing " + Count + " games...[/]", maxValue: Count);
-                var mappingTask = ctx.AddTask("[blue]Mapping games...[/]", maxValue: Count);
 
-                ProgressTask? idvSaveTask = null;
-                if (persistenceOptions.IdvGenerationName != null)
-                {
-                    idvSaveTask = ctx.AddTask("[yellow]Saving IDV files...[/]", autoStart: false);
-                }
-
-                var progressReporter = new BatchProgressReporter(playingTask, mappingTask, idvSaveTask);
+                var progressReporter = new BatchProgressReporter(playingTask);
                 return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, persistenceOptions: persistenceOptions, team1Actors: team1Actors, team2Actors: team2Actors);
             });
 

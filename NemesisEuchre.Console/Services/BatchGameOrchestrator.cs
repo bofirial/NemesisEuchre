@@ -104,7 +104,7 @@ public class BatchGameOrchestrator(
         var channelCapacity = _persistenceOptions.BatchSize * 4;
         var state = new BatchExecutionState(channelCapacity);
 
-        var consumerTask = persistenceCoordinator.ConsumeAndPersistAsync(state, progressReporter, persistenceOptions, cancellationToken);
+        var consumerTask = persistenceCoordinator.ConsumeAndPersistAsync(state, persistenceOptions, cancellationToken);
 
         var effectiveParallelism = parallelismCoordinator.CalculateEffectiveParallelism();
         var parallelOptions = new ParallelOptions
@@ -135,7 +135,6 @@ public class BatchGameOrchestrator(
     {
         var stopwatch = Stopwatch.StartNew();
         var completedSoFar = 0;
-        var savedSoFar = 0;
         var totalTeam1Wins = 0;
         var totalTeam2Wins = 0;
         var totalFailedGames = 0;
@@ -153,8 +152,7 @@ public class BatchGameOrchestrator(
 
             var subProgressReporter = progressReporter == null ? null : new SubBatchProgressReporter(
                 progressReporter,
-                completedSoFar,
-                savedSoFar);
+                completedSoFar);
 
             var (batchResults, batchState) = await ExecuteSingleBatchAsync(
                 gamesInThisBatch,
@@ -175,7 +173,6 @@ public class BatchGameOrchestrator(
             totalPersistenceDuration += batchState.PersistenceDuration;
             totalIdvSaveDuration += batchState.IdvSaveDuration;
             completedSoFar += gamesInThisBatch;
-            savedSoFar += batchResults.TotalGames;
 
             batchState.Dispose();
         }

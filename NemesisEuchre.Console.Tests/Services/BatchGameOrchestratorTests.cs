@@ -75,18 +75,16 @@ public class BatchGameOrchestratorTests
 
         _persistenceCoordinatorMock.Setup(x => x.ConsumeAndPersistAsync(
             It.IsAny<BatchExecutionState>(),
-            It.IsAny<IBatchProgressReporter>(),
             It.IsAny<GamePersistenceOptions?>(),
             It.IsAny<CancellationToken>()))
-            .Returns<BatchExecutionState, IBatchProgressReporter?, GamePersistenceOptions?, CancellationToken>(
-                async (state, progressReporter, persistenceOptions, ct) =>
+            .Returns<BatchExecutionState, GamePersistenceOptions?, CancellationToken>(
+                async (state, persistenceOptions, ct) =>
                 {
                     await foreach (var game in state.Reader.ReadAllAsync(ct).ConfigureAwait(false))
                     {
                         if (persistenceOptions?.PersistToSql != true)
                         {
                             state.SavedGames++;
-                            progressReporter?.ReportGamesSaved(state.SavedGames);
                         }
                         else
                         {
@@ -94,11 +92,7 @@ public class BatchGameOrchestratorTests
                             {
                                 using var scope = _serviceScopeFactoryMock.Object.CreateScope();
                                 var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
-                                var saveProgress = new Progress<int>(count =>
-                                {
-                                    state.SavedGames += count;
-                                    progressReporter?.ReportGamesSaved(state.SavedGames);
-                                });
+                                var saveProgress = new Progress<int>(count => state.SavedGames += count);
                                 await gameRepository.SaveCompletedGamesBulkAsync([game], saveProgress, ct).ConfigureAwait(false);
                             }
 #pragma warning disable RCS1075, S108
@@ -203,7 +197,6 @@ public class BatchGameOrchestratorTests
 
         reportedCompletedValues.Should().HaveCount(3);
         reportedCompletedValues.Should().Equal(1, 2, 3);
-        progressReporter.Verify(x => x.ReportGamesSaved(It.IsAny<int>()), Times.AtLeastOnce());
     }
 
     [Fact]
@@ -576,10 +569,6 @@ public class BatchGameOrchestratorTests
         await _sut.RunBatchAsync(3, progressReporter: progressReporter.Object, persistenceOptions: new GamePersistenceOptions(false, null), cancellationToken: TestContext.Current.CancellationToken);
 
         progressReporter.Verify(x => x.ReportGameCompleted(It.IsAny<int>()), Times.Exactly(3));
-        progressReporter.Verify(
-            x => x.ReportGamesSaved(It.IsAny<int>()),
-            Times.AtLeastOnce(),
-            "Progress should still be reported even when not persisting");
     }
 
     [Fact]

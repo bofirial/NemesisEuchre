@@ -16,7 +16,6 @@ public interface IPersistenceCoordinator
 {
     Task ConsumeAndPersistAsync(
         BatchExecutionState state,
-        IBatchProgressReporter? progressReporter,
         GamePersistenceOptions? persistenceOptions,
         CancellationToken cancellationToken = default);
 }
@@ -32,7 +31,6 @@ public class BatchPersistenceCoordinator(
 
     public async Task ConsumeAndPersistAsync(
         BatchExecutionState state,
-        IBatchProgressReporter? progressReporter,
         GamePersistenceOptions? persistenceOptions,
         CancellationToken cancellationToken = default)
     {
@@ -47,14 +45,14 @@ public class BatchPersistenceCoordinator(
 
             if (batch.Count >= _persistenceOptions.BatchSize)
             {
-                await FlushBatchAsync(batch, state, progressReporter, persistenceOptions, cancellationToken).ConfigureAwait(false);
+                await FlushBatchAsync(batch, state, persistenceOptions, cancellationToken).ConfigureAwait(false);
                 batch.Clear();
             }
         }
 
         if (batch.Count > 0)
         {
-            await FlushBatchAsync(batch, state, progressReporter, persistenceOptions, cancellationToken).ConfigureAwait(false);
+            await FlushBatchAsync(batch, state, persistenceOptions, cancellationToken).ConfigureAwait(false);
         }
 
         persistenceStopwatch.Stop();
@@ -62,21 +60,18 @@ public class BatchPersistenceCoordinator(
 
         if (persistenceOptions.IdvGenerationName != null)
         {
-            progressReporter?.ReportIdvSaveStarted();
             var idvStopwatch = Stopwatch.StartNew();
 
             trainingDataAccumulator.Save(persistenceOptions.IdvGenerationName, persistenceOptions.AllowOverwrite);
 
             idvStopwatch.Stop();
             state.IdvSaveDuration = idvStopwatch.Elapsed;
-            progressReporter?.ReportIdvSaveCompleted();
         }
     }
 
     private async Task FlushBatchAsync(
         List<Game> games,
         BatchExecutionState state,
-        IBatchProgressReporter? progressReporter,
         GamePersistenceOptions persistenceOptions,
         CancellationToken cancellationToken)
     {
@@ -86,11 +81,7 @@ public class BatchPersistenceCoordinator(
         {
             try
             {
-                var saveProgress = new Progress<int>(count =>
-                {
-                    state.SavedGames += count;
-                    progressReporter?.ReportGamesSaved(state.SavedGames);
-                });
+                var saveProgress = new Progress<int>(count => state.SavedGames += count);
 
                 var snapshot = new List<Game>(games);
                 using var scope = serviceScopeFactory.CreateScope();
@@ -113,7 +104,6 @@ public class BatchPersistenceCoordinator(
             if (!persisted)
             {
                 state.SavedGames += games.Count;
-                progressReporter?.ReportGamesSaved(state.SavedGames);
             }
         }
 
@@ -122,7 +112,6 @@ public class BatchPersistenceCoordinator(
             LoggerMessages.LogBatchGamePersistenceSkipped(logger, games.Count);
 
             state.SavedGames += games.Count;
-            progressReporter?.ReportGamesSaved(state.SavedGames);
         }
     }
 }
