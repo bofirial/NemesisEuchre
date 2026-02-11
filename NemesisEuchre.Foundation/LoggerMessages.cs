@@ -58,25 +58,6 @@ public static partial class LoggerMessages
         Message = "Failed to persist batch of {BatchSize} games. Games will not be saved.")]
     public static partial void LogBatchGamePersistenceFailed(ILogger logger, int batchSize, Exception exception);
 
-    [LoggerMessage(
-        EventId = 9,
-        Level = LogLevel.Debug,
-        Message = "Retrieving {DecisionType} training data (limit: {Limit}, winningTeamOnly: {WinningTeamOnly})")]
-    public static partial void LogRetrievingTrainingData(
-        ILogger logger,
-        string decisionType,
-        int limit,
-        bool winningTeamOnly);
-
-    [LoggerMessage(
-        EventId = 10,
-        Level = LogLevel.Error,
-        Message = "Failed to retrieve {DecisionType} training data")]
-    public static partial void LogTrainingDataRetrievalFailed(
-        ILogger logger,
-        string decisionType,
-        Exception exception);
-
     // EventID 11-34: MachineLearning core operations
     [LoggerMessage(
         EventId = 11,
@@ -127,21 +108,6 @@ public static partial class LoggerMessages
         Level = LogLevel.Information,
         Message = "Model metadata saved to {MetadataPath}")]
     public static partial void LogMetadataSaved(ILogger logger, string metadataPath);
-
-    [LoggerMessage(
-        EventId = 18,
-        Level = LogLevel.Information,
-        Message = "Loading training data (limit: {Limit}, winningTeamOnly: {WinningTeamOnly})")]
-    public static partial void LogLoadingTrainingData(
-        ILogger logger,
-        int limit,
-        bool winningTeamOnly);
-
-    [LoggerMessage(
-        EventId = 19,
-        Level = LogLevel.Debug,
-        Message = "Processed {RecordCount} training records")]
-    public static partial void LogTrainingDataProgress(ILogger logger, int recordCount);
 
     [LoggerMessage(
         EventId = 20,

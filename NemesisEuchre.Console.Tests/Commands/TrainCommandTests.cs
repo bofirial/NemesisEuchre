@@ -65,7 +65,7 @@ public class TrainCommandTests
             It.IsAny<int>(),
             It.IsAny<string>(),
             It.IsAny<Spectre.Console.IAnsiConsole>(),
-            It.IsAny<string?>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(trainingResults);
 
@@ -113,7 +113,7 @@ public class TrainCommandTests
             It.IsAny<int>(),
             It.IsAny<string>(),
             It.IsAny<Spectre.Console.IAnsiConsole>(),
-            It.IsAny<string?>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(trainingResults);
 
@@ -152,7 +152,7 @@ public class TrainCommandTests
             1000,
             "gen2",
             It.IsAny<Spectre.Console.IAnsiConsole>(),
-            It.IsAny<string?>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(trainingResults);
 
@@ -180,7 +180,7 @@ public class TrainCommandTests
             1000,
             "gen2",
             It.IsAny<Spectre.Console.IAnsiConsole>(),
-            It.IsAny<string?>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>()),
             Times.Once);
     }

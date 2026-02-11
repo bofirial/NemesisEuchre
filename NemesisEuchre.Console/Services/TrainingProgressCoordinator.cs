@@ -15,7 +15,7 @@ public interface ITrainingProgressCoordinator
         int sampleLimit,
         string modelName,
         IAnsiConsole console,
-        string? idvName = null,
+        string idvName,
         CancellationToken cancellationToken = default);
 }
 
@@ -27,7 +27,7 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
         int sampleLimit,
         string modelName,
         IAnsiConsole console,
-        string? idvName = null,
+        string idvName,
         CancellationToken cancellationToken = default)
     {
         return console.Progress()

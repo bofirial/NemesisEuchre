@@ -14,11 +14,6 @@ public interface IModelTrainer<TData>
     where TData : class, new()
 {
     Task<TrainingResult> TrainAsync(
-        IEnumerable<TData> trainingData,
-        bool preShuffled = false,
-        CancellationToken cancellationToken = default);
-
-    Task<TrainingResult> TrainAsync(
         IDataView dataView,
         bool preShuffled = false,
         CancellationToken cancellationToken = default);
@@ -53,17 +48,6 @@ public abstract class RegressionModelTrainerBase<TData>(
     protected ILogger Logger { get; } = logger ?? throw new ArgumentNullException(nameof(logger));
 
     protected ITransformer? TrainedModel { get; private set; }
-
-    public Task<TrainingResult> TrainAsync(
-        IEnumerable<TData> trainingData,
-        bool preShuffled = false,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(trainingData);
-
-        var dataSplit = DataSplitter.Split(trainingData, preShuffled: preShuffled);
-        return TrainFromSplitAsync(dataSplit, cancellationToken);
-    }
 
     public Task<TrainingResult> TrainAsync(
         IDataView dataView,

@@ -482,9 +482,9 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 2. ~~Add a --persist-to-sql option for the default command~~
 3. ~~Add a --persist-to-IDV option for persisting to an IDV file~~
 4. ~~Update train command to support training from an IDV file~~
-5. Test training from an IDV file
-6. Remove option to train from SQL
-   * Reduce code complexity and remove dead code
+5. ~~Test training from an IDV file~~
+6. ~~Remove option to train from SQL~~
+   * ~~Reduce code complexity and remove dead code~~
 7. IDV file validation (row count, schema check)
 8. Add an IDV file side-car file to record meta data about the IDV file.  Examples would be (row counts, game count, deal count, trick count, actor types, timestamp, generation name)
 9. Skip training models that already exist (ex. training Gen2 but gen2_calltrumpregression_v1 already exists)  Add a --force option to force retraining  Remove the _v1 suffix and logic?

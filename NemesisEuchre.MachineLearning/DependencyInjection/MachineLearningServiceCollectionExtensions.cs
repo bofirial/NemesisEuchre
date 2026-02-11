@@ -28,10 +28,6 @@ public static class MachineLearningServiceCollectionExtensions
         services.AddSingleton<IPredictionEngineProvider, CachedPredictionEngineProvider>();
         services.AddScoped<IModelPersistenceService, ModelPersistenceService>();
 
-        services.AddScoped<ITrainingDataLoader<CallTrumpTrainingData>, CallTrumpTrainingDataLoader>();
-        services.AddScoped<ITrainingDataLoader<DiscardCardTrainingData>, DiscardCardTrainingDataLoader>();
-        services.AddScoped<ITrainingDataLoader<PlayCardTrainingData>, PlayCardTrainingDataLoader>();
-
         services.AddScoped<IModelTrainer<CallTrumpTrainingData>, CallTrumpRegressionModelTrainer>();
         services.AddScoped<IModelTrainer<DiscardCardTrainingData>, DiscardCardRegressionModelTrainer>();
         services.AddScoped<IModelTrainer<PlayCardTrainingData>, PlayCardRegressionModelTrainer>();

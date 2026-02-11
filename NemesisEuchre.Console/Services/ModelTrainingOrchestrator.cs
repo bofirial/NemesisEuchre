@@ -18,7 +18,7 @@ public interface IModelTrainingOrchestrator
         int sampleLimit,
         string modelName,
         IProgress<TrainingProgress> progress,
-        string? idvName = null,
+        string idvName,
         CancellationToken cancellationToken = default);
 }
 
@@ -34,7 +34,7 @@ public class ModelTrainingOrchestrator(
         int sampleLimit,
         string modelName,
         IProgress<TrainingProgress> progress,
-        string? idvName = null,
+        string idvName,
         CancellationToken cancellationToken = default)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -57,9 +57,9 @@ public class ModelTrainingOrchestrator(
         {
             LoggerMessages.LogTrainingModelType(logger, trainer.ModelType);
 
-            var idvFilePath = idvName != null
-                ? Path.Combine(persistenceOptions.Value.IdvOutputPath, $"{idvName}_{GetIdvFilePrefix(trainer.DecisionType)}.idv")
-                : null;
+            var idvFilePath = Path.Combine(
+                persistenceOptions.Value.IdvOutputPath,
+                $"{idvName}_{GetIdvFilePrefix(trainer.DecisionType)}.idv");
 
             var result = await trainer.ExecuteAsync(
                 outputPath,

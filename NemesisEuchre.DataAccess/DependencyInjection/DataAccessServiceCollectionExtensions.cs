@@ -34,7 +34,6 @@ public static class DataAccessServiceCollectionExtensions
         services.AddScoped<IEntityToGameMapper, EntityToGameMapper>();
         services.AddScoped<IBulkInsertService, BulkInsertService>();
         services.AddScoped<IGameRepository, GameRepository>();
-        services.AddScoped<ITrainingDataRepository, TrainingDataRepository>();
 
         return services;
     }

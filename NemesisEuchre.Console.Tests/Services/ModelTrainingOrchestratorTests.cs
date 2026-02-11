@@ -31,6 +31,7 @@ public class ModelTrainingOrchestratorTests
             0,
             "gen1",
             new Progress<TrainingProgress>(),
+            "gen1",
             cancellationToken: TestContext.Current.CancellationToken);
 
         results.SuccessfulModels.Should().Be(0);
@@ -56,7 +57,7 @@ public class ModelTrainingOrchestratorTests
             It.IsAny<int>(),
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
-            It.IsAny<string?>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(successResult);
 
@@ -73,6 +74,7 @@ public class ModelTrainingOrchestratorTests
             1000,
             "gen1",
             new Progress<TrainingProgress>(),
+            "gen1",
             cancellationToken: TestContext.Current.CancellationToken);
 
         results.SuccessfulModels.Should().Be(1);
@@ -98,7 +100,7 @@ public class ModelTrainingOrchestratorTests
             It.IsAny<int>(),
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
-            It.IsAny<string?>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(failureResult);
 
@@ -115,6 +117,7 @@ public class ModelTrainingOrchestratorTests
             1000,
             "gen1",
             new Progress<TrainingProgress>(),
+            "gen1",
             cancellationToken: TestContext.Current.CancellationToken);
 
         results.SuccessfulModels.Should().Be(0);
@@ -137,7 +140,7 @@ public class ModelTrainingOrchestratorTests
             It.IsAny<int>(),
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
-            It.IsAny<string?>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(successResult);
 
@@ -148,7 +151,7 @@ public class ModelTrainingOrchestratorTests
             It.IsAny<int>(),
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
-            It.IsAny<string?>(),
+            It.IsAny<string>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(failureResult);
 
@@ -165,6 +168,7 @@ public class ModelTrainingOrchestratorTests
             1000,
             "gen1",
             new Progress<TrainingProgress>(),
+            "gen1",
             cancellationToken: TestContext.Current.CancellationToken);
 
         results.SuccessfulModels.Should().Be(1);
