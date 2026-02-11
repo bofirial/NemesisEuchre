@@ -11,7 +11,7 @@ public class GamePlayer
 
     public int PlayerPositionId { get; set; }
 
-    public int? ActorTypeId { get; set; }
+    public int ActorTypeId { get; set; }
 
     public GameEntity? Game { get; set; }
 

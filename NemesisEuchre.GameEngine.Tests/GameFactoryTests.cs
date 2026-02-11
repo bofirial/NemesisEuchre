@@ -67,10 +67,10 @@ public class GameFactoryTests
 
         var game = await gameInitializer.CreateGameAsync();
 
-        game.Players[PlayerPosition.North].ActorType.Should().Be(ActorType.Chaos);
-        game.Players[PlayerPosition.South].ActorType.Should().Be(ActorType.Chaos);
-        game.Players[PlayerPosition.East].ActorType.Should().Be(ActorType.Chaos);
-        game.Players[PlayerPosition.West].ActorType.Should().Be(ActorType.Chaos);
+        game.Players[PlayerPosition.North].Actor.ActorType.Should().Be(ActorType.Chaos);
+        game.Players[PlayerPosition.South].Actor.ActorType.Should().Be(ActorType.Chaos);
+        game.Players[PlayerPosition.East].Actor.ActorType.Should().Be(ActorType.Chaos);
+        game.Players[PlayerPosition.West].Actor.ActorType.Should().Be(ActorType.Chaos);
     }
 
     [Fact]
@@ -86,9 +86,9 @@ public class GameFactoryTests
 
         var game = await gameInitializer.CreateGameAsync();
 
-        game.Players[PlayerPosition.North].ActorType.Should().Be(gameOptionsValue.Team1ActorTypes[0]);
-        game.Players[PlayerPosition.South].ActorType.Should().Be(gameOptionsValue.Team1ActorTypes[1]);
-        game.Players[PlayerPosition.East].ActorType.Should().Be(gameOptionsValue.Team2ActorTypes[0]);
-        game.Players[PlayerPosition.West].ActorType.Should().Be(gameOptionsValue.Team2ActorTypes[1]);
+        game.Players[PlayerPosition.North].Actor.ActorType.Should().Be(gameOptionsValue.Team1ActorTypes[0]);
+        game.Players[PlayerPosition.South].Actor.ActorType.Should().Be(gameOptionsValue.Team1ActorTypes[1]);
+        game.Players[PlayerPosition.East].Actor.ActorType.Should().Be(gameOptionsValue.Team2ActorTypes[0]);
+        game.Players[PlayerPosition.West].Actor.ActorType.Should().Be(gameOptionsValue.Team2ActorTypes[1]);
     }
 }

@@ -15,6 +15,6 @@ public class PlayerActorResolver(IEnumerable<IPlayerActor> playerActors) : IPlay
 
     public IPlayerActor GetPlayerActor(DealPlayer player)
     {
-        return _playerActors[player.ActorType!.Value];
+        return _playerActors[player.Actor.ActorType];
     }
 }

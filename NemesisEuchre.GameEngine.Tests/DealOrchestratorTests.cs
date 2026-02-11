@@ -103,7 +103,7 @@ public class DealOrchestratorTests
         deal.Players.Clear();
         for (int i = 0; i < playerCount; i++)
         {
-            deal.Players[(PlayerPosition)i] = new DealPlayer();
+            deal.Players[(PlayerPosition)i] = new DealPlayer { Actor = new Actor(ActorType.Chaos, null) };
         }
 
         var act = async () => await _sut.OrchestrateDealAsync(deal);
@@ -382,10 +382,10 @@ public class DealOrchestratorTests
             Team2Score = 0,
             Players = new Dictionary<PlayerPosition, DealPlayer>
             {
-                { PlayerPosition.North, new DealPlayer { Position = PlayerPosition.North, ActorType = ActorType.Chaos } },
-                { PlayerPosition.East, new DealPlayer { Position = PlayerPosition.East, ActorType = ActorType.Chaos } },
-                { PlayerPosition.South, new DealPlayer { Position = PlayerPosition.South, ActorType = ActorType.Chaos } },
-                { PlayerPosition.West, new DealPlayer { Position = PlayerPosition.West, ActorType = ActorType.Chaos } },
+                { PlayerPosition.North, new DealPlayer { Position = PlayerPosition.North, Actor = new Actor(ActorType.Chaos, null) } },
+                { PlayerPosition.East, new DealPlayer { Position = PlayerPosition.East, Actor = new Actor(ActorType.Chaos, null) } },
+                { PlayerPosition.South, new DealPlayer { Position = PlayerPosition.South, Actor = new Actor(ActorType.Chaos, null) } },
+                { PlayerPosition.West, new DealPlayer { Position = PlayerPosition.West, Actor = new Actor(ActorType.Chaos, null) } },
             },
         };
     }

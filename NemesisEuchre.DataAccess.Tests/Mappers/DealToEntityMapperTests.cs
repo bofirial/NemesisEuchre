@@ -232,28 +232,28 @@ public class DealToEntityMapperTests
                 [PlayerPosition.North] = new DealPlayer
                 {
                     Position = PlayerPosition.North,
-                    ActorType = ActorType.Chaos,
+                    Actor = new Actor(ActorType.Chaos, null),
                     StartingHand = [],
                     CurrentHand = [],
                 },
                 [PlayerPosition.East] = new DealPlayer
                 {
                     Position = PlayerPosition.East,
-                    ActorType = ActorType.Chaos,
+                    Actor = new Actor(ActorType.Chaos, null),
                     StartingHand = [],
                     CurrentHand = [],
                 },
                 [PlayerPosition.South] = new DealPlayer
                 {
                     Position = PlayerPosition.South,
-                    ActorType = ActorType.Chaos,
+                    Actor = new Actor(ActorType.Chaos, null),
                     StartingHand = [],
                     CurrentHand = [],
                 },
                 [PlayerPosition.West] = new DealPlayer
                 {
                     Position = PlayerPosition.West,
-                    ActorType = ActorType.Chaos,
+                    Actor = new Actor(ActorType.Chaos, null),
                     StartingHand = [],
                     CurrentHand = [],
                 },
@@ -268,22 +268,22 @@ public class DealToEntityMapperTests
             [PlayerPosition.North] = new Player
             {
                 Position = PlayerPosition.North,
-                ActorType = ActorType.Chaos,
+                Actor = new Actor(ActorType.Chaos, null),
             },
             [PlayerPosition.East] = new Player
             {
                 Position = PlayerPosition.East,
-                ActorType = ActorType.Chaos,
+                Actor = new Actor(ActorType.Chaos, null),
             },
             [PlayerPosition.South] = new Player
             {
                 Position = PlayerPosition.South,
-                ActorType = ActorType.Chaos,
+                Actor = new Actor(ActorType.Chaos, null),
             },
             [PlayerPosition.West] = new Player
             {
                 Position = PlayerPosition.West,
-                ActorType = ActorType.Chaos,
+                Actor = new Actor(ActorType.Chaos, null),
             },
         };
     }

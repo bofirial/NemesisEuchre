@@ -222,10 +222,10 @@ public class DecisionRendererTests
             WinningTeam = Team.Team1,
             Players = new Dictionary<PlayerPosition, DealPlayer>
             {
-                { PlayerPosition.North, new DealPlayer { Position = PlayerPosition.North, StartingHand = [], ActorType = ActorType.Chaos } },
-                { PlayerPosition.East, new DealPlayer { Position = PlayerPosition.East, StartingHand = [], ActorType = ActorType.Chaos } },
-                { PlayerPosition.South, new DealPlayer { Position = PlayerPosition.South, StartingHand = [], ActorType = ActorType.Chaos } },
-                { PlayerPosition.West, new DealPlayer { Position = PlayerPosition.West, StartingHand = [], ActorType = ActorType.Chaos } },
+                { PlayerPosition.North, new DealPlayer { Position = PlayerPosition.North, StartingHand = [], Actor = new Actor(ActorType.Chaos, null) } },
+                { PlayerPosition.East, new DealPlayer { Position = PlayerPosition.East, StartingHand = [], Actor = new Actor(ActorType.Chaos, null) } },
+                { PlayerPosition.South, new DealPlayer { Position = PlayerPosition.South, StartingHand = [], Actor = new Actor(ActorType.Chaos, null) } },
+                { PlayerPosition.West, new DealPlayer { Position = PlayerPosition.West, StartingHand = [], Actor = new Actor(ActorType.Chaos, null) } },
             },
             CompletedTricks = [trick],
         };

@@ -51,7 +51,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
             DealPlayers = [.. deal.Players.Select(kvp => new DealPlayerEntity
             {
                 PlayerPositionId = (int)kvp.Key,
-                ActorTypeId = kvp.Value.ActorType.HasValue ? (int)kvp.Value.ActorType.Value : null,
+                ActorTypeId = (int)kvp.Value.Actor.ActorType,
                 StartingHandCards = [.. kvp.Value.StartingHand.Select((card, index) => new DealPlayerStartingHandCard
                 {
                     CardId = CardIdHelper.ToCardId(card),
@@ -81,7 +81,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
 
         dealEntity.CallTrumpDecisions = [.. deal.CallTrumpDecisions.Select(decision =>
         {
-            var actorType = gamePlayers[decision.PlayerPosition].ActorType;
+            var actorType = gamePlayers[decision.PlayerPosition].Actor.ActorType;
             var playerTeam = decision.PlayerPosition.GetTeam();
             var didTeamWinDeal = playerTeam == Team.Team1 ? didTeam1WinDeal : didTeam2WinDeal;
             var didTeamWinGame = playerTeam == Team.Team1 ? didTeam1WinGame : didTeam2WinGame;
@@ -94,7 +94,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
                 OpponentScore = decision.OpponentScore,
                 ChosenDecisionValueId = (int)decision.ChosenDecision,
                 DecisionOrder = (byte)decision.DecisionOrder,
-                ActorTypeId = actorType.HasValue ? (int)actorType.Value : null,
+                ActorTypeId = (int)actorType,
                 DidTeamWinDeal = didTeamWinDeal,
                 RelativeDealPoints = deal.DealResult.CalculateRelativeDealPoints(decision.PlayerPosition, deal.WinningTeam),
                 DidTeamWinGame = didTeamWinGame,
@@ -123,7 +123,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
 
         dealEntity.DiscardCardDecisions = [.. deal.DiscardCardDecisions.Select(decision =>
         {
-            var actorType = gamePlayers[decision.PlayerPosition].ActorType;
+            var actorType = gamePlayers[decision.PlayerPosition].Actor.ActorType;
             var playerTeam = decision.PlayerPosition.GetTeam();
             var didTeamWinDeal = playerTeam == Team.Team1 ? didTeam1WinDeal : didTeam2WinDeal;
             var didTeamWinGame = playerTeam == Team.Team1 ? didTeam1WinGame : didTeam2WinGame;
@@ -135,7 +135,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
                 OpponentScore = decision.OpponentScore,
                 ChosenRelativeCardId = CardIdHelper.ToRelativeCardId(decision.ChosenCard.ToRelative(deal.Trump!.Value)),
                 CallingPlayerGoingAlone = deal.CallingPlayerIsGoingAlone,
-                ActorTypeId = actorType.HasValue ? (int)actorType.Value : null,
+                ActorTypeId = (int)actorType,
                 DidTeamWinDeal = didTeamWinDeal,
                 RelativeDealPoints = deal.DealResult.CalculateRelativeDealPoints(decision.PlayerPosition, deal.WinningTeam),
                 DidTeamWinGame = didTeamWinGame,

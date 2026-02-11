@@ -81,7 +81,7 @@ public class DealValidatorTests
 
         for (int i = 0; i < playerCount; i++)
         {
-            deal.Players.Add((PlayerPosition)i, new DealPlayer());
+            deal.Players.Add((PlayerPosition)i, new DealPlayer { Actor = new Actor(ActorType.Chaos, null) });
         }
 
         var act = () => _validator.ValidateDealPreconditions(deal);
@@ -100,10 +100,10 @@ public class DealValidatorTests
             UpCard = new Card(Suit.Hearts, Rank.Ace),
         };
 
-        deal.Players.Add(PlayerPosition.North, new DealPlayer());
-        deal.Players.Add(PlayerPosition.East, new DealPlayer());
-        deal.Players.Add(PlayerPosition.South, new DealPlayer());
-        deal.Players.Add(PlayerPosition.West, new DealPlayer());
+        deal.Players.Add(PlayerPosition.North, new DealPlayer { Actor = new Actor(ActorType.Chaos, null) });
+        deal.Players.Add(PlayerPosition.East, new DealPlayer { Actor = new Actor(ActorType.Chaos, null) });
+        deal.Players.Add(PlayerPosition.South, new DealPlayer { Actor = new Actor(ActorType.Chaos, null) });
+        deal.Players.Add(PlayerPosition.West, new DealPlayer { Actor = new Actor(ActorType.Chaos, null) });
 
         var act = () => _validator.ValidateDealPreconditions(deal);
 

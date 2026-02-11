@@ -45,7 +45,7 @@ public class EntityToGameMapperTests
         game.Players.Should().ContainKey(PlayerPosition.East);
         game.Players.Should().ContainKey(PlayerPosition.South);
         game.Players.Should().ContainKey(PlayerPosition.West);
-        game.Players[PlayerPosition.North].ActorType.Should().Be(ActorType.Chaos);
+        game.Players[PlayerPosition.North].Actor.ActorType.Should().Be(ActorType.Chaos);
     }
 
     [Fact]
@@ -113,24 +113,24 @@ public class EntityToGameMapperTests
 
         var game = _mapper.Map(entity, includeDecisions: false);
 
-        game.Players[PlayerPosition.North].ActorType.Should().Be(ActorType.Gen1);
+        game.Players[PlayerPosition.North].Actor.ActorType.Should().Be(ActorType.Gen1);
     }
 
     [Fact]
-    public void Map_WithNullActorType_MapsToNull()
+    public void Map_WithNullActorType_DefaultsToZeroEnumValue()
     {
         var entity = CreateTestGameEntity();
         entity.GamePlayers =
         [
-            new GamePlayer { PlayerPositionId = (int)PlayerPosition.North, ActorTypeId = null },
-            new GamePlayer { PlayerPositionId = (int)PlayerPosition.East, ActorTypeId = null },
-            new GamePlayer { PlayerPositionId = (int)PlayerPosition.South, ActorTypeId = null },
-            new GamePlayer { PlayerPositionId = (int)PlayerPosition.West, ActorTypeId = null },
+            new GamePlayer { PlayerPositionId = (int)PlayerPosition.North, ActorTypeId = 0 },
+            new GamePlayer { PlayerPositionId = (int)PlayerPosition.East, ActorTypeId = 0 },
+            new GamePlayer { PlayerPositionId = (int)PlayerPosition.South, ActorTypeId = 0 },
+            new GamePlayer { PlayerPositionId = (int)PlayerPosition.West, ActorTypeId = 0 },
         ];
 
         var game = _mapper.Map(entity, includeDecisions: false);
 
-        game.Players[PlayerPosition.North].ActorType.Should().BeNull();
+        game.Players[PlayerPosition.North].Actor.ActorType.Should().Be(ActorType.User);
     }
 
     private static GameEntity CreateTestGameEntity()

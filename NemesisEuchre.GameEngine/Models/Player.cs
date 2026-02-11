@@ -9,5 +9,5 @@ public class Player
 
     public Team Team => Position.GetTeam();
 
-    public ActorType? ActorType { get; set; }
+    public required Actor Actor { get; set; }
 }

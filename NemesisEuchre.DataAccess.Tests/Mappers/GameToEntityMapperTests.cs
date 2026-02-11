@@ -24,7 +24,7 @@ public class GameToEntityMapperTests
             WinningTeam = Team.Team1,
         };
 
-        game.Players.Add(PlayerPosition.North, new Player { Position = PlayerPosition.North });
+        game.Players.Add(PlayerPosition.North, new Player { Position = PlayerPosition.North, Actor = new Actor(ActorType.Chaos, null) });
 
         var entity = mapper.Map(game);
 

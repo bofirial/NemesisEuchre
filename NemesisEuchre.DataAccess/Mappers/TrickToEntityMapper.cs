@@ -33,7 +33,7 @@ public class TrickToEntityMapper : ITrickToEntityMapper
             })],
             PlayCardDecisions = [.. trick.PlayCardDecisions.Select(decision =>
             {
-                var actorType = gamePlayers[decision.PlayerPosition].ActorType;
+                var actorType = gamePlayers[decision.PlayerPosition].Actor.ActorType;
                 var playerTeam = decision.PlayerPosition.GetTeam();
                 var didTeamWinTrick = trick.WinningTeam == playerTeam;
                 var didTeamWinDeal = playerTeam == Team.Team1 ? didTeam1WinDeal : didTeam2WinDeal;
@@ -54,7 +54,7 @@ public class TrickToEntityMapper : ITrickToEntityMapper
                         ? CardIdHelper.ToRelativeCardId(decision.DealerPickedUpCard.ToRelative(decision.TrumpSuit))
                         : null,
                     ChosenRelativeCardId = CardIdHelper.ToRelativeCardId(decision.ChosenCard.ToRelative(decision.TrumpSuit)),
-                    ActorTypeId = actorType.HasValue ? (int)actorType.Value : null,
+                    ActorTypeId = (int)actorType,
                     DidTeamWinTrick = didTeamWinTrick,
                     DidTeamWinDeal = didTeamWinDeal,
                     RelativeDealPoints = dealResult.CalculateRelativeDealPoints(decision.PlayerPosition, dealWinningTeam),

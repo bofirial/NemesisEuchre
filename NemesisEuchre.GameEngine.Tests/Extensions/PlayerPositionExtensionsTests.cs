@@ -148,10 +148,10 @@ public class PlayerPositionExtensionsTests
     {
         var players = new Dictionary<PlayerPosition, Player>
         {
-            [PlayerPosition.North] = new Player { Position = PlayerPosition.North },
-            [PlayerPosition.East] = new Player { Position = PlayerPosition.East },
-            [PlayerPosition.South] = new Player { Position = PlayerPosition.South },
-            [PlayerPosition.West] = new Player { Position = PlayerPosition.West },
+            [PlayerPosition.North] = new Player { Position = PlayerPosition.North, Actor = new Actor(ActorType.Chaos, null) },
+            [PlayerPosition.East] = new Player { Position = PlayerPosition.East, Actor = new Actor(ActorType.Chaos, null) },
+            [PlayerPosition.South] = new Player { Position = PlayerPosition.South, Actor = new Actor(ActorType.Chaos, null) },
+            [PlayerPosition.West] = new Player { Position = PlayerPosition.West, Actor = new Actor(ActorType.Chaos, null) },
         };
 
         var partner = players.GetPlayerAtRelativePosition(

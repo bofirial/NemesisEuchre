@@ -106,10 +106,10 @@ public class GamePersistenceIntegrationTests
             WinningTeam = Team.Team1,
         };
 
-        game.Players[PlayerPosition.North] = new Player { Position = PlayerPosition.North, ActorType = ActorType.Chaos };
-        game.Players[PlayerPosition.South] = new Player { Position = PlayerPosition.South, ActorType = ActorType.Chaos };
-        game.Players[PlayerPosition.East] = new Player { Position = PlayerPosition.East, ActorType = ActorType.Chaos };
-        game.Players[PlayerPosition.West] = new Player { Position = PlayerPosition.West, ActorType = ActorType.Chaos };
+        game.Players[PlayerPosition.North] = new Player { Position = PlayerPosition.North, Actor = new Actor(ActorType.Chaos, null) };
+        game.Players[PlayerPosition.South] = new Player { Position = PlayerPosition.South, Actor = new Actor(ActorType.Chaos, null) };
+        game.Players[PlayerPosition.East] = new Player { Position = PlayerPosition.East, Actor = new Actor(ActorType.Chaos, null) };
+        game.Players[PlayerPosition.West] = new Player { Position = PlayerPosition.West, Actor = new Actor(ActorType.Chaos, null) };
 
         var deal = new Deal
         {
@@ -133,7 +133,7 @@ public class GamePersistenceIntegrationTests
             deal.Players[position] = new DealPlayer
             {
                 Position = position,
-                ActorType = ActorType.Chaos,
+                Actor = new Actor(ActorType.Chaos, null),
             };
         }
 

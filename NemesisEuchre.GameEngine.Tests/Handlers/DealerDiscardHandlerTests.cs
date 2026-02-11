@@ -217,7 +217,7 @@ public class DealerDiscardHandlerTests
 
         var southPlayer = new DealPlayer
         {
-            ActorType = ActorType.Chaos,
+            Actor = new Actor(ActorType.Chaos, null),
             CurrentHand =
             [
                 new Card(Suit.Hearts, Rank.Nine),
@@ -293,7 +293,7 @@ public class DealerDiscardHandlerTests
 
         var northPlayer = new DealPlayer
         {
-            ActorType = ActorType.Chaos,
+            Actor = new Actor(ActorType.Chaos, null),
             CurrentHand =
             [
                 new Card(Suit.Hearts, Rank.Nine),

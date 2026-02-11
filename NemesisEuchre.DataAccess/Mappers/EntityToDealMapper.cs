@@ -42,7 +42,7 @@ public class EntityToDealMapper(IEntityToTrickMapper trickMapper) : IEntityToDea
                 dp => new DealPlayer
                 {
                     Position = (PlayerPosition)dp.PlayerPositionId,
-                    ActorType = dp.ActorTypeId.HasValue ? (ActorType)dp.ActorTypeId.Value : null,
+                    Actor = new Actor((ActorType)dp.ActorTypeId, null),
                     StartingHand = [.. dp.StartingHandCards.OrderBy(c => c.SortOrder).Select(c => CardIdHelper.ToCard(c.CardId))],
                 }),
             CompletedTricks = [.. entity.Tricks

@@ -173,10 +173,10 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = new Dictionary<PlayerPosition, Player>
         {
-            { PlayerPosition.North, new Player { Position = PlayerPosition.North, ActorType = ActorType.Chaos } },
-            { PlayerPosition.East, new Player { Position = PlayerPosition.East, ActorType = ActorType.Chad } },
-            { PlayerPosition.South, new Player { Position = PlayerPosition.South, ActorType = ActorType.Beta } },
-            { PlayerPosition.West, new Player { Position = PlayerPosition.West, ActorType = ActorType.Chaos } },
+            { PlayerPosition.North, new Player { Position = PlayerPosition.North, Actor = new Actor(ActorType.Chaos, null) } },
+            { PlayerPosition.East, new Player { Position = PlayerPosition.East, Actor = new Actor(ActorType.Chad, null) } },
+            { PlayerPosition.South, new Player { Position = PlayerPosition.South, Actor = new Actor(ActorType.Beta, null) } },
+            { PlayerPosition.West, new Player { Position = PlayerPosition.West, Actor = new Actor(ActorType.Chaos, null) } },
         };
 
         var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
@@ -189,7 +189,7 @@ public class TrickToEntityMapperTests
 
         var northDecision = decisions[0];
         var firstPosition = trick.PlayCardDecisions[0].PlayerPosition;
-        northDecision.ActorTypeId.Should().Be((int?)gamePlayers[firstPosition].ActorType);
+        northDecision.ActorTypeId.Should().Be((int?)gamePlayers[firstPosition].Actor.ActorType);
     }
 
     [Fact]
@@ -303,10 +303,10 @@ public class TrickToEntityMapperTests
     {
         return new Dictionary<PlayerPosition, Player>
         {
-            { PlayerPosition.North, new Player { Position = PlayerPosition.North, ActorType = ActorType.Chaos } },
-            { PlayerPosition.East, new Player { Position = PlayerPosition.East, ActorType = ActorType.Chaos } },
-            { PlayerPosition.South, new Player { Position = PlayerPosition.South, ActorType = ActorType.Chaos } },
-            { PlayerPosition.West, new Player { Position = PlayerPosition.West, ActorType = ActorType.Chaos } },
+            { PlayerPosition.North, new Player { Position = PlayerPosition.North, Actor = new Actor(ActorType.Chaos, null) } },
+            { PlayerPosition.East, new Player { Position = PlayerPosition.East, Actor = new Actor(ActorType.Chaos, null) } },
+            { PlayerPosition.South, new Player { Position = PlayerPosition.South, Actor = new Actor(ActorType.Chaos, null) } },
+            { PlayerPosition.West, new Player { Position = PlayerPosition.West, Actor = new Actor(ActorType.Chaos, null) } },
         };
     }
 }

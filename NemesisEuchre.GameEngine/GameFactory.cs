@@ -28,20 +28,20 @@ public class GameFactory(IOptions<GameOptions> gameOptions) : IGameFactory
         {
             Players =
             {
-                [PlayerPosition.North] = CreatePlayer(PlayerPosition.North, team1ActorTypes[0]),
-                [PlayerPosition.East] = CreatePlayer(PlayerPosition.East, team2ActorTypes[0]),
-                [PlayerPosition.South] = CreatePlayer(PlayerPosition.South, team1ActorTypes[1]),
-                [PlayerPosition.West] = CreatePlayer(PlayerPosition.West, team2ActorTypes[1]),
+                [PlayerPosition.North] = CreatePlayer(PlayerPosition.North, new Actor(team1ActorTypes[0], null)),
+                [PlayerPosition.East] = CreatePlayer(PlayerPosition.East, new Actor(team2ActorTypes[0], null)),
+                [PlayerPosition.South] = CreatePlayer(PlayerPosition.South, new Actor(team1ActorTypes[1], null)),
+                [PlayerPosition.West] = CreatePlayer(PlayerPosition.West, new Actor(team2ActorTypes[1], null)),
             },
         };
     }
 
-    private static Player CreatePlayer(PlayerPosition position, ActorType actorType)
+    private static Player CreatePlayer(PlayerPosition position, Actor actor)
     {
         return new Player
         {
             Position = position,
-            ActorType = actorType,
+            Actor = actor,
         };
     }
 
