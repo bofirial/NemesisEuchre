@@ -5,7 +5,6 @@ using Microsoft.ML;
 
 using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.Foundation;
-using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.Services;
@@ -18,7 +17,6 @@ public interface IModelPersistenceService
         string modelsDirectory,
         int generation,
         string modelType,
-        ActorType actorType,
         TrainingResult trainingResult,
         ModelMetadata metadata,
         object evaluationReport,
@@ -36,7 +34,6 @@ public class ModelPersistenceService(
         string modelsDirectory,
         int generation,
         string modelType,
-        ActorType actorType,
         TrainingResult trainingResult,
         ModelMetadata metadata,
         object evaluationReport,

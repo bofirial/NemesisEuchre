@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.ML;
 
 using NemesisEuchre.Foundation;
-using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Options;
@@ -31,7 +30,6 @@ public interface IModelTrainer<TData>
     Task SaveModelAsync(
         string modelsDirectory,
         int generation,
-        ActorType actorType,
         TrainingResult trainingResult,
         CancellationToken cancellationToken = default);
 }
@@ -121,7 +119,6 @@ public abstract class RegressionModelTrainerBase<TData>(
     public Task SaveModelAsync(
         string modelsDirectory,
         int generation,
-        ActorType actorType,
         TrainingResult trainingResult,
         CancellationToken cancellationToken = default)
     {
@@ -131,7 +128,7 @@ public abstract class RegressionModelTrainerBase<TData>(
         }
 
         var version = VersionManager.GetNextVersion(modelsDirectory, generation, GetModelType().ToLowerInvariant());
-        var metadata = CreateModelMetadata(generation, actorType, trainingResult, version);
+        var metadata = CreateModelMetadata(generation, trainingResult, version);
         var evaluationReport = CreateEvaluationReport(
             trainingResult.ValidationMetrics as RegressionEvaluationMetrics ?? throw new InvalidOperationException("Expected RegressionEvaluationMetrics"),
             trainingResult.ValidationSamples);
@@ -142,7 +139,6 @@ public abstract class RegressionModelTrainerBase<TData>(
             modelsDirectory,
             generation,
             GetModelType(),
-            actorType,
             trainingResult,
             metadata,
             evaluationReport,
@@ -191,7 +187,6 @@ public abstract class RegressionModelTrainerBase<TData>(
 
     private ModelMetadata CreateModelMetadata(
         int generation,
-        ActorType actorType,
         TrainingResult trainingResult,
         int version)
     {
@@ -200,7 +195,6 @@ public abstract class RegressionModelTrainerBase<TData>(
 
         return new ModelMetadata(
             GetModelType(),
-            actorType,
             generation,
             version,
             DateTime.UtcNow,

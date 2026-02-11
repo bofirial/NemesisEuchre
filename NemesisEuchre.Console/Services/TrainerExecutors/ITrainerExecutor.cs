@@ -10,7 +10,6 @@ public interface ITrainerExecutor
     DecisionType DecisionType { get; }
 
     Task<ModelTrainingResult> ExecuteAsync(
-        ActorType actorType,
         string outputPath,
         int sampleLimit,
         int generation,

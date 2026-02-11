@@ -68,13 +68,12 @@ public class TrainingDataRepositoryTests : IDisposable
         await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var results = new List<CallTrumpDecisionEntity>();
-        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(ActorType.Chaos, cancellationToken: TestContext.Current.CancellationToken))
+        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(cancellationToken: TestContext.Current.CancellationToken))
         {
             results.Add(entity);
         }
 
-        results.Should().HaveCount(2);
-        results.Should().AllSatisfy(e => e.ActorTypeId.Should().Be((int)ActorType.Chaos));
+        results.Should().HaveCount(3);
     }
 
     [Fact]
@@ -98,7 +97,7 @@ public class TrainingDataRepositoryTests : IDisposable
         await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var results = new List<CallTrumpDecisionEntity>();
-        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(ActorType.Chaos, limit: 5, cancellationToken: TestContext.Current.CancellationToken))
+        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(5, cancellationToken: TestContext.Current.CancellationToken))
         {
             results.Add(entity);
         }
@@ -146,7 +145,7 @@ public class TrainingDataRepositoryTests : IDisposable
         await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var results = new List<CallTrumpDecisionEntity>();
-        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(ActorType.Chaos, winningTeamOnly: true, cancellationToken: TestContext.Current.CancellationToken))
+        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(winningTeamOnly: true, cancellationToken: TestContext.Current.CancellationToken))
         {
             results.Add(entity);
         }
@@ -159,7 +158,7 @@ public class TrainingDataRepositoryTests : IDisposable
     public async Task GetDecisionDataAsync_NoMatchingData_ReturnsEmpty()
     {
         var results = new List<CallTrumpDecisionEntity>();
-        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(ActorType.Chaos, cancellationToken: TestContext.Current.CancellationToken))
+        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(cancellationToken: TestContext.Current.CancellationToken))
         {
             results.Add(entity);
         }
@@ -196,7 +195,7 @@ public class TrainingDataRepositoryTests : IDisposable
         await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var results = new List<CallTrumpDecisionEntity>();
-        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(ActorType.Chaos, cancellationToken: TestContext.Current.CancellationToken))
+        await foreach (var entity in _repository.GetDecisionDataAsync<CallTrumpDecisionEntity>(cancellationToken: TestContext.Current.CancellationToken))
         {
             results.Add(entity);
         }

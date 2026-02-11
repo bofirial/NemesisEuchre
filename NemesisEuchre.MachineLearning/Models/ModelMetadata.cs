@@ -1,10 +1,7 @@
-using NemesisEuchre.Foundation.Constants;
-
 namespace NemesisEuchre.MachineLearning.Models;
 
 public record ModelMetadata(
     string ModelType,
-    ActorType ActorType,
     int Generation,
     int Version,
     DateTime TrainingDate,

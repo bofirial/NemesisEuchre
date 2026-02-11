@@ -13,7 +13,6 @@ namespace NemesisEuchre.Console.Services;
 public interface IModelTrainingOrchestrator
 {
     Task<TrainingResults> TrainModelsAsync(
-        ActorType actorType,
         DecisionType decisionType,
         string outputPath,
         int sampleLimit,
@@ -30,7 +29,6 @@ public class ModelTrainingOrchestrator(
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Critical Code Smell", "S1215:\"GC.Collect\" should not be called", Justification = "Intentional GC between model trainings to reclaim ~6 GB IDataView buffers")]
     public async Task<TrainingResults> TrainModelsAsync(
-        ActorType actorType,
         DecisionType decisionType,
         string outputPath,
         int sampleLimit,
@@ -50,7 +48,6 @@ public class ModelTrainingOrchestrator(
 
         LoggerMessages.LogStartingTrainingWithTrainers(
             logger,
-            actorType,
             trainers.Count,
             string.Join(", ", trainers.Select(t => t.ModelType)));
 
@@ -65,7 +62,6 @@ public class ModelTrainingOrchestrator(
                 : null;
 
             var result = await trainer.ExecuteAsync(
-                actorType,
                 outputPath,
                 sampleLimit,
                 generation,

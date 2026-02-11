@@ -26,7 +26,6 @@ public class ModelTrainingOrchestratorTests
         var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, Options.Create(new PersistenceOptions()), mockLogger);
 
         var results = await orchestrator.TrainModelsAsync(
-            ActorType.Gen1,
             DecisionType.CallTrump,
             "./models",
             0,
@@ -53,7 +52,6 @@ public class ModelTrainingOrchestratorTests
         mockTrainer.Setup(t => t.ModelType).Returns("TestModel");
         mockTrainer.Setup(t => t.DecisionType).Returns(DecisionType.CallTrump);
         mockTrainer.Setup(t => t.ExecuteAsync(
-            It.IsAny<ActorType>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
             It.IsAny<int>(),
@@ -70,7 +68,6 @@ public class ModelTrainingOrchestratorTests
         var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, Options.Create(new PersistenceOptions()), mockLogger);
 
         var results = await orchestrator.TrainModelsAsync(
-            ActorType.Gen1,
             DecisionType.CallTrump,
             "./models",
             1000,
@@ -97,7 +94,6 @@ public class ModelTrainingOrchestratorTests
         mockTrainer.Setup(t => t.ModelType).Returns("TestModel");
         mockTrainer.Setup(t => t.DecisionType).Returns(DecisionType.CallTrump);
         mockTrainer.Setup(t => t.ExecuteAsync(
-            It.IsAny<ActorType>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
             It.IsAny<int>(),
@@ -114,7 +110,6 @@ public class ModelTrainingOrchestratorTests
         var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, Options.Create(new PersistenceOptions()), mockLogger);
 
         var results = await orchestrator.TrainModelsAsync(
-            ActorType.Gen1,
             DecisionType.CallTrump,
             "./models",
             1000,
@@ -138,7 +133,6 @@ public class ModelTrainingOrchestratorTests
         var mockTrainer1 = new Mock<ITrainerExecutor>();
         mockTrainer1.Setup(t => t.ModelType).Returns("Model1");
         mockTrainer1.Setup(t => t.ExecuteAsync(
-            It.IsAny<ActorType>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
             It.IsAny<int>(),
@@ -150,7 +144,6 @@ public class ModelTrainingOrchestratorTests
         var mockTrainer2 = new Mock<ITrainerExecutor>();
         mockTrainer2.Setup(t => t.ModelType).Returns("Model2");
         mockTrainer2.Setup(t => t.ExecuteAsync(
-            It.IsAny<ActorType>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
             It.IsAny<int>(),
@@ -167,7 +160,6 @@ public class ModelTrainingOrchestratorTests
         var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, Options.Create(new PersistenceOptions()), mockLogger);
 
         var results = await orchestrator.TrainModelsAsync(
-            ActorType.Gen1,
             DecisionType.All,
             "./models",
             1000,

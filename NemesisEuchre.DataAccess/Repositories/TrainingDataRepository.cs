@@ -5,28 +5,24 @@ using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.Foundation;
-using NemesisEuchre.Foundation.Constants;
 
 namespace NemesisEuchre.DataAccess.Repositories;
 
 public interface ITrainingDataRepository
 {
     IAsyncEnumerable<TEntity> GetDecisionDataAsync<TEntity>(
-        ActorType actorType,
         int limit = 0,
         bool winningTeamOnly = false,
         CancellationToken cancellationToken = default)
         where TEntity : class, IDecisionEntity;
 
     IEnumerable<TEntity> GetDecisionData<TEntity>(
-        ActorType actorType,
         int limit = 0,
         bool winningTeamOnly = false,
         bool shuffle = false)
         where TEntity : class, IDecisionEntity;
 
     int GetDecisionDataCount<TEntity>(
-        ActorType actorType,
         int limit = 0,
         bool winningTeamOnly = false)
         where TEntity : class, IDecisionEntity;
@@ -58,7 +54,6 @@ public partial class TrainingDataRepository(
     };
 
     public async IAsyncEnumerable<TEntity> GetDecisionDataAsync<TEntity>(
-        ActorType actorType,
         int limit = 0,
         bool winningTeamOnly = false,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -67,11 +62,10 @@ public partial class TrainingDataRepository(
         LoggerMessages.LogRetrievingTrainingData(
             logger,
             typeof(TEntity).Name,
-            actorType.ToString(),
             limit,
             winningTeamOnly);
 
-        var query = BuildQuery<TEntity>(actorType, limit, winningTeamOnly);
+        var query = BuildQuery<TEntity>(limit, winningTeamOnly);
 
         // Materialize fully so split queries complete before yielding entities.
         var entities = await query.ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -83,7 +77,6 @@ public partial class TrainingDataRepository(
     }
 
     public IEnumerable<TEntity> GetDecisionData<TEntity>(
-        ActorType actorType,
         int limit = 0,
         bool winningTeamOnly = false,
         bool shuffle = false)
@@ -92,11 +85,10 @@ public partial class TrainingDataRepository(
         LoggerMessages.LogRetrievingTrainingData(
             logger,
             typeof(TEntity).Name,
-            actorType.ToString(),
             limit,
             winningTeamOnly);
 
-        var query = BuildQuery<TEntity>(actorType, limit, winningTeamOnly);
+        var query = BuildQuery<TEntity>(limit, winningTeamOnly);
 
         if (shuffle)
         {
@@ -107,12 +99,11 @@ public partial class TrainingDataRepository(
     }
 
     public int GetDecisionDataCount<TEntity>(
-        ActorType actorType,
         int limit = 0,
         bool winningTeamOnly = false)
         where TEntity : class, IDecisionEntity
     {
-        var query = BuildQuery<TEntity>(actorType, limit, winningTeamOnly);
+        var query = BuildQuery<TEntity>(limit, winningTeamOnly);
         return query.Count();
     }
 
@@ -125,7 +116,6 @@ public partial class TrainingDataRepository(
     }
 
     private IQueryable<TEntity> BuildQuery<TEntity>(
-        ActorType actorType,
         int limit,
         bool winningTeamOnly)
         where TEntity : class, IDecisionEntity
@@ -133,8 +123,6 @@ public partial class TrainingDataRepository(
         var config = GetConfig<TEntity>();
         var dbSet = ((EntityTypeConfig<TEntity>)config).GetDbSet(context);
         var query = ((EntityTypeConfig<TEntity>)config).ApplyIncludes(dbSet.AsNoTrackingWithIdentityResolution());
-
-        query = query.Where(d => d.ActorTypeId == (int)actorType);
 
         if (winningTeamOnly)
         {

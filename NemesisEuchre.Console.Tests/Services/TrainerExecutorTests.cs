@@ -22,7 +22,6 @@ public class TrainerExecutorTests
         var mockTrainer = new Mock<IModelTrainer<CallTrumpTrainingData>>();
         var mockDataLoader = new Mock<ITrainingDataLoader<CallTrumpTrainingData>>();
         mockDataLoader.Setup(l => l.StreamTrainingData(
-            It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
             It.IsAny<bool>(),
@@ -43,7 +42,6 @@ public class TrainerExecutorTests
             mockLogger);
 
         var result = await executor.ExecuteAsync(
-            ActorType.Gen1,
             "./models",
             1000,
             1,
@@ -97,7 +95,6 @@ public class TrainerExecutorTests
                 Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
             await executor.ExecuteAsync(
-                ActorType.Gen1,
                 "./models",
                 1000,
                 1,
@@ -114,7 +111,6 @@ public class TrainerExecutorTests
                 Times.Once);
             mockDataLoader.Verify(
                 l => l.StreamTrainingData(
-                    It.IsAny<ActorType>(),
                     It.IsAny<int>(),
                     It.IsAny<bool>(),
                     It.IsAny<bool>(),
@@ -135,7 +131,6 @@ public class TrainerExecutorTests
         var mockIdvFileService = new Mock<IIdvFileService>();
 
         mockDataLoader.Setup(l => l.StreamTrainingData(
-            It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
             It.IsAny<bool>(),
@@ -155,7 +150,6 @@ public class TrainerExecutorTests
             Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
         await executor.ExecuteAsync(
-            ActorType.Gen1,
             "./models",
             1000,
             1,
@@ -165,7 +159,6 @@ public class TrainerExecutorTests
 
         mockDataLoader.Verify(
             l => l.StreamTrainingData(
-                It.IsAny<ActorType>(),
                 It.IsAny<int>(),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),
@@ -182,7 +175,6 @@ public class TrainerExecutorTests
         var mockIdvFileService = new Mock<IIdvFileService>();
 
         mockDataLoader.Setup(l => l.StreamTrainingData(
-            It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
             It.IsAny<bool>(),
@@ -202,7 +194,6 @@ public class TrainerExecutorTests
             Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
         await executor.ExecuteAsync(
-            ActorType.Gen1,
             "./models",
             1000,
             1,
@@ -212,7 +203,6 @@ public class TrainerExecutorTests
 
         mockDataLoader.Verify(
             l => l.StreamTrainingData(
-                It.IsAny<ActorType>(),
                 It.IsAny<int>(),
                 It.IsAny<bool>(),
                 It.IsAny<bool>(),

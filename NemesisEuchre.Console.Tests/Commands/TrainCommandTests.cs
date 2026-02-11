@@ -34,7 +34,6 @@ public class TrainCommandTests
             mockRenderer.Object,
             options)
         {
-            ActorType = ActorType.Gen1,
             DecisionType = DecisionType.All,
             OutputPath = null,
         };
@@ -60,7 +59,6 @@ public class TrainCommandTests
             TotalDuration: TimeSpan.FromSeconds(10));
 
         mockProgressCoordinator.Setup(o => o.CoordinateTrainingWithProgressAsync(
-            It.IsAny<ActorType>(),
             It.IsAny<DecisionType>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
@@ -79,7 +77,6 @@ public class TrainCommandTests
             mockRenderer.Object,
             options)
         {
-            ActorType = ActorType.Gen1,
             DecisionType = DecisionType.All,
             OutputPath = null,
         };
@@ -90,7 +87,6 @@ public class TrainCommandTests
         mockRenderer.Verify(
             r => r.RenderTrainingResults(
             trainingResults,
-            ActorType.Gen1,
             DecisionType.All),
             Times.Once);
     }
@@ -110,7 +106,6 @@ public class TrainCommandTests
             TotalDuration: TimeSpan.FromSeconds(10));
 
         mockProgressCoordinator.Setup(o => o.CoordinateTrainingWithProgressAsync(
-            It.IsAny<ActorType>(),
             It.IsAny<DecisionType>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
@@ -129,7 +124,6 @@ public class TrainCommandTests
             mockRenderer.Object,
             options)
         {
-            ActorType = ActorType.Gen1,
             DecisionType = DecisionType.CallTrump,
             OutputPath = "./custom-models",
         };
@@ -150,7 +144,6 @@ public class TrainCommandTests
         var trainingResults = new TrainingResults(1, 0, [], TimeSpan.FromSeconds(5));
 
         mockProgressCoordinator.Setup(o => o.CoordinateTrainingWithProgressAsync(
-            ActorType.Gen1,
             DecisionType.CallTrump,
             "./custom-models",
             1000,
@@ -169,7 +162,6 @@ public class TrainCommandTests
             mockRenderer.Object,
             options)
         {
-            ActorType = ActorType.Gen1,
             DecisionType = DecisionType.CallTrump,
             OutputPath = "./custom-models",
             SampleLimit = 1000,
@@ -180,7 +172,6 @@ public class TrainCommandTests
 
         mockProgressCoordinator.Verify(
             o => o.CoordinateTrainingWithProgressAsync(
-            ActorType.Gen1,
             DecisionType.CallTrump,
             "./custom-models",
             1000,

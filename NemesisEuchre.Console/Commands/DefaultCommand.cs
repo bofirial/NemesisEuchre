@@ -26,7 +26,7 @@ public class DefaultCommand(
     [CliOption(Description = "Persist games to SQL database")]
     public bool PersistToSql { get; set; }
 
-    [CliOption(Description = "Persist training data to IDV files with the given generation name (e.g. gen2)")]
+    [CliOption(Description = "Persist training data to IDV files with the given generation name (e.g. gen2)", Required = false)]
     public string? PersistToIdv { get; set; }
 
     [CliOption(Description = "Show decisions made during the game")]

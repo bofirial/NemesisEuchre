@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation;
-using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 
 namespace NemesisEuchre.MachineLearning.DataAccess;
@@ -12,13 +11,11 @@ public interface ITrainingDataLoader<TTrainingData>
     where TTrainingData : class, new()
 {
     Task<IEnumerable<TTrainingData>> LoadTrainingDataAsync(
-        ActorType actorType,
         int limit = 0,
         bool winningTeamOnly = false,
         CancellationToken cancellationToken = default);
 
     IEnumerable<TTrainingData> StreamTrainingData(
-        ActorType actorType,
         int limit = 0,
         bool winningTeamOnly = false,
         bool shuffle = false,
@@ -34,19 +31,18 @@ public abstract class TrainingDataLoaderBase<TEntity, TTrainingData>(
     where TTrainingData : class, new()
 {
     public async Task<IEnumerable<TTrainingData>> LoadTrainingDataAsync(
-        ActorType actorType,
         int limit = 0,
         bool winningTeamOnly = false,
         CancellationToken cancellationToken = default)
     {
-        LoggerMessages.LogLoadingTrainingData(logger, actorType.ToString(), limit, winningTeamOnly);
+        LoggerMessages.LogLoadingTrainingData(logger, limit, winningTeamOnly);
 
         var trainingData = new List<TTrainingData>();
         var entityCount = 0;
         var transformErrorCount = 0;
 
         await foreach (var entity in trainingDataRepository.GetDecisionDataAsync<TEntity>(
-            actorType, limit, winningTeamOnly, cancellationToken))
+            limit, winningTeamOnly, cancellationToken))
         {
             if (!IsEntityValid(entity))
             {
@@ -76,19 +72,18 @@ public abstract class TrainingDataLoaderBase<TEntity, TTrainingData>(
     }
 
     public IEnumerable<TTrainingData> StreamTrainingData(
-        ActorType actorType,
         int limit = 0,
         bool winningTeamOnly = false,
         bool shuffle = false,
         CancellationToken cancellationToken = default)
     {
-        LoggerMessages.LogLoadingTrainingData(logger, actorType.ToString(), limit, winningTeamOnly);
+        LoggerMessages.LogLoadingTrainingData(logger, limit, winningTeamOnly);
 
         var entityCount = 0;
         var transformErrorCount = 0;
 
         foreach (var entity in trainingDataRepository.GetDecisionData<TEntity>(
-            actorType, limit, winningTeamOnly, shuffle))
+            limit, winningTeamOnly, shuffle))
         {
             cancellationToken.ThrowIfCancellationRequested();
 

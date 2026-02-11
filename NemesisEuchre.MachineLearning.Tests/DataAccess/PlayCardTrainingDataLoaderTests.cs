@@ -10,7 +10,6 @@ using Moq;
 
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.DataAccess.Repositories;
-using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Models;
@@ -68,7 +67,6 @@ public class PlayCardTrainingDataLoaderTests
         }
 
         _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<PlayCardDecisionEntity>(
-            It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
             It.IsAny<CancellationToken>()))
@@ -79,7 +77,7 @@ public class PlayCardTrainingDataLoaderTests
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
-        var result = await loader.LoadTrainingDataAsync(ActorType.Chaos, 10, false, cancellationToken: TestContext.Current.CancellationToken);
+        var result = await loader.LoadTrainingDataAsync(10, false, TestContext.Current.CancellationToken);
 
         result.Should().HaveCount(10);
         _mockFeatureEngineer.Verify(x => x.Transform(It.IsAny<PlayCardDecisionEntity>()), Times.Exactly(10));
@@ -107,7 +105,6 @@ public class PlayCardTrainingDataLoaderTests
             });
 
         _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<PlayCardDecisionEntity>(
-            It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
             It.IsAny<CancellationToken>()))
@@ -118,7 +115,7 @@ public class PlayCardTrainingDataLoaderTests
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
-        var result = await loader.LoadTrainingDataAsync(ActorType.Chaos, cancellationToken: TestContext.Current.CancellationToken);
+        var result = await loader.LoadTrainingDataAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().HaveCount(4);
     }
@@ -135,7 +132,6 @@ public class PlayCardTrainingDataLoaderTests
             });
 
         _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<PlayCardDecisionEntity>(
-            It.IsAny<ActorType>(),
             50,
             It.IsAny<bool>(),
             It.IsAny<CancellationToken>()))
@@ -146,7 +142,7 @@ public class PlayCardTrainingDataLoaderTests
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
-        var result = await loader.LoadTrainingDataAsync(ActorType.Chaos, 50, cancellationToken: TestContext.Current.CancellationToken);
+        var result = await loader.LoadTrainingDataAsync(50, cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().HaveCount(50);
     }
@@ -174,7 +170,6 @@ public class PlayCardTrainingDataLoaderTests
             });
 
         _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<PlayCardDecisionEntity>(
-            It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
             It.IsAny<CancellationToken>()))
@@ -185,7 +180,7 @@ public class PlayCardTrainingDataLoaderTests
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
-        var act = async () => await loader.LoadTrainingDataAsync(ActorType.Chaos, 1000, false, cts.Token);
+        var act = async () => await loader.LoadTrainingDataAsync(1000, false, cts.Token);
 
         await act.Should().ThrowAsync<OperationCanceledException>();
     }
@@ -204,7 +199,6 @@ public class PlayCardTrainingDataLoaderTests
             });
 
         _mockTrainingDataRepository.Setup(x => x.GetDecisionDataAsync<PlayCardDecisionEntity>(
-            It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
             It.IsAny<CancellationToken>()))
@@ -215,7 +209,7 @@ public class PlayCardTrainingDataLoaderTests
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
-        await loader.LoadTrainingDataAsync(ActorType.Chaos, 25000, cancellationToken: TestContext.Current.CancellationToken);
+        await loader.LoadTrainingDataAsync(25000, cancellationToken: TestContext.Current.CancellationToken);
 
         _mockLogger.Verify(
             x => x.Log(
@@ -252,7 +246,6 @@ public class PlayCardTrainingDataLoaderTests
         }
 
         _mockTrainingDataRepository.Setup(x => x.GetDecisionData<PlayCardDecisionEntity>(
-            It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
             It.IsAny<bool>()))
@@ -264,7 +257,7 @@ public class PlayCardTrainingDataLoaderTests
             _mockLogger.Object);
 
         var result = loader.StreamTrainingData(
-            ActorType.Chaos, 10, cancellationToken: TestContext.Current.CancellationToken).ToList();
+            10, cancellationToken: TestContext.Current.CancellationToken).ToList();
 
         result.Should().HaveCount(10);
         _mockFeatureEngineer.Verify(x => x.Transform(It.IsAny<PlayCardDecisionEntity>()), Times.Exactly(10));
@@ -292,7 +285,6 @@ public class PlayCardTrainingDataLoaderTests
             });
 
         _mockTrainingDataRepository.Setup(x => x.GetDecisionData<PlayCardDecisionEntity>(
-            It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
             It.IsAny<bool>()))
@@ -304,7 +296,7 @@ public class PlayCardTrainingDataLoaderTests
             _mockLogger.Object);
 
         var result = loader.StreamTrainingData(
-            ActorType.Chaos, cancellationToken: TestContext.Current.CancellationToken).ToList();
+            cancellationToken: TestContext.Current.CancellationToken).ToList();
 
         result.Should().HaveCount(4);
     }
@@ -333,7 +325,6 @@ public class PlayCardTrainingDataLoaderTests
             });
 
         _mockTrainingDataRepository.Setup(x => x.GetDecisionData<PlayCardDecisionEntity>(
-            It.IsAny<ActorType>(),
             It.IsAny<int>(),
             It.IsAny<bool>(),
             It.IsAny<bool>()))
@@ -344,7 +335,7 @@ public class PlayCardTrainingDataLoaderTests
             _mockFeatureEngineer.Object,
             _mockLogger.Object);
 
-        var act = () => loader.StreamTrainingData(ActorType.Chaos, 1000, false, false, cts.Token).ToList();
+        var act = () => loader.StreamTrainingData(1000, false, false, cts.Token).ToList();
 
         act.Should().Throw<OperationCanceledException>();
     }
@@ -353,7 +344,6 @@ public class PlayCardTrainingDataLoaderTests
     public void StreamTrainingData_PassesShuffleFlag()
     {
         _mockTrainingDataRepository.Setup(x => x.GetDecisionData<PlayCardDecisionEntity>(
-            ActorType.Chaos,
             100,
             false,
             true))
@@ -365,11 +355,11 @@ public class PlayCardTrainingDataLoaderTests
             _mockLogger.Object);
 
         var result = loader.StreamTrainingData(
-            ActorType.Chaos, 100, shuffle: true, cancellationToken: TestContext.Current.CancellationToken).ToList();
+            100, shuffle: true, cancellationToken: TestContext.Current.CancellationToken).ToList();
 
         result.Should().BeEmpty();
         _mockTrainingDataRepository.Verify(
-            x => x.GetDecisionData<PlayCardDecisionEntity>(ActorType.Chaos, 100, false, true),
+            x => x.GetDecisionData<PlayCardDecisionEntity>(100, false, true),
             Times.Once);
     }
 

@@ -7,16 +7,16 @@ namespace NemesisEuchre.Console.Services;
 
 public interface ITrainingResultsRenderer
 {
-    void RenderTrainingResults(TrainingResults results, ActorType actorType, DecisionType decisionType);
+    void RenderTrainingResults(TrainingResults results, DecisionType decisionType);
 }
 
 public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRenderer
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0045:Convert to conditional expression", Justification = "Nested Conditional")]
-    public void RenderTrainingResults(TrainingResults results, ActorType actorType, DecisionType decisionType)
+    public void RenderTrainingResults(TrainingResults results, DecisionType decisionType)
     {
         console.WriteLine();
-        console.Write(new Rule($"[yellow]Training Results - {actorType} ({decisionType})[/]").LeftJustified());
+        console.Write(new Rule($"[yellow]Training Results - ({decisionType})[/]").LeftJustified());
         console.WriteLine();
 
         var table = new Table()

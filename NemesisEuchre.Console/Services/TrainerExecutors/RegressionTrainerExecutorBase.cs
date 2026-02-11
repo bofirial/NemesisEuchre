@@ -27,7 +27,6 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
     public abstract DecisionType DecisionType { get; }
 
     public async Task<ModelTrainingResult> ExecuteAsync(
-        ActorType actorType,
         string outputPath,
         int sampleLimit,
         int generation,
@@ -52,7 +51,6 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             else
             {
                 var streamingData = _dataLoader.StreamTrainingData(
-                    actorType,
                     sampleLimit,
                     winningTeamOnly: false,
                     shuffle: true,
@@ -64,7 +62,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
 
             if (trainingResult.TrainingSamples == 0)
             {
-                LoggerMessages.LogNoTrainingDataFound(_logger, actorType, ModelType);
+                LoggerMessages.LogNoTrainingDataFound(_logger, ModelType);
                 progress.Report(new TrainingProgress(ModelType, TrainingPhase.Failed, 0, "No training data available"));
                 return new ModelTrainingResult(ModelType, false, ErrorMessage: "No training data available");
             }
@@ -72,7 +70,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 75, "Training complete"));
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Saving, 75, "Saving model..."));
-            await _trainer.SaveModelAsync(outputPath, generation, actorType, trainingResult, cancellationToken);
+            await _trainer.SaveModelAsync(outputPath, generation, trainingResult, cancellationToken);
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Complete, 100, "Complete"));
 
@@ -81,20 +79,19 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             LoggerMessages.LogModelTrainedSuccessfully(
                 _logger,
                 ModelType,
-                actorType,
                 metrics.MeanAbsoluteError,
                 metrics.RSquared);
 
             return new ModelTrainingResult(
                 ModelType,
                 true,
-                ModelPath: Path.Combine(outputPath, $"{actorType}_{ModelType}_Gen{generation}.zip"),
+                ModelPath: Path.Combine(outputPath, $"{ModelType}_Gen{generation}.zip"),
                 MeanAbsoluteError: metrics.MeanAbsoluteError,
                 RSquared: metrics.RSquared);
         }
         catch (Exception ex)
         {
-            LoggerMessages.LogModelTrainingFailed(_logger, ex, ModelType, actorType);
+            LoggerMessages.LogModelTrainingFailed(_logger, ex, ModelType);
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Failed, 0, $"Error: {ex.Message}"));
             return new ModelTrainingResult(ModelType, false, ErrorMessage: ex.Message);
         }

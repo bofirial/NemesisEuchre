@@ -23,9 +23,6 @@ public class TrainCommand(
     ITrainingResultsRenderer resultsRenderer,
     IOptions<MachineLearningOptions> options) : ICliRunAsyncWithReturn
 {
-    [CliOption(Description = "Actor type to train models for")]
-    public required ActorType ActorType { get; set; }
-
     [CliOption(Description = "Decision type to train (CallTrump, Discard, Play, All)")]
     public DecisionType DecisionType { get; set; } = DecisionType.All;
 
@@ -43,7 +40,7 @@ public class TrainCommand(
 
     public async Task<int> RunAsync()
     {
-        LoggerMessages.LogTrainingStarting(logger, ActorType, DecisionType, Generation);
+        LoggerMessages.LogTrainingStarting(logger, DecisionType);
 
         var outputPath = ValidateAndPrepareOutputPath();
         if (outputPath == null)
@@ -54,7 +51,6 @@ public class TrainCommand(
         DisplayTrainingConfiguration(outputPath);
 
         var results = await progressCoordinator.CoordinateTrainingWithProgressAsync(
-            ActorType,
             DecisionType,
             outputPath,
             SampleLimit,
@@ -62,7 +58,7 @@ public class TrainCommand(
             ansiConsole,
             IdvName);
 
-        resultsRenderer.RenderTrainingResults(results, ActorType, DecisionType);
+        resultsRenderer.RenderTrainingResults(results, DecisionType);
 
         return DetermineExitCode(results);
     }

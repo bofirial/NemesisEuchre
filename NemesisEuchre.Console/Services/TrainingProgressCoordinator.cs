@@ -10,7 +10,6 @@ namespace NemesisEuchre.Console.Services;
 public interface ITrainingProgressCoordinator
 {
     Task<TrainingResults> CoordinateTrainingWithProgressAsync(
-        ActorType actorType,
         DecisionType decisionType,
         string outputPath,
         int sampleLimit,
@@ -23,7 +22,6 @@ public interface ITrainingProgressCoordinator
 public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrchestrator) : ITrainingProgressCoordinator
 {
     public Task<TrainingResults> CoordinateTrainingWithProgressAsync(
-        ActorType actorType,
         DecisionType decisionType,
         string outputPath,
         int sampleLimit,
@@ -36,7 +34,7 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
             .StartAsync(async ctx =>
             {
                 var overallTask = ctx.AddTask(
-                    $"[green]Training {decisionType} models for {actorType}[/]",
+                    $"[green]Training {decisionType} models[/]",
                     maxValue: 100);
 
                 var modelTasks = new ConcurrentDictionary<string, ProgressTask>();
@@ -73,7 +71,6 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
                 });
 
                 return await trainingOrchestrator.TrainModelsAsync(
-                    actorType,
                     decisionType,
                     outputPath,
                     sampleLimit,

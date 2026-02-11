@@ -61,22 +61,20 @@ public static partial class LoggerMessages
     [LoggerMessage(
         EventId = 9,
         Level = LogLevel.Debug,
-        Message = "Retrieving {DecisionType} training data for {ActorType} (limit: {Limit}, winningTeamOnly: {WinningTeamOnly})")]
+        Message = "Retrieving {DecisionType} training data (limit: {Limit}, winningTeamOnly: {WinningTeamOnly})")]
     public static partial void LogRetrievingTrainingData(
         ILogger logger,
         string decisionType,
-        string actorType,
         int limit,
         bool winningTeamOnly);
 
     [LoggerMessage(
         EventId = 10,
         Level = LogLevel.Error,
-        Message = "Failed to retrieve {DecisionType} training data for {ActorType}")]
+        Message = "Failed to retrieve {DecisionType} training data")]
     public static partial void LogTrainingDataRetrievalFailed(
         ILogger logger,
         string decisionType,
-        string actorType,
         Exception exception);
 
     // EventID 11-34: MachineLearning core operations
@@ -133,10 +131,9 @@ public static partial class LoggerMessages
     [LoggerMessage(
         EventId = 18,
         Level = LogLevel.Information,
-        Message = "Loading training data for {ActorType} (limit: {Limit}, winningTeamOnly: {WinningTeamOnly})")]
+        Message = "Loading training data (limit: {Limit}, winningTeamOnly: {WinningTeamOnly})")]
     public static partial void LogLoadingTrainingData(
         ILogger logger,
-        string actorType,
         int limit,
         bool winningTeamOnly);
 
@@ -288,12 +285,10 @@ public static partial class LoggerMessages
     [LoggerMessage(
         EventId = 40,
         Level = LogLevel.Information,
-        Message = "Starting training: ActorType={ActorType}, DecisionType={DecisionType}, Generation={Generation}")]
+        Message = "Starting training: DecisionType={DecisionType}")]
     public static partial void LogTrainingStarting(
         ILogger logger,
-        ActorType actorType,
-        DecisionType decisionType,
-        int generation);
+        DecisionType decisionType);
 
     [LoggerMessage(
         EventId = 41,
@@ -320,10 +315,9 @@ public static partial class LoggerMessages
     [LoggerMessage(
         EventId = 44,
         Level = LogLevel.Information,
-        Message = "Starting training for {ActorType} with {TrainerCount} trainer(s): {ModelTypes}")]
+        Message = "Starting training  with {TrainerCount} trainer(s): {ModelTypes}")]
     public static partial void LogStartingTrainingWithTrainers(
         ILogger logger,
-        ActorType actorType,
         int trainerCount,
         string modelTypes);
 
@@ -357,32 +351,29 @@ public static partial class LoggerMessages
     [LoggerMessage(
         EventId = 48,
         Level = LogLevel.Warning,
-        Message = "No training data found for {ActorType} {ModelType}")]
+        Message = "No training data found for {ModelType}")]
     public static partial void LogNoTrainingDataFound(
         ILogger logger,
-        ActorType actorType,
         string modelType);
 
     [LoggerMessage(
         EventId = 49,
         Level = LogLevel.Information,
-        Message = "Successfully trained {ModelType} for {ActorType} (MAE: {MeanAbsoluteError:F4}, R²: {RSquared:F4})")]
+        Message = "Successfully trained {ModelType} (MAE: {MeanAbsoluteError:F4}, R²: {RSquared:F4})")]
     public static partial void LogModelTrainedSuccessfully(
         ILogger logger,
         string modelType,
-        ActorType actorType,
         double meanAbsoluteError,
         double rSquared);
 
     [LoggerMessage(
         EventId = 50,
         Level = LogLevel.Error,
-        Message = "Failed to train {ModelType} for {ActorType}")]
+        Message = "Failed to train {ModelType}")]
     public static partial void LogModelTrainingFailed(
         ILogger logger,
         Exception exception,
-        string modelType,
-        ActorType actorType);
+        string modelType);
 
     // EventID 51-52: Persistence control
     [LoggerMessage(
