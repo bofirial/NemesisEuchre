@@ -38,6 +38,18 @@ public class DefaultCommand(
     [CliOption(Description = "ActorType for Team2")]
     public ActorType? Team2 { get; set; }
 
+    [CliOption(Description = "ModelName for Team1 ModelBots", Alias = "t1m")]
+    public string? Team1ModelName { get; set; }
+
+    [CliOption(Description = "ExplorationTemperature for Team1 ModelTrainerBots", Alias = "t1t")]
+    public float Team1ExplorationTemperature { get; set; }
+
+    [CliOption(Description = "ModelName for Team2 ModelBots", Alias = "t2m")]
+    public string? Team2ModelName { get; set; }
+
+    [CliOption(Description = "ExplorationTemperature for Team2 ModelTrainerBots", Alias = "t2t")]
+    public float Team2ExplorationTemperature { get; set; }
+
     public async Task<int> RunAsync()
     {
         Foundation.LoggerMessages.LogStartingUp(logger);
@@ -60,17 +72,39 @@ public class DefaultCommand(
         return 0;
     }
 
+    private static Actor? GetTeamActor(ActorType? teamActorType, string? teamModelName, float teamExplorationTemperature)
+    {
+        if (teamExplorationTemperature != default)
+        {
+            teamActorType = ActorType.ModelTrainer;
+        }
+        else if (!string.IsNullOrEmpty(teamModelName))
+        {
+            teamActorType = ActorType.Model;
+        }
+
+        return teamActorType != null ? new Actor(teamActorType.Value, teamModelName, teamExplorationTemperature) : null;
+    }
+
+    private Actor[]? GetTeamActors(Team team)
+    {
+        var teamActor = team switch
+        {
+            Team.Team1 => GetTeamActor(Team1, Team1ModelName, Team1ExplorationTemperature),
+            Team.Team2 => GetTeamActor(Team2, Team2ModelName, Team2ExplorationTemperature),
+            _ => throw new ArgumentOutOfRangeException(nameof(team), team, $"Invalid Team: {team}"),
+        };
+        return teamActor != null ? [teamActor, teamActor] : null;
+    }
+
     private Task<Game> RunSingleGameAsync(GamePersistenceOptions persistenceOptions)
     {
         ansiConsole.MarkupLine($"[dim]Playing a game between 2 {Team1 ?? ActorType.Chaos}Bots and 2 {Team2 ?? ActorType.Chaos}Bots...[/]");
         ansiConsole.WriteLine();
 
-        var team1Actors = Team1.HasValue ? new[] { new Actor(Team1.Value), new Actor(Team1.Value) } : null;
-        var team2Actors = Team2.HasValue ? new[] { new Actor(Team2.Value), new Actor(Team2.Value) } : null;
-
         return ansiConsole.Status()
             .Spinner(Spinner.Known.Dots)
-            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(persistenceOptions: persistenceOptions, team1Actors: team1Actors, team2Actors: team2Actors, showDecisions: ShowDecisions));
+            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(persistenceOptions: persistenceOptions, team1Actors: GetTeamActors(Team.Team1), team2Actors: GetTeamActors(Team.Team2), showDecisions: ShowDecisions));
     }
 
     private async Task RunBatchGamesAsync(GamePersistenceOptions persistenceOptions)
@@ -86,10 +120,7 @@ public class DefaultCommand(
 
                 var progressReporter = new BatchProgressReporter(playingTask, savingTask);
 
-                var team1Actors = Team1.HasValue ? new[] { new Actor(Team1.Value), new Actor(Team1.Value) } : null;
-                var team2Actors = Team2.HasValue ? new[] { new Actor(Team2.Value), new Actor(Team2.Value) } : null;
-
-                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, persistenceOptions: persistenceOptions, team1Actors: team1Actors, team2Actors: team2Actors);
+                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, persistenceOptions: persistenceOptions, team1Actors: GetTeamActors(Team.Team1), team2Actors: GetTeamActors(Team.Team2));
             });
 
         gameResultsRenderer.RenderBatchResults(results);
