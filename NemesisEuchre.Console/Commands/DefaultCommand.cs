@@ -102,28 +102,48 @@ public class DefaultCommand(
 
     private Task<Game> RunSingleGameAsync(GamePersistenceOptions persistenceOptions)
     {
-        ansiConsole.MarkupLine($"[dim]Playing a game between 2 {Team1 ?? ActorType.Chaos}Bots and 2 {Team2 ?? ActorType.Chaos}Bots...[/]");
+        var team1Actors = GetTeamActors(Team.Team1);
+        var team2Actors = GetTeamActors(Team.Team2);
+
+        ansiConsole.MarkupLine($"[dim]Playing a game between 2 {team1Actors?[0].ActorType ?? ActorType.Chaos}Bots and 2 {team2Actors?[0].ActorType ?? ActorType.Chaos}Bots...[/]");
         ansiConsole.WriteLine();
 
         return ansiConsole.Status()
             .Spinner(Spinner.Known.Dots)
-            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(persistenceOptions: persistenceOptions, team1Actors: GetTeamActors(Team.Team1), team2Actors: GetTeamActors(Team.Team2), showDecisions: ShowDecisions));
+            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(persistenceOptions: persistenceOptions, team1Actors: team1Actors, team2Actors: team2Actors, showDecisions: ShowDecisions));
     }
 
     private async Task RunBatchGamesAsync(GamePersistenceOptions persistenceOptions)
     {
-        ansiConsole.MarkupLine($"[dim]Playing a game between 2 {Team1 ?? ActorType.Chaos}Bots and 2 {Team2 ?? ActorType.Chaos}Bots...[/]");
+        var team1Actors = GetTeamActors(Team.Team1);
+        var team2Actors = GetTeamActors(Team.Team2);
+
+        ansiConsole.MarkupLine($"[dim]Playing games between 2 {team1Actors?[0].ActorType ?? ActorType.Chaos}Bots and 2 {team2Actors?[0].ActorType ?? ActorType.Chaos}Bots...[/]");
         ansiConsole.WriteLine();
 
         var results = await ansiConsole.Progress()
+            .AutoClear(false)
+            .HideCompleted(false)
+            .Columns(
+                new TaskDescriptionColumn(),
+                new ProgressBarColumn(),
+                new PercentageColumn(),
+                new ElapsedTimeColumn(),
+                new RemainingTimeColumn(),
+                new SpinnerColumn())
             .StartAsync(async ctx =>
             {
                 var playingTask = ctx.AddTask("[green]Playing " + Count + " games...[/]", maxValue: Count);
-                var savingTask = ctx.AddTask("[blue]Saving games...[/]", maxValue: Count);
+                var mappingTask = ctx.AddTask("[blue]Mapping games...[/]", maxValue: Count);
 
-                var progressReporter = new BatchProgressReporter(playingTask, savingTask);
+                ProgressTask? idvSaveTask = null;
+                if (persistenceOptions.IdvGenerationName != null)
+                {
+                    idvSaveTask = ctx.AddTask("[yellow]Saving IDV files...[/]", autoStart: false);
+                }
 
-                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, persistenceOptions: persistenceOptions, team1Actors: GetTeamActors(Team.Team1), team2Actors: GetTeamActors(Team.Team2));
+                var progressReporter = new BatchProgressReporter(playingTask, mappingTask, idvSaveTask);
+                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, persistenceOptions: persistenceOptions, team1Actors: team1Actors, team2Actors: team2Actors);
             });
 
         gameResultsRenderer.RenderBatchResults(results);

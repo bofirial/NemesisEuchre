@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Models;
@@ -46,6 +48,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
         string idvFilePath,
         CancellationToken cancellationToken = default)
     {
+        var modelStopwatch = Stopwatch.StartNew();
         try
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(idvFilePath);
@@ -79,7 +82,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             {
                 LoggerMessages.LogNoTrainingDataFound(_logger, ModelType);
                 progress.Report(new TrainingProgress(ModelType, TrainingPhase.Failed, 0, "No training data available"));
-                return new ModelTrainingResult(ModelType, false, ErrorMessage: "No training data available");
+                return new ModelTrainingResult(ModelType, false, ErrorMessage: "No training data available", Duration: modelStopwatch.Elapsed);
             }
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 75, "Training complete"));
@@ -102,13 +105,14 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
                 true,
                 ModelPath: Path.Combine(outputPath, $"{ModelType}_{modelName}.zip"),
                 MeanAbsoluteError: metrics.MeanAbsoluteError,
-                RSquared: metrics.RSquared);
+                RSquared: metrics.RSquared,
+                Duration: modelStopwatch.Elapsed);
         }
         catch (Exception ex)
         {
             LoggerMessages.LogModelTrainingFailed(_logger, ex, ModelType);
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Failed, 0, $"Error: {ex.Message}"));
-            return new ModelTrainingResult(ModelType, false, ErrorMessage: ex.Message);
+            return new ModelTrainingResult(ModelType, false, ErrorMessage: ex.Message, Duration: modelStopwatch.Elapsed);
         }
     }
 }

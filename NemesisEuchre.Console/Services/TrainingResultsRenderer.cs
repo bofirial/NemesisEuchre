@@ -25,6 +25,7 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
             .AddColumn(new TableColumn("[bold]Status[/]").Centered())
             .AddColumn(new TableColumn("[bold]MAE[/]").Centered())
             .AddColumn(new TableColumn("[bold]R²[/]").Centered())
+            .AddColumn(new TableColumn("[bold]Duration[/]").Centered())
             .AddColumn(new TableColumn("[bold]Model Path[/]"));
 
         foreach (var result in results.Results.OrderBy(r => r.ModelType))
@@ -55,11 +56,16 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
                 pathMarkup = "[dim]-[/]";
             }
 
+            var durationMarkup = result.Duration.HasValue
+                ? $"{result.Duration.Value.TotalSeconds:F1}s"
+                : "[dim]-[/]";
+
             table.AddRow(
                 result.ModelType,
                 statusMarkup,
                 maeMarkup,
                 rSquaredMarkup,
+                durationMarkup,
                 pathMarkup);
         }
 

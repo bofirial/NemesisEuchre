@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -36,6 +38,7 @@ public class BatchPersistenceCoordinator(
     {
         persistenceOptions ??= new GamePersistenceOptions(false, null);
 
+        var persistenceStopwatch = Stopwatch.StartNew();
         var batch = new List<Game>(_persistenceOptions.BatchSize);
 
         await foreach (var game in state.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
@@ -54,9 +57,19 @@ public class BatchPersistenceCoordinator(
             await FlushBatchAsync(batch, state, progressReporter, persistenceOptions, cancellationToken).ConfigureAwait(false);
         }
 
+        persistenceStopwatch.Stop();
+        state.PersistenceDuration = persistenceStopwatch.Elapsed;
+
         if (persistenceOptions.IdvGenerationName != null)
         {
+            progressReporter?.ReportIdvSaveStarted();
+            var idvStopwatch = Stopwatch.StartNew();
+
             trainingDataAccumulator.Save(persistenceOptions.IdvGenerationName, persistenceOptions.AllowOverwrite);
+
+            idvStopwatch.Stop();
+            state.IdvSaveDuration = idvStopwatch.Elapsed;
+            progressReporter?.ReportIdvSaveCompleted();
         }
     }
 

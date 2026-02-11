@@ -40,6 +40,10 @@ public sealed class BatchExecutionState(int channelCapacity) : IDisposable
 
     public int TotalPlayCardDecisions { get; set; }
 
+    public TimeSpan PersistenceDuration { get; set; }
+
+    public TimeSpan IdvSaveDuration { get; set; }
+
     public async Task<T> ExecuteWithLockAsync<T>(Func<T> action, CancellationToken cancellationToken = default)
     {
         await _semaphore.WaitAsync(cancellationToken);

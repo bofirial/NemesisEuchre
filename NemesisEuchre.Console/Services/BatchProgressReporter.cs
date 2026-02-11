@@ -7,9 +7,17 @@ public interface IBatchProgressReporter
     void ReportGameCompleted(int count);
 
     void ReportGamesSaved(int count);
+
+    void ReportIdvSaveStarted()
+    {
+    }
+
+    void ReportIdvSaveCompleted()
+    {
+    }
 }
 
-internal sealed class BatchProgressReporter(ProgressTask playingTask, ProgressTask savingTask) : IBatchProgressReporter
+internal sealed class BatchProgressReporter(ProgressTask playingTask, ProgressTask savingTask, ProgressTask? idvSaveTask = null) : IBatchProgressReporter
 {
     public void ReportGameCompleted(int count)
     {
@@ -19,6 +27,20 @@ internal sealed class BatchProgressReporter(ProgressTask playingTask, ProgressTa
     public void ReportGamesSaved(int count)
     {
         savingTask.Value = count;
+    }
+
+    public void ReportIdvSaveStarted()
+    {
+        idvSaveTask?.StartTask();
+    }
+
+    public void ReportIdvSaveCompleted()
+    {
+        if (idvSaveTask != null)
+        {
+            idvSaveTask.Value = idvSaveTask.MaxValue;
+            idvSaveTask.StopTask();
+        }
     }
 }
 
@@ -35,5 +57,15 @@ internal sealed class SubBatchProgressReporter(
     public void ReportGamesSaved(int count)
     {
         parentReporter.ReportGamesSaved(savedOffset + count);
+    }
+
+    public void ReportIdvSaveStarted()
+    {
+        parentReporter.ReportIdvSaveStarted();
+    }
+
+    public void ReportIdvSaveCompleted()
+    {
+        parentReporter.ReportIdvSaveCompleted();
     }
 }

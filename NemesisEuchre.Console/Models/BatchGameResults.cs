@@ -22,6 +22,12 @@ public class BatchGameResults
 
     public required TimeSpan ElapsedTime { get; init; }
 
+    public TimeSpan? PlayingDuration { get; init; }
+
+    public TimeSpan? PersistenceDuration { get; init; }
+
+    public TimeSpan? IdvSaveDuration { get; init; }
+
     public double Team1WinRate => (Team1Wins + Team2Wins) > 0
         ? (double)Team1Wins / (Team1Wins + Team2Wins)
         : 0.0;

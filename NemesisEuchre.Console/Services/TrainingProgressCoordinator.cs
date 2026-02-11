@@ -33,6 +33,15 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
         CancellationToken cancellationToken = default)
     {
         return console.Progress()
+            .AutoClear(false)
+            .HideCompleted(false)
+            .Columns(
+                new TaskDescriptionColumn(),
+                new ProgressBarColumn(),
+                new PercentageColumn(),
+                new ElapsedTimeColumn(),
+                new RemainingTimeColumn(),
+                new SpinnerColumn())
             .StartAsync(async ctx =>
             {
                 var overallTask = ctx.AddTask(
