@@ -33,13 +33,13 @@ public class Gen1BotTests
     public void Constructor_ShouldCallEngineProvider_ForAllThreeModels()
     {
         _mockEngineProvider
-            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1))
+            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "Gen1"))
             .Returns((PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>?)null);
         _mockEngineProvider
-            .Setup(x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", 1))
+            .Setup(x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", "Gen1"))
             .Returns((PredictionEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>?)null);
         _mockEngineProvider
-            .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", 1))
+            .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", "Gen1"))
             .Returns((PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>?)null);
 
         _ = new Gen1Bot(
@@ -51,13 +51,13 @@ public class Gen1BotTests
             _mockLogger.Object);
 
         _mockEngineProvider.Verify(
-            x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1),
+            x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "Gen1"),
             Times.Once);
         _mockEngineProvider.Verify(
-            x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", 1),
+            x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", "Gen1"),
             Times.Once);
         _mockEngineProvider.Verify(
-            x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", 1),
+            x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", "Gen1"),
             Times.Once);
     }
 
@@ -65,7 +65,7 @@ public class Gen1BotTests
     public void Constructor_ShouldSucceed_WhenEngineProviderReturnsNull()
     {
         _mockEngineProvider
-            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1))
+            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "Gen1"))
             .Returns((PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>?)null);
 
         var bot = new Gen1Bot(
@@ -98,7 +98,7 @@ public class Gen1BotTests
     public async Task CallTrumpAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
     {
         _mockEngineProvider
-            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1))
+            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "Gen1"))
             .Returns((PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>?)null);
 
         var bot = new Gen1Bot(
@@ -152,7 +152,7 @@ public class Gen1BotTests
     public async Task DiscardCardAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
     {
         _mockEngineProvider
-            .Setup(x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", 1))
+            .Setup(x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", "Gen1"))
             .Returns((PredictionEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>?)null);
 
         var bot = new Gen1Bot(
@@ -180,7 +180,7 @@ public class Gen1BotTests
     public async Task PlayCardAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
     {
         _mockEngineProvider
-            .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", 1))
+            .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", "Gen1"))
             .Returns((PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>?)null);
 
         var bot = new Gen1Bot(

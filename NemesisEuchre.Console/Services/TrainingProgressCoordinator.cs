@@ -13,7 +13,7 @@ public interface ITrainingProgressCoordinator
         DecisionType decisionType,
         string outputPath,
         int sampleLimit,
-        int generation,
+        string modelName,
         IAnsiConsole console,
         string? idvName = null,
         CancellationToken cancellationToken = default);
@@ -25,7 +25,7 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
         DecisionType decisionType,
         string outputPath,
         int sampleLimit,
-        int generation,
+        string modelName,
         IAnsiConsole console,
         string? idvName = null,
         CancellationToken cancellationToken = default)
@@ -74,7 +74,7 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
                     decisionType,
                     outputPath,
                     sampleLimit,
-                    generation,
+                    modelName,
                     progress,
                     idvName);
             });

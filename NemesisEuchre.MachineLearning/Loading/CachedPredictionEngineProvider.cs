@@ -11,7 +11,7 @@ public interface IPredictionEngineProvider
 {
     PredictionEngine<TData, TPrediction>? TryGetEngine<TData, TPrediction>(
         string decisionType,
-        int generation = 1)
+        string modelName)
         where TData : class
         where TPrediction : class, new();
 }
@@ -29,11 +29,11 @@ public class CachedPredictionEngineProvider(
 
     public PredictionEngine<TData, TPrediction>? TryGetEngine<TData, TPrediction>(
         string decisionType,
-        int generation = 1)
+        string modelName)
         where TData : class
         where TPrediction : class, new()
     {
-        var cacheKey = $"{decisionType}_Gen{generation}_{typeof(TData).Name}_{typeof(TPrediction).Name}";
+        var cacheKey = $"{decisionType}_{modelName}_{typeof(TData).Name}_{typeof(TPrediction).Name}";
 
         lock (_lock)
         {
@@ -42,7 +42,7 @@ public class CachedPredictionEngineProvider(
                 return cached as PredictionEngine<TData, TPrediction>;
             }
 
-            var engine = TryLoadModel<TData, TPrediction>(decisionType, generation);
+            var engine = TryLoadModel<TData, TPrediction>(decisionType, modelName);
             _cache[cacheKey] = engine;
             return engine;
         }
@@ -50,7 +50,7 @@ public class CachedPredictionEngineProvider(
 
     private PredictionEngine<TData, TPrediction>? TryLoadModel<TData, TPrediction>(
         string decisionType,
-        int generation)
+        string modelName)
         where TData : class
         where TPrediction : class, new()
     {
@@ -58,9 +58,8 @@ public class CachedPredictionEngineProvider(
         {
             return _modelLoader.LoadModel<TData, TPrediction>(
                 _modelsDirectory,
-                generation,
-                decisionType,
-                version: null);
+                modelName,
+                decisionType);
         }
         catch (FileNotFoundException ex)
         {

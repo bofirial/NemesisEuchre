@@ -44,7 +44,7 @@ public class TrainerExecutorTests
         var result = await executor.ExecuteAsync(
             "./models",
             1000,
-            1,
+            "test-model",
             new Progress<TrainingProgress>(),
             cancellationToken: TestContext.Current.CancellationToken);
 
@@ -97,7 +97,7 @@ public class TrainerExecutorTests
             await executor.ExecuteAsync(
                 "./models",
                 1000,
-                1,
+                "test-model",
                 new Progress<TrainingProgress>(),
                 idvFilePath: tempFile,
                 cancellationToken: TestContext.Current.CancellationToken);
@@ -152,7 +152,7 @@ public class TrainerExecutorTests
         await executor.ExecuteAsync(
             "./models",
             1000,
-            1,
+            "test-model",
             new Progress<TrainingProgress>(),
             idvFilePath: null,
             cancellationToken: TestContext.Current.CancellationToken);
@@ -196,7 +196,7 @@ public class TrainerExecutorTests
         await executor.ExecuteAsync(
             "./models",
             1000,
-            1,
+            "test-model",
             new Progress<TrainingProgress>(),
             idvFilePath: "/nonexistent/path/file.idv",
             cancellationToken: TestContext.Current.CancellationToken);

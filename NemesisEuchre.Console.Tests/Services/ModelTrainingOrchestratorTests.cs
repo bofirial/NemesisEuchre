@@ -29,7 +29,7 @@ public class ModelTrainingOrchestratorTests
             DecisionType.CallTrump,
             "./models",
             0,
-            1,
+            "gen1",
             new Progress<TrainingProgress>(),
             cancellationToken: TestContext.Current.CancellationToken);
 
@@ -54,7 +54,7 @@ public class ModelTrainingOrchestratorTests
         mockTrainer.Setup(t => t.ExecuteAsync(
             It.IsAny<string>(),
             It.IsAny<int>(),
-            It.IsAny<int>(),
+            It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string?>(),
             It.IsAny<CancellationToken>()))
@@ -71,7 +71,7 @@ public class ModelTrainingOrchestratorTests
             DecisionType.CallTrump,
             "./models",
             1000,
-            1,
+            "gen1",
             new Progress<TrainingProgress>(),
             cancellationToken: TestContext.Current.CancellationToken);
 
@@ -96,7 +96,7 @@ public class ModelTrainingOrchestratorTests
         mockTrainer.Setup(t => t.ExecuteAsync(
             It.IsAny<string>(),
             It.IsAny<int>(),
-            It.IsAny<int>(),
+            It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string?>(),
             It.IsAny<CancellationToken>()))
@@ -113,7 +113,7 @@ public class ModelTrainingOrchestratorTests
             DecisionType.CallTrump,
             "./models",
             1000,
-            1,
+            "gen1",
             new Progress<TrainingProgress>(),
             cancellationToken: TestContext.Current.CancellationToken);
 
@@ -135,7 +135,7 @@ public class ModelTrainingOrchestratorTests
         mockTrainer1.Setup(t => t.ExecuteAsync(
             It.IsAny<string>(),
             It.IsAny<int>(),
-            It.IsAny<int>(),
+            It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string?>(),
             It.IsAny<CancellationToken>()))
@@ -146,7 +146,7 @@ public class ModelTrainingOrchestratorTests
         mockTrainer2.Setup(t => t.ExecuteAsync(
             It.IsAny<string>(),
             It.IsAny<int>(),
-            It.IsAny<int>(),
+            It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string?>(),
             It.IsAny<CancellationToken>()))
@@ -163,7 +163,7 @@ public class ModelTrainingOrchestratorTests
             DecisionType.All,
             "./models",
             1000,
-            1,
+            "gen1",
             new Progress<TrainingProgress>(),
             cancellationToken: TestContext.Current.CancellationToken);
 

@@ -15,7 +15,7 @@ public interface IModelPersistenceService
         ITransformer model,
         MLContext mlContext,
         string modelsDirectory,
-        int generation,
+        string modelName,
         string modelType,
         TrainingResult trainingResult,
         ModelMetadata metadata,
@@ -25,14 +25,13 @@ public interface IModelPersistenceService
 }
 
 public class ModelPersistenceService(
-    IModelVersionManager versionManager,
     ILogger<ModelPersistenceService> logger) : IModelPersistenceService
 {
     public async Task SaveModelAsync<TData>(
         ITransformer model,
         MLContext mlContext,
         string modelsDirectory,
-        int generation,
+        string modelName,
         string modelType,
         TrainingResult trainingResult,
         ModelMetadata metadata,
@@ -40,32 +39,30 @@ public class ModelPersistenceService(
         CancellationToken cancellationToken = default)
         where TData : class, new()
     {
-        ValidateSaveModelParameters(model, modelsDirectory, generation, trainingResult);
+        ValidateSaveModelParameters(model, modelsDirectory, modelName, trainingResult);
 
         EnsureDirectoryExists(modelsDirectory);
 
         var decisionType = modelType.ToLowerInvariant();
-        var version = DetermineNextVersion(modelsDirectory, generation, decisionType);
-        var modelPath = versionManager.GetModelPath(modelsDirectory, generation, decisionType, version);
 
-        await SaveModelFileAsync<TData>(model, mlContext, modelPath, generation, decisionType, version, cancellationToken);
-        await SaveMetadataAsync(modelPath, metadata, cancellationToken);
-        await SaveEvaluationReportAsync(modelPath, evaluationReport, cancellationToken);
+        var normalizedDecisionType = decisionType.ToLowerInvariant();
+        var fileName = $"{modelName}_{normalizedDecisionType}.zip";
+        var modelFilePath = Path.Combine(modelsDirectory, fileName);
+
+        await SaveModelFileAsync<TData>(model, mlContext, modelFilePath, modelName, decisionType, cancellationToken);
+        await SaveMetadataAsync(modelFilePath, metadata, cancellationToken);
+        await SaveEvaluationReportAsync(modelFilePath, evaluationReport, cancellationToken);
     }
 
     private static void ValidateSaveModelParameters(
         ITransformer model,
         string modelsDirectory,
-        int generation,
+        string modelName,
         TrainingResult trainingResult)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(modelsDirectory);
         ArgumentNullException.ThrowIfNull(trainingResult);
-
-        if (generation < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(generation), "Generation must be at least 1");
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(modelName);
 
         if (model == null)
         {
@@ -81,27 +78,18 @@ public class ModelPersistenceService(
         }
     }
 
-    private int DetermineNextVersion(string modelsDirectory, int generation, string decisionType)
-    {
-        LoggerMessages.LogDeterminingNextVersion(logger, generation, decisionType);
-        var version = versionManager.GetNextVersion(modelsDirectory, generation, decisionType);
-        LoggerMessages.LogExistingVersionsFound(logger, version - 1, generation, decisionType);
-        return version;
-    }
-
     private Task SaveModelFileAsync<TData>(
         ITransformer model,
         MLContext mlContext,
         string modelPath,
-        int generation,
+        string modelName,
         string decisionType,
-        int version,
         CancellationToken cancellationToken)
         where TData : class, new()
     {
         var schema = mlContext.Data.LoadFromEnumerable([new TData()]).Schema;
 
-        LoggerMessages.LogSavingModelWithVersion(logger, generation, decisionType, version);
+        LoggerMessages.LogSavingModel(logger, modelName, decisionType);
 
         return Task.Run(
             () =>

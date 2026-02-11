@@ -225,14 +225,14 @@ public static partial class LoggerMessages
     [LoggerMessage(
         EventId = 31,
         Level = LogLevel.Information,
-        Message = "Saving model as gen{Generation}_{DecisionType}_v{Version}.zip")]
-    public static partial void LogSavingModelWithVersion(ILogger logger, int generation, string decisionType, int version);
+        Message = "Saving model as {modelName}_{DecisionType}.zip")]
+    public static partial void LogSavingModel(ILogger logger, string modelName, string decisionType);
 
     [LoggerMessage(
         EventId = 32,
         Level = LogLevel.Information,
-        Message = "Loading model gen{Generation} {DecisionType} v{Version}")]
-    public static partial void LogLoadingModelWithVersion(ILogger logger, int generation, string decisionType, int version);
+        Message = "Loading model {modelName} {DecisionType}")]
+    public static partial void LogLoadingModelWithDecisionType(ILogger logger, string modelName, string decisionType);
 
     [LoggerMessage(
         EventId = 33,

@@ -47,7 +47,7 @@ public class Gen1TrainerBotTests
     public async Task CallTrumpAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
     {
         _mockEngineProvider
-            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1))
+            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "Gen1"))
             .Returns((PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>?)null);
 
         _mockRandom.Setup(x => x.NextInt(It.IsAny<int>())).Returns(0);
@@ -77,7 +77,7 @@ public class Gen1TrainerBotTests
     public async Task DiscardCardAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
     {
         _mockEngineProvider
-            .Setup(x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", 1))
+            .Setup(x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", "Gen1"))
             .Returns((PredictionEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>?)null);
 
         _mockRandom.Setup(x => x.NextInt(It.IsAny<int>())).Returns(0);
@@ -107,7 +107,7 @@ public class Gen1TrainerBotTests
     public async Task PlayCardAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
     {
         _mockEngineProvider
-            .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", 1))
+            .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", "Gen1"))
             .Returns((PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>?)null);
 
         _mockRandom.Setup(x => x.NextInt(It.IsAny<int>())).Returns(0);

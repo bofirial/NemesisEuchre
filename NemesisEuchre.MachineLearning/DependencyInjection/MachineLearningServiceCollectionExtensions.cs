@@ -24,7 +24,6 @@ public static class MachineLearningServiceCollectionExtensions
         services.AddSingleton<IIdvFileService, IdvFileService>();
         services.AddScoped<IDataSplitter, DataSplitter>();
         services.AddSingleton<IModelCache, ModelCache>();
-        services.AddSingleton<IModelVersionManager, ModelVersionManager>();
         services.AddSingleton<IModelLoader, ModelLoader>();
         services.AddSingleton<IPredictionEngineProvider, CachedPredictionEngineProvider>();
         services.AddScoped<IModelPersistenceService, ModelPersistenceService>();

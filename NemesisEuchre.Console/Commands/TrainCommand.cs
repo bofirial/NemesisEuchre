@@ -32,11 +32,8 @@ public class TrainCommand(
     [CliOption(Description = "Maximum training samples (0 = unlimited)")]
     public int SampleLimit { get; set; }
 
-    [CliOption(Description = "Generation number for models")]
-    public int Generation { get; set; } = 1;
-
     [CliOption(Description = "Load training data from IDV files with the given generation name (e.g. gen2)")]
-    public string? IdvName { get; set; }
+    public required string IdvName { get; set; }
 
     public async Task<int> RunAsync()
     {
@@ -54,7 +51,7 @@ public class TrainCommand(
             DecisionType,
             outputPath,
             SampleLimit,
-            Generation,
+            IdvName,
             ansiConsole,
             IdvName);
 
@@ -86,7 +83,7 @@ public class TrainCommand(
     {
         ansiConsole.WriteLine();
         ansiConsole.MarkupLine($"[dim]Output: {outputPath}[/]");
-        ansiConsole.MarkupLine($"[dim]Generation: {Generation}[/]");
+        ansiConsole.MarkupLine($"[dim]Model Name: {IdvName}[/]");
 
         if (SampleLimit > 0)
         {

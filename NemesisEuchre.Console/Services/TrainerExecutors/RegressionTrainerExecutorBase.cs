@@ -10,6 +10,21 @@ using NemesisEuchre.MachineLearning.Trainers;
 
 namespace NemesisEuchre.Console.Services.TrainerExecutors;
 
+public interface ITrainerExecutor
+{
+    string ModelType { get; }
+
+    DecisionType DecisionType { get; }
+
+    Task<ModelTrainingResult> ExecuteAsync(
+        string outputPath,
+        int sampleLimit,
+        string modelName,
+        IProgress<TrainingProgress> progress,
+        string? idvFilePath = null,
+        CancellationToken cancellationToken = default);
+}
+
 public abstract class RegressionTrainerExecutorBase<TTrainingData>(
     IModelTrainer<TTrainingData> trainer,
     ITrainingDataLoader<TTrainingData> dataLoader,
@@ -29,7 +44,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
     public async Task<ModelTrainingResult> ExecuteAsync(
         string outputPath,
         int sampleLimit,
-        int generation,
+        string modelName,
         IProgress<TrainingProgress> progress,
         string? idvFilePath = null,
         CancellationToken cancellationToken = default)
@@ -70,7 +85,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 75, "Training complete"));
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Saving, 75, "Saving model..."));
-            await _trainer.SaveModelAsync(outputPath, generation, trainingResult, cancellationToken);
+            await _trainer.SaveModelAsync(outputPath, modelName, trainingResult, cancellationToken);
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Complete, 100, "Complete"));
 
@@ -85,7 +100,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             return new ModelTrainingResult(
                 ModelType,
                 true,
-                ModelPath: Path.Combine(outputPath, $"{ModelType}_Gen{generation}.zip"),
+                ModelPath: Path.Combine(outputPath, $"{ModelType}_{modelName}.zip"),
                 MeanAbsoluteError: metrics.MeanAbsoluteError,
                 RSquared: metrics.RSquared);
         }

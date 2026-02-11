@@ -34,57 +34,57 @@ public class CachedPredictionEngineProviderTests
     [Fact]
     public void TryGetEngine_FirstCall_CallsModelLoader()
     {
-        _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1);
+        _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "gen1");
 
         _mockModelLoader.Verify(
             x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", 1, "CallTrump", null),
+                "./test-models", "gen1", "CallTrump"),
             Times.Once);
     }
 
     [Fact]
     public void TryGetEngine_SecondCall_UsesCache()
     {
-        _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1);
-        _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1);
+        _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "gen1");
+        _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "gen1");
 
         _mockModelLoader.Verify(
             x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", 1, "CallTrump", null),
+                "./test-models", "gen1", "CallTrump"),
             Times.Once);
     }
 
     [Fact]
     public void TryGetEngine_DifferentDecisionTypes_LoadsSeparateEngines()
     {
-        _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1);
-        _provider.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", 1);
+        _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "gen1");
+        _provider.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", "gen1");
 
         _mockModelLoader.Verify(
             x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", 1, "CallTrump", null),
+                "./test-models", "gen1", "CallTrump"),
             Times.Once);
 
         _mockModelLoader.Verify(
             x => x.LoadModel<DiscardCardTrainingData, DiscardCardRegressionPrediction>(
-                "./test-models", 1, "DiscardCard", null),
+                "./test-models", "gen1", "DiscardCard"),
             Times.Once);
     }
 
     [Fact]
-    public void TryGetEngine_DifferentGenerations_LoadsSeparateEngines()
+    public void TryGetEngine_DifferentModelNames_LoadsSeparateEngines()
     {
-        _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1);
-        _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 2);
+        _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "gen1");
+        _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "gen2");
 
         _mockModelLoader.Verify(
             x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", 1, "CallTrump", null),
+                "./test-models", "gen1", "CallTrump"),
             Times.Once);
 
         _mockModelLoader.Verify(
             x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", 2, "CallTrump", null),
+                "./test-models", "gen2", "CallTrump"),
             Times.Once);
     }
 
@@ -93,12 +93,12 @@ public class CachedPredictionEngineProviderTests
     {
         _mockModelLoader
             .Setup(x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", 1, "CallTrump", null))
+                "./test-models", "gen1", "CallTrump"))
             .Throws(new FileNotFoundException("Model not found"));
 
         _mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
 
-        var result = _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1);
+        var result = _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "gen1");
 
         result.Should().BeNull();
 
@@ -117,12 +117,12 @@ public class CachedPredictionEngineProviderTests
     {
         _mockModelLoader
             .Setup(x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", 1, "CallTrump", null))
+                "./test-models", "gen1", "CallTrump"))
             .Throws(new InvalidOperationException("Load failed"));
 
         _mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
 
-        var result = _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1);
+        var result = _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "gen1");
 
         result.Should().BeNull();
 
@@ -141,18 +141,18 @@ public class CachedPredictionEngineProviderTests
     {
         _mockModelLoader
             .Setup(x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", 1, "CallTrump", null))
+                "./test-models", "gen1", "CallTrump"))
             .Throws(new FileNotFoundException("Model not found"));
 
-        var result1 = _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1);
-        var result2 = _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1);
+        var result1 = _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "gen1");
+        var result2 = _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "gen1");
 
         result1.Should().BeNull();
         result2.Should().BeNull();
 
         _mockModelLoader.Verify(
             x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", 1, "CallTrump", null),
+                "./test-models", "gen1", "CallTrump"),
             Times.Once);
     }
 }

@@ -29,7 +29,7 @@ public interface IModelTrainer<TData>
 
     Task SaveModelAsync(
         string modelsDirectory,
-        int generation,
+        string modelName,
         TrainingResult trainingResult,
         CancellationToken cancellationToken = default);
 }
@@ -37,7 +37,6 @@ public interface IModelTrainer<TData>
 public abstract class RegressionModelTrainerBase<TData>(
     MLContext mlContext,
     IDataSplitter dataSplitter,
-    IModelVersionManager versionManager,
     IModelPersistenceService persistenceService,
     IOptions<MachineLearningOptions> options,
     ILogger logger) : IModelTrainer<TData>
@@ -46,8 +45,6 @@ public abstract class RegressionModelTrainerBase<TData>(
     protected MLContext MlContext { get; } = mlContext ?? throw new ArgumentNullException(nameof(mlContext));
 
     protected IDataSplitter DataSplitter { get; } = dataSplitter ?? throw new ArgumentNullException(nameof(dataSplitter));
-
-    protected IModelVersionManager VersionManager { get; } = versionManager ?? throw new ArgumentNullException(nameof(versionManager));
 
     protected IModelPersistenceService PersistenceService { get; } = persistenceService ?? throw new ArgumentNullException(nameof(persistenceService));
 
@@ -118,7 +115,7 @@ public abstract class RegressionModelTrainerBase<TData>(
 
     public Task SaveModelAsync(
         string modelsDirectory,
-        int generation,
+        string modelName,
         TrainingResult trainingResult,
         CancellationToken cancellationToken = default)
     {
@@ -127,8 +124,7 @@ public abstract class RegressionModelTrainerBase<TData>(
             throw new InvalidOperationException("No trained model to save. Call TrainAsync first.");
         }
 
-        var version = VersionManager.GetNextVersion(modelsDirectory, generation, GetModelType().ToLowerInvariant());
-        var metadata = CreateModelMetadata(generation, trainingResult, version);
+        var metadata = CreateModelMetadata(modelName, trainingResult);
         var evaluationReport = CreateEvaluationReport(
             trainingResult.ValidationMetrics as RegressionEvaluationMetrics ?? throw new InvalidOperationException("Expected RegressionEvaluationMetrics"),
             trainingResult.ValidationSamples);
@@ -137,7 +133,7 @@ public abstract class RegressionModelTrainerBase<TData>(
             TrainedModel,
             MlContext,
             modelsDirectory,
-            generation,
+            modelName,
             GetModelType(),
             trainingResult,
             metadata,
@@ -186,17 +182,15 @@ public abstract class RegressionModelTrainerBase<TData>(
     }
 
     private ModelMetadata CreateModelMetadata(
-        int generation,
-        TrainingResult trainingResult,
-        int version)
+        string modelName,
+        TrainingResult trainingResult)
     {
         var regressionMetrics = trainingResult.ValidationMetrics as RegressionEvaluationMetrics
             ?? throw new InvalidOperationException("Expected RegressionEvaluationMetrics");
 
         return new ModelMetadata(
             GetModelType(),
-            generation,
-            version,
+            modelName,
             DateTime.UtcNow,
             trainingResult.TrainingSamples,
             trainingResult.ValidationSamples,

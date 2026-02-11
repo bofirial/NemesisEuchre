@@ -36,6 +36,7 @@ public class TrainCommandTests
         {
             DecisionType = DecisionType.All,
             OutputPath = null,
+            IdvName = "gen1",
         };
 
         var exitCode = await command.RunAsync();
@@ -62,7 +63,7 @@ public class TrainCommandTests
             It.IsAny<DecisionType>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
-            It.IsAny<int>(),
+            It.IsAny<string>(),
             It.IsAny<Spectre.Console.IAnsiConsole>(),
             It.IsAny<string?>(),
             It.IsAny<CancellationToken>()))
@@ -79,6 +80,7 @@ public class TrainCommandTests
         {
             DecisionType = DecisionType.All,
             OutputPath = null,
+            IdvName = "gen1",
         };
 
         var exitCode = await command.RunAsync();
@@ -109,7 +111,7 @@ public class TrainCommandTests
             It.IsAny<DecisionType>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
-            It.IsAny<int>(),
+            It.IsAny<string>(),
             It.IsAny<Spectre.Console.IAnsiConsole>(),
             It.IsAny<string?>(),
             It.IsAny<CancellationToken>()))
@@ -126,6 +128,7 @@ public class TrainCommandTests
         {
             DecisionType = DecisionType.CallTrump,
             OutputPath = "./custom-models",
+            IdvName = "gen1",
         };
 
         var exitCode = await command.RunAsync();
@@ -147,7 +150,7 @@ public class TrainCommandTests
             DecisionType.CallTrump,
             "./custom-models",
             1000,
-            2,
+            "gen2",
             It.IsAny<Spectre.Console.IAnsiConsole>(),
             It.IsAny<string?>(),
             It.IsAny<CancellationToken>()))
@@ -165,7 +168,7 @@ public class TrainCommandTests
             DecisionType = DecisionType.CallTrump,
             OutputPath = "./custom-models",
             SampleLimit = 1000,
-            Generation = 2,
+            IdvName = "gen2",
         };
 
         await command.RunAsync();
@@ -175,7 +178,7 @@ public class TrainCommandTests
             DecisionType.CallTrump,
             "./custom-models",
             1000,
-            2,
+            "gen2",
             It.IsAny<Spectre.Console.IAnsiConsole>(),
             It.IsAny<string?>(),
             It.IsAny<CancellationToken>()),

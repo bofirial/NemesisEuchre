@@ -16,7 +16,7 @@ public interface IModelTrainingOrchestrator
         DecisionType decisionType,
         string outputPath,
         int sampleLimit,
-        int generation,
+        string modelName,
         IProgress<TrainingProgress> progress,
         string? idvName = null,
         CancellationToken cancellationToken = default);
@@ -32,7 +32,7 @@ public class ModelTrainingOrchestrator(
         DecisionType decisionType,
         string outputPath,
         int sampleLimit,
-        int generation,
+        string modelName,
         IProgress<TrainingProgress> progress,
         string? idvName = null,
         CancellationToken cancellationToken = default)
@@ -64,7 +64,7 @@ public class ModelTrainingOrchestrator(
             var result = await trainer.ExecuteAsync(
                 outputPath,
                 sampleLimit,
-                generation,
+                modelName,
                 progress,
                 idvFilePath,
                 cancellationToken);

@@ -2,8 +2,7 @@ namespace NemesisEuchre.MachineLearning.Models;
 
 public record ModelMetadata(
     string ModelType,
-    int Generation,
-    int Version,
+    string ModelName,
     DateTime TrainingDate,
     int TrainingSamples,
     int ValidationSamples,
