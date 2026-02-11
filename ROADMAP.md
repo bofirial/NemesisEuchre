@@ -488,8 +488,8 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 7. ~~IDV file validation (row count, schema check)~~
 8. ~~Add an IDV file side-car file to record meta data about the IDV file.  Examples would be (row counts, game count, deal count, trick count, actor types, timestamp, generation name)~~
 9. ~~Skip training models that already exist (ex. training Gen2 but gen2_calltrumpregression_v1 already exists)  Add a --force option to force retraining  Remove the _v1 suffix and logic?~~
-10. Log ILogger data to a file so it doesn't interrupt SpectreConsole output
-11. Add a way for SpectreConsole to output important ILogger data?
+10. ~~Log ILogger data to a file so it doesn't interrupt SpectreConsole output~~
+11. ~~Add a way for SpectreConsole to output important ILogger data?~~
 12. Add StopWatches to report durations for each phase of training
 
 ## Interactive Play 0.8
