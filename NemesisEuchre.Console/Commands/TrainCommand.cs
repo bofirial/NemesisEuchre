@@ -33,7 +33,7 @@ public class TrainCommand(
     public int SampleLimit { get; set; }
 
     [CliOption(Description = "Load training data from IDV files with the given generation name (e.g. gen2)")]
-    public required string IdvName { get; set; }
+    public required string ModelName { get; set; }
 
     public async Task<int> RunAsync()
     {
@@ -51,9 +51,9 @@ public class TrainCommand(
             DecisionType,
             outputPath,
             SampleLimit,
-            IdvName,
+            ModelName,
             ansiConsole,
-            IdvName);
+            ModelName);
 
         resultsRenderer.RenderTrainingResults(results, DecisionType);
 
@@ -83,7 +83,7 @@ public class TrainCommand(
     {
         ansiConsole.WriteLine();
         ansiConsole.MarkupLine($"[dim]Output: {outputPath}[/]");
-        ansiConsole.MarkupLine($"[dim]Model Name: {IdvName}[/]");
+        ansiConsole.MarkupLine($"[dim]Model Name: {ModelName}[/]");
 
         if (SampleLimit > 0)
         {
