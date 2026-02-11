@@ -490,7 +490,7 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 9. ~~Skip training models that already exist (ex. training Gen2 but gen2_calltrumpregression_v1 already exists)  Add a --force option to force retraining  Remove the _v1 suffix and logic?~~
 10. ~~Log ILogger data to a file so it doesn't interrupt SpectreConsole output~~
 11. ~~Add a way for SpectreConsole to output important ILogger data?~~
-12. Add StopWatches to report durations for each phase of training
+12. ~~Add StopWatches to report durations for each phase of training~~
 
 ## Interactive Play 0.8
 
