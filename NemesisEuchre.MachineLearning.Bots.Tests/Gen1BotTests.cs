@@ -27,7 +27,8 @@ public class Gen1BotTests
     private readonly Mock<IDiscardCardInferenceFeatureBuilder> _mockDiscardCardFeatureBuilder = new();
     private readonly Mock<IPlayCardInferenceFeatureBuilder> _mockPlayCardFeatureBuilder = new();
     private readonly Mock<IRandomNumberGenerator> _mockRandom = new();
-    private readonly Mock<ILogger<Gen1Bot>> _mockLogger = new();
+    private readonly Mock<ILogger<ModelBot>> _mockLogger = new();
+    private readonly Actor _actor = new(ActorType.Model, "Gen1");
 
     [Fact]
     public void Constructor_ShouldCallEngineProvider_ForAllThreeModels()
@@ -42,13 +43,14 @@ public class Gen1BotTests
             .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", "Gen1"))
             .Returns((PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>?)null);
 
-        _ = new Gen1Bot(
+        _ = new ModelBot(
             _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _actor);
 
         _mockEngineProvider.Verify(
             x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "Gen1"),
@@ -68,30 +70,32 @@ public class Gen1BotTests
             .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "Gen1"))
             .Returns((PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>?)null);
 
-        var bot = new Gen1Bot(
+        var bot = new ModelBot(
             _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _actor);
 
         bot.Should().NotBeNull();
-        bot.ActorType.Should().Be(ActorType.Gen1);
+        bot.ActorType.Should().Be(ActorType.Model);
     }
 
     [Fact]
     public void ActorType_ShouldReturnGen1()
     {
-        var bot = new Gen1Bot(
+        var bot = new ModelBot(
             _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _actor);
 
-        bot.ActorType.Should().Be(ActorType.Gen1);
+        bot.ActorType.Should().Be(ActorType.Model);
     }
 
     [Fact]
@@ -101,13 +105,14 @@ public class Gen1BotTests
             .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "Gen1"))
             .Returns((PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>?)null);
 
-        var bot = new Gen1Bot(
+        var bot = new ModelBot(
             _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _actor);
         var cardsInHand = GenerateCards(5);
         var upCard = GenerateCard();
         var validDecisions = new[] { CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp };
@@ -126,13 +131,14 @@ public class Gen1BotTests
     [Fact]
     public Task DiscardCardAsync_ShouldThrowException_WhenHandIsNot6Cards()
     {
-        var bot = new Gen1Bot(
+        var bot = new ModelBot(
             _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _actor);
         var cardsInHand = GenerateRelativeCards(5);
         var validCardsToDiscard = new[] { cardsInHand[0] };
 
@@ -155,13 +161,14 @@ public class Gen1BotTests
             .Setup(x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", "Gen1"))
             .Returns((PredictionEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>?)null);
 
-        var bot = new Gen1Bot(
+        var bot = new ModelBot(
             _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _actor);
         var cardsInHand = GenerateRelativeCards(6);
         var validCardsToDiscard = new[] { cardsInHand[0], cardsInHand[1] };
 
@@ -183,13 +190,14 @@ public class Gen1BotTests
             .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", "Gen1"))
             .Returns((PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>?)null);
 
-        var bot = new Gen1Bot(
+        var bot = new ModelBot(
             _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _actor);
         var cardsInHand = GenerateRelativeCards(5);
         var validCardsToPlay = new[] { cardsInHand[0], cardsInHand[1] };
         var playedCards = new Dictionary<RelativePlayerPosition, RelativeCard>();

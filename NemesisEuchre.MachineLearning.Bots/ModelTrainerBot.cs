@@ -7,26 +7,30 @@ using NemesisEuchre.GameEngine.Selection;
 using NemesisEuchre.GameEngine.Utilities;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Loading;
+using NemesisEuchre.MachineLearning.Options;
 
 namespace NemesisEuchre.MachineLearning.Bots;
 
-public class Gen3TrainerBot(
+public class ModelTrainerBot(
     IPredictionEngineProvider engineProvider,
     ICallTrumpInferenceFeatureBuilder callTrumpFeatureBuilder,
     IDiscardCardInferenceFeatureBuilder discardCardFeatureBuilder,
     IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
     IRandomNumberGenerator random,
-    ILogger<Gen3TrainerBot> logger) : Gen3Bot(
+    MachineLearningOptions machineLearningOptions,
+    ILogger<ModelTrainerBot> logger,
+    Actor actor) : ModelBot(
         engineProvider,
         callTrumpFeatureBuilder,
         discardCardFeatureBuilder,
         playCardFeatureBuilder,
         random,
-        logger)
+        logger,
+        actor)
 {
-    private const float Temperature = 0.2f;
+    public override ActorType ActorType => ActorType.ModelTrainer;
 
-    public override ActorType ActorType => ActorType.Gen1Trainer;
+    private float Temperature => Actor.Temperature != default ? Actor.Temperature : machineLearningOptions.ExplorationTemperature;
 
     public override async Task<CallTrumpDecisionContext> CallTrumpAsync(
         Card[] cardsInHand,

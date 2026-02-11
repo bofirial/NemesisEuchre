@@ -21,7 +21,7 @@ public class PlayerActorResolverTests
         chadActorMock.Setup(x => x.ActorType).Returns(ActorType.Chad);
 
         var actors = new[] { chaosActorMock.Object, chadActorMock.Object };
-        var resolver = new PlayerActorResolver(actors);
+        var resolver = new PlayerActorResolver(actors, []);
 
         var player = new DealPlayer { Actor = new Actor(ActorType.Chaos, null) };
 
@@ -43,7 +43,7 @@ public class PlayerActorResolverTests
         betaActorMock.Setup(x => x.ActorType).Returns(ActorType.Beta);
 
         var actors = new[] { chaosActorMock.Object, chadActorMock.Object, betaActorMock.Object };
-        var resolver = new PlayerActorResolver(actors);
+        var resolver = new PlayerActorResolver(actors, []);
 
         var player = new DealPlayer { Actor = new Actor(ActorType.Chad, null) };
 

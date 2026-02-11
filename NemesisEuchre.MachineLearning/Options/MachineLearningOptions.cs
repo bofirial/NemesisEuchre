@@ -36,6 +36,9 @@ public class MachineLearningOptions
     [Range(1, 1000)]
     public int MinimumExampleCountPerLeaf { get; set; } = 20;
 
+    [Range(0.001f, 5.0f)]
+    public float ExplorationTemperature { get; set; } = 0.2f;
+
     [Range(0, int.MaxValue)]
     public int RandomSeed { get; set; } = 42;
 }

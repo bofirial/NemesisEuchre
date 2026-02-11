@@ -107,13 +107,13 @@ public class EntityToGameMapperTests
         {
             if (gp.PlayerPositionId == (int)PlayerPosition.North)
             {
-                gp.ActorTypeId = (int)ActorType.Gen1;
+                gp.ActorTypeId = (int)ActorType.Model;
             }
         }
 
         var game = _mapper.Map(entity, includeDecisions: false);
 
-        game.Players[PlayerPosition.North].Actor.ActorType.Should().Be(ActorType.Gen1);
+        game.Players[PlayerPosition.North].Actor.ActorType.Should().Be(ActorType.Model);
     }
 
     [Fact]

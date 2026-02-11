@@ -65,12 +65,12 @@ public class DefaultCommand(
         ansiConsole.MarkupLine($"[dim]Playing a game between 2 {Team1 ?? ActorType.Chaos}Bots and 2 {Team2 ?? ActorType.Chaos}Bots...[/]");
         ansiConsole.WriteLine();
 
-        var team1ActorTypes = Team1.HasValue ? new[] { Team1.Value, Team1.Value } : null;
-        var team2ActorTypes = Team2.HasValue ? new[] { Team2.Value, Team2.Value } : null;
+        var team1Actors = Team1.HasValue ? new[] { new Actor(Team1.Value), new Actor(Team1.Value) } : null;
+        var team2Actors = Team2.HasValue ? new[] { new Actor(Team2.Value), new Actor(Team2.Value) } : null;
 
         return ansiConsole.Status()
             .Spinner(Spinner.Known.Dots)
-            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(persistenceOptions: persistenceOptions, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes, showDecisions: ShowDecisions));
+            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(persistenceOptions: persistenceOptions, team1Actors: team1Actors, team2Actors: team2Actors, showDecisions: ShowDecisions));
     }
 
     private async Task RunBatchGamesAsync(GamePersistenceOptions persistenceOptions)
@@ -86,10 +86,10 @@ public class DefaultCommand(
 
                 var progressReporter = new BatchProgressReporter(playingTask, savingTask);
 
-                var team1ActorTypes = Team1.HasValue ? new[] { Team1.Value, Team1.Value } : null;
-                var team2ActorTypes = Team2.HasValue ? new[] { Team2.Value, Team2.Value } : null;
+                var team1Actors = Team1.HasValue ? new[] { new Actor(Team1.Value), new Actor(Team1.Value) } : null;
+                var team2Actors = Team2.HasValue ? new[] { new Actor(Team2.Value), new Actor(Team2.Value) } : null;
 
-                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, persistenceOptions: persistenceOptions, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes);
+                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, persistenceOptions: persistenceOptions, team1Actors: team1Actors, team2Actors: team2Actors);
             });
 
         gameResultsRenderer.RenderBatchResults(results);

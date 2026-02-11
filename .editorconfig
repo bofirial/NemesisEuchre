@@ -402,9 +402,6 @@ dotnet_diagnostic.SA1200.severity = none  # Using directives must be placed corr
 dotnet_diagnostic.MA0048.severity = suggestion  # File name must match type name (can be too strict)
 dotnet_diagnostic.MA0165.severity = none  # Make interpolated string (conflicts with RCS1214, only useful with variables)
 
-# SonarAnalyzer - Adjust for modern C# patterns
-dotnet_diagnostic.S3358.severity = suggestion  # Ternary operators should not be nested (sometimes useful)
-
 # Roslynator - Performance and style
 dotnet_diagnostic.RCS1018.severity = suggestion  # Add accessibility modifiers (sometimes obvious from context)
 

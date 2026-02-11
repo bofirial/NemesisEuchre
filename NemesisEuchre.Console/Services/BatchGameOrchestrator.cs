@@ -18,8 +18,8 @@ public interface IBatchGameOrchestrator
         int numberOfGames,
         IBatchProgressReporter? progressReporter = null,
         GamePersistenceOptions? persistenceOptions = null,
-        ActorType[]? team1ActorTypes = null,
-        ActorType[]? team2ActorTypes = null,
+        Actor[]? team1Actors = null,
+        Actor[]? team2Actors = null,
         CancellationToken cancellationToken = default);
 }
 
@@ -37,8 +37,8 @@ public class BatchGameOrchestrator(
         int numberOfGames,
         IBatchProgressReporter? progressReporter = null,
         GamePersistenceOptions? persistenceOptions = null,
-        ActorType[]? team1ActorTypes = null,
-        ActorType[]? team2ActorTypes = null,
+        Actor[]? team1Actors = null,
+        Actor[]? team2Actors = null,
         CancellationToken cancellationToken = default)
     {
         if (numberOfGames <= 0)
@@ -49,11 +49,11 @@ public class BatchGameOrchestrator(
         const int maxGamesPerSubBatch = 10000;
         if (subBatchStrategy.ShouldUseSubBatches(numberOfGames, maxGamesPerSubBatch))
         {
-            return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, persistenceOptions, cancellationToken, team1ActorTypes, team2ActorTypes).ConfigureAwait(false);
+            return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, persistenceOptions, cancellationToken, team1Actors, team2Actors).ConfigureAwait(false);
         }
 
         var stopwatch = Stopwatch.StartNew();
-        var results = await ExecuteSingleBatchAsync(numberOfGames, progressReporter, persistenceOptions, team1ActorTypes, team2ActorTypes, cancellationToken).ConfigureAwait(false);
+        var results = await ExecuteSingleBatchAsync(numberOfGames, progressReporter, persistenceOptions, team1Actors, team2Actors, cancellationToken).ConfigureAwait(false);
         stopwatch.Stop();
 
         return new BatchGameResults
@@ -100,8 +100,8 @@ public class BatchGameOrchestrator(
         int numberOfGames,
         IBatchProgressReporter? progressReporter,
         GamePersistenceOptions? persistenceOptions,
-        ActorType[]? team1ActorTypes,
-        ActorType[]? team2ActorTypes,
+        Actor[]? team1Actors,
+        Actor[]? team2Actors,
         CancellationToken cancellationToken)
     {
         var channelCapacity = _persistenceOptions.BatchSize * 4;
@@ -119,7 +119,7 @@ public class BatchGameOrchestrator(
         await Parallel.ForEachAsync(
             Enumerable.Range(0, numberOfGames),
             parallelOptions,
-            async (gameNumber, ct) => await RunSingleGameAsync(gameNumber, state, progressReporter, team1ActorTypes, team2ActorTypes, ct).ConfigureAwait(false)).ConfigureAwait(false);
+            async (gameNumber, ct) => await RunSingleGameAsync(gameNumber, state, progressReporter, team1Actors, team2Actors, ct).ConfigureAwait(false)).ConfigureAwait(false);
 
         state.Writer.Complete();
         await consumerTask.ConfigureAwait(false);
@@ -133,8 +133,8 @@ public class BatchGameOrchestrator(
         IBatchProgressReporter? progressReporter,
         GamePersistenceOptions? persistenceOptions,
         CancellationToken cancellationToken,
-        ActorType[]? team1ActorTypes = null,
-        ActorType[]? team2ActorTypes = null)
+        Actor[]? team1Actors = null,
+        Actor[]? team2Actors = null)
     {
         var stopwatch = Stopwatch.StartNew();
         var completedSoFar = 0;
@@ -161,8 +161,8 @@ public class BatchGameOrchestrator(
                 gamesInThisBatch,
                 subProgressReporter,
                 persistenceOptions,
-                team1ActorTypes,
-                team2ActorTypes,
+                team1Actors,
+                team2Actors,
                 cancellationToken).ConfigureAwait(false);
 
             totalTeam1Wins += batchResults.Team1Wins;
@@ -198,15 +198,15 @@ public class BatchGameOrchestrator(
         int gameNumber,
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
-        ActorType[]? team1ActorTypes = null,
-        ActorType[]? team2ActorTypes = null,
+        Actor[]? team1Actors = null,
+        Actor[]? team2Actors = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
             using var scope = serviceScopeFactory.CreateScope();
             var gameOrchestrator = scope.ServiceProvider.GetRequiredService<IGameOrchestrator>();
-            var game = await gameOrchestrator.OrchestrateGameAsync(team1ActorTypes, team2ActorTypes).ConfigureAwait(false);
+            var game = await gameOrchestrator.OrchestrateGameAsync(team1Actors, team2Actors).ConfigureAwait(false);
 
             await state.ExecuteWithLockAsync(
                 () =>

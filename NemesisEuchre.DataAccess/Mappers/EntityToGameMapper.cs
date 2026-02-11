@@ -27,7 +27,7 @@ public class EntityToGameMapper(IEntityToDealMapper dealMapper) : IEntityToGameM
             game.Players[position] = new Player
             {
                 Position = position,
-                Actor = new Actor((ActorType)gp.ActorTypeId, null),
+                Actor = new Actor((ActorType)gp.ActorTypeId),
             };
         }
 

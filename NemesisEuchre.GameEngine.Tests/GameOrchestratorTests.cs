@@ -70,7 +70,7 @@ public class GameOrchestratorTests
     {
         var game = new Game();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         SetupGameToEndImmediately(game);
@@ -86,7 +86,7 @@ public class GameOrchestratorTests
         var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -107,7 +107,7 @@ public class GameOrchestratorTests
         var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -128,7 +128,7 @@ public class GameOrchestratorTests
         var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -162,7 +162,7 @@ public class GameOrchestratorTests
             new(),
         };
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         var dealIndex = 0;
@@ -189,7 +189,7 @@ public class GameOrchestratorTests
     {
         var game = new Game();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         SetupGameToEndImmediately(game);
@@ -206,7 +206,7 @@ public class GameOrchestratorTests
         var firstDeal = new Deal();
         var secondDeal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -233,7 +233,7 @@ public class GameOrchestratorTests
         var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -253,7 +253,7 @@ public class GameOrchestratorTests
         var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -282,7 +282,7 @@ public class GameOrchestratorTests
         var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -303,7 +303,7 @@ public class GameOrchestratorTests
     {
         var game = new Game();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         SetupGameToEndImmediately(game);
@@ -328,7 +328,7 @@ public class GameOrchestratorTests
         var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(It.IsAny<Game>(), It.IsAny<Deal?>()))
@@ -351,7 +351,7 @@ public class GameOrchestratorTests
         var game = new Game();
         var deal = new Deal();
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         _dealFactoryMock.Setup(x => x.CreateDealAsync(game, null))
@@ -383,7 +383,7 @@ public class GameOrchestratorTests
             new(),
         };
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         var dealIndex = 0;
@@ -422,7 +422,7 @@ public class GameOrchestratorTests
             new(),
         };
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>()))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>()))
             .ReturnsAsync(game);
 
         var dealIndex = 0;
@@ -478,52 +478,52 @@ public class GameOrchestratorTests
     }
 
     [Fact]
-    public async Task OrchestrateGameAsync_WithTeam1ActorTypes_PassesToGameFactory()
+    public async Task OrchestrateGameAsync_WithTeam1Actors_PassesToGameFactory()
     {
         var game = new Game();
-        var team1ActorTypes = new[] { ActorType.Gen1, ActorType.Gen1 };
+        var team1Actors = new[] { new Actor(ActorType.Model, null), new Actor(ActorType.Model, null) };
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(team1ActorTypes, null))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(team1Actors, null))
             .ReturnsAsync(game);
 
         SetupGameToEndImmediately(game);
 
-        await _sut.OrchestrateGameAsync(team1ActorTypes);
+        await _sut.OrchestrateGameAsync(team1Actors);
 
-        _gameFactoryMock.Verify(x => x.CreateGameAsync(team1ActorTypes, null), Times.Once);
+        _gameFactoryMock.Verify(x => x.CreateGameAsync(team1Actors, null), Times.Once);
     }
 
     [Fact]
-    public async Task OrchestrateGameAsync_WithTeam2ActorTypes_PassesToGameFactory()
+    public async Task OrchestrateGameAsync_WithTeam2Actors_PassesToGameFactory()
     {
         var game = new Game();
-        var team2ActorTypes = new[] { ActorType.Chaos, ActorType.Chaos };
+        var team2Actors = new[] { new Actor(ActorType.Chaos, null), new Actor(ActorType.Chaos, null) };
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(null, team2ActorTypes))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(null, team2Actors))
             .ReturnsAsync(game);
 
         SetupGameToEndImmediately(game);
 
-        await _sut.OrchestrateGameAsync(null, team2ActorTypes);
+        await _sut.OrchestrateGameAsync(null, team2Actors);
 
-        _gameFactoryMock.Verify(x => x.CreateGameAsync(null, team2ActorTypes), Times.Once);
+        _gameFactoryMock.Verify(x => x.CreateGameAsync(null, team2Actors), Times.Once);
     }
 
     [Fact]
-    public async Task OrchestrateGameAsync_WithBothTeamActorTypes_PassesToGameFactory()
+    public async Task OrchestrateGameAsync_WithBothTeamActors_PassesToGameFactory()
     {
         var game = new Game();
-        var team1ActorTypes = new[] { ActorType.Gen1, ActorType.Gen1 };
-        var team2ActorTypes = new[] { ActorType.Chaos, ActorType.Chaos };
+        var team1Actors = new[] { new Actor(ActorType.Model, null), new Actor(ActorType.Model, null) };
+        var team2Actors = new[] { new Actor(ActorType.Chaos, null), new Actor(ActorType.Chaos, null) };
 
-        _gameFactoryMock.Setup(x => x.CreateGameAsync(team1ActorTypes, team2ActorTypes))
+        _gameFactoryMock.Setup(x => x.CreateGameAsync(team1Actors, team2Actors))
             .ReturnsAsync(game);
 
         SetupGameToEndImmediately(game);
 
-        await _sut.OrchestrateGameAsync(team1ActorTypes, team2ActorTypes);
+        await _sut.OrchestrateGameAsync(team1Actors, team2Actors);
 
-        _gameFactoryMock.Verify(x => x.CreateGameAsync(team1ActorTypes, team2ActorTypes), Times.Once);
+        _gameFactoryMock.Verify(x => x.CreateGameAsync(team1Actors, team2Actors), Times.Once);
     }
 
     private void SetupGameToEndImmediately(Game game)
