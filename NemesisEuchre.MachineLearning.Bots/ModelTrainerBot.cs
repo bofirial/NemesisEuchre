@@ -30,7 +30,7 @@ public class ModelTrainerBot(
 {
     public override ActorType ActorType => ActorType.ModelTrainer;
 
-    private float Temperature => Actor.Temperature != default ? Actor.Temperature : machineLearningOptions.ExplorationTemperature;
+    private float Temperature => Actor.ExplorationTemperature != default ? Actor.ExplorationTemperature : machineLearningOptions.ExplorationTemperature;
 
     public override async Task<CallTrumpDecisionContext> CallTrumpAsync(
         Card[] cardsInHand,
