@@ -10,5 +10,7 @@ public static class MachineLearningBotsServiceCollectionExtensions
     {
         services.AddScoped<IPlayerActor, Gen1Bot>();
         services.AddScoped<IPlayerActor, Gen1TrainerBot>();
+        services.AddScoped<IPlayerActor, Gen2Bot>();
+        services.AddScoped<IPlayerActor, Gen3Bot>();
     }
 }
