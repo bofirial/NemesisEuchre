@@ -40,7 +40,11 @@ public class TrainerExecutorTests
             var mockIdvFileService = new Mock<IIdvFileService>();
             var mockDataView = new Mock<Microsoft.ML.IDataView>();
 
+            mockDataView.Setup(d => d.GetRowCount()).Returns(100L);
+
             mockIdvFileService.Setup(s => s.Load(tempFile)).Returns(mockDataView.Object);
+            mockIdvFileService.Setup(s => s.LoadMetadata($"{tempFile}.meta.json"))
+                .Returns(new IdvFileMetadata("test", DecisionType.CallTrump, 100, 10, 50, 200, [], DateTime.UtcNow));
 
             mockTrainer.Setup(t => t.TrainAsync(
                 It.IsAny<Microsoft.ML.IDataView>(),
@@ -118,5 +122,121 @@ public class TrainerExecutorTests
             cancellationToken: TestContext.Current.CancellationToken);
 
         result.Success.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithMatchingMetadata_Succeeds()
+    {
+        var tempFile = Path.GetTempFileName();
+        try
+        {
+            var mockTrainer = new Mock<IModelTrainer<CallTrumpTrainingData>>();
+            var mockIdvFileService = new Mock<IIdvFileService>();
+            var mockDataView = new Mock<Microsoft.ML.IDataView>();
+
+            mockDataView.Setup(d => d.GetRowCount()).Returns(50L);
+
+            mockIdvFileService.Setup(s => s.Load(tempFile)).Returns(mockDataView.Object);
+            mockIdvFileService.Setup(s => s.LoadMetadata($"{tempFile}.meta.json"))
+                .Returns(new IdvFileMetadata("gen1", DecisionType.CallTrump, 50, 5, 25, 100, [], DateTime.UtcNow));
+
+            mockTrainer.Setup(t => t.TrainAsync(
+                It.IsAny<Microsoft.ML.IDataView>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new TrainingResult(null!, new RegressionEvaluationMetrics(0, 0, 0, 0, 0), 50, 35, 15));
+
+            var executor = new CallTrumpRegressionTrainerExecutor(
+                mockTrainer.Object,
+                mockIdvFileService.Object,
+                Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
+
+            var result = await executor.ExecuteAsync(
+                "./models",
+                1000,
+                "test-model",
+                new Progress<TrainingProgress>(),
+                idvFilePath: tempFile,
+                cancellationToken: TestContext.Current.CancellationToken);
+
+            result.Success.Should().BeTrue();
+            mockIdvFileService.Verify(s => s.LoadMetadata($"{tempFile}.meta.json"), Times.Once);
+        }
+        finally
+        {
+            File.Delete(tempFile);
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithMissingMetadata_ReturnsFailureResult()
+    {
+        var tempFile = Path.GetTempFileName();
+        try
+        {
+            var mockTrainer = new Mock<IModelTrainer<CallTrumpTrainingData>>();
+            var mockIdvFileService = new Mock<IIdvFileService>();
+
+            mockIdvFileService.Setup(s => s.LoadMetadata($"{tempFile}.meta.json"))
+                .Throws(new FileNotFoundException("IDV metadata file not found"));
+
+            var executor = new CallTrumpRegressionTrainerExecutor(
+                mockTrainer.Object,
+                mockIdvFileService.Object,
+                Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
+
+            var result = await executor.ExecuteAsync(
+                "./models",
+                1000,
+                "test-model",
+                new Progress<TrainingProgress>(),
+                idvFilePath: tempFile,
+                cancellationToken: TestContext.Current.CancellationToken);
+
+            result.Success.Should().BeFalse();
+            result.ErrorMessage.Should().Contain("metadata");
+        }
+        finally
+        {
+            File.Delete(tempFile);
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithRowCountMismatch_ReturnsFailureResult()
+    {
+        var tempFile = Path.GetTempFileName();
+        try
+        {
+            var mockTrainer = new Mock<IModelTrainer<CallTrumpTrainingData>>();
+            var mockIdvFileService = new Mock<IIdvFileService>();
+            var mockDataView = new Mock<Microsoft.ML.IDataView>();
+
+            mockDataView.Setup(d => d.GetRowCount()).Returns(100L);
+
+            mockIdvFileService.Setup(s => s.Load(tempFile)).Returns(mockDataView.Object);
+            mockIdvFileService.Setup(s => s.LoadMetadata($"{tempFile}.meta.json"))
+                .Returns(new IdvFileMetadata("gen1", DecisionType.CallTrump, 999, 5, 25, 100, [], DateTime.UtcNow));
+
+            var executor = new CallTrumpRegressionTrainerExecutor(
+                mockTrainer.Object,
+                mockIdvFileService.Object,
+                Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
+
+            var result = await executor.ExecuteAsync(
+                "./models",
+                1000,
+                "test-model",
+                new Progress<TrainingProgress>(),
+                idvFilePath: tempFile,
+                cancellationToken: TestContext.Current.CancellationToken);
+
+            result.Success.Should().BeFalse();
+            result.ErrorMessage.Should().Contain("mismatch");
+        }
+        finally
+        {
+            File.Delete(tempFile);
+        }
     }
 }

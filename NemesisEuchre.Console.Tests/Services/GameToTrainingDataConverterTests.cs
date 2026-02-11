@@ -42,7 +42,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_WithValidGames_ProducesCorrectTrainingData()
     {
-        var game = new Game { GameStatus = GameStatus.Complete };
+        var game = CreateGameWithPlayers();
         var games = new List<Game> { game };
 
         var callTrumpDecision = new CallTrumpDecisionEntity { RelativeDealPoints = 2 };
@@ -82,7 +82,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_FiltersOutDecisionsWithNullRelativeDealPoints()
     {
-        var game = new Game { GameStatus = GameStatus.Complete };
+        var game = CreateGameWithPlayers();
         var games = new List<Game> { game };
 
         var validCallTrumpDecision = new CallTrumpDecisionEntity { RelativeDealPoints = 2 };
@@ -150,7 +150,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_WhenFeatureEngineerThrows_ContinuesProcessing()
     {
-        var game = new Game { GameStatus = GameStatus.Complete };
+        var game = CreateGameWithPlayers();
         var games = new List<Game> { game };
 
         var callTrumpDecision1 = new CallTrumpDecisionEntity { RelativeDealPoints = 2 };
@@ -187,7 +187,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_WhenMultipleFeatureEngineersThrow_ReturnsEmptyLists()
     {
-        var game = new Game { GameStatus = GameStatus.Complete };
+        var game = CreateGameWithPlayers();
         var games = new List<Game> { game };
 
         var callTrumpDecision = new CallTrumpDecisionEntity { RelativeDealPoints = 2 };
@@ -229,8 +229,8 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_CallsMapperForEachGame()
     {
-        var game1 = new Game { GameStatus = GameStatus.Complete };
-        var game2 = new Game { GameStatus = GameStatus.Complete };
+        var game1 = CreateGameWithPlayers();
+        var game2 = CreateGameWithPlayers();
         var games = new List<Game> { game1, game2 };
 
         var gameEntity1 = new GameEntity { Deals = [] };
@@ -248,7 +248,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_CallsCorrectFeatureEngineerForEachDecisionType()
     {
-        var game = new Game { GameStatus = GameStatus.Complete };
+        var game = CreateGameWithPlayers();
         var games = new List<Game> { game };
 
         var callTrumpDecision = new CallTrumpDecisionEntity { RelativeDealPoints = 2 };
@@ -284,7 +284,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_WithMultipleDealsAndDecisions_ProcessesAll()
     {
-        var game = new Game { GameStatus = GameStatus.Complete };
+        var game = CreateGameWithPlayers();
         var games = new List<Game> { game };
 
         var callTrumpDecision1 = new CallTrumpDecisionEntity { RelativeDealPoints = 2 };
@@ -329,7 +329,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_WithSuccessfulConversion_ReturnsTrainingData()
     {
-        var game = new Game { GameStatus = GameStatus.Complete };
+        var game = CreateGameWithPlayers();
         var games = new List<Game> { game };
 
         var gameEntity = new GameEntity
@@ -349,5 +349,93 @@ public class GameToTrainingDataConverterTests
         var result = _converter.Convert(games);
 
         result.CallTrumpData.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void Convert_ReturnsStats_WithCorrectGameCount()
+    {
+        var game1 = CreateGameWithPlayers();
+        var game2 = CreateGameWithPlayers();
+        var games = new List<Game> { game1, game2 };
+
+        _mockMapper.Setup(m => m.Map(It.IsAny<Game>())).Returns(new GameEntity { Deals = [] });
+
+        var result = _converter.Convert(games);
+
+        result.Stats.GameCount.Should().Be(2);
+    }
+
+    [Fact]
+    public void Convert_ReturnsStats_WithCorrectDealAndTrickCounts()
+    {
+        var game = CreateGameWithPlayers();
+        game.CompletedDeals.Add(new Deal
+        {
+            CompletedTricks = [new Trick(), new Trick(), new Trick()],
+        });
+        game.CompletedDeals.Add(new Deal
+        {
+            CompletedTricks = [new Trick(), new Trick()],
+        });
+        var games = new List<Game> { game };
+
+        _mockMapper.Setup(m => m.Map(It.IsAny<Game>())).Returns(new GameEntity { Deals = [] });
+
+        var result = _converter.Convert(games);
+
+        result.Stats.DealCount.Should().Be(2);
+        result.Stats.TrickCount.Should().Be(5);
+    }
+
+    [Fact]
+    public void Convert_ReturnsStats_WithUniqueActors()
+    {
+        var actor1 = new Actor(ActorType.Chaos);
+        var actor2 = new Actor(ActorType.Model, "gen1", 0.1f);
+
+        var game1 = new Game { GameStatus = GameStatus.Complete };
+        game1.Players[PlayerPosition.South] = new Player { Actor = actor1 };
+        game1.Players[PlayerPosition.North] = new Player { Actor = actor1 };
+        game1.Players[PlayerPosition.East] = new Player { Actor = actor2 };
+        game1.Players[PlayerPosition.West] = new Player { Actor = actor2 };
+
+        var game2 = new Game { GameStatus = GameStatus.Complete };
+        game2.Players[PlayerPosition.South] = new Player { Actor = actor1 };
+        game2.Players[PlayerPosition.North] = new Player { Actor = actor2 };
+        game2.Players[PlayerPosition.East] = new Player { Actor = actor1 };
+        game2.Players[PlayerPosition.West] = new Player { Actor = actor2 };
+
+        var games = new List<Game> { game1, game2 };
+
+        _mockMapper.Setup(m => m.Map(It.IsAny<Game>())).Returns(new GameEntity { Deals = [] });
+
+        var result = _converter.Convert(games);
+
+        result.Stats.Actors.Should().HaveCount(2);
+        result.Stats.Actors.Should().Contain(actor1);
+        result.Stats.Actors.Should().Contain(actor2);
+    }
+
+    [Fact]
+    public void Convert_WithEmptyGameList_ReturnsZeroStats()
+    {
+        var games = new List<Game>();
+
+        var result = _converter.Convert(games);
+
+        result.Stats.GameCount.Should().Be(0);
+        result.Stats.DealCount.Should().Be(0);
+        result.Stats.TrickCount.Should().Be(0);
+        result.Stats.Actors.Should().BeEmpty();
+    }
+
+    private static Game CreateGameWithPlayers()
+    {
+        var game = new Game { GameStatus = GameStatus.Complete };
+        game.Players[PlayerPosition.South] = new Player { Actor = new Actor(ActorType.Chaos) };
+        game.Players[PlayerPosition.North] = new Player { Actor = new Actor(ActorType.Chaos) };
+        game.Players[PlayerPosition.East] = new Player { Actor = new Actor(ActorType.Chaos) };
+        game.Players[PlayerPosition.West] = new Player { Actor = new Actor(ActorType.Chaos) };
+        return game;
     }
 }

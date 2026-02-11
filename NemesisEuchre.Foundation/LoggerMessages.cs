@@ -12,7 +12,7 @@ public static partial class LoggerMessages
 
     [LoggerMessage(
         EventId = 2,
-        Level = LogLevel.Debug,
+        Level = LogLevel.Information,
         Message = "Persisting completed game with status: {GameStatus}")]
     public static partial void LogPersistingCompletedGame(
         ILogger logger,
@@ -20,7 +20,7 @@ public static partial class LoggerMessages
 
     [LoggerMessage(
         EventId = 3,
-        Level = LogLevel.Debug,
+        Level = LogLevel.Information,
         Message = "Game persisted successfully with ID: {GameId}")]
     public static partial void LogGamePersistedSuccessfully(
         ILogger logger,
@@ -42,13 +42,13 @@ public static partial class LoggerMessages
 
     [LoggerMessage(
         EventId = 6,
-        Level = LogLevel.Debug,
+        Level = LogLevel.Information,
         Message = "Persisting batch of {BatchSize} completed games")]
     public static partial void LogPersistingBatchedGames(ILogger logger, int batchSize);
 
     [LoggerMessage(
         EventId = 7,
-        Level = LogLevel.Debug,
+        Level = LogLevel.Information,
         Message = "Batch of {BatchSize} games persisted successfully")]
     public static partial void LogBatchGamesPersisted(ILogger logger, int batchSize);
 
@@ -375,13 +375,13 @@ public static partial class LoggerMessages
 
     [LoggerMessage(
         EventId = 56,
-        Level = LogLevel.Debug,
+        Level = LogLevel.Information,
         Message = "Bulk insert starting: {ParentCount} parent rows (EF Core), {LeafCount} leaf rows (SqlBulkCopy)")]
     public static partial void LogBulkInsertStarting(ILogger logger, int parentCount, int leafCount);
 
     [LoggerMessage(
         EventId = 57,
-        Level = LogLevel.Debug,
+        Level = LogLevel.Information,
         Message = "Bulk insert completed: {ParentCount} parent rows, {LeafCount} leaf rows in {Elapsed}")]
     public static partial void LogBulkInsertCompleted(ILogger logger, int parentCount, int leafCount, TimeSpan elapsed);
 
@@ -415,4 +415,23 @@ public static partial class LoggerMessages
         Level = LogLevel.Warning,
         Message = "IDV training data generation skipped for single game")]
     public static partial void LogIdvSkippedSingleGame(ILogger logger);
+
+    // EventID 63-65: IDV metadata operations
+    [LoggerMessage(
+        EventId = 63,
+        Level = LogLevel.Information,
+        Message = "IDV metadata saved: {MetadataPath}")]
+    public static partial void LogIdvMetadataSaved(ILogger logger, string metadataPath);
+
+    [LoggerMessage(
+        EventId = 64,
+        Level = LogLevel.Information,
+        Message = "IDV metadata validated: {FilePath} ({RowCount} rows, {GameCount} games)")]
+    public static partial void LogIdvMetadataValidated(ILogger logger, string filePath, int rowCount, int gameCount);
+
+    [LoggerMessage(
+        EventId = 65,
+        Level = LogLevel.Error,
+        Message = "IDV metadata verification failed: {MetadataPath}")]
+    public static partial void LogIdvMetadataVerificationFailed(ILogger logger, string metadataPath);
 }

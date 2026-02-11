@@ -3,6 +3,8 @@ using FluentAssertions;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 
+using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Services;
 
 namespace NemesisEuchre.MachineLearning.Tests.Services;
@@ -152,6 +154,96 @@ public class IdvFileServiceTests : IDisposable
         var act = () => _service.Load(string.Empty);
 
         act.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void SaveMetadata_CreatesFile()
+    {
+        var metadataPath = Path.Combine(_tempDirectory, "test.idv.meta.json");
+        var metadata = new IdvFileMetadata(
+            "gen1",
+            DecisionType.Play,
+            100,
+            10,
+            50,
+            200,
+            [new ActorInfo(ActorType.Chaos, null, 0f)],
+            DateTime.UtcNow);
+
+        _service.SaveMetadata(metadata, metadataPath);
+
+        File.Exists(metadataPath).Should().BeTrue();
+    }
+
+    [Fact]
+    public void SaveMetadata_WithNullMetadata_ThrowsArgumentNullException()
+    {
+        var metadataPath = Path.Combine(_tempDirectory, "null.meta.json");
+
+        var act = () => _service.SaveMetadata(null!, metadataPath);
+
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void LoadMetadata_WithNonExistentFile_ThrowsFileNotFoundException()
+    {
+        var metadataPath = Path.Combine(_tempDirectory, "nonexistent.meta.json");
+
+        var act = () => _service.LoadMetadata(metadataPath);
+
+        act.Should().Throw<FileNotFoundException>();
+    }
+
+    [Fact]
+    public void LoadMetadata_WithNullPath_ThrowsArgumentException()
+    {
+        var act = () => _service.LoadMetadata(null!);
+
+        act.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void SaveAndLoadMetadata_Roundtrip_PreservesAllFields()
+    {
+        var metadataPath = Path.Combine(_tempDirectory, "roundtrip.meta.json");
+        var actors = new List<ActorInfo>
+        {
+            new(ActorType.Chaos, null, 0f),
+            new(ActorType.Model, "gen1-v1", 0.15f),
+        };
+        var createdAt = new DateTime(2026, 2, 11, 12, 0, 0, DateTimeKind.Utc);
+        var metadata = new IdvFileMetadata("gen1", DecisionType.CallTrump, 500, 50, 250, 1000, actors, createdAt);
+
+        _service.SaveMetadata(metadata, metadataPath);
+        var loaded = _service.LoadMetadata(metadataPath);
+
+        loaded.GenerationName.Should().Be("gen1");
+        loaded.DecisionType.Should().Be(DecisionType.CallTrump);
+        loaded.RowCount.Should().Be(500);
+        loaded.GameCount.Should().Be(50);
+        loaded.DealCount.Should().Be(250);
+        loaded.TrickCount.Should().Be(1000);
+        loaded.CreatedAtUtc.Should().Be(createdAt);
+        loaded.Actors.Should().HaveCount(2);
+        loaded.Actors[0].ActorType.Should().Be(ActorType.Chaos);
+        loaded.Actors[0].ModelName.Should().BeNull();
+        loaded.Actors[0].ExplorationTemperature.Should().Be(0f);
+        loaded.Actors[1].ActorType.Should().Be(ActorType.Model);
+        loaded.Actors[1].ModelName.Should().Be("gen1-v1");
+        loaded.Actors[1].ExplorationTemperature.Should().BeApproximately(0.15f, 0.001f);
+    }
+
+    [Fact]
+    public void SaveAndLoadMetadata_Roundtrip_PreservesEmptyActorList()
+    {
+        var metadataPath = Path.Combine(_tempDirectory, "empty-actors.meta.json");
+        var metadata = new IdvFileMetadata("gen1", DecisionType.Discard, 0, 0, 0, 0, [], DateTime.UtcNow);
+
+        _service.SaveMetadata(metadata, metadataPath);
+        var loaded = _service.LoadMetadata(metadataPath);
+
+        loaded.Actors.Should().BeEmpty();
     }
 
     public void Dispose()

@@ -55,10 +55,22 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
                 throw new FileNotFoundException($"IDV file not found: {idvFilePath}", idvFilePath);
             }
 
+            var metadataPath = $"{idvFilePath}.meta.json";
+            var metadata = _idvFileService.LoadMetadata(metadataPath);
+
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.LoadingData, 0, "Streaming training data..."));
 
             LoggerMessages.LogIdvFileLoading(_logger, idvFilePath);
             var dataView = _idvFileService.Load(idvFilePath);
+
+            var rowCount = (int)(dataView.GetRowCount() ?? -1);
+            if (rowCount != metadata.RowCount)
+            {
+                throw new InvalidOperationException(
+                    $"IDV row count mismatch for {idvFilePath}: metadata says {metadata.RowCount} but IDataView has {rowCount} rows");
+            }
+
+            LoggerMessages.LogIdvMetadataValidated(_logger, idvFilePath, metadata.RowCount, metadata.GameCount);
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 25, "Training model (IDV)..."));
             var trainingResult = await _trainer.TrainAsync(dataView, preShuffled: true, cancellationToken);

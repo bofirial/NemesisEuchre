@@ -4,6 +4,7 @@ using NemesisEuchre.Console.Models;
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.DataAccess.Mappers;
 using NemesisEuchre.Foundation;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Models;
@@ -29,8 +30,20 @@ public class GameToTrainingDataConverter(
         var discardCardData = new List<DiscardCardTrainingData>();
         var errorCount = 0;
 
+        var dealCount = 0;
+        var trickCount = 0;
+        var actors = new HashSet<Actor>();
+
         foreach (var game in games)
         {
+            dealCount += game.CompletedDeals.Count;
+            trickCount += game.CompletedDeals.Sum(d => d.CompletedTricks.Count);
+
+            foreach (var player in game.Players.Values)
+            {
+                actors.Add(player.Actor);
+            }
+
             var gameEntity = gameToEntityMapper.Map(game);
 
             foreach (var deal in gameEntity.Deals)
@@ -96,6 +109,7 @@ public class GameToTrainingDataConverter(
             LoggerMessages.LogTrainingDataLoadComplete(logger, playCardData.Count + callTrumpData.Count + discardCardData.Count, errorCount);
         }
 
-        return new TrainingDataBatch(playCardData, callTrumpData, discardCardData);
+        var stats = new TrainingDataBatchStats(games.Count, dealCount, trickCount, actors);
+        return new TrainingDataBatch(playCardData, callTrumpData, discardCardData, stats);
     }
 }

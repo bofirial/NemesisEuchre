@@ -1,4 +1,9 @@
+using System.Text.Json;
+
 using Microsoft.ML;
+
+using NemesisEuchre.DataAccess.Configuration;
+using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.Services;
 
@@ -8,6 +13,10 @@ public interface IIdvFileService
         where T : class;
 
     IDataView Load(string filePath);
+
+    void SaveMetadata(IdvFileMetadata metadata, string metadataPath);
+
+    IdvFileMetadata LoadMetadata(string metadataPath);
 }
 
 public class IdvFileService(MLContext mlContext) : IIdvFileService
@@ -29,5 +38,28 @@ public class IdvFileService(MLContext mlContext) : IIdvFileService
         ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
 
         return mlContext.Data.LoadFromBinary(filePath);
+    }
+
+    public void SaveMetadata(IdvFileMetadata metadata, string metadataPath)
+    {
+        ArgumentNullException.ThrowIfNull(metadata);
+        ArgumentException.ThrowIfNullOrWhiteSpace(metadataPath);
+
+        var json = JsonSerializer.Serialize(metadata, JsonSerializationOptions.WithNaNHandling);
+        File.WriteAllText(metadataPath, json);
+    }
+
+    public IdvFileMetadata LoadMetadata(string metadataPath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(metadataPath);
+
+        if (!File.Exists(metadataPath))
+        {
+            throw new FileNotFoundException($"IDV metadata file not found: {metadataPath}", metadataPath);
+        }
+
+        var json = File.ReadAllText(metadataPath);
+        return JsonSerializer.Deserialize<IdvFileMetadata>(json, JsonSerializationOptions.WithNaNHandling)
+            ?? throw new InvalidOperationException($"Failed to deserialize IDV metadata from: {metadataPath}");
     }
 }

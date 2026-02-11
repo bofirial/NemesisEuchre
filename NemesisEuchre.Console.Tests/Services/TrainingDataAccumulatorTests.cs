@@ -8,6 +8,7 @@ using Moq;
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.DataAccess.Options;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Services;
 
@@ -18,12 +19,26 @@ public class TrainingDataAccumulatorTests : IDisposable
     private readonly string _tempDirectory;
     private readonly Mock<IIdvFileService> _mockIdvFileService = new();
     private readonly TrainingDataAccumulator _accumulator;
+    private readonly Dictionary<string, IdvFileMetadata> _lastSavedMetadata = [];
     private bool _disposed;
 
     public TrainingDataAccumulatorTests()
     {
         _tempDirectory = Path.Combine(Path.GetTempPath(), $"TrainingDataAccumulatorTests_{Guid.NewGuid()}");
         var options = Options.Create(new PersistenceOptions { IdvOutputPath = _tempDirectory });
+
+        _mockIdvFileService
+            .Setup(x => x.LoadMetadata(It.IsAny<string>()))
+            .Returns((string path) =>
+            {
+                var saved = _lastSavedMetadata.GetValueOrDefault(path);
+                return saved ?? new IdvFileMetadata("test", DecisionType.Play, 0, 0, 0, 0, [], DateTime.UtcNow);
+            });
+
+        _mockIdvFileService
+            .Setup(x => x.SaveMetadata(It.IsAny<IdvFileMetadata>(), It.IsAny<string>()))
+            .Callback((IdvFileMetadata metadata, string path) => _lastSavedMetadata[path] = metadata);
+
         _accumulator = new TrainingDataAccumulator(
             _mockIdvFileService.Object,
             options,
@@ -60,7 +75,7 @@ public class TrainingDataAccumulatorTests : IDisposable
     [Fact]
     public void Add_ShouldNotThrow_WhenBatchIsEmpty()
     {
-        var emptyBatch = new TrainingDataBatch([], [], []);
+        var emptyBatch = new TrainingDataBatch([], [], [], new TrainingDataBatchStats(0, 0, 0, []));
 
         var act = () => _accumulator.Add(emptyBatch);
 
@@ -192,6 +207,114 @@ public class TrainingDataAccumulatorTests : IDisposable
             Times.Once);
     }
 
+    [Fact]
+    public void Save_ShouldCallSaveMetadata_ForEachIdvFile()
+    {
+        var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
+        _accumulator.Add(batch);
+
+        _accumulator.Save("gen-1");
+
+        _mockIdvFileService.Verify(
+            x => x.SaveMetadata(It.IsAny<IdvFileMetadata>(), It.IsAny<string>()),
+            Times.Exactly(3));
+    }
+
+    [Fact]
+    public void Save_ShouldCallSaveMetadata_WithCorrectRowCounts()
+    {
+        var batch = CreateBatch(playCardCount: 5, callTrumpCount: 3, discardCardCount: 2);
+        _accumulator.Add(batch);
+
+        _accumulator.Save("gen-1");
+
+        _mockIdvFileService.Verify(
+            x => x.SaveMetadata(
+                It.Is<IdvFileMetadata>(m => m.RowCount == 5 && m.DecisionType == DecisionType.Play),
+                It.IsAny<string>()),
+            Times.Once);
+        _mockIdvFileService.Verify(
+            x => x.SaveMetadata(
+                It.Is<IdvFileMetadata>(m => m.RowCount == 3 && m.DecisionType == DecisionType.CallTrump),
+                It.IsAny<string>()),
+            Times.Once);
+        _mockIdvFileService.Verify(
+            x => x.SaveMetadata(
+                It.Is<IdvFileMetadata>(m => m.RowCount == 2 && m.DecisionType == DecisionType.Discard),
+                It.IsAny<string>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public void Save_ShouldCallSaveMetadata_WithAccumulatedGameCount()
+    {
+        var stats1 = new TrainingDataBatchStats(10, 50, 200, []);
+        var batch1 = new TrainingDataBatch([], [], [], stats1);
+        var stats2 = new TrainingDataBatchStats(5, 25, 100, []);
+        var batch2 = new TrainingDataBatch([], [], [], stats2);
+
+        _accumulator.Add(batch1);
+        _accumulator.Add(batch2);
+        _accumulator.Save("gen-1");
+
+        _mockIdvFileService.Verify(
+            x => x.SaveMetadata(
+                It.Is<IdvFileMetadata>(m => m.GameCount == 15 && m.DealCount == 75 && m.TrickCount == 300),
+                It.IsAny<string>()),
+            Times.Exactly(3));
+    }
+
+    [Fact]
+    public void Save_ShouldCallSaveMetadata_WithCorrectFilePaths()
+    {
+        var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
+        _accumulator.Add(batch);
+
+        _accumulator.Save("gen-1");
+
+        _mockIdvFileService.Verify(
+            x => x.SaveMetadata(
+                It.IsAny<IdvFileMetadata>(),
+                It.Is<string>(path => path.EndsWith("gen-1_PlayCard.idv.meta.json"))),
+            Times.Once);
+        _mockIdvFileService.Verify(
+            x => x.SaveMetadata(
+                It.IsAny<IdvFileMetadata>(),
+                It.Is<string>(path => path.EndsWith("gen-1_CallTrump.idv.meta.json"))),
+            Times.Once);
+        _mockIdvFileService.Verify(
+            x => x.SaveMetadata(
+                It.IsAny<IdvFileMetadata>(),
+                It.Is<string>(path => path.EndsWith("gen-1_DiscardCard.idv.meta.json"))),
+            Times.Once);
+    }
+
+    [Fact]
+    public void Add_ShouldAccumulateStats_AcrossMultipleBatches()
+    {
+        var actor1 = new Actor(ActorType.Chaos);
+        var actor2 = new Actor(ActorType.Model, "gen1", 0.1f);
+
+        var stats1 = new TrainingDataBatchStats(3, 15, 60, [actor1]);
+        var batch1 = new TrainingDataBatch([], [], [], stats1);
+        var stats2 = new TrainingDataBatchStats(2, 10, 40, [actor1, actor2]);
+        var batch2 = new TrainingDataBatch([], [], [], stats2);
+
+        _accumulator.Add(batch1);
+        _accumulator.Add(batch2);
+        _accumulator.Save("gen-1");
+
+        _mockIdvFileService.Verify(
+            x => x.SaveMetadata(
+                It.Is<IdvFileMetadata>(m =>
+                    m.GameCount == 5 &&
+                    m.DealCount == 25 &&
+                    m.TrickCount == 100 &&
+                    m.Actors.Count == 2),
+                It.IsAny<string>()),
+            Times.Exactly(3));
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)
@@ -228,9 +351,12 @@ public class TrainingDataAccumulatorTests : IDisposable
             .Select(_ => new DiscardCardTrainingData { Card1Rank = 1.0f })
             .ToList();
 
+        var stats = new TrainingDataBatchStats(1, 5, 20, [new Actor(ActorType.Chaos)]);
+
         return new TrainingDataBatch(
             playCardData,
             callTrumpData,
-            discardCardData);
+            discardCardData,
+            stats);
     }
 }
