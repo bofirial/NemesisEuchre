@@ -19,6 +19,8 @@ public interface IBatchProgressReporter
 
 internal sealed class BatchProgressReporter(ProgressTask playingTask, ProgressTask savingTask, ProgressTask? idvSaveTask = null) : IBatchProgressReporter
 {
+    private bool _idvSaveStarted;
+
     public void ReportGameCompleted(int count)
     {
         playingTask.Value = count;
@@ -31,15 +33,18 @@ internal sealed class BatchProgressReporter(ProgressTask playingTask, ProgressTa
 
     public void ReportIdvSaveStarted()
     {
-        idvSaveTask?.StartTask();
+        if (idvSaveTask != null && !_idvSaveStarted)
+        {
+            idvSaveTask.StartTask();
+            _idvSaveStarted = true;
+        }
     }
 
     public void ReportIdvSaveCompleted()
     {
-        if (idvSaveTask != null)
+        if (idvSaveTask is { } task)
         {
-            idvSaveTask.Value = idvSaveTask.MaxValue;
-            idvSaveTask.StopTask();
+            task.Value = task.MaxValue;
         }
     }
 }
