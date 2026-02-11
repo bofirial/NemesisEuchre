@@ -32,7 +32,10 @@ public class TrainCommand(
     [CliOption(Description = "Maximum training samples (0 = unlimited)")]
     public int SampleLimit { get; set; }
 
-    [CliOption(Description = "Load training data from IDV files with the given generation name (e.g. gen2)")]
+    [CliOption(Description = "Load training data from IDV files with the given generation name (e.g. {gen2}_CallTrump.idv)")]
+    public required string Source { get; set; }
+
+    [CliOption(Description = "Name of the model to create (e.g. {gen1}_calltrumpregression.zip)")]
     public required string ModelName { get; set; }
 
     public async Task<int> RunAsync()
@@ -53,7 +56,7 @@ public class TrainCommand(
             SampleLimit,
             ModelName,
             ansiConsole,
-            ModelName);
+            Source);
 
         resultsRenderer.RenderTrainingResults(results, DecisionType);
 

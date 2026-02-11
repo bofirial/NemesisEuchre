@@ -37,6 +37,7 @@ public class TrainCommandTests
             DecisionType = DecisionType.All,
             OutputPath = null,
             ModelName = "gen1",
+            Source = "gen1",
         };
 
         var exitCode = await command.RunAsync();
@@ -81,6 +82,7 @@ public class TrainCommandTests
             DecisionType = DecisionType.All,
             OutputPath = null,
             ModelName = "gen1",
+            Source = "gen1",
         };
 
         var exitCode = await command.RunAsync();
@@ -129,6 +131,7 @@ public class TrainCommandTests
             DecisionType = DecisionType.CallTrump,
             OutputPath = "./custom-models",
             ModelName = "gen1",
+            Source = "gen1",
         };
 
         var exitCode = await command.RunAsync();
@@ -169,6 +172,7 @@ public class TrainCommandTests
             OutputPath = "./custom-models",
             SampleLimit = 1000,
             ModelName = "gen2",
+            Source = "gen2",
         };
 
         await command.RunAsync();
