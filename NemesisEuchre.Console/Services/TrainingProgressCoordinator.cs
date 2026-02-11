@@ -16,6 +16,7 @@ public interface ITrainingProgressCoordinator
         string modelName,
         IAnsiConsole console,
         string idvName,
+        bool allowOverwrite = false,
         CancellationToken cancellationToken = default);
 }
 
@@ -28,6 +29,7 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
         string modelName,
         IAnsiConsole console,
         string idvName,
+        bool allowOverwrite = false,
         CancellationToken cancellationToken = default)
     {
         return console.Progress()
@@ -76,7 +78,8 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
                     sampleLimit,
                     modelName,
                     progress,
-                    idvName);
+                    idvName,
+                    allowOverwrite);
             });
     }
 }

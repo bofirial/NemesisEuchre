@@ -13,8 +13,11 @@ using NemesisEuchre.Foundation.Constants;
 
 namespace NemesisEuchre.Console.Tests.Services;
 
-public class ModelTrainingOrchestratorTests
+public class ModelTrainingOrchestratorTests : IDisposable
 {
+    private readonly string _tempDirectory = Path.Combine(Path.GetTempPath(), $"ModelTrainingOrchestratorTests_{Guid.NewGuid()}");
+    private bool _disposed;
+
     [Fact]
     public async Task TrainModelsAsync_WhenNoTrainersFound_ReturnsEmptyResults()
     {
@@ -174,5 +177,187 @@ public class ModelTrainingOrchestratorTests
         results.SuccessfulModels.Should().Be(1);
         results.FailedModels.Should().Be(1);
         results.Results.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task TrainModelsAsync_ThrowsInvalidOperationException_WhenModelFileExists()
+    {
+        Directory.CreateDirectory(_tempDirectory);
+        await File.WriteAllTextAsync(Path.Combine(_tempDirectory, "gen1_testmodel.zip"), "existing", TestContext.Current.CancellationToken);
+
+        var orchestrator = CreateOrchestratorWithTrainer("TestModel", DecisionType.CallTrump);
+
+        var act = () => orchestrator.TrainModelsAsync(
+            DecisionType.CallTrump,
+            _tempDirectory,
+            0,
+            "gen1",
+            new Progress<TrainingProgress>(),
+            "gen1",
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*Model files already exist*--overwrite*");
+    }
+
+    [Fact]
+    public async Task TrainModelsAsync_ThrowsInvalidOperationException_WhenMetadataFileExists()
+    {
+        Directory.CreateDirectory(_tempDirectory);
+        await File.WriteAllTextAsync(Path.Combine(_tempDirectory, "gen1_testmodel.json"), "existing", TestContext.Current.CancellationToken);
+
+        var orchestrator = CreateOrchestratorWithTrainer("TestModel", DecisionType.CallTrump);
+
+        var act = () => orchestrator.TrainModelsAsync(
+            DecisionType.CallTrump,
+            _tempDirectory,
+            0,
+            "gen1",
+            new Progress<TrainingProgress>(),
+            "gen1",
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*Model files already exist*--overwrite*");
+    }
+
+    [Fact]
+    public async Task TrainModelsAsync_ThrowsInvalidOperationException_WhenEvaluationFileExists()
+    {
+        Directory.CreateDirectory(_tempDirectory);
+        await File.WriteAllTextAsync(Path.Combine(_tempDirectory, "gen1_testmodel.evaluation.json"), "existing", TestContext.Current.CancellationToken);
+
+        var orchestrator = CreateOrchestratorWithTrainer("TestModel", DecisionType.CallTrump);
+
+        var act = () => orchestrator.TrainModelsAsync(
+            DecisionType.CallTrump,
+            _tempDirectory,
+            0,
+            "gen1",
+            new Progress<TrainingProgress>(),
+            "gen1",
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*Model files already exist*--overwrite*");
+    }
+
+    [Fact]
+    public async Task TrainModelsAsync_DoesNotCallExecuteAsync_WhenGuardFails()
+    {
+        Directory.CreateDirectory(_tempDirectory);
+        await File.WriteAllTextAsync(Path.Combine(_tempDirectory, "gen1_testmodel.zip"), "existing", TestContext.Current.CancellationToken);
+
+        var mockTrainer = new Mock<ITrainerExecutor>();
+        mockTrainer.Setup(t => t.ModelType).Returns("TestModel");
+        mockTrainer.Setup(t => t.DecisionType).Returns(DecisionType.CallTrump);
+
+        var mockFactory = new Mock<ITrainerFactory>();
+        mockFactory.Setup(f => f.GetTrainers(DecisionType.CallTrump))
+            .Returns([mockTrainer.Object]);
+
+        var orchestrator = new ModelTrainingOrchestrator(
+            mockFactory.Object, Options.Create(new PersistenceOptions()), Mock.Of<ILogger<ModelTrainingOrchestrator>>());
+
+        var act = () => orchestrator.TrainModelsAsync(
+            DecisionType.CallTrump,
+            _tempDirectory,
+            0,
+            "gen1",
+            new Progress<TrainingProgress>(),
+            "gen1",
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await act.Should().ThrowAsync<InvalidOperationException>();
+        mockTrainer.Verify(
+            t => t.ExecuteAsync(
+                It.IsAny<string>(),
+                It.IsAny<int>(),
+                It.IsAny<string>(),
+                It.IsAny<IProgress<TrainingProgress>>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task TrainModelsAsync_Succeeds_WhenFilesExistAndAllowOverwriteIsTrue()
+    {
+        Directory.CreateDirectory(_tempDirectory);
+        await File.WriteAllTextAsync(Path.Combine(_tempDirectory, "gen1_testmodel.zip"), "existing", TestContext.Current.CancellationToken);
+        await File.WriteAllTextAsync(Path.Combine(_tempDirectory, "gen1_testmodel.json"), "existing", TestContext.Current.CancellationToken);
+
+        var successResult = new ModelTrainingResult("TestModel", true, ModelPath: "path.zip");
+        var mockTrainer = new Mock<ITrainerExecutor>();
+        mockTrainer.Setup(t => t.ModelType).Returns("TestModel");
+        mockTrainer.Setup(t => t.DecisionType).Returns(DecisionType.CallTrump);
+        mockTrainer.Setup(t => t.ExecuteAsync(
+            It.IsAny<string>(),
+            It.IsAny<int>(),
+            It.IsAny<string>(),
+            It.IsAny<IProgress<TrainingProgress>>(),
+            It.IsAny<string>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(successResult);
+
+        var mockFactory = new Mock<ITrainerFactory>();
+        mockFactory.Setup(f => f.GetTrainers(DecisionType.CallTrump))
+            .Returns([mockTrainer.Object]);
+
+        var orchestrator = new ModelTrainingOrchestrator(
+            mockFactory.Object, Options.Create(new PersistenceOptions()), Mock.Of<ILogger<ModelTrainingOrchestrator>>());
+
+        var results = await orchestrator.TrainModelsAsync(
+            DecisionType.CallTrump,
+            _tempDirectory,
+            0,
+            "gen1",
+            new Progress<TrainingProgress>(),
+            "gen1",
+            allowOverwrite: true,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        results.SuccessfulModels.Should().Be(1);
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing && Directory.Exists(_tempDirectory))
+            {
+                try
+                {
+                    Directory.Delete(_tempDirectory, true);
+                }
+#pragma warning disable S108
+                catch
+                {
+                }
+#pragma warning restore S108
+            }
+
+            _disposed = true;
+        }
+    }
+
+    private static ModelTrainingOrchestrator CreateOrchestratorWithTrainer(string modelType, DecisionType decisionType)
+    {
+        var mockTrainer = new Mock<ITrainerExecutor>();
+        mockTrainer.Setup(t => t.ModelType).Returns(modelType);
+        mockTrainer.Setup(t => t.DecisionType).Returns(decisionType);
+
+        var mockFactory = new Mock<ITrainerFactory>();
+        mockFactory.Setup(f => f.GetTrainers(decisionType))
+            .Returns([mockTrainer.Object]);
+
+        return new ModelTrainingOrchestrator(
+            mockFactory.Object, Options.Create(new PersistenceOptions()), Mock.Of<ILogger<ModelTrainingOrchestrator>>());
     }
 }

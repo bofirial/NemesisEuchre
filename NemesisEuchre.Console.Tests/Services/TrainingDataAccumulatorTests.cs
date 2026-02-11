@@ -315,6 +315,97 @@ public class TrainingDataAccumulatorTests : IDisposable
             Times.Exactly(3));
     }
 
+    [Fact]
+    public void Save_ThrowsInvalidOperationException_WhenIdvFileExists()
+    {
+        Directory.CreateDirectory(_tempDirectory);
+        File.WriteAllText(Path.Combine(_tempDirectory, "gen1_PlayCard.idv"), "existing");
+
+        var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
+        _accumulator.Add(batch);
+
+        var act = () => _accumulator.Save("gen1");
+
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*IDV files already exist*--overwrite*");
+    }
+
+    [Fact]
+    public void Save_ThrowsInvalidOperationException_WhenMetadataFileExists()
+    {
+        Directory.CreateDirectory(_tempDirectory);
+        File.WriteAllText(Path.Combine(_tempDirectory, "gen1_CallTrump.idv.meta.json"), "existing");
+
+        var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
+        _accumulator.Add(batch);
+
+        var act = () => _accumulator.Save("gen1");
+
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*IDV files already exist*--overwrite*");
+    }
+
+    [Fact]
+    public void Save_ListsAllConflictingFiles_InExceptionMessage()
+    {
+        Directory.CreateDirectory(_tempDirectory);
+        File.WriteAllText(Path.Combine(_tempDirectory, "gen1_PlayCard.idv"), "existing");
+        File.WriteAllText(Path.Combine(_tempDirectory, "gen1_CallTrump.idv.meta.json"), "existing");
+        File.WriteAllText(Path.Combine(_tempDirectory, "gen1_DiscardCard.idv"), "existing");
+
+        var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
+        _accumulator.Add(batch);
+
+        var act = () => _accumulator.Save("gen1");
+
+        act.Should().Throw<InvalidOperationException>()
+            .Which.Message.Should()
+            .Contain("gen1_PlayCard.idv").And
+            .Contain("gen1_CallTrump.idv.meta.json").And
+            .Contain("gen1_DiscardCard.idv");
+    }
+
+    [Fact]
+    public void Save_DoesNotWriteAnyFiles_WhenGuardFails()
+    {
+        Directory.CreateDirectory(_tempDirectory);
+        File.WriteAllText(Path.Combine(_tempDirectory, "gen1_PlayCard.idv"), "existing");
+
+        var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
+        _accumulator.Add(batch);
+
+        var act = () => _accumulator.Save("gen1");
+
+        act.Should().Throw<InvalidOperationException>();
+        _mockIdvFileService.Verify(
+            x => x.Save(It.IsAny<List<PlayCardTrainingData>>(), It.IsAny<string>()),
+            Times.Never);
+        _mockIdvFileService.Verify(
+            x => x.Save(It.IsAny<List<CallTrumpTrainingData>>(), It.IsAny<string>()),
+            Times.Never);
+        _mockIdvFileService.Verify(
+            x => x.Save(It.IsAny<List<DiscardCardTrainingData>>(), It.IsAny<string>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public void Save_Succeeds_WhenFilesExistAndAllowOverwriteIsTrue()
+    {
+        Directory.CreateDirectory(_tempDirectory);
+        File.WriteAllText(Path.Combine(_tempDirectory, "gen1_PlayCard.idv"), "existing");
+        File.WriteAllText(Path.Combine(_tempDirectory, "gen1_CallTrump.idv.meta.json"), "existing");
+
+        var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
+        _accumulator.Add(batch);
+
+        var act = () => _accumulator.Save("gen1", allowOverwrite: true);
+
+        act.Should().NotThrow();
+        _mockIdvFileService.Verify(
+            x => x.Save(It.IsAny<List<PlayCardTrainingData>>(), It.IsAny<string>()),
+            Times.Once);
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)

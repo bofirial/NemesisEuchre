@@ -14,7 +14,7 @@ public interface ITrainingDataAccumulator
 {
     void Add(TrainingDataBatch batch);
 
-    void Save(string generationName);
+    void Save(string generationName, bool allowOverwrite = false);
 }
 
 public class TrainingDataAccumulator(
@@ -42,13 +42,34 @@ public class TrainingDataAccumulator(
         _actors.UnionWith(batch.Stats.Actors);
     }
 
-    public void Save(string generationName)
+    public void Save(string generationName, bool allowOverwrite = false)
     {
         var outputPath = persistenceOptions.Value.IdvOutputPath;
 
         if (!Directory.Exists(outputPath))
         {
             Directory.CreateDirectory(outputPath);
+        }
+
+        string[] suffixes = ["PlayCard", "CallTrump", "DiscardCard"];
+
+        if (!allowOverwrite)
+        {
+            var conflictingFiles = suffixes
+                .SelectMany(s => new[]
+                {
+                    Path.Combine(outputPath, $"{generationName}_{s}.idv"),
+                    Path.Combine(outputPath, $"{generationName}_{s}.idv.meta.json"),
+                })
+                .Where(File.Exists)
+                .ToList();
+
+            if (conflictingFiles.Count > 0)
+            {
+                throw new InvalidOperationException(
+                    $"IDV files already exist and would be overwritten. Use --overwrite to replace them.{Environment.NewLine}" +
+                    string.Join(Environment.NewLine, conflictingFiles));
+            }
         }
 
         var actorInfos = _actors.Select(a => new ActorInfo(a.ActorType, a.ModelName, a.ExplorationTemperature)).ToList();

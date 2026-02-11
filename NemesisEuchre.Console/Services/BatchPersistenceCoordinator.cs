@@ -56,7 +56,7 @@ public class BatchPersistenceCoordinator(
 
         if (persistenceOptions.IdvGenerationName != null)
         {
-            trainingDataAccumulator.Save(persistenceOptions.IdvGenerationName);
+            trainingDataAccumulator.Save(persistenceOptions.IdvGenerationName, persistenceOptions.AllowOverwrite);
         }
     }
 

@@ -38,6 +38,9 @@ public class TrainCommand(
     [CliOption(Description = "Name of the model to create (e.g. {gen1}_calltrumpregression.zip)")]
     public required string ModelName { get; set; }
 
+    [CliOption(Description = "Allow overwriting existing model files")]
+    public bool Overwrite { get; set; }
+
     public async Task<int> RunAsync()
     {
         LoggerMessages.LogTrainingStarting(logger, DecisionType);
@@ -56,7 +59,8 @@ public class TrainCommand(
             SampleLimit,
             ModelName,
             ansiConsole,
-            Source);
+            Source,
+            Overwrite);
 
         resultsRenderer.RenderTrainingResults(results, DecisionType);
 

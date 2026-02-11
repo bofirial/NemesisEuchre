@@ -19,6 +19,7 @@ public interface IModelTrainingOrchestrator
         string modelName,
         IProgress<TrainingProgress> progress,
         string idvName,
+        bool allowOverwrite = false,
         CancellationToken cancellationToken = default);
 }
 
@@ -35,6 +36,7 @@ public class ModelTrainingOrchestrator(
         string modelName,
         IProgress<TrainingProgress> progress,
         string idvName,
+        bool allowOverwrite = false,
         CancellationToken cancellationToken = default)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -50,6 +52,30 @@ public class ModelTrainingOrchestrator(
             logger,
             trainers.Count,
             string.Join(", ", trainers.Select(t => t.ModelType)));
+
+        if (!allowOverwrite)
+        {
+            var conflictingFiles = trainers
+                .SelectMany(t =>
+                {
+                    var baseName = $"{modelName}_{t.ModelType.ToLowerInvariant()}";
+                    return new[]
+                    {
+                        Path.Combine(outputPath, $"{baseName}.zip"),
+                        Path.Combine(outputPath, $"{baseName}.json"),
+                        Path.Combine(outputPath, $"{baseName}.evaluation.json"),
+                    };
+                })
+                .Where(File.Exists)
+                .ToList();
+
+            if (conflictingFiles.Count > 0)
+            {
+                throw new InvalidOperationException(
+                    $"Model files already exist and would be overwritten. Use --overwrite to replace them.{Environment.NewLine}" +
+                    string.Join(Environment.NewLine, conflictingFiles));
+            }
+        }
 
         var results = new List<ModelTrainingResult>();
 

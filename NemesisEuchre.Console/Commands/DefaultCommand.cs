@@ -50,6 +50,9 @@ public class DefaultCommand(
     [CliOption(Description = "ExplorationTemperature for Team2 ModelTrainerBots", Alias = "t2t")]
     public float Team2ExplorationTemperature { get; set; }
 
+    [CliOption(Description = "Allow overwriting existing IDV files")]
+    public bool Overwrite { get; set; }
+
     public async Task<int> RunAsync()
     {
         Foundation.LoggerMessages.LogStartingUp(logger);
@@ -58,7 +61,7 @@ public class DefaultCommand(
 
         ansiConsole.MarkupLine("[green]Welcome to NemesisEuchre - AI-Powered Euchre Strategy[/]");
 
-        var persistenceOptions = new GamePersistenceOptions(PersistToSql, PersistToIdv);
+        var persistenceOptions = new GamePersistenceOptions(PersistToSql, PersistToIdv, Overwrite);
 
         if (Count == 1)
         {

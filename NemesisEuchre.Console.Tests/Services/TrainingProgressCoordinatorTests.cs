@@ -37,6 +37,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 "gen1",
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
@@ -52,6 +53,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 "gen1",
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -73,9 +75,10 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<DecisionType, string, int, string, IProgress<TrainingProgress>, string, CancellationToken>(
-                (decision, path, limit, modelName, _, _, _) =>
+            .Callback<DecisionType, string, int, string, IProgress<TrainingProgress>, string, bool, CancellationToken>(
+                (decision, path, limit, modelName, _, _, _, _) =>
                 {
                     capturedDecisionType = decision;
                     capturedOutputPath = path;
@@ -106,6 +109,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new OperationCanceledException());
 
@@ -134,6 +138,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Training failed"));
 
@@ -173,6 +178,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
