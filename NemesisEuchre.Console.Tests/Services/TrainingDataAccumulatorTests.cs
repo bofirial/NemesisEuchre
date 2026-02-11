@@ -406,6 +406,43 @@ public class TrainingDataAccumulatorTests : IDisposable
             Times.Once);
     }
 
+    [Fact]
+    public void Save_SkipsOverwriteCheck_OnSubsequentSavesWithSameGenerationName()
+    {
+        var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
+        _accumulator.Add(batch);
+
+        _accumulator.Save("gen1");
+
+        Directory.CreateDirectory(_tempDirectory);
+        foreach (var suffix in (string[])["PlayCard", "CallTrump", "DiscardCard"])
+        {
+            File.WriteAllText(Path.Combine(_tempDirectory, $"gen1_{suffix}.idv"), "data");
+            File.WriteAllText(Path.Combine(_tempDirectory, $"gen1_{suffix}.idv.meta.json"), "data");
+        }
+
+        var act = () => _accumulator.Save("gen1");
+
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void Save_StillChecksOverwrite_ForDifferentGenerationName()
+    {
+        var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
+        _accumulator.Add(batch);
+
+        _accumulator.Save("gen1");
+
+        Directory.CreateDirectory(_tempDirectory);
+        File.WriteAllText(Path.Combine(_tempDirectory, "gen2_PlayCard.idv"), "existing");
+
+        var act = () => _accumulator.Save("gen2");
+
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*IDV files already exist*--overwrite*");
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed)

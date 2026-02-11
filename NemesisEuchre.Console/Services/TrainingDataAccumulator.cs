@@ -26,6 +26,7 @@ public class TrainingDataAccumulator(
     private readonly List<CallTrumpTrainingData> _callTrumpData = [];
     private readonly List<DiscardCardTrainingData> _discardCardData = [];
     private readonly HashSet<Actor> _actors = [];
+    private readonly HashSet<string> _savedGenerationNames = [];
     private int _gameCount;
     private int _dealCount;
     private int _trickCount;
@@ -53,7 +54,7 @@ public class TrainingDataAccumulator(
 
         string[] suffixes = ["PlayCard", "CallTrump", "DiscardCard"];
 
-        if (!allowOverwrite)
+        if (!allowOverwrite && !_savedGenerationNames.Contains(generationName))
         {
             var conflictingFiles = suffixes
                 .SelectMany(s => new[]
@@ -94,6 +95,8 @@ public class TrainingDataAccumulator(
             generationName,
             DecisionType.Discard,
             actorInfos);
+
+        _savedGenerationNames.Add(generationName);
     }
 
     private void SaveIdvFileWithMetadata<T>(
