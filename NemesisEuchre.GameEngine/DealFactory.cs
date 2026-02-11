@@ -70,7 +70,7 @@ public class DealFactory(ICardShuffler cardShuffler, IRandomNumberGenerator rand
                 Position = currentPosition,
                 StartingHand = sortedCards,
                 CurrentHand = [.. sortedCards],
-                ActorType = gamePlayers[currentPosition].ActorType,
+                Actor = gamePlayers[currentPosition].Actor,
             };
 
             currentPosition = currentPosition.GetNextPosition();

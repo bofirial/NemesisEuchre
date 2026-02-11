@@ -8,7 +8,7 @@ public static class MachineLearningBotsServiceCollectionExtensions
 {
     public static void AddNemesisEuchreMachineLearningBots(this IServiceCollection services)
     {
-        services.AddScoped<IPlayerActor, Gen1Bot>();
-        services.AddScoped<IPlayerActor, Gen1TrainerBot>();
+        services.AddScoped<IPlayerActorFactory, ModelBotFactory>();
+        services.AddScoped<IPlayerActorFactory, ModelTrainerBotFactory>();
     }
 }

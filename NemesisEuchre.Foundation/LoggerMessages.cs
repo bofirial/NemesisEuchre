@@ -12,7 +12,7 @@ public static partial class LoggerMessages
 
     [LoggerMessage(
         EventId = 2,
-        Level = LogLevel.Debug,
+        Level = LogLevel.Information,
         Message = "Persisting completed game with status: {GameStatus}")]
     public static partial void LogPersistingCompletedGame(
         ILogger logger,
@@ -20,7 +20,7 @@ public static partial class LoggerMessages
 
     [LoggerMessage(
         EventId = 3,
-        Level = LogLevel.Debug,
+        Level = LogLevel.Information,
         Message = "Game persisted successfully with ID: {GameId}")]
     public static partial void LogGamePersistedSuccessfully(
         ILogger logger,
@@ -42,13 +42,13 @@ public static partial class LoggerMessages
 
     [LoggerMessage(
         EventId = 6,
-        Level = LogLevel.Debug,
+        Level = LogLevel.Information,
         Message = "Persisting batch of {BatchSize} completed games")]
     public static partial void LogPersistingBatchedGames(ILogger logger, int batchSize);
 
     [LoggerMessage(
         EventId = 7,
-        Level = LogLevel.Debug,
+        Level = LogLevel.Information,
         Message = "Batch of {BatchSize} games persisted successfully")]
     public static partial void LogBatchGamesPersisted(ILogger logger, int batchSize);
 
@@ -57,27 +57,6 @@ public static partial class LoggerMessages
         Level = LogLevel.Error,
         Message = "Failed to persist batch of {BatchSize} games. Games will not be saved.")]
     public static partial void LogBatchGamePersistenceFailed(ILogger logger, int batchSize, Exception exception);
-
-    [LoggerMessage(
-        EventId = 9,
-        Level = LogLevel.Debug,
-        Message = "Retrieving {DecisionType} training data for {ActorType} (limit: {Limit}, winningTeamOnly: {WinningTeamOnly})")]
-    public static partial void LogRetrievingTrainingData(
-        ILogger logger,
-        string decisionType,
-        string actorType,
-        int limit,
-        bool winningTeamOnly);
-
-    [LoggerMessage(
-        EventId = 10,
-        Level = LogLevel.Error,
-        Message = "Failed to retrieve {DecisionType} training data for {ActorType}")]
-    public static partial void LogTrainingDataRetrievalFailed(
-        ILogger logger,
-        string decisionType,
-        string actorType,
-        Exception exception);
 
     // EventID 11-34: MachineLearning core operations
     [LoggerMessage(
@@ -129,22 +108,6 @@ public static partial class LoggerMessages
         Level = LogLevel.Information,
         Message = "Model metadata saved to {MetadataPath}")]
     public static partial void LogMetadataSaved(ILogger logger, string metadataPath);
-
-    [LoggerMessage(
-        EventId = 18,
-        Level = LogLevel.Information,
-        Message = "Loading training data for {ActorType} (limit: {Limit}, winningTeamOnly: {WinningTeamOnly})")]
-    public static partial void LogLoadingTrainingData(
-        ILogger logger,
-        string actorType,
-        int limit,
-        bool winningTeamOnly);
-
-    [LoggerMessage(
-        EventId = 19,
-        Level = LogLevel.Debug,
-        Message = "Processed {RecordCount} training records")]
-    public static partial void LogTrainingDataProgress(ILogger logger, int recordCount);
 
     [LoggerMessage(
         EventId = 20,
@@ -228,14 +191,14 @@ public static partial class LoggerMessages
     [LoggerMessage(
         EventId = 31,
         Level = LogLevel.Information,
-        Message = "Saving model as gen{Generation}_{DecisionType}_v{Version}.zip")]
-    public static partial void LogSavingModelWithVersion(ILogger logger, int generation, string decisionType, int version);
+        Message = "Saving model as {modelName}_{DecisionType}.zip")]
+    public static partial void LogSavingModel(ILogger logger, string modelName, string decisionType);
 
     [LoggerMessage(
         EventId = 32,
         Level = LogLevel.Information,
-        Message = "Loading model gen{Generation} {DecisionType} v{Version}")]
-    public static partial void LogLoadingModelWithVersion(ILogger logger, int generation, string decisionType, int version);
+        Message = "Loading model {modelName} {DecisionType}")]
+    public static partial void LogLoadingModelWithDecisionType(ILogger logger, string modelName, string decisionType);
 
     [LoggerMessage(
         EventId = 33,
@@ -288,12 +251,10 @@ public static partial class LoggerMessages
     [LoggerMessage(
         EventId = 40,
         Level = LogLevel.Information,
-        Message = "Starting training: ActorType={ActorType}, DecisionType={DecisionType}, Generation={Generation}")]
+        Message = "Starting training: DecisionType={DecisionType}")]
     public static partial void LogTrainingStarting(
         ILogger logger,
-        ActorType actorType,
-        DecisionType decisionType,
-        int generation);
+        DecisionType decisionType);
 
     [LoggerMessage(
         EventId = 41,
@@ -320,10 +281,9 @@ public static partial class LoggerMessages
     [LoggerMessage(
         EventId = 44,
         Level = LogLevel.Information,
-        Message = "Starting training for {ActorType} with {TrainerCount} trainer(s): {ModelTypes}")]
+        Message = "Starting training  with {TrainerCount} trainer(s): {ModelTypes}")]
     public static partial void LogStartingTrainingWithTrainers(
         ILogger logger,
-        ActorType actorType,
         int trainerCount,
         string modelTypes);
 
@@ -357,44 +317,41 @@ public static partial class LoggerMessages
     [LoggerMessage(
         EventId = 48,
         Level = LogLevel.Warning,
-        Message = "No training data found for {ActorType} {ModelType}")]
+        Message = "No training data found for {ModelType}")]
     public static partial void LogNoTrainingDataFound(
         ILogger logger,
-        ActorType actorType,
         string modelType);
 
     [LoggerMessage(
         EventId = 49,
         Level = LogLevel.Information,
-        Message = "Successfully trained {ModelType} for {ActorType} (MAE: {MeanAbsoluteError:F4}, R²: {RSquared:F4})")]
+        Message = "Successfully trained {ModelType} (MAE: {MeanAbsoluteError:F4}, R²: {RSquared:F4})")]
     public static partial void LogModelTrainedSuccessfully(
         ILogger logger,
         string modelType,
-        ActorType actorType,
         double meanAbsoluteError,
         double rSquared);
 
     [LoggerMessage(
         EventId = 50,
         Level = LogLevel.Error,
-        Message = "Failed to train {ModelType} for {ActorType}")]
+        Message = "Failed to train {ModelType}")]
     public static partial void LogModelTrainingFailed(
         ILogger logger,
         Exception exception,
-        string modelType,
-        ActorType actorType);
+        string modelType);
 
     // EventID 51-52: Persistence control
     [LoggerMessage(
         EventId = 51,
         Level = LogLevel.Information,
-        Message = "Game persistence skipped (--do-not-persist flag enabled)")]
+        Message = "Game persistence skipped")]
     public static partial void LogGamePersistenceSkipped(ILogger logger);
 
     [LoggerMessage(
         EventId = 52,
         Level = LogLevel.Information,
-        Message = "Batch of {BatchSize} games persistence skipped (--do-not-persist flag enabled)")]
+        Message = "Batch of {BatchSize} games persistence skipped")]
     public static partial void LogBatchGamePersistenceSkipped(ILogger logger, int batchSize);
 
     // EventID 53-55: ML Bot engine availability
@@ -418,13 +375,63 @@ public static partial class LoggerMessages
 
     [LoggerMessage(
         EventId = 56,
-        Level = LogLevel.Debug,
+        Level = LogLevel.Information,
         Message = "Bulk insert starting: {ParentCount} parent rows (EF Core), {LeafCount} leaf rows (SqlBulkCopy)")]
     public static partial void LogBulkInsertStarting(ILogger logger, int parentCount, int leafCount);
 
     [LoggerMessage(
         EventId = 57,
-        Level = LogLevel.Debug,
+        Level = LogLevel.Information,
         Message = "Bulk insert completed: {ParentCount} parent rows, {LeafCount} leaf rows in {Elapsed}")]
     public static partial void LogBulkInsertCompleted(ILogger logger, int parentCount, int leafCount, TimeSpan elapsed);
+
+    // EventID 58-62: IDV file operations
+    [LoggerMessage(
+        EventId = 58,
+        Level = LogLevel.Information,
+        Message = "Generating IDV training data for batch of {BatchSize} games")]
+    public static partial void LogIdvGeneratingBatch(ILogger logger, int batchSize);
+
+    [LoggerMessage(
+        EventId = 59,
+        Level = LogLevel.Information,
+        Message = "Saving IDV file: {FilePath} ({RowCount} rows)")]
+    public static partial void LogIdvFileSaving(ILogger logger, string filePath, int rowCount);
+
+    [LoggerMessage(
+        EventId = 60,
+        Level = LogLevel.Information,
+        Message = "IDV file saved: {FilePath} ({RowCount} rows)")]
+    public static partial void LogIdvFileSaved(ILogger logger, string filePath, int rowCount);
+
+    [LoggerMessage(
+        EventId = 61,
+        Level = LogLevel.Information,
+        Message = "Loading training data from IDV file: {FilePath}")]
+    public static partial void LogIdvFileLoading(ILogger logger, string filePath);
+
+    [LoggerMessage(
+        EventId = 62,
+        Level = LogLevel.Warning,
+        Message = "IDV training data generation skipped for single game")]
+    public static partial void LogIdvSkippedSingleGame(ILogger logger);
+
+    // EventID 63-65: IDV metadata operations
+    [LoggerMessage(
+        EventId = 63,
+        Level = LogLevel.Information,
+        Message = "IDV metadata saved: {MetadataPath}")]
+    public static partial void LogIdvMetadataSaved(ILogger logger, string metadataPath);
+
+    [LoggerMessage(
+        EventId = 64,
+        Level = LogLevel.Information,
+        Message = "IDV metadata validated: {FilePath} ({RowCount} rows, {GameCount} games)")]
+    public static partial void LogIdvMetadataValidated(ILogger logger, string filePath, int rowCount, int gameCount);
+
+    [LoggerMessage(
+        EventId = 65,
+        Level = LogLevel.Error,
+        Message = "IDV metadata verification failed: {MetadataPath}")]
+    public static partial void LogIdvMetadataVerificationFailed(ILogger logger, string metadataPath);
 }

@@ -6,6 +6,6 @@ public enum ActorType
     Chaos = 1,
     Chad = 2,
     Beta = 3,
-    Gen1 = 10,
-    Gen1Trainer = 11,
+    Model = 4,
+    ModelTrainer = 5,
 }

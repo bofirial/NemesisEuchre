@@ -423,3 +423,6 @@ FodyWeavers.xsd
 
 # ML model files
 /models/
+
+# ML data files
+/data/

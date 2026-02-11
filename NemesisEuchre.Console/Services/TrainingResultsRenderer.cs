@@ -7,16 +7,16 @@ namespace NemesisEuchre.Console.Services;
 
 public interface ITrainingResultsRenderer
 {
-    void RenderTrainingResults(TrainingResults results, ActorType actorType, DecisionType decisionType);
+    void RenderTrainingResults(TrainingResults results, DecisionType decisionType);
 }
 
 public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRenderer
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0045:Convert to conditional expression", Justification = "Nested Conditional")]
-    public void RenderTrainingResults(TrainingResults results, ActorType actorType, DecisionType decisionType)
+    public void RenderTrainingResults(TrainingResults results, DecisionType decisionType)
     {
         console.WriteLine();
-        console.Write(new Rule($"[yellow]Training Results - {actorType} ({decisionType})[/]").LeftJustified());
+        console.Write(new Rule($"[yellow]Training Results - ({decisionType})[/]").LeftJustified());
         console.WriteLine();
 
         var table = new Table()
@@ -25,6 +25,7 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
             .AddColumn(new TableColumn("[bold]Status[/]").Centered())
             .AddColumn(new TableColumn("[bold]MAE[/]").Centered())
             .AddColumn(new TableColumn("[bold]R²[/]").Centered())
+            .AddColumn(new TableColumn("[bold]Duration[/]").Centered())
             .AddColumn(new TableColumn("[bold]Model Path[/]"));
 
         foreach (var result in results.Results.OrderBy(r => r.ModelType))
@@ -55,11 +56,16 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
                 pathMarkup = "[dim]-[/]";
             }
 
+            var durationMarkup = result.Duration.HasValue
+                ? $"{result.Duration.Value.TotalSeconds:F1}s"
+                : "[dim]-[/]";
+
             table.AddRow(
                 result.ModelType,
                 statusMarkup,
                 maeMarkup,
                 rSquaredMarkup,
+                durationMarkup,
                 pathMarkup);
         }
 

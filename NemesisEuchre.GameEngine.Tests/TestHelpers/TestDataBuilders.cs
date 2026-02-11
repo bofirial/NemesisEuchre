@@ -17,10 +17,10 @@ public static class TestDataBuilders
             Team1Score = team1Score,
             Team2Score = team2Score,
         };
-        game.Players.Add(PlayerPosition.North, new Player { Position = PlayerPosition.North });
-        game.Players.Add(PlayerPosition.East, new Player { Position = PlayerPosition.East });
-        game.Players.Add(PlayerPosition.South, new Player { Position = PlayerPosition.South });
-        game.Players.Add(PlayerPosition.West, new Player { Position = PlayerPosition.West });
+        game.Players.Add(PlayerPosition.North, new Player { Position = PlayerPosition.North, Actor = new Actor(ActorType.Chaos, null) });
+        game.Players.Add(PlayerPosition.East, new Player { Position = PlayerPosition.East, Actor = new Actor(ActorType.Chaos, null) });
+        game.Players.Add(PlayerPosition.South, new Player { Position = PlayerPosition.South, Actor = new Actor(ActorType.Chaos, null) });
+        game.Players.Add(PlayerPosition.West, new Player { Position = PlayerPosition.West, Actor = new Actor(ActorType.Chaos, null) });
         return game;
     }
 
@@ -56,10 +56,10 @@ public static class TestDataBuilders
     {
         return new Dictionary<PlayerPosition, DealPlayer>
         {
-            { PlayerPosition.North, new DealPlayer { Position = PlayerPosition.North, StartingHand = [] } },
-            { PlayerPosition.East, new DealPlayer { Position = PlayerPosition.East, StartingHand = [] } },
-            { PlayerPosition.South, new DealPlayer { Position = PlayerPosition.South, StartingHand = [] } },
-            { PlayerPosition.West, new DealPlayer { Position = PlayerPosition.West, StartingHand = [] } },
+            { PlayerPosition.North, new DealPlayer { Position = PlayerPosition.North, Actor = new Actor(ActorType.Chaos, null), StartingHand = [] } },
+            { PlayerPosition.East, new DealPlayer { Position = PlayerPosition.East, Actor = new Actor(ActorType.Chaos, null), StartingHand = [] } },
+            { PlayerPosition.South, new DealPlayer { Position = PlayerPosition.South, Actor = new Actor(ActorType.Chaos, null), StartingHand = [] } },
+            { PlayerPosition.West, new DealPlayer { Position = PlayerPosition.West, Actor = new Actor(ActorType.Chaos, null), StartingHand = [] } },
         };
     }
 

@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.ML;
 
 using NemesisEuchre.Foundation;
-using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Options;
@@ -15,7 +14,7 @@ public interface IModelTrainer<TData>
     where TData : class, new()
 {
     Task<TrainingResult> TrainAsync(
-        IEnumerable<TData> trainingData,
+        IDataView dataView,
         bool preShuffled = false,
         CancellationToken cancellationToken = default);
 
@@ -25,8 +24,7 @@ public interface IModelTrainer<TData>
 
     Task SaveModelAsync(
         string modelsDirectory,
-        int generation,
-        ActorType actorType,
+        string modelName,
         TrainingResult trainingResult,
         CancellationToken cancellationToken = default);
 }
@@ -34,7 +32,6 @@ public interface IModelTrainer<TData>
 public abstract class RegressionModelTrainerBase<TData>(
     MLContext mlContext,
     IDataSplitter dataSplitter,
-    IModelVersionManager versionManager,
     IModelPersistenceService persistenceService,
     IOptions<MachineLearningOptions> options,
     ILogger logger) : IModelTrainer<TData>
@@ -44,8 +41,6 @@ public abstract class RegressionModelTrainerBase<TData>(
 
     protected IDataSplitter DataSplitter { get; } = dataSplitter ?? throw new ArgumentNullException(nameof(dataSplitter));
 
-    protected IModelVersionManager VersionManager { get; } = versionManager ?? throw new ArgumentNullException(nameof(versionManager));
-
     protected IModelPersistenceService PersistenceService { get; } = persistenceService ?? throw new ArgumentNullException(nameof(persistenceService));
 
     protected MachineLearningOptions Options { get; } = options?.Value ?? throw new ArgumentNullException(nameof(options));
@@ -54,45 +49,15 @@ public abstract class RegressionModelTrainerBase<TData>(
 
     protected ITransformer? TrainedModel { get; private set; }
 
-    public async Task<TrainingResult> TrainAsync(
-        IEnumerable<TData> trainingData,
+    public Task<TrainingResult> TrainAsync(
+        IDataView dataView,
         bool preShuffled = false,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(trainingData);
+        ArgumentNullException.ThrowIfNull(dataView);
 
-        LoggerMessages.LogStartingTraining(Logger, GetModelType());
-
-        var dataSplit = DataSplitter.Split(trainingData, preShuffled: preShuffled);
-
-        LoggerMessages.LogDataSplitComplete(
-            Logger,
-            dataSplit.TrainRowCount,
-            dataSplit.ValidationRowCount,
-            dataSplit.TestRowCount);
-
-        var pipeline = BuildPipeline(dataSplit.Train);
-
-        LoggerMessages.LogTrainingModel(Logger, Options.NumberOfIterations);
-
-        TrainedModel = await Task.Run(() => pipeline.Fit(dataSplit.Train), cancellationToken);
-
-        LoggerMessages.LogTrainingComplete(Logger);
-
-        var validationMetrics = await EvaluateAsync(dataSplit.Validation, cancellationToken);
-
-        LoggerMessages.LogRegressionValidationMetrics(
-            Logger,
-            validationMetrics.RSquared,
-            validationMetrics.MeanAbsoluteError,
-            validationMetrics.RootMeanSquaredError);
-
-        return new TrainingResult(
-            TrainedModel,
-            validationMetrics,
-            dataSplit.TrainRowCount,
-            dataSplit.ValidationRowCount,
-            dataSplit.TestRowCount);
+        var dataSplit = DataSplitter.Split(dataView, preShuffled: preShuffled);
+        return TrainFromSplitAsync(dataSplit, cancellationToken);
     }
 
     Task<EvaluationMetrics> IModelTrainer<TData>.EvaluateAsync(
@@ -134,8 +99,7 @@ public abstract class RegressionModelTrainerBase<TData>(
 
     public Task SaveModelAsync(
         string modelsDirectory,
-        int generation,
-        ActorType actorType,
+        string modelName,
         TrainingResult trainingResult,
         CancellationToken cancellationToken = default)
     {
@@ -144,8 +108,7 @@ public abstract class RegressionModelTrainerBase<TData>(
             throw new InvalidOperationException("No trained model to save. Call TrainAsync first.");
         }
 
-        var version = VersionManager.GetNextVersion(modelsDirectory, generation, GetModelType().ToLowerInvariant());
-        var metadata = CreateModelMetadata(generation, actorType, trainingResult, version);
+        var metadata = CreateModelMetadata(modelName, trainingResult);
         var evaluationReport = CreateEvaluationReport(
             trainingResult.ValidationMetrics as RegressionEvaluationMetrics ?? throw new InvalidOperationException("Expected RegressionEvaluationMetrics"),
             trainingResult.ValidationSamples);
@@ -154,9 +117,8 @@ public abstract class RegressionModelTrainerBase<TData>(
             TrainedModel,
             MlContext,
             modelsDirectory,
-            generation,
+            modelName,
             GetModelType(),
-            actorType,
             trainingResult,
             metadata,
             evaluationReport,
@@ -167,20 +129,52 @@ public abstract class RegressionModelTrainerBase<TData>(
 
     protected abstract string GetModelType();
 
+    private async Task<TrainingResult> TrainFromSplitAsync(
+        DataSplit dataSplit,
+        CancellationToken cancellationToken)
+    {
+        LoggerMessages.LogStartingTraining(Logger, GetModelType());
+
+        LoggerMessages.LogDataSplitComplete(
+            Logger,
+            dataSplit.TrainRowCount,
+            dataSplit.ValidationRowCount,
+            dataSplit.TestRowCount);
+
+        var pipeline = BuildPipeline(dataSplit.Train);
+
+        LoggerMessages.LogTrainingModel(Logger, Options.NumberOfIterations);
+
+        TrainedModel = await Task.Run(() => pipeline.Fit(dataSplit.Train), cancellationToken);
+
+        LoggerMessages.LogTrainingComplete(Logger);
+
+        var validationMetrics = await EvaluateAsync(dataSplit.Validation, cancellationToken);
+
+        LoggerMessages.LogRegressionValidationMetrics(
+            Logger,
+            validationMetrics.RSquared,
+            validationMetrics.MeanAbsoluteError,
+            validationMetrics.RootMeanSquaredError);
+
+        return new TrainingResult(
+            TrainedModel,
+            validationMetrics,
+            dataSplit.TrainRowCount,
+            dataSplit.ValidationRowCount,
+            dataSplit.TestRowCount);
+    }
+
     private ModelMetadata CreateModelMetadata(
-        int generation,
-        ActorType actorType,
-        TrainingResult trainingResult,
-        int version)
+        string modelName,
+        TrainingResult trainingResult)
     {
         var regressionMetrics = trainingResult.ValidationMetrics as RegressionEvaluationMetrics
             ?? throw new InvalidOperationException("Expected RegressionEvaluationMetrics");
 
         return new ModelMetadata(
             GetModelType(),
-            actorType,
-            generation,
-            version,
+            modelName,
             DateTime.UtcNow,
             trainingResult.TrainingSamples,
             trainingResult.ValidationSamples,

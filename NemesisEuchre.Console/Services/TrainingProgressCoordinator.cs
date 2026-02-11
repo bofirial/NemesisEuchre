@@ -10,31 +10,42 @@ namespace NemesisEuchre.Console.Services;
 public interface ITrainingProgressCoordinator
 {
     Task<TrainingResults> CoordinateTrainingWithProgressAsync(
-        ActorType actorType,
         DecisionType decisionType,
         string outputPath,
         int sampleLimit,
-        int generation,
+        string modelName,
         IAnsiConsole console,
+        string idvName,
+        bool allowOverwrite = false,
         CancellationToken cancellationToken = default);
 }
 
 public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrchestrator) : ITrainingProgressCoordinator
 {
     public Task<TrainingResults> CoordinateTrainingWithProgressAsync(
-        ActorType actorType,
         DecisionType decisionType,
         string outputPath,
         int sampleLimit,
-        int generation,
+        string modelName,
         IAnsiConsole console,
+        string idvName,
+        bool allowOverwrite = false,
         CancellationToken cancellationToken = default)
     {
         return console.Progress()
+            .AutoClear(false)
+            .HideCompleted(false)
+            .Columns(
+                new TaskDescriptionColumn(),
+                new ProgressBarColumn(),
+                new PercentageColumn(),
+                new ElapsedTimeColumn(),
+                new RemainingTimeColumn(),
+                new SpinnerColumn())
             .StartAsync(async ctx =>
             {
                 var overallTask = ctx.AddTask(
-                    $"[green]Training {decisionType} models for {actorType}[/]",
+                    $"[green]Training {decisionType} models[/]",
                     maxValue: 100);
 
                 var modelTasks = new ConcurrentDictionary<string, ProgressTask>();
@@ -71,12 +82,13 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
                 });
 
                 return await trainingOrchestrator.TrainModelsAsync(
-                    actorType,
                     decisionType,
                     outputPath,
                     sampleLimit,
-                    generation,
-                    progress);
+                    modelName,
+                    progress,
+                    idvName,
+                    allowOverwrite);
             });
     }
 }

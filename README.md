@@ -11,7 +11,7 @@ A console-based engine for training a high-performance Euchre AI using massive d
 - ✅ **v0.1** - Dependency injection and logging setup
 - ✅ **v0.1** - Unit test infrastructure with FluentAssertions, Moq, and Bogus
 - ✅ **v0.1** - GitHub Actions CI/CD pipeline
-- ✅ **v0.1** - Code quality analyzers (StyleCop, Roslynator, SonarAnalyzer)
+- ✅ **v0.1** - Code quality analyzers (StyleCop, Roslynator)
 - ✅ **v0.2** - Complete Euchre game engine with orchestration
 - ✅ **v0.2** - Game models optimized for machine learning (relative suits and positions)
 - ✅ **v0.2** - Trump selection, trick playing, and deal result calculation
@@ -25,7 +25,8 @@ A console-based engine for training a high-performance Euchre AI using massive d
 - ✅ **v0.5** - Model memory enhancements for game state tracking
 - ✅ **v0.5** - Enhanced feature engineering with historical context
 - ✅ **v0.6** - Advanced game display, Gen1TrainerBot with exploration, database normalization, streaming training
-- 🚧 **v0.7** - Interactive play with ASCII card display (in progress)
+- ✅ **v0.7** - Machine Learning iteration improvments using idv files
+- 🚧 **v0.8** - Interactive play with ASCII card display (in progress)
 
 ## Quick Start
 

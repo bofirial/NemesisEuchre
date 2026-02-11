@@ -17,9 +17,9 @@ public interface IBatchGameOrchestrator
     Task<BatchGameResults> RunBatchAsync(
         int numberOfGames,
         IBatchProgressReporter? progressReporter = null,
-        bool doNotPersist = false,
-        ActorType[]? team1ActorTypes = null,
-        ActorType[]? team2ActorTypes = null,
+        GamePersistenceOptions? persistenceOptions = null,
+        Actor[]? team1Actors = null,
+        Actor[]? team2Actors = null,
         CancellationToken cancellationToken = default);
 }
 
@@ -36,9 +36,9 @@ public class BatchGameOrchestrator(
     public async Task<BatchGameResults> RunBatchAsync(
         int numberOfGames,
         IBatchProgressReporter? progressReporter = null,
-        bool doNotPersist = false,
-        ActorType[]? team1ActorTypes = null,
-        ActorType[]? team2ActorTypes = null,
+        GamePersistenceOptions? persistenceOptions = null,
+        Actor[]? team1Actors = null,
+        Actor[]? team2Actors = null,
         CancellationToken cancellationToken = default)
     {
         if (numberOfGames <= 0)
@@ -49,26 +49,16 @@ public class BatchGameOrchestrator(
         const int maxGamesPerSubBatch = 10000;
         if (subBatchStrategy.ShouldUseSubBatches(numberOfGames, maxGamesPerSubBatch))
         {
-            return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, doNotPersist, cancellationToken, team1ActorTypes, team2ActorTypes).ConfigureAwait(false);
+            return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, persistenceOptions, cancellationToken, team1Actors, team2Actors).ConfigureAwait(false);
         }
 
         var stopwatch = Stopwatch.StartNew();
-        var results = await ExecuteSingleBatchAsync(numberOfGames, progressReporter, doNotPersist, team1ActorTypes, team2ActorTypes, cancellationToken).ConfigureAwait(false);
+        var (_, state) = await ExecuteSingleBatchAsync(numberOfGames, progressReporter, persistenceOptions, team1Actors, team2Actors, cancellationToken).ConfigureAwait(false);
         stopwatch.Stop();
 
-        return new BatchGameResults
-        {
-            TotalGames = results.TotalGames,
-            Team1Wins = results.Team1Wins,
-            Team2Wins = results.Team2Wins,
-            FailedGames = results.FailedGames,
-            TotalDeals = results.TotalDeals,
-            TotalTricks = results.TotalTricks,
-            TotalCallTrumpDecisions = results.TotalCallTrumpDecisions,
-            TotalDiscardCardDecisions = results.TotalDiscardCardDecisions,
-            TotalPlayCardDecisions = results.TotalPlayCardDecisions,
-            ElapsedTime = stopwatch.Elapsed,
-        };
+        var result = AggregateResults(numberOfGames, state, stopwatch.Elapsed);
+        state.Dispose();
+        return result;
     }
 
     private static BatchGameResults AggregateResults(
@@ -76,6 +66,10 @@ public class BatchGameOrchestrator(
         BatchExecutionState state,
         TimeSpan elapsedTime)
     {
+        var persistenceDuration = state.PersistenceDuration;
+        var idvSaveDuration = state.IdvSaveDuration;
+        var playingDuration = elapsedTime - persistenceDuration - idvSaveDuration;
+
         return new BatchGameResults
         {
             TotalGames = numberOfGames,
@@ -88,6 +82,9 @@ public class BatchGameOrchestrator(
             TotalDiscardCardDecisions = state.TotalDiscardCardDecisions,
             TotalPlayCardDecisions = state.TotalPlayCardDecisions,
             ElapsedTime = elapsedTime,
+            PlayingDuration = playingDuration,
+            PersistenceDuration = persistenceDuration,
+            IdvSaveDuration = idvSaveDuration > TimeSpan.Zero ? idvSaveDuration : null,
         };
     }
 
@@ -96,18 +93,18 @@ public class BatchGameOrchestrator(
         return d.CompletedTricks.Sum(t => t.PlayCardDecisions.Count);
     }
 
-    private async Task<BatchGameResults> ExecuteSingleBatchAsync(
+    private async Task<(BatchGameResults results, BatchExecutionState state)> ExecuteSingleBatchAsync(
         int numberOfGames,
         IBatchProgressReporter? progressReporter,
-        bool doNotPersist,
-        ActorType[]? team1ActorTypes,
-        ActorType[]? team2ActorTypes,
+        GamePersistenceOptions? persistenceOptions,
+        Actor[]? team1Actors,
+        Actor[]? team2Actors,
         CancellationToken cancellationToken)
     {
         var channelCapacity = _persistenceOptions.BatchSize * 4;
-        using var state = new BatchExecutionState(channelCapacity);
+        var state = new BatchExecutionState(channelCapacity);
 
-        var consumerTask = persistenceCoordinator.ConsumeAndPersistAsync(state, progressReporter, doNotPersist, cancellationToken);
+        var consumerTask = persistenceCoordinator.ConsumeAndPersistAsync(state, progressReporter, persistenceOptions, cancellationToken);
 
         var effectiveParallelism = parallelismCoordinator.CalculateEffectiveParallelism();
         var parallelOptions = new ParallelOptions
@@ -119,22 +116,22 @@ public class BatchGameOrchestrator(
         await Parallel.ForEachAsync(
             Enumerable.Range(0, numberOfGames),
             parallelOptions,
-            async (gameNumber, ct) => await RunSingleGameAsync(gameNumber, state, progressReporter, team1ActorTypes, team2ActorTypes, ct).ConfigureAwait(false)).ConfigureAwait(false);
+            async (gameNumber, ct) => await RunSingleGameAsync(gameNumber, state, progressReporter, team1Actors, team2Actors, ct).ConfigureAwait(false)).ConfigureAwait(false);
 
         state.Writer.Complete();
         await consumerTask.ConfigureAwait(false);
 
-        return AggregateResults(numberOfGames, state, TimeSpan.Zero);
+        return (AggregateResults(numberOfGames, state, TimeSpan.Zero), state);
     }
 
     private async Task<BatchGameResults> RunBatchesInSubBatchesAsync(
         int totalGames,
         int subBatchSize,
         IBatchProgressReporter? progressReporter,
-        bool doNotPersist,
+        GamePersistenceOptions? persistenceOptions,
         CancellationToken cancellationToken,
-        ActorType[]? team1ActorTypes = null,
-        ActorType[]? team2ActorTypes = null)
+        Actor[]? team1Actors = null,
+        Actor[]? team2Actors = null)
     {
         var stopwatch = Stopwatch.StartNew();
         var completedSoFar = 0;
@@ -147,6 +144,8 @@ public class BatchGameOrchestrator(
         var totalCallTrumpDecisions = 0;
         var totalDiscardCardDecisions = 0;
         var totalPlayCardDecisions = 0;
+        var totalPersistenceDuration = TimeSpan.Zero;
+        var totalIdvSaveDuration = TimeSpan.Zero;
 
         while (completedSoFar < totalGames)
         {
@@ -157,12 +156,12 @@ public class BatchGameOrchestrator(
                 completedSoFar,
                 savedSoFar);
 
-            var batchResults = await ExecuteSingleBatchAsync(
+            var (batchResults, batchState) = await ExecuteSingleBatchAsync(
                 gamesInThisBatch,
                 subProgressReporter,
-                doNotPersist,
-                team1ActorTypes,
-                team2ActorTypes,
+                persistenceOptions,
+                team1Actors,
+                team2Actors,
                 cancellationToken).ConfigureAwait(false);
 
             totalTeam1Wins += batchResults.Team1Wins;
@@ -173,11 +172,17 @@ public class BatchGameOrchestrator(
             totalCallTrumpDecisions += batchResults.TotalCallTrumpDecisions;
             totalDiscardCardDecisions += batchResults.TotalDiscardCardDecisions;
             totalPlayCardDecisions += batchResults.TotalPlayCardDecisions;
+            totalPersistenceDuration += batchState.PersistenceDuration;
+            totalIdvSaveDuration += batchState.IdvSaveDuration;
             completedSoFar += gamesInThisBatch;
             savedSoFar += batchResults.TotalGames;
+
+            batchState.Dispose();
         }
 
         stopwatch.Stop();
+
+        var playingDuration = stopwatch.Elapsed - totalPersistenceDuration - totalIdvSaveDuration;
 
         return new BatchGameResults
         {
@@ -191,6 +196,9 @@ public class BatchGameOrchestrator(
             TotalDiscardCardDecisions = totalDiscardCardDecisions,
             TotalPlayCardDecisions = totalPlayCardDecisions,
             ElapsedTime = stopwatch.Elapsed,
+            PlayingDuration = playingDuration,
+            PersistenceDuration = totalPersistenceDuration,
+            IdvSaveDuration = totalIdvSaveDuration > TimeSpan.Zero ? totalIdvSaveDuration : null,
         };
     }
 
@@ -198,15 +206,15 @@ public class BatchGameOrchestrator(
         int gameNumber,
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
-        ActorType[]? team1ActorTypes = null,
-        ActorType[]? team2ActorTypes = null,
+        Actor[]? team1Actors = null,
+        Actor[]? team2Actors = null,
         CancellationToken cancellationToken = default)
     {
         try
         {
             using var scope = serviceScopeFactory.CreateScope();
             var gameOrchestrator = scope.ServiceProvider.GetRequiredService<IGameOrchestrator>();
-            var game = await gameOrchestrator.OrchestrateGameAsync(team1ActorTypes, team2ActorTypes).ConfigureAwait(false);
+            var game = await gameOrchestrator.OrchestrateGameAsync(team1Actors, team2Actors).ConfigureAwait(false);
 
             await state.ExecuteWithLockAsync(
                 () =>

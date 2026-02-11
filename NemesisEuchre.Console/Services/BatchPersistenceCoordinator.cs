@@ -1,7 +1,10 @@
+using System.Diagnostics;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using NemesisEuchre.Console.Models;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation;
@@ -14,12 +17,14 @@ public interface IPersistenceCoordinator
     Task ConsumeAndPersistAsync(
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
-        bool doNotPersist,
+        GamePersistenceOptions? persistenceOptions,
         CancellationToken cancellationToken = default);
 }
 
 public class BatchPersistenceCoordinator(
     IServiceScopeFactory serviceScopeFactory,
+    IGameToTrainingDataConverter trainingDataConverter,
+    ITrainingDataAccumulator trainingDataAccumulator,
     IOptions<PersistenceOptions> persistenceOptions,
     ILogger<BatchPersistenceCoordinator> logger) : IPersistenceCoordinator
 {
@@ -28,9 +33,12 @@ public class BatchPersistenceCoordinator(
     public async Task ConsumeAndPersistAsync(
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
-        bool doNotPersist,
+        GamePersistenceOptions? persistenceOptions,
         CancellationToken cancellationToken = default)
     {
+        persistenceOptions ??= new GamePersistenceOptions(false, null);
+
+        var persistenceStopwatch = Stopwatch.StartNew();
         var batch = new List<Game>(_persistenceOptions.BatchSize);
 
         await foreach (var game in state.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
@@ -39,14 +47,29 @@ public class BatchPersistenceCoordinator(
 
             if (batch.Count >= _persistenceOptions.BatchSize)
             {
-                await FlushBatchAsync(batch, state, progressReporter, doNotPersist, cancellationToken).ConfigureAwait(false);
+                await FlushBatchAsync(batch, state, progressReporter, persistenceOptions, cancellationToken).ConfigureAwait(false);
                 batch.Clear();
             }
         }
 
         if (batch.Count > 0)
         {
-            await FlushBatchAsync(batch, state, progressReporter, doNotPersist, cancellationToken).ConfigureAwait(false);
+            await FlushBatchAsync(batch, state, progressReporter, persistenceOptions, cancellationToken).ConfigureAwait(false);
+        }
+
+        persistenceStopwatch.Stop();
+        state.PersistenceDuration = persistenceStopwatch.Elapsed;
+
+        if (persistenceOptions.IdvGenerationName != null)
+        {
+            progressReporter?.ReportIdvSaveStarted();
+            var idvStopwatch = Stopwatch.StartNew();
+
+            trainingDataAccumulator.Save(persistenceOptions.IdvGenerationName, persistenceOptions.AllowOverwrite);
+
+            idvStopwatch.Stop();
+            state.IdvSaveDuration = idvStopwatch.Elapsed;
+            progressReporter?.ReportIdvSaveCompleted();
         }
     }
 
@@ -54,17 +77,12 @@ public class BatchPersistenceCoordinator(
         List<Game> games,
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
-        bool doNotPersist,
+        GamePersistenceOptions persistenceOptions,
         CancellationToken cancellationToken)
     {
-        if (doNotPersist)
-        {
-            LoggerMessages.LogBatchGamePersistenceSkipped(logger, games.Count);
+        var persisted = false;
 
-            state.SavedGames += games.Count;
-            progressReporter?.ReportGamesSaved(state.SavedGames);
-        }
-        else
+        if (persistenceOptions.PersistToSql)
         {
             try
             {
@@ -78,11 +96,33 @@ public class BatchPersistenceCoordinator(
                 using var scope = serviceScopeFactory.CreateScope();
                 var gameRepository = scope.ServiceProvider.GetRequiredService<IGameRepository>();
                 await gameRepository.SaveCompletedGamesBulkAsync(snapshot, saveProgress, cancellationToken).ConfigureAwait(false);
+                persisted = true;
             }
             catch (Exception ex)
             {
                 LoggerMessages.LogGamePersistenceFailed(logger, ex);
             }
+        }
+
+        if (persistenceOptions.IdvGenerationName != null)
+        {
+            LoggerMessages.LogIdvGeneratingBatch(logger, games.Count);
+            var trainingBatch = trainingDataConverter.Convert(games);
+            trainingDataAccumulator.Add(trainingBatch);
+
+            if (!persisted)
+            {
+                state.SavedGames += games.Count;
+                progressReporter?.ReportGamesSaved(state.SavedGames);
+            }
+        }
+
+        if (!persistenceOptions.PersistToSql && persistenceOptions.IdvGenerationName == null)
+        {
+            LoggerMessages.LogBatchGamePersistenceSkipped(logger, games.Count);
+
+            state.SavedGames += games.Count;
+            progressReporter?.ReportGamesSaved(state.SavedGames);
         }
     }
 }

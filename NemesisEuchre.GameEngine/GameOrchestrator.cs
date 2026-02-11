@@ -8,7 +8,7 @@ namespace NemesisEuchre.GameEngine;
 
 public interface IGameOrchestrator
 {
-    Task<Game> OrchestrateGameAsync(ActorType[]? team1ActorTypes = null, ActorType[]? team2ActorTypes = null);
+    Task<Game> OrchestrateGameAsync(Actor[]? team1Actors = null, Actor[]? team2Actors = null);
 }
 
 public class GameOrchestrator(
@@ -21,11 +21,11 @@ public class GameOrchestrator(
 {
     private const int MaxDealsPerGame = 100;
 
-    public async Task<Game> OrchestrateGameAsync(ActorType[]? team1ActorTypes = null, ActorType[]? team2ActorTypes = null)
+    public async Task<Game> OrchestrateGameAsync(Actor[]? team1Actors = null, Actor[]? team2Actors = null)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(gameOptions.Value.WinningScore, 1);
 
-        var game = await gameFactory.CreateGameAsync(team1ActorTypes, team2ActorTypes).ConfigureAwait(false);
+        var game = await gameFactory.CreateGameAsync(team1Actors, team2Actors).ConfigureAwait(false);
 
         InitializeGame(game);
 

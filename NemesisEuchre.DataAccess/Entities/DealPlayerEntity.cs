@@ -13,7 +13,7 @@ public class DealPlayerEntity
 
     public int PlayerPositionId { get; set; }
 
-    public int? ActorTypeId { get; set; }
+    public int ActorTypeId { get; set; }
 
     public DealEntity? Deal { get; set; }
 

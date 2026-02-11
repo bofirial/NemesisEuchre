@@ -6,4 +6,5 @@ public record ModelTrainingResult(
     string? ModelPath = null,
     string? ErrorMessage = null,
     double? MeanAbsoluteError = null,
-    double? RSquared = null);
+    double? RSquared = null,
+    TimeSpan? Duration = null);

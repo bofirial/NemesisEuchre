@@ -1,22 +1,39 @@
+using System.Diagnostics;
+
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
-using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.Models;
+using NemesisEuchre.MachineLearning.Services;
 using NemesisEuchre.MachineLearning.Trainers;
 
 namespace NemesisEuchre.Console.Services.TrainerExecutors;
 
+public interface ITrainerExecutor
+{
+    string ModelType { get; }
+
+    DecisionType DecisionType { get; }
+
+    Task<ModelTrainingResult> ExecuteAsync(
+        string outputPath,
+        int sampleLimit,
+        string modelName,
+        IProgress<TrainingProgress> progress,
+        string idvFilePath,
+        CancellationToken cancellationToken = default);
+}
+
 public abstract class RegressionTrainerExecutorBase<TTrainingData>(
     IModelTrainer<TTrainingData> trainer,
-    ITrainingDataLoader<TTrainingData> dataLoader,
+    IIdvFileService idvFileService,
     ILogger logger) : ITrainerExecutor
     where TTrainingData : class, new()
 {
     private readonly IModelTrainer<TTrainingData> _trainer = trainer ?? throw new ArgumentNullException(nameof(trainer));
-    private readonly ITrainingDataLoader<TTrainingData> _dataLoader = dataLoader ?? throw new ArgumentNullException(nameof(dataLoader));
+    private readonly IIdvFileService _idvFileService = idvFileService ?? throw new ArgumentNullException(nameof(idvFileService));
     private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public abstract string ModelType { get; }
@@ -24,38 +41,54 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
     public abstract DecisionType DecisionType { get; }
 
     public async Task<ModelTrainingResult> ExecuteAsync(
-        ActorType actorType,
         string outputPath,
         int sampleLimit,
-        int generation,
+        string modelName,
         IProgress<TrainingProgress> progress,
+        string idvFilePath,
         CancellationToken cancellationToken = default)
     {
+        var modelStopwatch = Stopwatch.StartNew();
         try
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(idvFilePath);
+
+            if (!File.Exists(idvFilePath))
+            {
+                throw new FileNotFoundException($"IDV file not found: {idvFilePath}", idvFilePath);
+            }
+
+            var metadataPath = $"{idvFilePath}.meta.json";
+            var metadata = _idvFileService.LoadMetadata(metadataPath);
+
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.LoadingData, 0, "Streaming training data..."));
 
-            var streamingData = _dataLoader.StreamTrainingData(
-                actorType,
-                sampleLimit,
-                winningTeamOnly: false,
-                shuffle: true,
-                cancellationToken);
+            LoggerMessages.LogIdvFileLoading(_logger, idvFilePath);
+            var dataView = _idvFileService.Load(idvFilePath);
 
-            progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 25, "Training model (streaming)..."));
-            var trainingResult = await _trainer.TrainAsync(streamingData, preShuffled: true, cancellationToken);
+            var rowCount = (int)(dataView.GetRowCount() ?? -1);
+            if (rowCount != metadata.RowCount)
+            {
+                throw new InvalidOperationException(
+                    $"IDV row count mismatch for {idvFilePath}: metadata says {metadata.RowCount} but IDataView has {rowCount} rows");
+            }
+
+            LoggerMessages.LogIdvMetadataValidated(_logger, idvFilePath, metadata.RowCount, metadata.GameCount);
+
+            progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 25, "Training model (IDV)..."));
+            var trainingResult = await _trainer.TrainAsync(dataView, preShuffled: true, cancellationToken);
 
             if (trainingResult.TrainingSamples == 0)
             {
-                LoggerMessages.LogNoTrainingDataFound(_logger, actorType, ModelType);
+                LoggerMessages.LogNoTrainingDataFound(_logger, ModelType);
                 progress.Report(new TrainingProgress(ModelType, TrainingPhase.Failed, 0, "No training data available"));
-                return new ModelTrainingResult(ModelType, false, ErrorMessage: "No training data available");
+                return new ModelTrainingResult(ModelType, false, ErrorMessage: "No training data available", Duration: modelStopwatch.Elapsed);
             }
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 75, "Training complete"));
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Saving, 75, "Saving model..."));
-            await _trainer.SaveModelAsync(outputPath, generation, actorType, trainingResult, cancellationToken);
+            await _trainer.SaveModelAsync(outputPath, modelName, trainingResult, cancellationToken);
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Complete, 100, "Complete"));
 
@@ -64,22 +97,22 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             LoggerMessages.LogModelTrainedSuccessfully(
                 _logger,
                 ModelType,
-                actorType,
                 metrics.MeanAbsoluteError,
                 metrics.RSquared);
 
             return new ModelTrainingResult(
                 ModelType,
                 true,
-                ModelPath: Path.Combine(outputPath, $"{actorType}_{ModelType}_Gen{generation}.zip"),
+                ModelPath: Path.Combine(outputPath, $"{ModelType}_{modelName}.zip"),
                 MeanAbsoluteError: metrics.MeanAbsoluteError,
-                RSquared: metrics.RSquared);
+                RSquared: metrics.RSquared,
+                Duration: modelStopwatch.Elapsed);
         }
         catch (Exception ex)
         {
-            LoggerMessages.LogModelTrainingFailed(_logger, ex, ModelType, actorType);
+            LoggerMessages.LogModelTrainingFailed(_logger, ex, ModelType);
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Failed, 0, $"Error: {ex.Message}"));
-            return new ModelTrainingResult(ModelType, false, ErrorMessage: ex.Message);
+            return new ModelTrainingResult(ModelType, false, ErrorMessage: ex.Message, Duration: modelStopwatch.Elapsed);
         }
     }
 }

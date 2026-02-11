@@ -839,7 +839,7 @@ public class TrumpSelectionOrchestratorTests
         return new DealPlayer
         {
             Position = position,
-            ActorType = ActorType.Chaos,
+            Actor = new Actor(ActorType.Chaos, null),
             CurrentHand = hand,
         };
     }

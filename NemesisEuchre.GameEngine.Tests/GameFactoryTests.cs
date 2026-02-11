@@ -26,15 +26,15 @@ public class GameFactoryTests
     [InlineData(1)]
     [InlineData(3)]
     [InlineData(4)]
-    public Task CreateGameAsync_WithInvalidTeam1ActorTypesLength_ThrowsArgumentException(int length)
+    public Task CreateGameAsync_WithInvalidTeam1ActorsLength_ThrowsArgumentException(int length)
     {
         var gameOptions = MsOptions.Options.Create(new GameOptions());
         var gameInitializer = new GameFactory(gameOptions);
 
-        var act = async () => await gameInitializer.CreateGameAsync(team1ActorTypes: new ActorType[length]);
+        var act = async () => await gameInitializer.CreateGameAsync(team1Actors: new Actor[length]);
 
         return act.Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("team1ActorTypes")
+            .WithParameterName("team1Actors")
             .WithMessage("Team1ActorTypes must contain exactly 2 actor types.*");
     }
 
@@ -43,15 +43,15 @@ public class GameFactoryTests
     [InlineData(1)]
     [InlineData(3)]
     [InlineData(4)]
-    public Task CreateGameAsync_WithInvalidTeam2ActorTypesLength_ThrowsArgumentException(int length)
+    public Task CreateGameAsync_WithInvalidTeam2ActorsLength_ThrowsArgumentException(int length)
     {
         var gameOptions = MsOptions.Options.Create(new GameOptions());
         var gameInitializer = new GameFactory(gameOptions);
 
-        var act = async () => await gameInitializer.CreateGameAsync(team2ActorTypes: new ActorType[length]);
+        var act = async () => await gameInitializer.CreateGameAsync(team2Actors: new Actor[length]);
 
         return act.Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("team2ActorTypes")
+            .WithParameterName("team2Actors")
             .WithMessage("Team2ActorTypes must contain exactly 2 actor types.*");
     }
 
@@ -60,17 +60,17 @@ public class GameFactoryTests
     {
         var gameOptions = MsOptions.Options.Create(new GameOptions
         {
-            Team1ActorTypes = [ActorType.Chaos, ActorType.Chaos],
-            Team2ActorTypes = [ActorType.Chaos, ActorType.Chaos],
+            Team1Actors = [new Actor(ActorType.Chaos, null), new Actor(ActorType.Chaos, null)],
+            Team2Actors = [new Actor(ActorType.Chaos, null), new Actor(ActorType.Chaos, null)],
         });
         var gameInitializer = new GameFactory(gameOptions);
 
         var game = await gameInitializer.CreateGameAsync();
 
-        game.Players[PlayerPosition.North].ActorType.Should().Be(ActorType.Chaos);
-        game.Players[PlayerPosition.South].ActorType.Should().Be(ActorType.Chaos);
-        game.Players[PlayerPosition.East].ActorType.Should().Be(ActorType.Chaos);
-        game.Players[PlayerPosition.West].ActorType.Should().Be(ActorType.Chaos);
+        game.Players[PlayerPosition.North].Actor.ActorType.Should().Be(ActorType.Chaos);
+        game.Players[PlayerPosition.South].Actor.ActorType.Should().Be(ActorType.Chaos);
+        game.Players[PlayerPosition.East].Actor.ActorType.Should().Be(ActorType.Chaos);
+        game.Players[PlayerPosition.West].Actor.ActorType.Should().Be(ActorType.Chaos);
     }
 
     [Fact]
@@ -78,17 +78,17 @@ public class GameFactoryTests
     {
         var gameOptionsValue = new GameOptions
         {
-            Team1ActorTypes = [ActorType.Chaos, ActorType.Chaos],
-            Team2ActorTypes = [ActorType.Chaos, ActorType.Chaos],
+            Team1Actors = [new Actor(ActorType.Chaos, null), new Actor(ActorType.Chaos, null)],
+            Team2Actors = [new Actor(ActorType.Chaos, null), new Actor(ActorType.Chaos, null)],
         };
         var gameOptions = MsOptions.Options.Create(gameOptionsValue);
         var gameInitializer = new GameFactory(gameOptions);
 
         var game = await gameInitializer.CreateGameAsync();
 
-        game.Players[PlayerPosition.North].ActorType.Should().Be(gameOptionsValue.Team1ActorTypes[0]);
-        game.Players[PlayerPosition.South].ActorType.Should().Be(gameOptionsValue.Team1ActorTypes[1]);
-        game.Players[PlayerPosition.East].ActorType.Should().Be(gameOptionsValue.Team2ActorTypes[0]);
-        game.Players[PlayerPosition.West].ActorType.Should().Be(gameOptionsValue.Team2ActorTypes[1]);
+        game.Players[PlayerPosition.North].Actor.ActorType.Should().Be(gameOptionsValue.Team1Actors[0].ActorType);
+        game.Players[PlayerPosition.South].Actor.ActorType.Should().Be(gameOptionsValue.Team1Actors[1].ActorType);
+        game.Players[PlayerPosition.East].Actor.ActorType.Should().Be(gameOptionsValue.Team2Actors[0].ActorType);
+        game.Players[PlayerPosition.West].Actor.ActorType.Should().Be(gameOptionsValue.Team2Actors[1].ActorType);
     }
 }

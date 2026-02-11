@@ -26,7 +26,7 @@ public class GameToEntityMapper(IDealToEntityMapper dealMapper) : IGameToEntityM
             GamePlayers = [.. game.Players.Select(kvp => new GamePlayer
             {
                 PlayerPositionId = (int)kvp.Key,
-                ActorTypeId = kvp.Value.ActorType.HasValue ? (int)kvp.Value.ActorType.Value : null,
+                ActorTypeId = (int)kvp.Value.Actor.ActorType,
             })],
             Deals = [.. game.CompletedDeals.Select((deal, index) => dealMapper.Map(deal, index + 1, game.Players, didTeam1WinGame, didTeam2WinGame))],
         };

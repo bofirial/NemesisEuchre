@@ -34,9 +34,10 @@ public class TrainCommandTests
             mockRenderer.Object,
             options)
         {
-            ActorType = ActorType.Gen1,
             DecisionType = DecisionType.All,
             OutputPath = null,
+            ModelName = "gen1",
+            Source = "gen1",
         };
 
         var exitCode = await command.RunAsync();
@@ -60,12 +61,13 @@ public class TrainCommandTests
             TotalDuration: TimeSpan.FromSeconds(10));
 
         mockProgressCoordinator.Setup(o => o.CoordinateTrainingWithProgressAsync(
-            It.IsAny<ActorType>(),
             It.IsAny<DecisionType>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
-            It.IsAny<int>(),
+            It.IsAny<string>(),
             It.IsAny<Spectre.Console.IAnsiConsole>(),
+            It.IsAny<string>(),
+            It.IsAny<bool>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(trainingResults);
 
@@ -78,9 +80,10 @@ public class TrainCommandTests
             mockRenderer.Object,
             options)
         {
-            ActorType = ActorType.Gen1,
             DecisionType = DecisionType.All,
             OutputPath = null,
+            ModelName = "gen1",
+            Source = "gen1",
         };
 
         var exitCode = await command.RunAsync();
@@ -89,7 +92,6 @@ public class TrainCommandTests
         mockRenderer.Verify(
             r => r.RenderTrainingResults(
             trainingResults,
-            ActorType.Gen1,
             DecisionType.All),
             Times.Once);
     }
@@ -109,12 +111,13 @@ public class TrainCommandTests
             TotalDuration: TimeSpan.FromSeconds(10));
 
         mockProgressCoordinator.Setup(o => o.CoordinateTrainingWithProgressAsync(
-            It.IsAny<ActorType>(),
             It.IsAny<DecisionType>(),
             It.IsAny<string>(),
             It.IsAny<int>(),
-            It.IsAny<int>(),
+            It.IsAny<string>(),
             It.IsAny<Spectre.Console.IAnsiConsole>(),
+            It.IsAny<string>(),
+            It.IsAny<bool>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(trainingResults);
 
@@ -127,9 +130,10 @@ public class TrainCommandTests
             mockRenderer.Object,
             options)
         {
-            ActorType = ActorType.Gen1,
             DecisionType = DecisionType.CallTrump,
             OutputPath = "./custom-models",
+            ModelName = "gen1",
+            Source = "gen1",
         };
 
         var exitCode = await command.RunAsync();
@@ -148,12 +152,13 @@ public class TrainCommandTests
         var trainingResults = new TrainingResults(1, 0, [], TimeSpan.FromSeconds(5));
 
         mockProgressCoordinator.Setup(o => o.CoordinateTrainingWithProgressAsync(
-            ActorType.Gen1,
             DecisionType.CallTrump,
             "./custom-models",
             1000,
-            2,
+            "gen2",
             It.IsAny<Spectre.Console.IAnsiConsole>(),
+            It.IsAny<string>(),
+            It.IsAny<bool>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(trainingResults);
 
@@ -166,23 +171,24 @@ public class TrainCommandTests
             mockRenderer.Object,
             options)
         {
-            ActorType = ActorType.Gen1,
             DecisionType = DecisionType.CallTrump,
             OutputPath = "./custom-models",
             SampleLimit = 1000,
-            Generation = 2,
+            ModelName = "gen2",
+            Source = "gen2",
         };
 
         await command.RunAsync();
 
         mockProgressCoordinator.Verify(
             o => o.CoordinateTrainingWithProgressAsync(
-            ActorType.Gen1,
             DecisionType.CallTrump,
             "./custom-models",
             1000,
-            2,
+            "gen2",
             It.IsAny<Spectre.Console.IAnsiConsole>(),
+            It.IsAny<string>(),
+            It.IsAny<bool>(),
             It.IsAny<CancellationToken>()),
             Times.Once);
     }

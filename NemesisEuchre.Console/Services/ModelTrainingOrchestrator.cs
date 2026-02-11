@@ -1,8 +1,10 @@
 using System.Diagnostics;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Console.Models;
+using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
 
@@ -11,27 +13,30 @@ namespace NemesisEuchre.Console.Services;
 public interface IModelTrainingOrchestrator
 {
     Task<TrainingResults> TrainModelsAsync(
-        ActorType actorType,
         DecisionType decisionType,
         string outputPath,
         int sampleLimit,
-        int generation,
+        string modelName,
         IProgress<TrainingProgress> progress,
+        string idvName,
+        bool allowOverwrite = false,
         CancellationToken cancellationToken = default);
 }
 
 public class ModelTrainingOrchestrator(
     ITrainerFactory trainerFactory,
+    IOptions<PersistenceOptions> persistenceOptions,
     ILogger<ModelTrainingOrchestrator> logger) : IModelTrainingOrchestrator
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Critical Code Smell", "S1215:\"GC.Collect\" should not be called", Justification = "Intentional GC between model trainings to reclaim ~6 GB IDataView buffers")]
     public async Task<TrainingResults> TrainModelsAsync(
-        ActorType actorType,
         DecisionType decisionType,
         string outputPath,
         int sampleLimit,
-        int generation,
+        string modelName,
         IProgress<TrainingProgress> progress,
+        string idvName,
+        bool allowOverwrite = false,
         CancellationToken cancellationToken = default)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -45,9 +50,32 @@ public class ModelTrainingOrchestrator(
 
         LoggerMessages.LogStartingTrainingWithTrainers(
             logger,
-            actorType,
             trainers.Count,
             string.Join(", ", trainers.Select(t => t.ModelType)));
+
+        if (!allowOverwrite)
+        {
+            var conflictingFiles = trainers
+                .SelectMany(t =>
+                {
+                    var baseName = $"{modelName}_{t.ModelType.ToLowerInvariant()}";
+                    return new[]
+                    {
+                        Path.Combine(outputPath, $"{baseName}.zip"),
+                        Path.Combine(outputPath, $"{baseName}.json"),
+                        Path.Combine(outputPath, $"{baseName}.evaluation.json"),
+                    };
+                })
+                .Where(File.Exists)
+                .ToList();
+
+            if (conflictingFiles.Count > 0)
+            {
+                throw new InvalidOperationException(
+                    $"Model files already exist and would be overwritten. Use --overwrite to replace them.{Environment.NewLine}" +
+                    string.Join(Environment.NewLine, conflictingFiles));
+            }
+        }
 
         var results = new List<ModelTrainingResult>();
 
@@ -55,12 +83,16 @@ public class ModelTrainingOrchestrator(
         {
             LoggerMessages.LogTrainingModelType(logger, trainer.ModelType);
 
+            var idvFilePath = Path.Combine(
+                persistenceOptions.Value.IdvOutputPath,
+                $"{idvName}_{GetIdvFilePrefix(trainer.DecisionType)}.idv");
+
             var result = await trainer.ExecuteAsync(
-                actorType,
                 outputPath,
                 sampleLimit,
-                generation,
+                modelName,
                 progress,
+                idvFilePath,
                 cancellationToken);
 
             results.Add(result);
@@ -83,5 +115,17 @@ public class ModelTrainingOrchestrator(
         LoggerMessages.LogTrainingCompleteWithResults(logger, successCount, failCount, stopwatch.Elapsed);
 
         return new TrainingResults(successCount, failCount, results, stopwatch.Elapsed);
+    }
+
+    private static string GetIdvFilePrefix(DecisionType type)
+    {
+        return type switch
+        {
+            DecisionType.Play => "PlayCard",
+            DecisionType.CallTrump => "CallTrump",
+            DecisionType.Discard => "DiscardCard",
+            DecisionType.All => throw new ArgumentOutOfRangeException(nameof(type), type, "DecisionType.All is not a valid individual decision type"),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unsupported decision type for IDV file prefix"),
+        };
     }
 }

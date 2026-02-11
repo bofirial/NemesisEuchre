@@ -5,7 +5,7 @@ using NemesisEuchre.DataAccess.Entities.Metadata;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class DiscardCardDecisionEntity : IDecisionEntity
+public class DiscardCardDecisionEntity
 {
     public int DiscardCardDecisionId { get; set; }
 

@@ -31,27 +31,29 @@ public class TrainingProgressCoordinatorTests : IDisposable
 
         _mockOrchestrator
             .Setup(x => x.TrainModelsAsync(
-                ActorType.Chaos,
                 DecisionType.CallTrump,
                 "./models",
                 1000,
-                1,
+                "gen1",
                 It.IsAny<IProgress<TrainingProgress>>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
-        var result = await _coordinator.CoordinateTrainingWithProgressAsync(ActorType.Chaos, DecisionType.CallTrump, "./models", 1000, 1, _testConsole, TestContext.Current.CancellationToken);
+        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "./models", 1000, "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(expectedResults);
 
         _mockOrchestrator.Verify(
             x => x.TrainModelsAsync(
-                ActorType.Chaos,
                 DecisionType.CallTrump,
                 "./models",
                 1000,
-                1,
+                "gen1",
                 It.IsAny<IProgress<TrainingProgress>>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -60,39 +62,37 @@ public class TrainingProgressCoordinatorTests : IDisposable
     public async Task CoordinateTrainingWithProgressAsync_PassesCorrectParameters()
     {
         var expectedResults = new TrainingResults(3, 0, [], TimeSpan.FromSeconds(2));
-        ActorType? capturedActorType = null;
         DecisionType? capturedDecisionType = null;
         string? capturedOutputPath = null;
         int? capturedSampleLimit = null;
-        int? capturedGeneration = null;
+        string? capturedModelName = null;
 
         _mockOrchestrator
             .Setup(x => x.TrainModelsAsync(
-                It.IsAny<ActorType>(),
                 It.IsAny<DecisionType>(),
                 It.IsAny<string>(),
                 It.IsAny<int>(),
-                It.IsAny<int>(),
+                It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<ActorType, DecisionType, string, int, int, IProgress<TrainingProgress>, CancellationToken>(
-                (actor, decision, path, limit, gen, _, _) =>
+            .Callback<DecisionType, string, int, string, IProgress<TrainingProgress>, string, bool, CancellationToken>(
+                (decision, path, limit, modelName, _, _, _, _) =>
                 {
-                    capturedActorType = actor;
                     capturedDecisionType = decision;
                     capturedOutputPath = path;
                     capturedSampleLimit = limit;
-                    capturedGeneration = gen;
+                    capturedModelName = modelName;
                 })
             .ReturnsAsync(expectedResults);
 
-        await _coordinator.CoordinateTrainingWithProgressAsync(ActorType.Beta, DecisionType.All, "./output", 5000, 2, _testConsole, TestContext.Current.CancellationToken);
+        await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.All, "./output", 5000, "gen2", _testConsole, "gen2", cancellationToken: TestContext.Current.CancellationToken);
 
-        capturedActorType.Should().Be(ActorType.Beta);
         capturedDecisionType.Should().Be(DecisionType.All);
         capturedOutputPath.Should().Be("./output");
         capturedSampleLimit.Should().Be(5000);
-        capturedGeneration.Should().Be(2);
+        capturedModelName.Should().Be("gen2");
     }
 
     [Fact]
@@ -103,23 +103,24 @@ public class TrainingProgressCoordinatorTests : IDisposable
 
         _mockOrchestrator
             .Setup(x => x.TrainModelsAsync(
-                It.IsAny<ActorType>(),
                 It.IsAny<DecisionType>(),
                 It.IsAny<string>(),
                 It.IsAny<int>(),
-                It.IsAny<int>(),
+                It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new OperationCanceledException());
 
         var act = async () => await _coordinator.CoordinateTrainingWithProgressAsync(
-            ActorType.Chaos,
             DecisionType.CallTrump,
             "./models",
             1000,
-            1,
+            "gen1",
             _testConsole,
-            cts.Token);
+            "gen1",
+            cancellationToken: cts.Token);
 
         await act.Should().ThrowAsync<OperationCanceledException>();
 
@@ -131,22 +132,23 @@ public class TrainingProgressCoordinatorTests : IDisposable
     {
         _mockOrchestrator
             .Setup(x => x.TrainModelsAsync(
-                It.IsAny<ActorType>(),
                 It.IsAny<DecisionType>(),
                 It.IsAny<string>(),
                 It.IsAny<int>(),
-                It.IsAny<int>(),
+                It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Training failed"));
 
         var act = async () => await _coordinator.CoordinateTrainingWithProgressAsync(
-            ActorType.Chaos,
             DecisionType.CallTrump,
             "./models",
             1000,
-            1,
-            _testConsole);
+            "gen1",
+            _testConsole,
+            "gen1");
 
         return act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("Training failed");
@@ -170,16 +172,17 @@ public class TrainingProgressCoordinatorTests : IDisposable
 
         _mockOrchestrator
             .Setup(x => x.TrainModelsAsync(
-                It.IsAny<ActorType>(),
                 It.IsAny<DecisionType>(),
                 It.IsAny<string>(),
                 It.IsAny<int>(),
-                It.IsAny<int>(),
+                It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
-        var result = await _coordinator.CoordinateTrainingWithProgressAsync(ActorType.Chaos, DecisionType.CallTrump, "./models", 0, 1, _testConsole, TestContext.Current.CancellationToken);
+        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "./models", 0, "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(expectedResults);
         result.SuccessfulModels.Should().Be(1);

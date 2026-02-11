@@ -32,7 +32,7 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
         var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
@@ -58,7 +58,7 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
         var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
@@ -84,7 +84,7 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
         var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
@@ -110,14 +110,14 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
         var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
 
         await command.RunAsync();
 
-        mockSingleGameRunner.Verify(o => o.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
+        mockSingleGameRunner.Verify(o => o.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
         var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
@@ -184,7 +184,7 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var command = new DefaultCommand(
             mockLogger,
@@ -199,9 +199,9 @@ public class DefaultCommandTests
 
         await command.RunAsync();
 
-        mockSingleGameRunner.Verify(o => o.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
+        mockSingleGameRunner.Verify(o => o.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
         mockBatchGameOrchestrator.Verify(
-            o => o.RunBatchAsync(It.IsAny<int>(), It.IsAny<IBatchProgressReporter>(), It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<CancellationToken>()),
+            o => o.RunBatchAsync(It.IsAny<int>(), It.IsAny<IBatchProgressReporter>(), It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -232,9 +232,9 @@ public class DefaultCommandTests
         mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
                 It.IsAny<int>(),
                 It.IsAny<IBatchProgressReporter>(),
-                It.IsAny<bool>(),
-                It.IsAny<ActorType[]?>(),
-                It.IsAny<ActorType[]?>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<Actor[]?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
@@ -252,9 +252,9 @@ public class DefaultCommandTests
         await command.RunAsync();
 
         mockBatchGameOrchestrator.Verify(
-            o => o.RunBatchAsync(10, It.IsAny<IBatchProgressReporter>(), It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), default),
+            o => o.RunBatchAsync(10, It.IsAny<IBatchProgressReporter>(), It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), default),
             Times.Once);
-        mockSingleGameRunner.Verify(o => o.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Never);
+        mockSingleGameRunner.Verify(o => o.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -284,9 +284,9 @@ public class DefaultCommandTests
         mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
                 It.IsAny<int>(),
                 It.IsAny<IBatchProgressReporter>(),
-                It.IsAny<bool>(),
-                It.IsAny<ActorType[]?>(),
-                It.IsAny<ActorType[]?>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<Actor[]?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
@@ -333,9 +333,9 @@ public class DefaultCommandTests
         mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
                 It.IsAny<int>(),
                 It.IsAny<IBatchProgressReporter>(),
-                It.IsAny<bool>(),
-                It.IsAny<ActorType[]?>(),
-                It.IsAny<ActorType[]?>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<Actor[]?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
@@ -352,7 +352,7 @@ public class DefaultCommandTests
 
         await command.RunAsync();
 
-        mockSingleGameRunner.Verify(o => o.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Never);
+        mockSingleGameRunner.Verify(o => o.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -382,9 +382,9 @@ public class DefaultCommandTests
         mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
                 It.IsAny<int>(),
                 It.IsAny<IBatchProgressReporter>(),
-                It.IsAny<bool>(),
-                It.IsAny<ActorType[]?>(),
-                It.IsAny<ActorType[]?>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<Actor[]?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
@@ -402,7 +402,7 @@ public class DefaultCommandTests
         await command.RunAsync();
 
         mockBatchGameOrchestrator.Verify(
-            o => o.RunBatchAsync(5, It.IsNotNull<IBatchProgressReporter>(), It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), default),
+            o => o.RunBatchAsync(5, It.IsNotNull<IBatchProgressReporter>(), It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), default),
             Times.Once);
     }
 
@@ -423,7 +423,7 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var command = new DefaultCommand(
             mockLogger,
@@ -438,7 +438,7 @@ public class DefaultCommandTests
 
         await command.RunAsync();
 
-        mockSingleGameRunner.Verify(o => o.RunAsync(false, null, null, default), Times.Once);
+        mockSingleGameRunner.Verify(o => o.RunAsync(It.IsAny<GamePersistenceOptions?>(), null, null, default), Times.Once);
     }
 
     [Fact]
@@ -458,7 +458,7 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var command = new DefaultCommand(
             mockLogger,
@@ -469,15 +469,15 @@ public class DefaultCommandTests
             mockGameResultsRenderer)
         {
             Count = 1,
-            Team1 = ActorType.Gen1,
+            Team1 = ActorType.Model,
         };
 
         await command.RunAsync();
 
         mockSingleGameRunner.Verify(
             o => o.RunAsync(
-                false,
-                It.Is<ActorType[]>(a => a.Length == 2 && a[0] == ActorType.Gen1 && a[1] == ActorType.Gen1),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.Is<Actor[]>(a => a.Length == 2 && a[0].ActorType == ActorType.Model && a[1].ActorType == ActorType.Model),
                 null,
                 default),
             Times.Once);
@@ -500,7 +500,7 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var command = new DefaultCommand(
             mockLogger,
@@ -511,16 +511,16 @@ public class DefaultCommandTests
             mockGameResultsRenderer)
         {
             Count = 1,
-            Team2 = ActorType.Gen1,
+            Team2 = ActorType.Model,
         };
 
         await command.RunAsync();
 
         mockSingleGameRunner.Verify(
             o => o.RunAsync(
-                false,
+                It.IsAny<GamePersistenceOptions?>(),
                 null,
-                It.Is<ActorType[]>(a => a.Length == 2 && a[0] == ActorType.Gen1 && a[1] == ActorType.Gen1),
+                It.Is<Actor[]>(a => a.Length == 2 && a[0].ActorType == ActorType.Model && a[1].ActorType == ActorType.Model),
                 default),
             Times.Once);
     }
@@ -542,7 +542,7 @@ public class DefaultCommandTests
             Team2Score = 7,
             WinningTeam = Team.Team1,
         };
-        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<bool>(), It.IsAny<ActorType[]?>(), It.IsAny<ActorType[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
+        mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var command = new DefaultCommand(
             mockLogger,
@@ -553,7 +553,7 @@ public class DefaultCommandTests
             mockGameResultsRenderer)
         {
             Count = 1,
-            Team1 = ActorType.Gen1,
+            Team1 = ActorType.Model,
             Team2 = ActorType.Chaos,
         };
 
@@ -561,9 +561,9 @@ public class DefaultCommandTests
 
         mockSingleGameRunner.Verify(
             o => o.RunAsync(
-                false,
-                It.Is<ActorType[]>(a => a.Length == 2 && a[0] == ActorType.Gen1 && a[1] == ActorType.Gen1),
-                It.Is<ActorType[]>(a => a.Length == 2 && a[0] == ActorType.Chaos && a[1] == ActorType.Chaos),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.Is<Actor[]>(a => a.Length == 2 && a[0].ActorType == ActorType.Model && a[1].ActorType == ActorType.Model),
+                It.Is<Actor[]>(a => a.Length == 2 && a[0].ActorType == ActorType.Chaos && a[1].ActorType == ActorType.Chaos),
                 default),
             Times.Once);
     }
@@ -595,9 +595,9 @@ public class DefaultCommandTests
         mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
                 It.IsAny<int>(),
                 It.IsAny<IBatchProgressReporter>(),
-                It.IsAny<bool>(),
-                It.IsAny<ActorType[]?>(),
-                It.IsAny<ActorType[]?>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<Actor[]?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
@@ -615,7 +615,7 @@ public class DefaultCommandTests
         await command.RunAsync();
 
         mockBatchGameOrchestrator.Verify(
-            o => o.RunBatchAsync(10, It.IsAny<IBatchProgressReporter>(), false, null, null, default),
+            o => o.RunBatchAsync(10, It.IsAny<IBatchProgressReporter>(), It.IsAny<GamePersistenceOptions?>(), null, null, default),
             Times.Once);
     }
 
@@ -646,9 +646,9 @@ public class DefaultCommandTests
         mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
                 It.IsAny<int>(),
                 It.IsAny<IBatchProgressReporter>(),
-                It.IsAny<bool>(),
-                It.IsAny<ActorType[]?>(),
-                It.IsAny<ActorType[]?>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<Actor[]?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
@@ -661,7 +661,7 @@ public class DefaultCommandTests
             mockGameResultsRenderer)
         {
             Count = 10,
-            Team1 = ActorType.Gen1,
+            Team1 = ActorType.Model,
         };
 
         await command.RunAsync();
@@ -670,8 +670,8 @@ public class DefaultCommandTests
             o => o.RunBatchAsync(
                 10,
                 It.IsAny<IBatchProgressReporter>(),
-                false,
-                It.Is<ActorType[]>(a => a.Length == 2 && a[0] == ActorType.Gen1 && a[1] == ActorType.Gen1),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.Is<Actor[]>(a => a.Length == 2 && a[0].ActorType == ActorType.Model && a[1].ActorType == ActorType.Model),
                 null,
                 default),
             Times.Once);
@@ -704,9 +704,9 @@ public class DefaultCommandTests
         mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
                 It.IsAny<int>(),
                 It.IsAny<IBatchProgressReporter>(),
-                It.IsAny<bool>(),
-                It.IsAny<ActorType[]?>(),
-                It.IsAny<ActorType[]?>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<Actor[]?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
@@ -728,9 +728,9 @@ public class DefaultCommandTests
             o => o.RunBatchAsync(
                 10,
                 It.IsAny<IBatchProgressReporter>(),
-                false,
+                It.IsAny<GamePersistenceOptions?>(),
                 null,
-                It.Is<ActorType[]>(a => a.Length == 2 && a[0] == ActorType.Chaos && a[1] == ActorType.Chaos),
+                It.Is<Actor[]>(a => a.Length == 2 && a[0].ActorType == ActorType.Chaos && a[1].ActorType == ActorType.Chaos),
                 default),
             Times.Once);
     }
@@ -762,9 +762,9 @@ public class DefaultCommandTests
         mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
                 It.IsAny<int>(),
                 It.IsAny<IBatchProgressReporter>(),
-                It.IsAny<bool>(),
-                It.IsAny<ActorType[]?>(),
-                It.IsAny<ActorType[]?>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<Actor[]?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
@@ -777,7 +777,7 @@ public class DefaultCommandTests
             mockGameResultsRenderer)
         {
             Count = 10,
-            Team1 = ActorType.Gen1,
+            Team1 = ActorType.Model,
             Team2 = ActorType.Chaos,
         };
 
@@ -787,9 +787,9 @@ public class DefaultCommandTests
             o => o.RunBatchAsync(
                 10,
                 It.IsAny<IBatchProgressReporter>(),
-                false,
-                It.Is<ActorType[]>(a => a.Length == 2 && a[0] == ActorType.Gen1 && a[1] == ActorType.Gen1),
-                It.Is<ActorType[]>(a => a.Length == 2 && a[0] == ActorType.Chaos && a[1] == ActorType.Chaos),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.Is<Actor[]>(a => a.Length == 2 && a[0].ActorType == ActorType.Model && a[1].ActorType == ActorType.Model),
+                It.Is<Actor[]>(a => a.Length == 2 && a[0].ActorType == ActorType.Chaos && a[1].ActorType == ActorType.Chaos),
                 default),
             Times.Once);
     }

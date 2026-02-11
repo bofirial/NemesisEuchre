@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.Logging;
 
+using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
@@ -22,8 +23,11 @@ public class DefaultCommand(
     [CliOption(Description = "Number of games to play")]
     public int Count { get; set; } = 1;
 
-    [CliOption(Description = "Skip saving games to the database")]
-    public bool DoNotPersist { get; set; }
+    [CliOption(Description = "Persist games to SQL database")]
+    public bool PersistToSql { get; set; }
+
+    [CliOption(Description = "Persist training data to IDV files with the given generation name (e.g. {gen2}_CallTrump.idv)", Required = false)]
+    public string? PersistToIdv { get; set; }
 
     [CliOption(Description = "Show decisions made during the game")]
     public bool ShowDecisions { get; set; }
@@ -34,6 +38,21 @@ public class DefaultCommand(
     [CliOption(Description = "ActorType for Team2")]
     public ActorType? Team2 { get; set; }
 
+    [CliOption(Description = "ModelName for Team1 ModelBots", Alias = "t1m")]
+    public string? Team1ModelName { get; set; }
+
+    [CliOption(Description = "ExplorationTemperature for Team1 ModelTrainerBots", Alias = "t1t")]
+    public float Team1ExplorationTemperature { get; set; }
+
+    [CliOption(Description = "ModelName for Team2 ModelBots", Alias = "t2m")]
+    public string? Team2ModelName { get; set; }
+
+    [CliOption(Description = "ExplorationTemperature for Team2 ModelTrainerBots", Alias = "t2t")]
+    public float Team2ExplorationTemperature { get; set; }
+
+    [CliOption(Description = "Allow overwriting existing IDV files")]
+    public bool Overwrite { get; set; }
+
     public async Task<int> RunAsync()
     {
         Foundation.LoggerMessages.LogStartingUp(logger);
@@ -42,48 +61,89 @@ public class DefaultCommand(
 
         ansiConsole.MarkupLine("[green]Welcome to NemesisEuchre - AI-Powered Euchre Strategy[/]");
 
+        var persistenceOptions = new GamePersistenceOptions(PersistToSql, PersistToIdv, Overwrite);
+
         if (Count == 1)
         {
-            await RunSingleGameAsync();
+            await RunSingleGameAsync(persistenceOptions);
         }
         else
         {
-            await RunBatchGamesAsync();
+            await RunBatchGamesAsync(persistenceOptions);
         }
 
         return 0;
     }
 
-    private Task<Game> RunSingleGameAsync()
+    private static Actor? GetTeamActor(ActorType? teamActorType, string? teamModelName, float teamExplorationTemperature)
     {
-        ansiConsole.MarkupLine($"[dim]Playing a game between 2 {Team1 ?? ActorType.Chaos}Bots and 2 {Team2 ?? ActorType.Chaos}Bots...[/]");
-        ansiConsole.WriteLine();
+        if (teamExplorationTemperature != default)
+        {
+            teamActorType = ActorType.ModelTrainer;
+        }
+        else if (!string.IsNullOrEmpty(teamModelName))
+        {
+            teamActorType = ActorType.Model;
+        }
 
-        var team1ActorTypes = Team1.HasValue ? new[] { Team1.Value, Team1.Value } : null;
-        var team2ActorTypes = Team2.HasValue ? new[] { Team2.Value, Team2.Value } : null;
+        return teamActorType != null ? new Actor(teamActorType.Value, teamModelName, teamExplorationTemperature) : null;
+    }
+
+    private Actor[]? GetTeamActors(Team team)
+    {
+        var teamActor = team switch
+        {
+            Team.Team1 => GetTeamActor(Team1, Team1ModelName, Team1ExplorationTemperature),
+            Team.Team2 => GetTeamActor(Team2, Team2ModelName, Team2ExplorationTemperature),
+            _ => throw new ArgumentOutOfRangeException(nameof(team), team, $"Invalid Team: {team}"),
+        };
+        return teamActor != null ? [teamActor, teamActor] : null;
+    }
+
+    private Task<Game> RunSingleGameAsync(GamePersistenceOptions persistenceOptions)
+    {
+        var team1Actors = GetTeamActors(Team.Team1);
+        var team2Actors = GetTeamActors(Team.Team2);
+
+        ansiConsole.MarkupLine($"[dim]Playing a game between 2 {team1Actors?[0].ActorType ?? ActorType.Chaos}Bots and 2 {team2Actors?[0].ActorType ?? ActorType.Chaos}Bots...[/]");
+        ansiConsole.WriteLine();
 
         return ansiConsole.Status()
             .Spinner(Spinner.Known.Dots)
-            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(doNotPersist: DoNotPersist, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes, showDecisions: ShowDecisions));
+            .StartAsync("Playing game...", async _ => await singleGameRunner.RunAsync(persistenceOptions: persistenceOptions, team1Actors: team1Actors, team2Actors: team2Actors, showDecisions: ShowDecisions));
     }
 
-    private async Task RunBatchGamesAsync()
+    private async Task RunBatchGamesAsync(GamePersistenceOptions persistenceOptions)
     {
-        ansiConsole.MarkupLine($"[dim]Playing a game between 2 {Team1 ?? ActorType.Chaos}Bots and 2 {Team2 ?? ActorType.Chaos}Bots...[/]");
+        var team1Actors = GetTeamActors(Team.Team1);
+        var team2Actors = GetTeamActors(Team.Team2);
+
+        ansiConsole.MarkupLine($"[dim]Playing games between 2 {team1Actors?[0].ActorType ?? ActorType.Chaos}Bots and 2 {team2Actors?[0].ActorType ?? ActorType.Chaos}Bots...[/]");
         ansiConsole.WriteLine();
 
         var results = await ansiConsole.Progress()
+            .AutoClear(false)
+            .HideCompleted(false)
+            .Columns(
+                new TaskDescriptionColumn(),
+                new ProgressBarColumn(),
+                new PercentageColumn(),
+                new ElapsedTimeColumn(),
+                new RemainingTimeColumn(),
+                new SpinnerColumn())
             .StartAsync(async ctx =>
             {
                 var playingTask = ctx.AddTask("[green]Playing " + Count + " games...[/]", maxValue: Count);
-                var savingTask = ctx.AddTask("[blue]Saving games...[/]", maxValue: Count);
+                var mappingTask = ctx.AddTask("[blue]Mapping games...[/]", maxValue: Count);
 
-                var progressReporter = new BatchProgressReporter(playingTask, savingTask);
+                ProgressTask? idvSaveTask = null;
+                if (persistenceOptions.IdvGenerationName != null)
+                {
+                    idvSaveTask = ctx.AddTask("[yellow]Saving IDV files...[/]", autoStart: false);
+                }
 
-                var team1ActorTypes = Team1.HasValue ? new[] { Team1.Value, Team1.Value } : null;
-                var team2ActorTypes = Team2.HasValue ? new[] { Team2.Value, Team2.Value } : null;
-
-                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, doNotPersist: DoNotPersist, team1ActorTypes: team1ActorTypes, team2ActorTypes: team2ActorTypes);
+                var progressReporter = new BatchProgressReporter(playingTask, mappingTask, idvSaveTask);
+                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, persistenceOptions: persistenceOptions, team1Actors: team1Actors, team2Actors: team2Actors);
             });
 
         gameResultsRenderer.RenderBatchResults(results);

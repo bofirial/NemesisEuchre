@@ -101,7 +101,7 @@ public class DecisionRenderer : IDecisionRenderer
         var cells = new List<IRenderable>
         {
             new Markup(GameResultsRenderer.GetDisplayPlayer(callDecision.PlayerPosition, deal)),
-            new Markup(deal.Players[callDecision.PlayerPosition].ActorType!.Value.Humanize()),
+            new Markup(deal.Players[callDecision.PlayerPosition].Actor.ActorType.Humanize()),
             new Columns(callDecision.CardsInHand.Select(c => GameResultsRenderer.GetDisplayCard(c, deal.Trump!.Value))),
             new Markup(GameResultsRenderer.GetDisplayCard(callDecision.UpCard!)),
             FormatDecisionScore(passDecisionPredictedPoints, callDecision.ChosenDecision == CallTrumpDecision.Pass),
@@ -117,7 +117,7 @@ public class DecisionRenderer : IDecisionRenderer
         var cells = new List<IRenderable>
         {
             new Markup(GameResultsRenderer.GetDisplayPlayer(callDecision.PlayerPosition, deal)),
-            new Markup(deal.Players[callDecision.PlayerPosition].ActorType!.Value.Humanize()),
+            new Markup(deal.Players[callDecision.PlayerPosition].Actor.ActorType.Humanize()),
             new Columns(callDecision.CardsInHand.Select(c => GameResultsRenderer.GetDisplayCard(c, deal.Trump!.Value))),
             new Markup(GameResultsRenderer.GetDisplayCard(callDecision.UpCard!)),
         };
@@ -173,7 +173,7 @@ public class DecisionRenderer : IDecisionRenderer
 
                 discardDecisionsTable.AddRow(
                     GameResultsRenderer.GetDisplayPlayer(discardCardDecision.PlayerPosition, deal),
-                    deal.Players[discardCardDecision.PlayerPosition].ActorType!.Value.Humanize(),
+                    deal.Players[discardCardDecision.PlayerPosition].Actor.ActorType.Humanize(),
                     GameResultsRenderer.GetDisplayCard(card, deal.Trump),
                     discardCardDecision.ChosenCard == card ? $":diamond_with_a_dot: {decisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:" : decisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture));
             }
@@ -212,7 +212,7 @@ public class DecisionRenderer : IDecisionRenderer
                 playCardDecisionsTable.AddRow(
                     trick.TrickNumber.ToString(CultureInfo.InvariantCulture),
                     GameResultsRenderer.GetDisplayPlayer(playCardDecision.PlayerPosition, deal),
-                    deal.Players[playCardDecision.PlayerPosition].ActorType!.Value.Humanize(),
+                    deal.Players[playCardDecision.PlayerPosition].Actor.ActorType.Humanize(),
                     playCardDecision.LeadSuit != null ? GameResultsRenderer.GetDisplaySuit(playCardDecision.LeadSuit!.Value) : string.Empty,
                     playCardDecision.ValidCardsToPlay.Length > 0 ? GameResultsRenderer.GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[0], playCardDecision, deal.Trump!.Value) : string.Empty,
                     playCardDecision.ValidCardsToPlay.Length > 1 ? GameResultsRenderer.GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[1], playCardDecision, deal.Trump!.Value) : string.Empty,

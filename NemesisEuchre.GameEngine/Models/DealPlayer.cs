@@ -10,5 +10,5 @@ public class DealPlayer
 
     public List<Card> CurrentHand { get; set; } = [];
 
-    public ActorType? ActorType { get; set; }
+    public required Actor Actor { get; set; }
 }

@@ -3,6 +3,7 @@ using Bogus;
 using FluentAssertions;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.ML;
 
 using Moq;
@@ -14,6 +15,7 @@ using NemesisEuchre.GameEngine.Utilities;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Loading;
 using NemesisEuchre.MachineLearning.Models;
+using NemesisEuchre.MachineLearning.Options;
 
 using Xunit;
 
@@ -27,38 +29,44 @@ public class Gen1TrainerBotTests
     private readonly Mock<IDiscardCardInferenceFeatureBuilder> _mockDiscardCardFeatureBuilder = new();
     private readonly Mock<IPlayCardInferenceFeatureBuilder> _mockPlayCardFeatureBuilder = new();
     private readonly Mock<IRandomNumberGenerator> _mockRandom = new();
-    private readonly Mock<ILogger<Gen1TrainerBot>> _mockLogger = new();
+    private readonly Mock<ILogger<ModelTrainerBot>> _mockLogger = new();
+    private readonly IOptions<MachineLearningOptions> _machineLearningOptions = Microsoft.Extensions.Options.Options.Create(new MachineLearningOptions());
+    private readonly Actor _actor = new(ActorType.ModelTrainer, "Gen1");
 
     [Fact]
     public void ActorType_ShouldReturnGen1Trainer()
     {
-        var bot = new Gen1TrainerBot(
+        var bot = new ModelTrainerBot(
             _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object);
+            _machineLearningOptions,
+            _mockLogger.Object,
+            _actor);
 
-        bot.ActorType.Should().Be(ActorType.Gen1Trainer);
+        bot.ActorType.Should().Be(ActorType.ModelTrainer);
     }
 
     [Fact]
     public async Task CallTrumpAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
     {
         _mockEngineProvider
-            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", 1))
+            .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "Gen1"))
             .Returns((PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>?)null);
 
         _mockRandom.Setup(x => x.NextInt(It.IsAny<int>())).Returns(0);
 
-        var bot = new Gen1TrainerBot(
+        var bot = new ModelTrainerBot(
             _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object);
+            _machineLearningOptions,
+            _mockLogger.Object,
+            _actor);
 
         var decisions = new[] { CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp };
         var result = await bot.CallTrumpAsync(
@@ -77,18 +85,20 @@ public class Gen1TrainerBotTests
     public async Task DiscardCardAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
     {
         _mockEngineProvider
-            .Setup(x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", 1))
+            .Setup(x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", "Gen1"))
             .Returns((PredictionEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>?)null);
 
         _mockRandom.Setup(x => x.NextInt(It.IsAny<int>())).Returns(0);
 
-        var bot = new Gen1TrainerBot(
+        var bot = new ModelTrainerBot(
             _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object);
+            _machineLearningOptions,
+            _mockLogger.Object,
+            _actor);
 
         var validCards = GenerateRelativeCards(6);
         var result = await bot.DiscardCardAsync(
@@ -107,18 +117,20 @@ public class Gen1TrainerBotTests
     public async Task PlayCardAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
     {
         _mockEngineProvider
-            .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", 1))
+            .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", "Gen1"))
             .Returns((PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>?)null);
 
         _mockRandom.Setup(x => x.NextInt(It.IsAny<int>())).Returns(0);
 
-        var bot = new Gen1TrainerBot(
+        var bot = new ModelTrainerBot(
             _mockEngineProvider.Object,
             _mockCallTrumpFeatureBuilder.Object,
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object);
+            _machineLearningOptions,
+            _mockLogger.Object,
+            _actor);
 
         var validCards = GenerateRelativeCards(5);
         var result = await bot.PlayCardAsync(

@@ -21,16 +21,12 @@ public static class MachineLearningServiceCollectionExtensions
         IConfiguration configuration)
     {
         services.AddSingleton<MLContext>();
+        services.AddSingleton<IIdvFileService, IdvFileService>();
         services.AddScoped<IDataSplitter, DataSplitter>();
         services.AddSingleton<IModelCache, ModelCache>();
-        services.AddSingleton<IModelVersionManager, ModelVersionManager>();
         services.AddSingleton<IModelLoader, ModelLoader>();
         services.AddSingleton<IPredictionEngineProvider, CachedPredictionEngineProvider>();
         services.AddScoped<IModelPersistenceService, ModelPersistenceService>();
-
-        services.AddScoped<ITrainingDataLoader<CallTrumpTrainingData>, CallTrumpTrainingDataLoader>();
-        services.AddScoped<ITrainingDataLoader<DiscardCardTrainingData>, DiscardCardTrainingDataLoader>();
-        services.AddScoped<ITrainingDataLoader<PlayCardTrainingData>, PlayCardTrainingDataLoader>();
 
         services.AddScoped<IModelTrainer<CallTrumpTrainingData>, CallTrumpRegressionModelTrainer>();
         services.AddScoped<IModelTrainer<DiscardCardTrainingData>, DiscardCardRegressionModelTrainer>();

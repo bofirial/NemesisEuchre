@@ -25,8 +25,8 @@ public class DealFactoryTests
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = new Game();
-        game.Players.Add(PlayerPosition.North, new Player { Position = PlayerPosition.North });
-        game.Players.Add(PlayerPosition.East, new Player { Position = PlayerPosition.East });
+        game.Players.Add(PlayerPosition.North, new Player { Position = PlayerPosition.North, Actor = new Actor(ActorType.Chaos, null) });
+        game.Players.Add(PlayerPosition.East, new Player { Position = PlayerPosition.East, Actor = new Actor(ActorType.Chaos, null) });
 
         var act = async () => await factory.CreateDealAsync(game);
 
@@ -40,7 +40,7 @@ public class DealFactoryTests
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = TestDataBuilders.CreateGame();
-        game.Players.Add((PlayerPosition)99, new Player { Position = (PlayerPosition)99 });
+        game.Players.Add((PlayerPosition)99, new Player { Position = (PlayerPosition)99, Actor = new Actor(ActorType.Chaos, null) });
 
         var act = async () => await factory.CreateDealAsync(game);
 
@@ -342,15 +342,15 @@ public class DealFactoryTests
     {
         var factory = new DealFactory(new NoOpShuffler(), new RandomNumberGenerator());
         var game = TestDataBuilders.CreateGame();
-        game.Players[PlayerPosition.North].ActorType = ActorType.Chaos;
-        game.Players[PlayerPosition.South].ActorType = ActorType.Chad;
+        game.Players[PlayerPosition.North].Actor = new Actor(ActorType.Beta, null);
+        game.Players[PlayerPosition.South].Actor = new Actor(ActorType.Chad, null);
 
         var deal = await factory.CreateDealAsync(game);
 
-        deal.Players[PlayerPosition.North].ActorType.Should().Be(ActorType.Chaos);
-        deal.Players[PlayerPosition.East].ActorType.Should().BeNull();
-        deal.Players[PlayerPosition.South].ActorType.Should().Be(ActorType.Chad);
-        deal.Players[PlayerPosition.West].ActorType.Should().BeNull();
+        deal.Players[PlayerPosition.North].Actor.ActorType.Should().Be(ActorType.Beta);
+        deal.Players[PlayerPosition.East].Actor.ActorType.Should().Be(ActorType.Chaos);
+        deal.Players[PlayerPosition.South].Actor.ActorType.Should().Be(ActorType.Chad);
+        deal.Players[PlayerPosition.West].Actor.ActorType.Should().Be(ActorType.Chaos);
     }
 
     private sealed class NoOpShuffler : ICardShuffler

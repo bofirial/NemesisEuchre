@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 
+using NemesisEuchre.Console.Models;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine;
@@ -9,7 +10,7 @@ namespace NemesisEuchre.Console.Services;
 
 public interface ISingleGameRunner
 {
-    Task<Game> RunAsync(bool doNotPersist = false, ActorType[]? team1ActorTypes = null, ActorType[]? team2ActorTypes = null, bool showDecisions = false, CancellationToken cancellationToken = default);
+    Task<Game> RunAsync(GamePersistenceOptions? persistenceOptions = null, Actor[]? team1Actors = null, Actor[]? team2Actors = null, bool showDecisions = false, CancellationToken cancellationToken = default);
 }
 
 public class SingleGameRunner(
@@ -18,11 +19,18 @@ public class SingleGameRunner(
     IGameResultsRenderer gameResultsRenderer,
     ILogger<SingleGameRunner> logger) : ISingleGameRunner
 {
-    public async Task<Game> RunAsync(bool doNotPersist = false, ActorType[]? team1ActorTypes = null, ActorType[]? team2ActorTypes = null, bool showDecisions = false, CancellationToken cancellationToken = default)
+    public async Task<Game> RunAsync(GamePersistenceOptions? persistenceOptions = null, Actor[]? team1Actors = null, Actor[]? team2Actors = null, bool showDecisions = false, CancellationToken cancellationToken = default)
     {
-        var game = await gameOrchestrator.OrchestrateGameAsync(team1ActorTypes, team2ActorTypes);
+        persistenceOptions ??= new GamePersistenceOptions(false, null);
 
-        if (!doNotPersist)
+        var game = await gameOrchestrator.OrchestrateGameAsync(team1Actors, team2Actors);
+
+        if (persistenceOptions.IdvGenerationName != null)
+        {
+            Foundation.LoggerMessages.LogIdvSkippedSingleGame(logger);
+        }
+
+        if (persistenceOptions.PersistToSql)
         {
             try
             {

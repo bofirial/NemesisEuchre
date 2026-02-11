@@ -13,11 +13,10 @@ namespace NemesisEuchre.MachineLearning.Trainers;
 public class DiscardCardRegressionModelTrainer(
     MLContext mlContext,
     IDataSplitter dataSplitter,
-    IModelVersionManager versionManager,
     IModelPersistenceService persistenceService,
     IOptions<MachineLearningOptions> options,
     ILogger<DiscardCardRegressionModelTrainer> logger)
-    : RegressionModelTrainerBase<DiscardCardTrainingData>(mlContext, dataSplitter, versionManager, persistenceService, options, logger)
+    : RegressionModelTrainerBase<DiscardCardTrainingData>(mlContext, dataSplitter, persistenceService, options, logger)
 {
     protected override IEstimator<ITransformer> BuildPipeline(IDataView trainingData)
     {

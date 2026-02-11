@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Commands;
+using NemesisEuchre.Console.Logging;
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.Console.Services.Orchestration;
 using NemesisEuchre.Console.Services.TrainerExecutors;
@@ -33,7 +34,8 @@ public static class Program
 
             services.AddLogging(builder => builder
                 .AddConfiguration(config.GetSection("Logging"))
-                .AddConsole());
+                .AddConsole()
+                .AddFile(Path.Combine("logs", $"nemesiseuchre-{DateTime.Now:yyyyMMdd-HHmmss}.log")));
 
             services.AddScoped(_ => AnsiConsole.Console);
 
@@ -43,6 +45,8 @@ public static class Program
             services.AddScoped<ISingleGameRunner, SingleGameRunner>();
             services.AddScoped<IParallelismCoordinator, ParallelismCoordinator>();
             services.AddScoped<ISubBatchStrategy, SubBatchStrategy>();
+            services.AddScoped<IGameToTrainingDataConverter, GameToTrainingDataConverter>();
+            services.AddScoped<ITrainingDataAccumulator, TrainingDataAccumulator>();
             services.AddScoped<IPersistenceCoordinator, BatchPersistenceCoordinator>();
             services.AddScoped<IBatchGameOrchestrator, BatchGameOrchestrator>();
 

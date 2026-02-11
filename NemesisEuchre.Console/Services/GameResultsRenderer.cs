@@ -84,6 +84,21 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         table.AddRow("Total Play Card Decisions", results.TotalPlayCardDecisions.ToString(CultureInfo.InvariantCulture));
         table.AddRow("Elapsed Time", $"{results.ElapsedTime.TotalSeconds:F2}s");
 
+        if (results.PlayingDuration.HasValue)
+        {
+            table.AddRow("[dim]  Playing[/]", $"[dim]{results.PlayingDuration.Value.TotalSeconds:F2}s[/]");
+        }
+
+        if (results.PersistenceDuration.HasValue)
+        {
+            table.AddRow("[dim]  Persistence[/]", $"[dim]{results.PersistenceDuration.Value.TotalSeconds:F2}s[/]");
+        }
+
+        if (results.IdvSaveDuration.HasValue)
+        {
+            table.AddRow("[dim]  IDV Save[/]", $"[dim]{results.IdvSaveDuration.Value.TotalSeconds:F2}s[/]");
+        }
+
         ansiConsole.Write(table);
         ansiConsole.WriteLine();
     }

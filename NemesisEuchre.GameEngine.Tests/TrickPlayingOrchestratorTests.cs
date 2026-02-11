@@ -1077,7 +1077,7 @@ public class TrickPlayingOrchestratorTests
         return new DealPlayer
         {
             Position = position,
-            ActorType = ActorType.Chaos,
+            Actor = new Actor(ActorType.Chaos, null),
             CurrentHand = [.. cards],
             StartingHand = cards,
         };

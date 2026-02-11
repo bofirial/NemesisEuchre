@@ -23,9 +23,6 @@ public class TrainCommand(
     ITrainingResultsRenderer resultsRenderer,
     IOptions<MachineLearningOptions> options) : ICliRunAsyncWithReturn
 {
-    [CliOption(Description = "Actor type to train models for")]
-    public required ActorType ActorType { get; set; }
-
     [CliOption(Description = "Decision type to train (CallTrump, Discard, Play, All)")]
     public DecisionType DecisionType { get; set; } = DecisionType.All;
 
@@ -35,12 +32,18 @@ public class TrainCommand(
     [CliOption(Description = "Maximum training samples (0 = unlimited)")]
     public int SampleLimit { get; set; }
 
-    [CliOption(Description = "Generation number for models")]
-    public int Generation { get; set; } = 1;
+    [CliOption(Description = "Load training data from IDV files with the given generation name (e.g. {gen2}_CallTrump.idv)")]
+    public required string Source { get; set; }
+
+    [CliOption(Description = "Name of the model to create (e.g. {gen1}_calltrumpregression.zip)")]
+    public required string ModelName { get; set; }
+
+    [CliOption(Description = "Allow overwriting existing model files")]
+    public bool Overwrite { get; set; }
 
     public async Task<int> RunAsync()
     {
-        LoggerMessages.LogTrainingStarting(logger, ActorType, DecisionType, Generation);
+        LoggerMessages.LogTrainingStarting(logger, DecisionType);
 
         var outputPath = ValidateAndPrepareOutputPath();
         if (outputPath == null)
@@ -51,14 +54,15 @@ public class TrainCommand(
         DisplayTrainingConfiguration(outputPath);
 
         var results = await progressCoordinator.CoordinateTrainingWithProgressAsync(
-            ActorType,
             DecisionType,
             outputPath,
             SampleLimit,
-            Generation,
-            ansiConsole);
+            ModelName,
+            ansiConsole,
+            Source,
+            Overwrite);
 
-        resultsRenderer.RenderTrainingResults(results, ActorType, DecisionType);
+        resultsRenderer.RenderTrainingResults(results, DecisionType);
 
         return DetermineExitCode(results);
     }
@@ -86,7 +90,7 @@ public class TrainCommand(
     {
         ansiConsole.WriteLine();
         ansiConsole.MarkupLine($"[dim]Output: {outputPath}[/]");
-        ansiConsole.MarkupLine($"[dim]Generation: {Generation}[/]");
+        ansiConsole.MarkupLine($"[dim]Model Name: {ModelName}[/]");
 
         if (SampleLimit > 0)
         {

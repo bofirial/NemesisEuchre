@@ -7,13 +7,12 @@ namespace NemesisEuchre.MachineLearning.DataAccess;
 
 public interface IDataSplitter
 {
-    DataSplit Split<T>(
-        IEnumerable<T> data,
+    DataSplit Split(
+        IDataView dataView,
         double trainRatio = 0.7,
         double validationRatio = 0.15,
         double testRatio = 0.15,
-        bool preShuffled = false)
-        where T : class;
+        bool preShuffled = false);
 }
 
 public class DataSplitter : IDataSplitter
@@ -30,20 +29,16 @@ public class DataSplitter : IDataSplitter
         _options = options.Value ?? throw new ArgumentNullException(nameof(options), "Options value cannot be null");
     }
 
-    public DataSplit Split<T>(
-        IEnumerable<T> data,
+    public DataSplit Split(
+        IDataView dataView,
         double trainRatio = 0.7,
         double validationRatio = 0.15,
         double testRatio = 0.15,
         bool preShuffled = false)
-        where T : class
     {
-        ArgumentNullException.ThrowIfNull(data);
+        ArgumentNullException.ThrowIfNull(dataView);
 
         ValidateRatios(trainRatio, validationRatio, testRatio);
-
-        var materializedData = data as IList<T> ?? [.. data];
-        var dataView = _mlContext.Data.LoadFromEnumerable(materializedData);
 
         var rowCount = (int)(dataView.GetRowCount() ?? 0);
 
