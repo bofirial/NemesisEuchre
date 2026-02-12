@@ -161,10 +161,8 @@ public abstract partial class RegressionModelTrainerBase<TData>(
         IProgress<TrainingIterationUpdate>? iterationProgress,
         CancellationToken cancellationToken)
     {
-        if (Logger.IsEnabled(LogLevel.Information))
-        {
-            LoggerMessages.LogStartingTraining(Logger, GetModelType());
-        }
+        var modelType = GetModelType();
+        LoggerMessages.LogStartingTraining(Logger, modelType);
 
         LoggerMessages.LogDataSplitComplete(
             Logger,

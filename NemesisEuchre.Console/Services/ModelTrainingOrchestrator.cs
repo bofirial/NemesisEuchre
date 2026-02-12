@@ -46,13 +46,8 @@ public class ModelTrainingOrchestrator(
             return new TrainingResults(0, 0, [], stopwatch.Elapsed);
         }
 
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            LoggerMessages.LogStartingTrainingWithTrainers(
-                logger,
-                trainers.Count,
-                string.Join(", ", trainers.Select(t => t.ModelType)));
-        }
+        var trainerNames = string.Join(", ", trainers.Select(t => t.ModelType));
+        LoggerMessages.LogStartingTrainingWithTrainers(logger, trainers.Count, trainerNames);
 
         if (!allowOverwrite)
         {
