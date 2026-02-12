@@ -16,7 +16,7 @@ public interface IGameToTrainingDataConverter
     TrainingDataBatch Convert(IReadOnlyList<Game> games);
 }
 
-public class GameToTrainingDataConverter(
+public partial class GameToTrainingDataConverter(
     IGameToEntityMapper gameToEntityMapper,
     IFeatureEngineer<PlayCardDecisionEntity, PlayCardTrainingData> playCardFeatureEngineer,
     IFeatureEngineer<CallTrumpDecisionEntity, CallTrumpTrainingData> callTrumpFeatureEngineer,
@@ -25,91 +25,124 @@ public class GameToTrainingDataConverter(
 {
     public TrainingDataBatch Convert(IReadOnlyList<Game> games)
     {
+        var results = new GameConversionResult[games.Count];
+
+        Parallel.For(0, games.Count, i => results[i] = ConvertSingle(games[i]));
+
+        var totalPlay = 0;
+        var totalCallTrump = 0;
+        var totalDiscard = 0;
+        var totalErrors = 0;
+        var dealCount = 0;
+        var trickCount = 0;
+
+        foreach (var r in results)
+        {
+            totalPlay += r.PlayCardData.Count;
+            totalCallTrump += r.CallTrumpData.Count;
+            totalDiscard += r.DiscardCardData.Count;
+            totalErrors += r.ErrorCount;
+            dealCount += r.DealCount;
+            trickCount += r.TrickCount;
+        }
+
+        var playCardData = new List<PlayCardTrainingData>(totalPlay);
+        var callTrumpData = new List<CallTrumpTrainingData>(totalCallTrump);
+        var discardCardData = new List<DiscardCardTrainingData>(totalDiscard);
+        var actors = new HashSet<Actor>();
+
+        foreach (var r in results)
+        {
+            playCardData.AddRange(r.PlayCardData);
+            callTrumpData.AddRange(r.CallTrumpData);
+            discardCardData.AddRange(r.DiscardCardData);
+            actors.UnionWith(r.Actors);
+        }
+
+        if (totalErrors > 0)
+        {
+            LoggerMessages.LogTrainingDataLoadComplete(logger, playCardData.Count + callTrumpData.Count + discardCardData.Count, totalErrors);
+        }
+
+        var stats = new TrainingDataBatchStats(games.Count, dealCount, trickCount, actors);
+        return new TrainingDataBatch(playCardData, callTrumpData, discardCardData, stats);
+    }
+
+    private GameConversionResult ConvertSingle(Game game)
+    {
         var playCardData = new List<PlayCardTrainingData>();
         var callTrumpData = new List<CallTrumpTrainingData>();
         var discardCardData = new List<DiscardCardTrainingData>();
         var errorCount = 0;
 
-        var dealCount = 0;
-        var trickCount = 0;
+        var dealCount = game.CompletedDeals.Count;
+        var trickCount = game.CompletedDeals.Sum(d => d.CompletedTricks.Count);
+
         var actors = new HashSet<Actor>();
-
-        foreach (var game in games)
+        foreach (var player in game.Players.Values)
         {
-            dealCount += game.CompletedDeals.Count;
-            trickCount += game.CompletedDeals.Sum(d => d.CompletedTricks.Count);
+            actors.Add(player.Actor);
+        }
 
-            foreach (var player in game.Players.Values)
+        var gameEntity = gameToEntityMapper.Map(game);
+
+        foreach (var deal in gameEntity.Deals)
+        {
+            foreach (var decision in deal.CallTrumpDecisions)
             {
-                actors.Add(player.Actor);
+                if (decision.RelativeDealPoints == null)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    callTrumpData.Add(callTrumpFeatureEngineer.Transform(decision));
+                }
+                catch (Exception ex)
+                {
+                    errorCount++;
+                    LoggerMessages.LogFeatureEngineeringError(logger, ex);
+                }
             }
 
-            var gameEntity = gameToEntityMapper.Map(game);
-
-            foreach (var deal in gameEntity.Deals)
+            foreach (var decision in deal.DiscardCardDecisions)
             {
-                foreach (var decision in deal.CallTrumpDecisions)
+                if (decision.RelativeDealPoints == null)
                 {
-                    if (decision.RelativeDealPoints == null)
-                    {
-                        continue;
-                    }
-
-                    try
-                    {
-                        callTrumpData.Add(callTrumpFeatureEngineer.Transform(decision));
-                    }
-                    catch (Exception ex)
-                    {
-                        errorCount++;
-                        LoggerMessages.LogFeatureEngineeringError(logger, ex);
-                    }
+                    continue;
                 }
 
-                foreach (var decision in deal.DiscardCardDecisions)
+                try
                 {
-                    if (decision.RelativeDealPoints == null)
-                    {
-                        continue;
-                    }
+                    discardCardData.Add(discardCardFeatureEngineer.Transform(decision));
+                }
+                catch (Exception ex)
+                {
+                    errorCount++;
+                    LoggerMessages.LogFeatureEngineeringError(logger, ex);
+                }
+            }
 
-                    try
-                    {
-                        discardCardData.Add(discardCardFeatureEngineer.Transform(decision));
-                    }
-                    catch (Exception ex)
-                    {
-                        errorCount++;
-                        LoggerMessages.LogFeatureEngineeringError(logger, ex);
-                    }
+            foreach (var decision in deal.PlayCardDecisions)
+            {
+                if (decision.RelativeDealPoints == null)
+                {
+                    continue;
                 }
 
-                foreach (var decision in deal.PlayCardDecisions)
+                try
                 {
-                    if (decision.RelativeDealPoints == null)
-                    {
-                        continue;
-                    }
-
-                    try
-                    {
-                        playCardData.Add(playCardFeatureEngineer.Transform(decision));
-                    }
-                    catch (Exception ex)
-                    {
-                        errorCount++;
-                        LoggerMessages.LogFeatureEngineeringError(logger, ex);
-                    }
+                    playCardData.Add(playCardFeatureEngineer.Transform(decision));
+                }
+                catch (Exception ex)
+                {
+                    errorCount++;
+                    LoggerMessages.LogFeatureEngineeringError(logger, ex);
                 }
             }
         }
 
-        if (errorCount > 0)
-        {
-            LoggerMessages.LogTrainingDataLoadComplete(logger, playCardData.Count + callTrumpData.Count + discardCardData.Count, errorCount);
-        }
-
-        var stats = new TrainingDataBatchStats(games.Count, dealCount, trickCount, actors);
-        return new TrainingDataBatch(playCardData, callTrumpData, discardCardData, stats);
+        return new GameConversionResult(playCardData, callTrumpData, discardCardData, dealCount, trickCount, actors, errorCount);
     }
 }

@@ -47,7 +47,7 @@ public class BatchGameOrchestrator(
             throw new ArgumentOutOfRangeException(nameof(numberOfGames), "Number of games must be greater than zero.");
         }
 
-        const int maxGamesPerSubBatch = 10000;
+        const int maxGamesPerSubBatch = 100_000;
         if (subBatchStrategy.ShouldUseSubBatches(numberOfGames, maxGamesPerSubBatch))
         {
             return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, persistenceOptions, cancellationToken, team1Actors, team2Actors).ConfigureAwait(false);
@@ -116,7 +116,7 @@ public class BatchGameOrchestrator(
         Actor[]? team2Actors,
         CancellationToken cancellationToken)
     {
-        var channelCapacity = _persistenceOptions.BatchSize * 4;
+        var channelCapacity = _persistenceOptions.BatchSize * 8;
         var state = new BatchExecutionState(channelCapacity);
 
         var consumerTask = persistenceCoordinator.ConsumeAndPersistAsync(state, persistenceOptions, cancellationToken);

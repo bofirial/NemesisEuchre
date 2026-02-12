@@ -75,9 +75,18 @@ public class TrainingDataAccumulator(
         var chunkDirectory = GetChunkDirectory(outputPath, generationName);
         var chunkSuffix = $"_chunk{_chunkIndex + 1:D4}";
 
-        SaveChunkFile(_playCardData, chunkDirectory, "PlayCard", chunkSuffix, _playCardChunkPaths);
-        SaveChunkFile(_callTrumpData, chunkDirectory, "CallTrump", chunkSuffix, _callTrumpChunkPaths);
-        SaveChunkFile(_discardCardData, chunkDirectory, "DiscardCard", chunkSuffix, _discardCardChunkPaths);
+        var playPath = GetChunkPath(chunkDirectory, "PlayCard", chunkSuffix);
+        var callPath = GetChunkPath(chunkDirectory, "CallTrump", chunkSuffix);
+        var discardPath = GetChunkPath(chunkDirectory, "DiscardCard", chunkSuffix);
+
+        Parallel.Invoke(
+            () => SaveChunkFileToPath(_playCardData, playPath),
+            () => SaveChunkFileToPath(_callTrumpData, callPath),
+            () => SaveChunkFileToPath(_discardCardData, discardPath));
+
+        _playCardChunkPaths.Add(playPath);
+        _callTrumpChunkPaths.Add(callPath);
+        _discardCardChunkPaths.Add(discardPath);
 
         _totalPlayCardRows += _playCardData.Count;
         _totalCallTrumpRows += _callTrumpData.Count;
@@ -107,15 +116,17 @@ public class TrainingDataAccumulator(
 
         if (_chunkIndex == 1)
         {
-            RenameChunkToFinal(_playCardChunkPaths, outputPath, generationName, "PlayCard", DecisionType.Play, _totalPlayCardRows, actorInfos);
-            RenameChunkToFinal(_callTrumpChunkPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, _totalCallTrumpRows, actorInfos);
-            RenameChunkToFinal(_discardCardChunkPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, _totalDiscardCardRows, actorInfos);
+            Parallel.Invoke(
+                () => RenameChunkToFinal(_playCardChunkPaths, outputPath, generationName, "PlayCard", DecisionType.Play, _totalPlayCardRows, actorInfos),
+                () => RenameChunkToFinal(_callTrumpChunkPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, _totalCallTrumpRows, actorInfos),
+                () => RenameChunkToFinal(_discardCardChunkPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, _totalDiscardCardRows, actorInfos));
         }
         else
         {
-            MergeChunksToFinal<PlayCardTrainingData>(_playCardChunkPaths, outputPath, generationName, "PlayCard", DecisionType.Play, _totalPlayCardRows, actorInfos);
-            MergeChunksToFinal<CallTrumpTrainingData>(_callTrumpChunkPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, _totalCallTrumpRows, actorInfos);
-            MergeChunksToFinal<DiscardCardTrainingData>(_discardCardChunkPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, _totalDiscardCardRows, actorInfos);
+            Parallel.Invoke(
+                () => MergeChunksToFinal<PlayCardTrainingData>(_playCardChunkPaths, outputPath, generationName, "PlayCard", DecisionType.Play, _totalPlayCardRows, actorInfos),
+                () => MergeChunksToFinal<CallTrumpTrainingData>(_callTrumpChunkPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, _totalCallTrumpRows, actorInfos),
+                () => MergeChunksToFinal<DiscardCardTrainingData>(_discardCardChunkPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, _totalDiscardCardRows, actorInfos));
         }
 
         var chunkDir = GetChunkDirectory(outputPath, generationName);
@@ -137,6 +148,11 @@ public class TrainingDataAccumulator(
     private static string GetChunkDirectory(string outputPath, string generationName)
     {
         return Path.Combine(outputPath, "_chunks", generationName);
+    }
+
+    private static string GetChunkPath(string chunkDirectory, string decisionName, string chunkSuffix)
+    {
+        return Path.Combine(chunkDirectory, decisionName + chunkSuffix + FileExtensions.Idv);
     }
 
     private void GuardAgainstOverwrite(string outputPath, string generationName, bool allowOverwrite)
@@ -165,18 +181,11 @@ public class TrainingDataAccumulator(
         }
     }
 
-    private void SaveChunkFile<T>(
-        List<T> data,
-        string chunkDirectory,
-        string decisionName,
-        string chunkSuffix,
-        List<string> chunkPaths)
+    private void SaveChunkFileToPath<T>(List<T> data, string chunkPath)
         where T : class
     {
-        var chunkPath = Path.Combine(chunkDirectory, decisionName + chunkSuffix + FileExtensions.Idv);
         LoggerMessages.LogIdvChunkSaving(logger, _chunkIndex + 1, chunkPath, data.Count);
         idvFileService.Save(data, chunkPath);
-        chunkPaths.Add(chunkPath);
     }
 
     private void RenameChunkToFinal(

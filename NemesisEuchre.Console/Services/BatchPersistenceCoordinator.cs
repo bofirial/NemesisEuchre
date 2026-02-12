@@ -38,6 +38,7 @@ public class BatchPersistenceCoordinator(
 
         var persistenceStopwatch = Stopwatch.StartNew();
         var batch = new List<Game>(_persistenceOptions.BatchSize);
+        Task<TrainingDataBatch>? pendingConversion = null;
 
         await foreach (var game in state.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
         {
@@ -45,14 +46,28 @@ public class BatchPersistenceCoordinator(
 
             if (batch.Count >= _persistenceOptions.BatchSize)
             {
-                await FlushBatchAsync(batch, state, persistenceOptions, cancellationToken).ConfigureAwait(false);
+                if (pendingConversion != null)
+                {
+                    trainingDataAccumulator.Add(await pendingConversion.ConfigureAwait(false));
+                }
+
+                pendingConversion = await FlushBatchAsync(batch, state, persistenceOptions, cancellationToken).ConfigureAwait(false);
                 batch.Clear();
             }
         }
 
+        if (pendingConversion != null)
+        {
+            trainingDataAccumulator.Add(await pendingConversion.ConfigureAwait(false));
+        }
+
         if (batch.Count > 0)
         {
-            await FlushBatchAsync(batch, state, persistenceOptions, cancellationToken).ConfigureAwait(false);
+            var finalConversion = await FlushBatchAsync(batch, state, persistenceOptions, cancellationToken).ConfigureAwait(false);
+            if (finalConversion != null)
+            {
+                trainingDataAccumulator.Add(await finalConversion.ConfigureAwait(false));
+            }
         }
 
         persistenceStopwatch.Stop();
@@ -64,7 +79,7 @@ public class BatchPersistenceCoordinator(
         }
     }
 
-    private async Task FlushBatchAsync(
+    private async Task<Task<TrainingDataBatch>?> FlushBatchAsync(
         List<Game> games,
         BatchExecutionState state,
         GamePersistenceOptions persistenceOptions,
@@ -90,10 +105,11 @@ public class BatchPersistenceCoordinator(
             }
         }
 
+        Task<TrainingDataBatch>? conversionTask = null;
         if (persistenceOptions.IdvGenerationName != null)
         {
-            var trainingBatch = trainingDataConverter.Convert(games);
-            trainingDataAccumulator.Add(trainingBatch);
+            var snapshot = new List<Game>(games);
+            conversionTask = Task.Run(() => trainingDataConverter.Convert(snapshot), cancellationToken);
 
             if (!persisted)
             {
@@ -105,5 +121,7 @@ public class BatchPersistenceCoordinator(
         {
             state.SavedGames += games.Count;
         }
+
+        return conversionTask;
     }
 }
