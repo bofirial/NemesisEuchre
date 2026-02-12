@@ -2,6 +2,7 @@ using FluentAssertions;
 
 using Moq;
 
+using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Mappers;
@@ -302,6 +303,87 @@ public class GameResultsRendererTests
         renderer.RenderResults(game, false);
 
         testConsole.Output.Should().Contain("0");
+    }
+
+    [Fact]
+    public void BuildLiveResultsTable_DisplaysProgressAndWinRates()
+    {
+        var testConsole = new TestConsole();
+        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+
+        var snapshot = new BatchProgressSnapshot(450, 260, 180, 10, 2250, 9000, 3600, 450, 27000);
+        var elapsed = TimeSpan.FromSeconds(10);
+
+        var renderable = renderer.BuildLiveResultsTable(snapshot, 1000, elapsed);
+        testConsole.Write(renderable);
+
+        var output = testConsole.Output;
+        output.Should().Contain("450");
+        output.Should().Contain("1,000");
+        output.Should().Contain("45.0%");
+        output.Should().Contain("260");
+        output.Should().Contain("180");
+        output.Should().Contain("Batch Game Results (Live)");
+    }
+
+    [Fact]
+    public void BuildLiveResultsTable_DisplaysDecisionCounts()
+    {
+        var testConsole = new TestConsole();
+        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+
+        var snapshot = new BatchProgressSnapshot(100, 60, 35, 5, 500, 2000, 800, 100, 6000);
+        var elapsed = TimeSpan.FromSeconds(5);
+
+        var renderable = renderer.BuildLiveResultsTable(snapshot, 200, elapsed);
+        testConsole.Write(renderable);
+
+        var output = testConsole.Output;
+        output.Should().Contain("800");
+        output.Should().Contain("100");
+        output.Should().Contain("6000");
+        output.Should().Contain("500");
+        output.Should().Contain("2000");
+    }
+
+    [Fact]
+    public void BuildLiveResultsTable_DisplaysThroughputAndEstimatedRemaining()
+    {
+        var testConsole = new TestConsole();
+        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+
+        var snapshot = new BatchProgressSnapshot(500, 300, 190, 10, 2500, 10000, 4000, 500, 30000);
+        var elapsed = TimeSpan.FromSeconds(10);
+
+        var renderable = renderer.BuildLiveResultsTable(snapshot, 1000, elapsed);
+        testConsole.Write(renderable);
+
+        var output = testConsole.Output;
+        output.Should().Contain("Throughput");
+        output.Should().Contain("50 games/sec");
+        output.Should().Contain("Estimated Remaining");
+        output.Should().Contain("10.0s");
+    }
+
+    [Fact]
+    public void BuildLiveResultsTable_WithZeroCompleted_OmitsThroughput()
+    {
+        var testConsole = new TestConsole();
+        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+
+        var snapshot = BatchProgressSnapshot.Empty;
+        var elapsed = TimeSpan.FromSeconds(1);
+
+        var renderable = renderer.BuildLiveResultsTable(snapshot, 100, elapsed);
+        testConsole.Write(renderable);
+
+        var output = testConsole.Output;
+        output.Should().NotContain("Throughput");
+        output.Should().NotContain("Estimated Remaining");
     }
 
     private static Deal CreateMinimalDeal(Suit trump)

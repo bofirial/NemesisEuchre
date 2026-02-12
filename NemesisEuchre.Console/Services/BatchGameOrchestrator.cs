@@ -92,6 +92,20 @@ public class BatchGameOrchestrator(
         };
     }
 
+    private static BatchProgressSnapshot CreateSnapshot(BatchExecutionState state)
+    {
+        return new(
+        state.CompletedGames,
+        state.Team1Wins,
+        state.Team2Wins,
+        state.FailedGames,
+        state.TotalDeals,
+        state.TotalTricks,
+        state.TotalCallTrumpDecisions,
+        state.TotalDiscardCardDecisions,
+        state.TotalPlayCardDecisions);
+    }
+
     private static int GetPlayCardDecisions(GameEngine.Models.Deal d)
     {
         return d.CompletedTricks.Sum(t => t.PlayCardDecisions.Count);
@@ -165,9 +179,20 @@ public class BatchGameOrchestrator(
         {
             var gamesInThisBatch = Math.Min(subBatchSize, totalGames - completedSoFar);
 
+            var cumulativeOffset = new BatchProgressSnapshot(
+                completedSoFar,
+                totalTeam1Wins,
+                totalTeam2Wins,
+                totalFailedGames,
+                totalDeals,
+                totalTricks,
+                totalCallTrumpDecisions,
+                totalDiscardCardDecisions,
+                totalPlayCardDecisions);
+
             var subProgressReporter = progressReporter == null ? null : new SubBatchProgressReporter(
                 progressReporter,
-                completedSoFar);
+                cumulativeOffset);
 
             var (batchResults, batchState) = await ExecuteSingleBatchAsync(
                 gamesInThisBatch,
@@ -254,7 +279,7 @@ public class BatchGameOrchestrator(
                     state.TotalDiscardCardDecisions += game.CompletedDeals.Sum(d => d.DiscardCardDecisions.Count);
                     state.TotalPlayCardDecisions += game.CompletedDeals.Sum(d => GetPlayCardDecisions(d));
                     state.CompletedGames++;
-                    progressReporter?.ReportGameCompleted(state.CompletedGames);
+                    progressReporter?.ReportProgress(CreateSnapshot(state));
                 },
                 cancellationToken).ConfigureAwait(false);
 
@@ -268,7 +293,7 @@ public class BatchGameOrchestrator(
                     {
                         state.FailedGames++;
                         state.CompletedGames++;
-                        progressReporter?.ReportGameCompleted(state.CompletedGames);
+                        progressReporter?.ReportProgress(CreateSnapshot(state));
                     },
                 cancellationToken).ConfigureAwait(false);
         }

@@ -191,15 +191,17 @@ public class BatchGameOrchestratorTests
         _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
             .ReturnsAsync(game);
 
-        var reportedCompletedValues = new List<int>();
+        var reportedSnapshots = new List<BatchProgressSnapshot>();
         var progressReporter = new Mock<IBatchProgressReporter>();
-        progressReporter.Setup(x => x.ReportGameCompleted(It.IsAny<int>()))
-            .Callback<int>(reportedCompletedValues.Add);
+        progressReporter.Setup(x => x.ReportProgress(It.IsAny<BatchProgressSnapshot>()))
+            .Callback<BatchProgressSnapshot>(reportedSnapshots.Add);
 
         await _sut.RunBatchAsync(3, progressReporter: progressReporter.Object, cancellationToken: TestContext.Current.CancellationToken);
 
-        reportedCompletedValues.Should().HaveCount(3);
-        reportedCompletedValues.Should().Equal(1, 2, 3);
+        reportedSnapshots.Should().HaveCount(3);
+        reportedSnapshots.Select(s => s.CompletedGames).Should().Equal(1, 2, 3);
+        reportedSnapshots[2].Team1Wins.Should().Be(3);
+        reportedSnapshots[2].TotalDeals.Should().Be(15);
     }
 
     [Fact]
@@ -575,7 +577,7 @@ public class BatchGameOrchestratorTests
 
         await _sut.RunBatchAsync(3, progressReporter: progressReporter.Object, persistenceOptions: new GamePersistenceOptions(false, null), cancellationToken: TestContext.Current.CancellationToken);
 
-        progressReporter.Verify(x => x.ReportGameCompleted(It.IsAny<int>()), Times.Exactly(3));
+        progressReporter.Verify(x => x.ReportProgress(It.IsAny<BatchProgressSnapshot>()), Times.Exactly(3));
     }
 
     [Fact]

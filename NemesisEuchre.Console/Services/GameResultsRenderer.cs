@@ -19,6 +19,8 @@ public interface IGameResultsRenderer
     void RenderResults(Game game, bool showDecisions);
 
     void RenderBatchResults(BatchGameResults results);
+
+    IRenderable BuildLiveResultsTable(BatchProgressSnapshot snapshot, int totalGames, TimeSpan elapsed);
 }
 
 public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMapper callTrumpDecisionMapper, IDecisionRenderer decisionRenderer) : IGameResultsRenderer
@@ -99,8 +101,52 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
             table.AddRow("[dim]  IDV Save[/]", $"[dim]{results.IdvSaveDuration.Value.TotalSeconds:F2}s[/]");
         }
 
+        if (results.ElapsedTime.TotalSeconds > 0)
+        {
+            var throughput = results.TotalGames / results.ElapsedTime.TotalSeconds;
+            table.AddRow("Throughput", $"{throughput:F0} games/sec");
+        }
+
         ansiConsole.Write(table);
         ansiConsole.WriteLine();
+    }
+
+    public IRenderable BuildLiveResultsTable(BatchProgressSnapshot snapshot, int totalGames, TimeSpan elapsed)
+    {
+        var table = CreateStyledTable()
+            .AddColumn(new TableColumn("[bold]Metric[/]").Centered())
+            .AddColumn(new TableColumn("[bold]Value[/]").Centered());
+
+        var percentage = totalGames > 0 ? (double)snapshot.CompletedGames / totalGames * 100 : 0;
+        table.AddRow("Progress", $"{snapshot.CompletedGames:N0} / {totalGames:N0} ({percentage:F1}%)");
+
+        var completedNonFailed = snapshot.Team1Wins + snapshot.Team2Wins;
+        var team1Rate = completedNonFailed > 0 ? (double)snapshot.Team1Wins / completedNonFailed : 0;
+        var team2Rate = completedNonFailed > 0 ? (double)snapshot.Team2Wins / completedNonFailed : 0;
+        table.AddRow("Team 1 Wins", $"{snapshot.Team1Wins:N0} ([{Team1Color}]{team1Rate:P1}[/])");
+        table.AddRow("Team 2 Wins", $"{snapshot.Team2Wins:N0} ([{Team2Color}]{team2Rate:P1}[/])");
+        table.AddRow("Failed Games", snapshot.FailedGames.ToString(CultureInfo.InvariantCulture));
+        table.AddRow("Total Deals", snapshot.TotalDeals.ToString(CultureInfo.InvariantCulture));
+        table.AddRow("Total Tricks", snapshot.TotalTricks.ToString(CultureInfo.InvariantCulture));
+        table.AddRow("Call Trump Decisions", snapshot.TotalCallTrumpDecisions.ToString(CultureInfo.InvariantCulture));
+        table.AddRow("Discard Card Decisions", snapshot.TotalDiscardCardDecisions.ToString(CultureInfo.InvariantCulture));
+        table.AddRow("Play Card Decisions", snapshot.TotalPlayCardDecisions.ToString(CultureInfo.InvariantCulture));
+        table.AddRow("Elapsed Time", $"{elapsed.TotalSeconds:F2}s");
+
+        if (snapshot.CompletedGames > 0 && elapsed.TotalSeconds > 0)
+        {
+            var throughput = snapshot.CompletedGames / elapsed.TotalSeconds;
+            table.AddRow("Throughput", $"{throughput:F0} games/sec");
+
+            var remaining = totalGames - snapshot.CompletedGames;
+            if (remaining > 0)
+            {
+                var estimatedRemaining = TimeSpan.FromSeconds(remaining / throughput);
+                table.AddRow("Estimated Remaining", $"{estimatedRemaining.TotalSeconds:F1}s");
+            }
+        }
+
+        return new Rows(new Markup("[bold yellow]Batch Game Results (Live)[/]"), new Text(string.Empty), table);
     }
 
     internal static string GetDisplayTeam(Team team)

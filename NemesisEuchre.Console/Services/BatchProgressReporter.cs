@@ -1,26 +1,30 @@
-using Spectre.Console;
+using NemesisEuchre.Console.Models;
 
 namespace NemesisEuchre.Console.Services;
 
 public interface IBatchProgressReporter
 {
-    void ReportGameCompleted(int count);
+    void ReportProgress(BatchProgressSnapshot snapshot);
 }
 
-internal sealed class BatchProgressReporter(ProgressTask playingTask) : IBatchProgressReporter
+internal sealed class LiveBatchProgressReporter : IBatchProgressReporter
 {
-    public void ReportGameCompleted(int count)
+    private volatile BatchProgressSnapshot? _latestSnapshot;
+
+    public BatchProgressSnapshot? LatestSnapshot => _latestSnapshot;
+
+    public void ReportProgress(BatchProgressSnapshot snapshot)
     {
-        playingTask.Value = count;
+        _latestSnapshot = snapshot;
     }
 }
 
 internal sealed class SubBatchProgressReporter(
     IBatchProgressReporter parentReporter,
-    int completedOffset) : IBatchProgressReporter
+    BatchProgressSnapshot cumulativeOffset) : IBatchProgressReporter
 {
-    public void ReportGameCompleted(int count)
+    public void ReportProgress(BatchProgressSnapshot snapshot)
     {
-        parentReporter.ReportGameCompleted(completedOffset + count);
+        parentReporter.ReportProgress(cumulativeOffset.Add(snapshot));
     }
 }

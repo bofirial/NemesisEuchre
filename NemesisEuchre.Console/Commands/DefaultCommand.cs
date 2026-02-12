@@ -1,4 +1,6 @@
-﻿using DotMake.CommandLine;
+﻿using System.Diagnostics;
+
+using DotMake.CommandLine;
 
 using Microsoft.Extensions.Logging;
 
@@ -144,22 +146,31 @@ public class DefaultCommand(
         ansiConsole.MarkupLine($"[dim]Playing games between 2 {team1Actors?[0].ActorType ?? ActorType.Chaos}Bots and 2 {team2Actors?[0].ActorType ?? ActorType.Chaos}Bots...[/]");
         ansiConsole.WriteLine();
 
-        var results = await ansiConsole.Progress()
-            .AutoClear(false)
-            .HideCompleted(false)
-            .Columns(
-                new TaskDescriptionColumn(),
-                new ProgressBarColumn(),
-                new PercentageColumn(),
-                new ElapsedTimeColumn(),
-                new RemainingTimeColumn(),
-                new SpinnerColumn())
+        var reporter = new LiveBatchProgressReporter();
+        var stopwatch = Stopwatch.StartNew();
+
+        var results = await ansiConsole.Live(new Text(string.Empty))
+            .AutoClear(true)
+            .Overflow(VerticalOverflow.Ellipsis)
+            .Cropping(VerticalOverflowCropping.Bottom)
             .StartAsync(async ctx =>
             {
-                var playingTask = ctx.AddTask("[green]Playing " + Count + " games...[/]", maxValue: Count);
+                var orchestratorTask = batchGameOrchestrator.RunBatchAsync(
+                    Count, reporter, persistenceOptions, team1Actors, team2Actors);
 
-                var progressReporter = new BatchProgressReporter(playingTask);
-                return await batchGameOrchestrator.RunBatchAsync(Count, progressReporter: progressReporter, persistenceOptions: persistenceOptions, team1Actors: team1Actors, team2Actors: team2Actors);
+                while (!orchestratorTask.IsCompleted)
+                {
+                    var snapshot = reporter.LatestSnapshot;
+                    if (snapshot != null)
+                    {
+                        ctx.UpdateTarget(
+                            gameResultsRenderer.BuildLiveResultsTable(snapshot, Count, stopwatch.Elapsed));
+                    }
+
+                    await Task.WhenAny(orchestratorTask, Task.Delay(250));
+                }
+
+                return await orchestratorTask;
             });
 
         gameResultsRenderer.RenderBatchResults(results);
