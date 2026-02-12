@@ -219,6 +219,23 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
                     deal.Team2Score.ToString(CultureInfo.InvariantCulture));
     }
 
+    private static int GetSkippedPlayerInsertIndex(Trick trick, PlayerPosition skippedPlayerPosition)
+    {
+        var leadPosition = trick.CardsPlayed[0].PlayerPosition;
+
+        if (leadPosition.GetNextPosition() == skippedPlayerPosition)
+        {
+            return 1;
+        }
+
+        if (leadPosition.GetNextPosition().GetNextPosition() == skippedPlayerPosition)
+        {
+            return 2;
+        }
+
+        return 3;
+    }
+
     private IRenderable[] GetPlayerRow(DealPlayer dealPlayer, Deal deal)
     {
         var playerHand = dealPlayer.StartingHand;
@@ -328,7 +345,6 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
                 .AddRow(GetTrickRow(deal.CompletedTricks[4], deal));
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0045:Convert to conditional expression", Justification = "Nested Conditionals are bad")]
     private IRenderable[] GetTrickRow(Trick trick, Deal deal)
     {
         var cards = trick.CardsPlayed.ConvertAll(card => GetCardCell(card, trick, deal.Trump!.Value));
@@ -336,21 +352,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         if (callTrumpDecisionMapper.IsGoingAloneDecision(deal.ChosenDecision!.Value))
         {
             var skippedPlayerPosition = deal.CallingPlayer!.Value.GetPartnerPosition();
-
-            int insertIndex;
-            if (trick.CardsPlayed[0].PlayerPosition.GetNextPosition() == skippedPlayerPosition)
-            {
-                insertIndex = 1;
-            }
-            else if (trick.CardsPlayed[0].PlayerPosition.GetNextPosition().GetNextPosition() == skippedPlayerPosition)
-            {
-                insertIndex = 2;
-            }
-            else
-            {
-                insertIndex = 3;
-            }
-
+            var insertIndex = GetSkippedPlayerInsertIndex(trick, skippedPlayerPosition);
             cards.Insert(insertIndex, new Text(string.Empty));
         }
 
