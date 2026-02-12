@@ -48,8 +48,7 @@ public class IdvFileService(MLContext mlContext) : IIdvFileService
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
 
-        var dataView = mlContext.Data.LoadFromBinary(filePath);
-        return mlContext.Data.CreateEnumerable<T>(dataView, reuseRowObject: false);
+        return StreamFromBinaryCore<T>(filePath);
     }
 
     public void SaveMetadata(IdvFileMetadata metadata, string metadataPath)
@@ -73,5 +72,22 @@ public class IdvFileService(MLContext mlContext) : IIdvFileService
         var json = File.ReadAllText(metadataPath);
         return JsonSerializer.Deserialize<IdvFileMetadata>(json, JsonSerializationOptions.WithNaNHandling)
             ?? throw new InvalidOperationException($"Failed to deserialize IDV metadata from: {metadataPath}");
+    }
+
+    private IEnumerable<T> StreamFromBinaryCore<T>(string filePath)
+        where T : class, new()
+    {
+        var dataView = mlContext.Data.LoadFromBinary(filePath);
+        try
+        {
+            foreach (var item in mlContext.Data.CreateEnumerable<T>(dataView, reuseRowObject: false))
+            {
+                yield return item;
+            }
+        }
+        finally
+        {
+            (dataView as IDisposable)?.Dispose();
+        }
     }
 }
