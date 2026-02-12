@@ -5,6 +5,7 @@ using Microsoft.ML;
 
 using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.Foundation;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.Services;
@@ -46,7 +47,7 @@ public class ModelPersistenceService(
         var decisionType = modelType.ToLowerInvariant();
 
         var normalizedDecisionType = decisionType.ToLowerInvariant();
-        var fileName = $"{modelName}_{normalizedDecisionType}.zip";
+        var fileName = $"{modelName}_{normalizedDecisionType}{FileExtensions.ModelZip}";
         var modelFilePath = Path.Combine(modelsDirectory, fileName);
 
         await SaveModelFileAsync<TData>(model, mlContext, modelFilePath, modelName, decisionType, cancellationToken);
@@ -105,7 +106,7 @@ public class ModelPersistenceService(
         ModelMetadata metadata,
         CancellationToken cancellationToken)
     {
-        var metadataPath = Path.ChangeExtension(modelPath, ".json");
+        var metadataPath = Path.ChangeExtension(modelPath, FileExtensions.ModelMetadataJson);
         var json = JsonSerializer.Serialize(metadata, JsonSerializationOptions.Default);
 
         await File.WriteAllTextAsync(metadataPath, json, cancellationToken);
@@ -117,7 +118,7 @@ public class ModelPersistenceService(
         object evaluationReport,
         CancellationToken cancellationToken)
     {
-        var evaluationPath = Path.ChangeExtension(modelPath, ".evaluation.json");
+        var evaluationPath = Path.ChangeExtension(modelPath, FileExtensions.EvaluationReportJson);
         var reportJson = JsonSerializer.Serialize(evaluationReport, JsonSerializationOptions.WithNaNHandling);
 
         await File.WriteAllTextAsync(evaluationPath, reportJson, cancellationToken);

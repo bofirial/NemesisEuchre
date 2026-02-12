@@ -58,7 +58,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
                 throw new FileNotFoundException($"IDV file not found: {idvFilePath}", idvFilePath);
             }
 
-            var metadataPath = $"{idvFilePath}.meta.json";
+            var metadataPath = idvFilePath + FileExtensions.IdvMetadataSuffix;
             var metadata = _idvFileService.LoadMetadata(metadataPath);
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.LoadingData, 0, "Streaming training data..."));
@@ -103,7 +103,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             return new ModelTrainingResult(
                 ModelType,
                 true,
-                ModelPath: Path.Combine(outputPath, $"{ModelType}_{modelName}.zip"),
+                ModelPath: Path.Combine(outputPath, $"{ModelType}_{modelName}{FileExtensions.ModelZip}"),
                 MeanAbsoluteError: metrics.MeanAbsoluteError,
                 RSquared: metrics.RSquared,
                 Duration: modelStopwatch.Elapsed);

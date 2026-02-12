@@ -61,9 +61,9 @@ public class ModelTrainingOrchestrator(
                     var baseName = $"{modelName}_{t.ModelType.ToLowerInvariant()}";
                     return new[]
                     {
-                        Path.Combine(outputPath, $"{baseName}.zip"),
-                        Path.Combine(outputPath, $"{baseName}.json"),
-                        Path.Combine(outputPath, $"{baseName}.evaluation.json"),
+                        Path.Combine(outputPath, baseName + FileExtensions.ModelZip),
+                        Path.Combine(outputPath, baseName + FileExtensions.ModelMetadataJson),
+                        Path.Combine(outputPath, baseName + FileExtensions.EvaluationReportJson),
                     };
                 })
                 .Where(File.Exists)
@@ -85,7 +85,7 @@ public class ModelTrainingOrchestrator(
 
             var idvFilePath = Path.Combine(
                 persistenceOptions.Value.IdvOutputPath,
-                $"{idvName}_{GetIdvFilePrefix(trainer.DecisionType)}.idv");
+                $"{idvName}_{GetIdvFilePrefix(trainer.DecisionType)}{FileExtensions.Idv}");
 
             var result = await trainer.ExecuteAsync(
                 outputPath,

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.ML;
 
 using NemesisEuchre.Foundation;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Caching;
 
 namespace NemesisEuchre.MachineLearning.Loading;
@@ -36,7 +37,7 @@ public class ModelLoader(
         ArgumentException.ThrowIfNullOrWhiteSpace(decisionType);
 
         var normalizedDecisionType = decisionType.ToLowerInvariant();
-        var fileName = $"{modelName}_{normalizedDecisionType}.zip";
+        var fileName = $"{modelName}_{normalizedDecisionType}{FileExtensions.ModelZip}";
         var modelFilePath = Path.Combine(modelsDirectory, fileName);
 
         LoggerMessages.LogLoadingModelWithDecisionType(logger, modelName, decisionType);

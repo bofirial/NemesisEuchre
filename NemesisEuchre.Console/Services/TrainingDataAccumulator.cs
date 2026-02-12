@@ -59,8 +59,8 @@ public class TrainingDataAccumulator(
             var conflictingFiles = suffixes
                 .SelectMany(s => new[]
                 {
-                    Path.Combine(outputPath, $"{generationName}_{s}.idv"),
-                    Path.Combine(outputPath, $"{generationName}_{s}.idv.meta.json"),
+                    Path.Combine(outputPath, $"{generationName}_{s}{FileExtensions.Idv}"),
+                    Path.Combine(outputPath, $"{generationName}_{s}{FileExtensions.IdvMetadata}"),
                 })
                 .Where(File.Exists)
                 .ToList();
@@ -77,21 +77,21 @@ public class TrainingDataAccumulator(
 
         SaveIdvFileWithMetadata(
             _playCardData,
-            Path.Combine(outputPath, $"{generationName}_PlayCard.idv"),
+            Path.Combine(outputPath, $"{generationName}_PlayCard{FileExtensions.Idv}"),
             generationName,
             DecisionType.Play,
             actorInfos);
 
         SaveIdvFileWithMetadata(
             _callTrumpData,
-            Path.Combine(outputPath, $"{generationName}_CallTrump.idv"),
+            Path.Combine(outputPath, $"{generationName}_CallTrump{FileExtensions.Idv}"),
             generationName,
             DecisionType.CallTrump,
             actorInfos);
 
         SaveIdvFileWithMetadata(
             _discardCardData,
-            Path.Combine(outputPath, $"{generationName}_DiscardCard.idv"),
+            Path.Combine(outputPath, $"{generationName}_DiscardCard{FileExtensions.Idv}"),
             generationName,
             DecisionType.Discard,
             actorInfos);
@@ -111,7 +111,7 @@ public class TrainingDataAccumulator(
         idvFileService.Save(data, filePath);
         LoggerMessages.LogIdvFileSaved(logger, filePath, data.Count);
 
-        var metadataPath = $"{filePath}.meta.json";
+        var metadataPath = filePath + FileExtensions.IdvMetadataSuffix;
         var metadata = new IdvFileMetadata(
             generationName,
             decisionType,
