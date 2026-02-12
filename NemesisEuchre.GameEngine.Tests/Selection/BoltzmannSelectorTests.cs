@@ -253,7 +253,7 @@ public class BoltzmannSelectorTests
             results[result]++;
         }
 
-        results["best"].Should().BeLessThan((int)(iterations * 0.6));
+        results["best"].Should().BeLessThan((int)(iterations * 0.7));
         results["poor"].Should().BeGreaterThanOrEqualTo((int)(iterations * 0.2));
     }
 

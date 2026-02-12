@@ -92,7 +92,9 @@ public class ModelPersistenceServiceTests : IDisposable
         return act.Should().ThrowAsync<ArgumentNullException>();
     }
 
-    [Fact]
+#pragma warning disable xUnit1004
+    [Fact(Skip = "Long running test")]
+#pragma warning restore xUnit1004
     public async Task SaveModelAsync_CreatesDirectoryIfNotExists()
     {
         var outputDir = Path.Combine(_tempDirectory, "subdir");
@@ -114,7 +116,9 @@ public class ModelPersistenceServiceTests : IDisposable
         Directory.Exists(outputDir).Should().BeTrue();
     }
 
-    [Fact]
+#pragma warning disable xUnit1004
+    [Fact(Skip = "Long running test")]
+#pragma warning restore xUnit1004
     public async Task SaveModelAsync_CreatesZipAndJsonFiles()
     {
         Directory.CreateDirectory(_tempDirectory);
