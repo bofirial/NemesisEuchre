@@ -84,7 +84,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         table.AddRow("Total Call Trump Decisions", results.TotalCallTrumpDecisions.ToString(CultureInfo.InvariantCulture));
         table.AddRow("Total Discard Card Decisions", results.TotalDiscardCardDecisions.ToString(CultureInfo.InvariantCulture));
         table.AddRow("Total Play Card Decisions", results.TotalPlayCardDecisions.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Elapsed Time", $"{results.ElapsedTime.TotalSeconds:F2}s");
+        table.AddRow("Elapsed Time", results.ElapsedTime.Humanize(2, countEmptyUnits: true));
 
         if (results.PlayingDuration.HasValue)
         {
@@ -131,7 +131,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         table.AddRow("Call Trump Decisions", snapshot.TotalCallTrumpDecisions.ToString(CultureInfo.InvariantCulture));
         table.AddRow("Discard Card Decisions", snapshot.TotalDiscardCardDecisions.ToString(CultureInfo.InvariantCulture));
         table.AddRow("Play Card Decisions", snapshot.TotalPlayCardDecisions.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Elapsed Time", $"{elapsed.TotalSeconds:F2}s");
+        table.AddRow("Elapsed Time", elapsed.Humanize(2, countEmptyUnits: true));
 
         if (snapshot.CompletedGames > 0 && elapsed.TotalSeconds > 0)
         {
@@ -142,7 +142,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
             if (remaining > 0)
             {
                 var estimatedRemaining = TimeSpan.FromSeconds(remaining / throughput);
-                table.AddRow("Estimated Remaining", $"{estimatedRemaining.TotalSeconds:F1}s");
+                table.AddRow("Estimated Remaining", estimatedRemaining.Humanize(2, countEmptyUnits: true));
             }
         }
 

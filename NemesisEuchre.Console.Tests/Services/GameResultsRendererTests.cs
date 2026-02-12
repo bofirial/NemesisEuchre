@@ -365,7 +365,7 @@ public class GameResultsRendererTests
         output.Should().Contain("Throughput");
         output.Should().Contain("50 games/sec");
         output.Should().Contain("Estimated Remaining");
-        output.Should().Contain("10.0s");
+        output.Should().Contain("10 seconds");
     }
 
     [Fact]
