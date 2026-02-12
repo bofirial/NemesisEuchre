@@ -56,7 +56,7 @@ public class BatchGameOrchestrator(
         var stopwatch = Stopwatch.StartNew();
         var (_, state) = await ExecuteSingleBatchAsync(numberOfGames, progressReporter, persistenceOptions, team1Actors, team2Actors, cancellationToken).ConfigureAwait(false);
 
-        FinalizeIdv(persistenceOptions, state);
+        FinalizeIdv(persistenceOptions, state, progressReporter);
 
         stopwatch.Stop();
 
@@ -111,12 +111,16 @@ public class BatchGameOrchestrator(
         return d.CompletedTricks.Sum(t => t.PlayCardDecisions.Count);
     }
 
-    private void FinalizeIdv(GamePersistenceOptions? persistenceOptions, BatchExecutionState state)
+    private void FinalizeIdv(GamePersistenceOptions? persistenceOptions, BatchExecutionState state, IBatchProgressReporter? progressReporter = null)
     {
         if (persistenceOptions?.IdvGenerationName != null)
         {
+            Action<string>? statusCallback = progressReporter is LiveBatchProgressReporter live
+                ? msg => live.StatusMessage = msg
+                : null;
+
             var idvStopwatch = Stopwatch.StartNew();
-            trainingDataAccumulator.Finalize(persistenceOptions.IdvGenerationName);
+            trainingDataAccumulator.Finalize(persistenceOptions.IdvGenerationName, statusCallback);
             idvStopwatch.Stop();
             state.IdvSaveDuration = idvStopwatch.Elapsed;
         }
@@ -219,8 +223,12 @@ public class BatchGameOrchestrator(
 
         if (persistenceOptions?.IdvGenerationName != null)
         {
+            Action<string>? statusCallback = progressReporter is LiveBatchProgressReporter live
+                ? msg => live.StatusMessage = msg
+                : null;
+
             var idvStopwatch = Stopwatch.StartNew();
-            trainingDataAccumulator.Finalize(persistenceOptions.IdvGenerationName);
+            trainingDataAccumulator.Finalize(persistenceOptions.IdvGenerationName, statusCallback);
             idvStopwatch.Stop();
             totalIdvSaveDuration += idvStopwatch.Elapsed;
         }

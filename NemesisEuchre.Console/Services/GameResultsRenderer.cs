@@ -20,7 +20,7 @@ public interface IGameResultsRenderer
 
     void RenderBatchResults(BatchGameResults results);
 
-    IRenderable BuildLiveResultsTable(BatchProgressSnapshot snapshot, int totalGames, TimeSpan elapsed);
+    IRenderable BuildLiveResultsTable(BatchProgressSnapshot snapshot, int totalGames, TimeSpan elapsed, string? statusMessage = null);
 }
 
 public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMapper callTrumpDecisionMapper, IDecisionRenderer decisionRenderer) : IGameResultsRenderer
@@ -111,7 +111,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         ansiConsole.WriteLine();
     }
 
-    public IRenderable BuildLiveResultsTable(BatchProgressSnapshot snapshot, int totalGames, TimeSpan elapsed)
+    public IRenderable BuildLiveResultsTable(BatchProgressSnapshot snapshot, int totalGames, TimeSpan elapsed, string? statusMessage = null)
     {
         var table = CreateStyledTable()
             .AddColumn(new TableColumn("[bold]Metric[/]").Centered())
@@ -119,6 +119,11 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
 
         var percentage = totalGames > 0 ? (double)snapshot.CompletedGames / totalGames * 100 : 0;
         table.AddRow("Progress", $"{snapshot.CompletedGames:N0} / {totalGames:N0} ({percentage:F1}%)");
+
+        if (statusMessage != null)
+        {
+            table.AddRow("[yellow]Status[/]", $"[yellow]{statusMessage}[/]");
+        }
 
         var completedNonFailed = snapshot.Team1Wins + snapshot.Team2Wins;
         var team1Rate = completedNonFailed > 0 ? (double)snapshot.Team1Wins / completedNonFailed : 0;

@@ -16,7 +16,7 @@ public interface ITrainingDataAccumulator
 
     void SaveChunk(string generationName, bool allowOverwrite = false);
 
-    void Finalize(string generationName);
+    void Finalize(string generationName, Action<string>? onStatusUpdate = null);
 }
 
 public class TrainingDataAccumulator(
@@ -99,10 +99,11 @@ public class TrainingDataAccumulator(
         _chunkIndex++;
     }
 
-    public void Finalize(string generationName)
+    public void Finalize(string generationName, Action<string>? onStatusUpdate = null)
     {
         if (_playCardData.Count > 0 || _callTrumpData.Count > 0 || _discardCardData.Count > 0)
         {
+            onStatusUpdate?.Invoke("Saving remaining training data...");
             SaveChunk(generationName);
         }
 
@@ -116,6 +117,7 @@ public class TrainingDataAccumulator(
 
         if (_chunkIndex == 1)
         {
+            onStatusUpdate?.Invoke("Finalizing IDV files...");
             Parallel.Invoke(
                 () => RenameChunkToFinal(_playCardChunkPaths, outputPath, generationName, "PlayCard", DecisionType.Play, _totalPlayCardRows, actorInfos),
                 () => RenameChunkToFinal(_callTrumpChunkPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, _totalCallTrumpRows, actorInfos),
@@ -123,12 +125,15 @@ public class TrainingDataAccumulator(
         }
         else
         {
+            var totalRows = _totalPlayCardRows + _totalCallTrumpRows + _totalDiscardCardRows;
+            onStatusUpdate?.Invoke($"Merging {_chunkIndex} chunks ({totalRows:N0} rows)...");
             Parallel.Invoke(
                 () => MergeChunksToFinal<PlayCardTrainingData>(_playCardChunkPaths, outputPath, generationName, "PlayCard", DecisionType.Play, _totalPlayCardRows, actorInfos),
                 () => MergeChunksToFinal<CallTrumpTrainingData>(_callTrumpChunkPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, _totalCallTrumpRows, actorInfos),
                 () => MergeChunksToFinal<DiscardCardTrainingData>(_discardCardChunkPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, _totalDiscardCardRows, actorInfos));
         }
 
+        onStatusUpdate?.Invoke("Cleaning up temporary files...");
         var chunkDir = GetChunkDirectory(outputPath, generationName);
         if (Directory.Exists(chunkDir))
         {

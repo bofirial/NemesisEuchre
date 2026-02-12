@@ -10,8 +10,15 @@ public interface IBatchProgressReporter
 internal sealed class LiveBatchProgressReporter : IBatchProgressReporter
 {
     private volatile BatchProgressSnapshot? _latestSnapshot;
+    private volatile string? _statusMessage;
 
     public BatchProgressSnapshot? LatestSnapshot => _latestSnapshot;
+
+    public string? StatusMessage
+    {
+        get => _statusMessage;
+        set => _statusMessage = value;
+    }
 
     public void ReportProgress(BatchProgressSnapshot snapshot)
     {
