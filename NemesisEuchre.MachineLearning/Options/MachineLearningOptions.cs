@@ -8,7 +8,7 @@ namespace NemesisEuchre.MachineLearning.Options;
 public class MachineLearningOptions
 {
     [Required]
-    public string ModelOutputPath { get; set; } = "./models";
+    public string ModelOutputPath { get; set; } = "models";
 
     /// <summary>
     /// Gets or sets the maximum number of leaves in one tree. Controls tree complexity and model capacity.

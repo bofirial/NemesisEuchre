@@ -30,7 +30,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
 
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
-            "./models",
+            "models",
             "gen1",
             new Progress<TrainingProgress>(),
             "gen1",
@@ -47,7 +47,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
         var successResult = new ModelTrainingResult(
             "TestModel",
             true,
-            ModelPath: "./models/Gen1_TestModel_Gen1.zip",
+            ModelPath: Path.Combine("models", "Gen1_TestModel_Gen1.zip"),
             MeanAbsoluteError: 0.5,
             RSquared: 0.85);
 
@@ -71,7 +71,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
 
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
-            "./models",
+            "models",
             "gen1",
             new Progress<TrainingProgress>(),
             "gen1",
@@ -112,7 +112,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
 
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
-            "./models",
+            "models",
             "gen1",
             new Progress<TrainingProgress>(),
             "gen1",
@@ -128,7 +128,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
     [Fact]
     public async Task TrainModelsAsync_WhenMultipleTrainers_ReturnsAggregatedResults()
     {
-        var successResult = new ModelTrainingResult("Model1", true, ModelPath: "./models/Model1.zip");
+        var successResult = new ModelTrainingResult("Model1", true, ModelPath: Path.Combine("models", "Model1.zip"));
         var failureResult = new ModelTrainingResult("Model2", false, ErrorMessage: "Failed");
 
         var mockTrainer1 = new Mock<ITrainerExecutor>();
@@ -160,7 +160,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
 
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.All,
-            "./models",
+            "models",
             "gen1",
             new Progress<TrainingProgress>(),
             "gen1",

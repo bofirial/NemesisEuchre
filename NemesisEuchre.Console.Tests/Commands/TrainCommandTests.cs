@@ -69,7 +69,7 @@ public class TrainCommandTests
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(trainingResults);
 
-        var options = Options.Create(new MachineLearningOptions { ModelOutputPath = "./models" });
+        var options = Options.Create(new MachineLearningOptions { ModelOutputPath = "models" });
 
         var command = new TrainCommand(
             mockLogger,
@@ -117,7 +117,7 @@ public class TrainCommandTests
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(trainingResults);
 
-        var options = Options.Create(new MachineLearningOptions { ModelOutputPath = "./models" });
+        var options = Options.Create(new MachineLearningOptions { ModelOutputPath = "models" });
 
         var command = new TrainCommand(
             mockLogger,

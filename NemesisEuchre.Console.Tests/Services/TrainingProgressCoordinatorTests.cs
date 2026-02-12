@@ -32,7 +32,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
         _mockOrchestrator
             .Setup(x => x.TrainModelsAsync(
                 DecisionType.CallTrump,
-                "./models",
+                "models",
                 "gen1",
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
@@ -40,14 +40,14 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
-        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "./models", "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
+        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "models", "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(expectedResults);
 
         _mockOrchestrator.Verify(
             x => x.TrainModelsAsync(
                 DecisionType.CallTrump,
-                "./models",
+                "models",
                 "gen1",
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
@@ -82,10 +82,10 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 })
             .ReturnsAsync(expectedResults);
 
-        await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.All, "./output", "gen2", _testConsole, "gen2", cancellationToken: TestContext.Current.CancellationToken);
+        await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.All, "output", "gen2", _testConsole, "gen2", cancellationToken: TestContext.Current.CancellationToken);
 
         capturedDecisionType.Should().Be(DecisionType.All);
-        capturedOutputPath.Should().Be("./output");
+        capturedOutputPath.Should().Be("output");
         capturedModelName.Should().Be("gen2");
     }
 
@@ -108,7 +108,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
 
         var act = async () => await _coordinator.CoordinateTrainingWithProgressAsync(
             DecisionType.CallTrump,
-            "./models",
+            "models",
             "gen1",
             _testConsole,
             "gen1",
@@ -135,7 +135,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
 
         var act = async () => await _coordinator.CoordinateTrainingWithProgressAsync(
             DecisionType.CallTrump,
-            "./models",
+            "models",
             "gen1",
             _testConsole,
             "gen1");
@@ -171,7 +171,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
-        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "./models", "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
+        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "models", "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(expectedResults);
         result.SuccessfulModels.Should().Be(1);

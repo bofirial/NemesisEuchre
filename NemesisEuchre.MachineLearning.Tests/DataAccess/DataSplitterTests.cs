@@ -184,7 +184,7 @@ public class DataSplitterTests
         var options = Microsoft.Extensions.Options.Options.Create(new MachineLearningOptions
         {
             RandomSeed = randomSeed,
-            ModelOutputPath = "./models",
+            ModelOutputPath = "models",
             NumberOfLeaves = 31,
             NumberOfIterations = 200,
             LearningRate = 0.1,

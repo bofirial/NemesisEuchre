@@ -58,7 +58,7 @@ public class TrainerExecutorTests
                 Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
             await executor.ExecuteAsync(
-                "./models",
+                "models",
                 "test-model",
                 new Progress<TrainingProgress>(),
                 idvFilePath: tempFile,
@@ -90,7 +90,7 @@ public class TrainerExecutorTests
             Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
         var result = await executor.ExecuteAsync(
-            "./models",
+            "models",
             "test-model",
             new Progress<TrainingProgress>(),
             idvFilePath: "/nonexistent/path/file.idv",
@@ -112,7 +112,7 @@ public class TrainerExecutorTests
             Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
         var result = await executor.ExecuteAsync(
-            "./models",
+            "models",
             "test-model",
             new Progress<TrainingProgress>(),
             idvFilePath: null!,
@@ -149,7 +149,7 @@ public class TrainerExecutorTests
                 Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
             var result = await executor.ExecuteAsync(
-                "./models",
+                "models",
                 "test-model",
                 new Progress<TrainingProgress>(),
                 idvFilePath: tempFile,
@@ -182,7 +182,7 @@ public class TrainerExecutorTests
                 Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
             var result = await executor.ExecuteAsync(
-                "./models",
+                "models",
                 "test-model",
                 new Progress<TrainingProgress>(),
                 idvFilePath: tempFile,
@@ -219,7 +219,7 @@ public class TrainerExecutorTests
                 Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
             var result = await executor.ExecuteAsync(
-                "./models",
+                "models",
                 "test-model",
                 new Progress<TrainingProgress>(),
                 idvFilePath: tempFile,

@@ -22,7 +22,7 @@ public class CachedPredictionEngineProviderTests
     {
         _options = Microsoft.Extensions.Options.Options.Create(new MachineLearningOptions
         {
-            ModelOutputPath = "./test-models",
+            ModelOutputPath = "test-models",
         });
 
         _provider = new CachedPredictionEngineProvider(
@@ -38,7 +38,7 @@ public class CachedPredictionEngineProviderTests
 
         _mockModelLoader.Verify(
             x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", "gen1", "CallTrump"),
+                "test-models", "gen1", "CallTrump"),
             Times.Once);
     }
 
@@ -50,7 +50,7 @@ public class CachedPredictionEngineProviderTests
 
         _mockModelLoader.Verify(
             x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", "gen1", "CallTrump"),
+                "test-models", "gen1", "CallTrump"),
             Times.Once);
     }
 
@@ -62,12 +62,12 @@ public class CachedPredictionEngineProviderTests
 
         _mockModelLoader.Verify(
             x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", "gen1", "CallTrump"),
+                "test-models", "gen1", "CallTrump"),
             Times.Once);
 
         _mockModelLoader.Verify(
             x => x.LoadModel<DiscardCardTrainingData, DiscardCardRegressionPrediction>(
-                "./test-models", "gen1", "DiscardCard"),
+                "test-models", "gen1", "DiscardCard"),
             Times.Once);
     }
 
@@ -79,12 +79,12 @@ public class CachedPredictionEngineProviderTests
 
         _mockModelLoader.Verify(
             x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", "gen1", "CallTrump"),
+                "test-models", "gen1", "CallTrump"),
             Times.Once);
 
         _mockModelLoader.Verify(
             x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", "gen2", "CallTrump"),
+                "test-models", "gen2", "CallTrump"),
             Times.Once);
     }
 
@@ -93,7 +93,7 @@ public class CachedPredictionEngineProviderTests
     {
         _mockModelLoader
             .Setup(x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", "gen1", "CallTrump"))
+                "test-models", "gen1", "CallTrump"))
             .Throws(new FileNotFoundException("Model not found"));
 
         _mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
@@ -117,7 +117,7 @@ public class CachedPredictionEngineProviderTests
     {
         _mockModelLoader
             .Setup(x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", "gen1", "CallTrump"))
+                "test-models", "gen1", "CallTrump"))
             .Throws(new InvalidOperationException("Load failed"));
 
         _mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
@@ -141,7 +141,7 @@ public class CachedPredictionEngineProviderTests
     {
         _mockModelLoader
             .Setup(x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", "gen1", "CallTrump"))
+                "test-models", "gen1", "CallTrump"))
             .Throws(new FileNotFoundException("Model not found"));
 
         var result1 = _provider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "gen1");
@@ -152,7 +152,7 @@ public class CachedPredictionEngineProviderTests
 
         _mockModelLoader.Verify(
             x => x.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-                "./test-models", "gen1", "CallTrump"),
+                "test-models", "gen1", "CallTrump"),
             Times.Once);
     }
 }
