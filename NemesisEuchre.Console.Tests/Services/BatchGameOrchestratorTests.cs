@@ -600,43 +600,6 @@ public class BatchGameOrchestratorTests
         results.FailedGames.Should().Be(0);
     }
 
-    [Fact]
-    public async Task RunBatchAsync_WithDoNotPersist_LogsSkippedMessage()
-    {
-        var persistenceLogger = new Mock<ILogger<BatchPersistenceCoordinator>>();
-        persistenceLogger.Setup(x => x.IsEnabled(LogLevel.Information)).Returns(true);
-        var realPersistenceCoordinator = new BatchPersistenceCoordinator(
-            _serviceScopeFactoryMock.Object,
-            Mock.Of<IGameToTrainingDataConverter>(),
-            Mock.Of<ITrainingDataAccumulator>(),
-            Options.Create(new PersistenceOptions { BatchSize = 100 }),
-            persistenceLogger.Object);
-
-        var sut = new BatchGameOrchestrator(
-            _serviceScopeFactoryMock.Object,
-            _parallelismCoordinatorMock.Object,
-            _subBatchStrategyMock.Object,
-            realPersistenceCoordinator,
-            _trainingDataAccumulatorMock.Object,
-            _persistenceOptionsMock.Object,
-            _loggerMock.Object);
-
-        var game = CreateGameWithWinner(Team.Team1);
-        _gameOrchestratorMock.Setup(x => x.OrchestrateGameAsync())
-            .ReturnsAsync(game);
-
-        await sut.RunBatchAsync(3, persistenceOptions: new GamePersistenceOptions(false, null), cancellationToken: TestContext.Current.CancellationToken);
-
-        persistenceLogger.Verify(
-            x => x.Log(
-                LogLevel.Information,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((_, _) => true),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.AtLeastOnce);
-    }
-
     private static Game CreateGameWithWinner(Team winningTeam, int numberOfDeals = 5)
     {
         var game = new Game

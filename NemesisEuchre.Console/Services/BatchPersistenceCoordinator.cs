@@ -92,7 +92,6 @@ public class BatchPersistenceCoordinator(
 
         if (persistenceOptions.IdvGenerationName != null)
         {
-            LoggerMessages.LogIdvGeneratingBatch(logger, games.Count);
             var trainingBatch = trainingDataConverter.Convert(games);
             trainingDataAccumulator.Add(trainingBatch);
 
@@ -104,8 +103,6 @@ public class BatchPersistenceCoordinator(
 
         if (!persistenceOptions.PersistToSql && persistenceOptions.IdvGenerationName == null)
         {
-            LoggerMessages.LogBatchGamePersistenceSkipped(logger, games.Count);
-
             state.SavedGames += games.Count;
         }
     }
