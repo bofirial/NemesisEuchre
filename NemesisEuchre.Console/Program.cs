@@ -7,6 +7,10 @@ using Microsoft.Extensions.Logging;
 using NemesisEuchre.Console.Commands;
 using NemesisEuchre.Console.Logging;
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.Console.Services.BehavioralTests;
+using NemesisEuchre.Console.Services.BehavioralTests.Scenarios.CallTrump;
+using NemesisEuchre.Console.Services.BehavioralTests.Scenarios.Discard;
+using NemesisEuchre.Console.Services.BehavioralTests.Scenarios.PlayCard;
 using NemesisEuchre.Console.Services.Orchestration;
 using NemesisEuchre.Console.Services.TrainerExecutors;
 using NemesisEuchre.DataAccess.DependencyInjection;
@@ -57,6 +61,21 @@ public static class Program
             services.AddScoped<ITrainerExecutor, CallTrumpRegressionTrainerExecutor>();
             services.AddScoped<ITrainerExecutor, DiscardCardRegressionTrainerExecutor>();
             services.AddScoped<ITrainerExecutor, PlayCardRegressionTrainerExecutor>();
+
+            services.AddScoped<IModelBehavioralTestRunner, ModelBehavioralTestRunner>();
+            services.AddScoped<ITestResultsRenderer, TestResultsRenderer>();
+            services.AddScoped<IModelBehavioralTest, FiveTrumpPlusOneNonTrump>();
+            services.AddScoped<IModelBehavioralTest, FiveTrumpGoingAlone>();
+            services.AddScoped<IModelBehavioralTest, KeepLoneTrumpCard>();
+            services.AddScoped<IModelBehavioralTest, FourTrumpPlusLowNonTrump>();
+            services.AddScoped<IModelBehavioralTest, FiveTrumpInHand>();
+            services.AddScoped<IModelBehavioralTest, NoTrumpNoFaceCards>();
+            services.AddScoped<IModelBehavioralTest, TopThreeTrumpCards>();
+            services.AddScoped<IModelBehavioralTest, PerfectHandGoAlone>();
+            services.AddScoped<IModelBehavioralTest, OnlyOneValidCard>();
+            services.AddScoped<IModelBehavioralTest, LeadWithRightBower>();
+            services.AddScoped<IModelBehavioralTest, DontTrumpOverPartner>();
+            services.AddScoped<IModelBehavioralTest, MustFollowSuit>();
 
             services.AddNemesisEuchreGameEngine();
             services.Configure<GameOptions>(_ => { });
