@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 using FluentAssertions;
 
 using Microsoft.Extensions.Logging;
@@ -19,7 +21,7 @@ public class TrainingDataAccumulatorTests : IDisposable
     private readonly string _tempDirectory;
     private readonly Mock<IIdvFileService> _mockIdvFileService = new();
     private readonly TrainingDataAccumulator _accumulator;
-    private readonly Dictionary<string, IdvFileMetadata> _lastSavedMetadata = [];
+    private readonly ConcurrentDictionary<string, IdvFileMetadata> _lastSavedMetadata = new();
     private readonly List<(string path, int count)> _savedPlayCardCalls = [];
     private readonly List<(string path, int count)> _savedCallTrumpCalls = [];
     private readonly List<(string path, int count)> _savedDiscardCardCalls = [];

@@ -10,100 +10,22 @@ using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.Tests.Caching;
 
-public class ModelCacheTests : IDisposable
+public class ModelCacheTestFixture : IDisposable
 {
-    private readonly MLContext _mlContext;
-    private readonly Mock<ILogger<ModelCache>> _mockLogger;
-    private readonly string _tempDirectory;
-    private readonly string _testModelPath;
-
-    public ModelCacheTests()
+    public ModelCacheTestFixture()
     {
-        _mlContext = new MLContext(seed: 42);
-        _mockLogger = new Mock<ILogger<ModelCache>>();
-        _tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(_tempDirectory);
-        _testModelPath = Path.Combine(_tempDirectory, "test-model.zip");
+        TempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(TempDirectory);
+        TestModelPath = Path.Combine(TempDirectory, "test-model.zip");
 
         CreateTestModel();
     }
 
-    [Fact]
-    public void GetOrCreatePredictionEngine_FirstCall_CreatesNewEngine()
-    {
-        var cache = new ModelCache(_mlContext, _mockLogger.Object);
+    public MLContext MlContext { get; } = new MLContext(seed: 42);
 
-        var engine = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(_testModelPath);
+    public string TempDirectory { get; }
 
-        engine.Should().NotBeNull();
-    }
-
-    [Fact]
-    public void GetOrCreatePredictionEngine_SecondCall_ReturnsCachedEngine()
-    {
-        var cache = new ModelCache(_mlContext, _mockLogger.Object);
-
-        var engine1 = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(_testModelPath);
-        var engine2 = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(_testModelPath);
-
-        engine1.Should().BeSameAs(engine2);
-    }
-
-    [Fact]
-    public void GetOrCreatePredictionEngine_WithConcurrentRequests_CreatesOnlyOnce()
-    {
-        var cache = new ModelCache(_mlContext, _mockLogger.Object);
-        var engines = new List<object>();
-        var locker = new object();
-
-        Parallel.For(0, 10, _ =>
-        {
-            var engine = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(_testModelPath);
-            lock (locker)
-            {
-                engines.Add(engine);
-            }
-        });
-
-        engines.Should().HaveCount(10);
-        engines.Distinct().Should().HaveCount(1);
-    }
-
-    [Fact]
-    public void GetOrCreatePredictionEngine_WithInvalidPath_ThrowsFileNotFoundException()
-    {
-        var cache = new ModelCache(_mlContext, _mockLogger.Object);
-        var invalidPath = Path.Combine(_tempDirectory, "nonexistent-model.zip");
-
-        var act = () => cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(invalidPath);
-
-        act.Should().Throw<FileNotFoundException>()
-            .WithMessage($"Model file not found at path: {invalidPath}*");
-    }
-
-    [Fact]
-    public void InvalidateCache_DisposesEngine_AndAllowsRecreation()
-    {
-        var cache = new ModelCache(_mlContext, _mockLogger.Object);
-
-        var engine1 = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(_testModelPath);
-        cache.InvalidateCache(_testModelPath);
-        var engine2 = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(_testModelPath);
-
-        engine1.Should().NotBeSameAs(engine2);
-    }
-
-    [Fact]
-    public void InvalidateAll_ClearsAllCachedEngines()
-    {
-        var cache = new ModelCache(_mlContext, _mockLogger.Object);
-
-        var engine1 = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(_testModelPath);
-        cache.InvalidateAll();
-        var engine2 = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(_testModelPath);
-
-        engine1.Should().NotBeSameAs(engine2);
-    }
+    public string TestModelPath { get; }
 
     public void Dispose()
     {
@@ -113,9 +35,9 @@ public class ModelCacheTests : IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
-        if (disposing && Directory.Exists(_tempDirectory))
+        if (disposing && Directory.Exists(TempDirectory))
         {
-            Directory.Delete(_tempDirectory, true);
+            Directory.Delete(TempDirectory, true);
         }
     }
 
@@ -157,10 +79,10 @@ public class ModelCacheTests : IDisposable
             });
         }
 
-        var dataView = _mlContext.Data.LoadFromEnumerable(trainingData);
+        var dataView = MlContext.Data.LoadFromEnumerable(trainingData);
 
-        var pipeline = _mlContext.Transforms.Conversion.MapValueToKey("Label")
-            .Append(_mlContext.Transforms.Concatenate(
+        var pipeline = MlContext.Transforms.Conversion.MapValueToKey("Label")
+            .Append(MlContext.Transforms.Concatenate(
                 "Features",
                 nameof(CallTrumpTrainingData.Card1Rank),
                 nameof(CallTrumpTrainingData.Card1Suit),
@@ -178,10 +100,92 @@ public class ModelCacheTests : IDisposable
                 nameof(CallTrumpTrainingData.TeamScore),
                 nameof(CallTrumpTrainingData.OpponentScore),
                 nameof(CallTrumpTrainingData.DecisionOrder)))
-            .Append(_mlContext.MulticlassClassification.Trainers.LightGbm())
-            .Append(_mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
+            .Append(MlContext.MulticlassClassification.Trainers.LightGbm())
+            .Append(MlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
 
         var model = pipeline.Fit(dataView);
-        _mlContext.Model.Save(model, dataView.Schema, _testModelPath);
+        MlContext.Model.Save(model, dataView.Schema, TestModelPath);
+    }
+}
+
+public class ModelCacheTests(ModelCacheTestFixture fixture) : IClassFixture<ModelCacheTestFixture>
+{
+    private readonly Mock<ILogger<ModelCache>> _mockLogger = new();
+
+    [Fact]
+    public void GetOrCreatePredictionEngine_FirstCall_CreatesNewEngine()
+    {
+        var cache = new ModelCache(fixture.MlContext, _mockLogger.Object);
+
+        var engine = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(fixture.TestModelPath);
+
+        engine.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void GetOrCreatePredictionEngine_SecondCall_ReturnsCachedEngine()
+    {
+        var cache = new ModelCache(fixture.MlContext, _mockLogger.Object);
+
+        var engine1 = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(fixture.TestModelPath);
+        var engine2 = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(fixture.TestModelPath);
+
+        engine1.Should().BeSameAs(engine2);
+    }
+
+    [Fact]
+    public void GetOrCreatePredictionEngine_WithConcurrentRequests_CreatesOnlyOnce()
+    {
+        var cache = new ModelCache(fixture.MlContext, _mockLogger.Object);
+        var engines = new List<object>();
+        var locker = new object();
+
+        Parallel.For(0, 10, _ =>
+        {
+            var engine = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(fixture.TestModelPath);
+            lock (locker)
+            {
+                engines.Add(engine);
+            }
+        });
+
+        engines.Should().HaveCount(10);
+        engines.Distinct().Should().HaveCount(1);
+    }
+
+    [Fact]
+    public void GetOrCreatePredictionEngine_WithInvalidPath_ThrowsFileNotFoundException()
+    {
+        var cache = new ModelCache(fixture.MlContext, _mockLogger.Object);
+        var invalidPath = Path.Combine(fixture.TempDirectory, "nonexistent-model.zip");
+
+        var act = () => cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(invalidPath);
+
+        act.Should().Throw<FileNotFoundException>()
+            .WithMessage($"Model file not found at path: {invalidPath}*");
+    }
+
+    [Fact]
+    public void InvalidateCache_DisposesEngine_AndAllowsRecreation()
+    {
+        var cache = new ModelCache(fixture.MlContext, _mockLogger.Object);
+
+        var engine1 = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(fixture.TestModelPath);
+        cache.InvalidateCache(fixture.TestModelPath);
+        var engine2 = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(fixture.TestModelPath);
+
+        engine1.Should().NotBeSameAs(engine2);
+    }
+
+    [Fact]
+    public void InvalidateAll_ClearsAllCachedEngines()
+    {
+        var cache = new ModelCache(fixture.MlContext, _mockLogger.Object);
+
+        var engine1 = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(fixture.TestModelPath);
+        cache.InvalidateAll();
+        var engine2 = cache.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpPrediction>(fixture.TestModelPath);
+
+        engine1.Should().NotBeSameAs(engine2);
     }
 }

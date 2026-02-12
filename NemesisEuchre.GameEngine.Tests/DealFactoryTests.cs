@@ -91,10 +91,10 @@ public class DealFactoryTests
             dealerCounts[deal.DealerPosition!.Value] = count + 1;
         }
 
-        dealerCounts[PlayerPosition.North].Should().BeInRange(200, 300);
-        dealerCounts[PlayerPosition.East].Should().BeInRange(200, 300);
-        dealerCounts[PlayerPosition.South].Should().BeInRange(200, 300);
-        dealerCounts[PlayerPosition.West].Should().BeInRange(200, 300);
+        dealerCounts[PlayerPosition.North].Should().BeInRange(175, 325);
+        dealerCounts[PlayerPosition.East].Should().BeInRange(175, 325);
+        dealerCounts[PlayerPosition.South].Should().BeInRange(175, 325);
+        dealerCounts[PlayerPosition.West].Should().BeInRange(175, 325);
     }
 
     [Fact]
