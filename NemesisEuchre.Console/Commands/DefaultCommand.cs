@@ -114,6 +114,18 @@ public class DefaultCommand(
         return teamActorType != null ? new Actor(teamActorType.Value, teamModelName, teamExplorationTemperature) : null;
     }
 
+    private static string GetActorDisplay(Actor? actor)
+    {
+        return actor?.ActorType switch
+        {
+            ActorType.User => "the player",
+            ActorType.Chaos or ActorType.Chad or ActorType.Beta => $"{actor.ActorType}Bots",
+            ActorType.Model => $"{actor.ActorType}Bots ({actor.ModelName})",
+            ActorType.ModelTrainer => $"{actor.ActorType}Bots ({actor.ModelName} {actor.ExplorationTemperature})",
+            _ => $"{ActorType.Chaos}Bots",
+        };
+    }
+
     private Actor[]? GetTeamActors(Team team)
     {
         var teamActor = team switch
@@ -130,7 +142,7 @@ public class DefaultCommand(
         var team1Actors = GetTeamActors(Team.Team1);
         var team2Actors = GetTeamActors(Team.Team2);
 
-        ansiConsole.MarkupLine($"[dim]Playing a game between 2 {team1Actors?[0].ActorType ?? ActorType.Chaos}Bots and 2 {team2Actors?[0].ActorType ?? ActorType.Chaos}Bots...[/]");
+        ansiConsole.MarkupLine($"[dim]Playing a game between 2 {GetActorDisplay(team1Actors?[0])} and 2 {GetActorDisplay(team2Actors?[0])}...[/]");
         ansiConsole.WriteLine();
 
         return ansiConsole.Status()
@@ -143,7 +155,7 @@ public class DefaultCommand(
         var team1Actors = GetTeamActors(Team.Team1);
         var team2Actors = GetTeamActors(Team.Team2);
 
-        ansiConsole.MarkupLine($"[dim]Playing games between 2 {team1Actors?[0].ActorType ?? ActorType.Chaos}Bots and 2 {team2Actors?[0].ActorType ?? ActorType.Chaos}Bots...[/]");
+        ansiConsole.MarkupLine($"[dim]Playing games between 2 {GetActorDisplay(team1Actors?[0])} and 2 {GetActorDisplay(team2Actors?[0])}...[/]");
         ansiConsole.WriteLine();
 
         var reporter = new LiveBatchProgressReporter();
