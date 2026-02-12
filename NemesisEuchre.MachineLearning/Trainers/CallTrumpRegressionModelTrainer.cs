@@ -36,6 +36,6 @@ public class CallTrumpRegressionModelTrainer(
 
     protected override string GetModelType()
     {
-        return "CallTrumpRegression";
+        return "CallTrump";
     }
 }

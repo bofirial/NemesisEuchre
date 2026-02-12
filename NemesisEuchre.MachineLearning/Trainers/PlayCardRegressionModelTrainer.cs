@@ -36,6 +36,6 @@ public class PlayCardRegressionModelTrainer(
 
     protected override string GetModelType()
     {
-        return "PlayCardRegression";
+        return "PlayCard";
     }
 }

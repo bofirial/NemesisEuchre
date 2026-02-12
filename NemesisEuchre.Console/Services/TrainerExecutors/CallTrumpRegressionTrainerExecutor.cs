@@ -13,7 +13,7 @@ public class CallTrumpRegressionTrainerExecutor(
     ILogger<CallTrumpRegressionTrainerExecutor> logger) :
     RegressionTrainerExecutorBase<CallTrumpTrainingData>(trainer, idvFileService, logger)
 {
-    public override string ModelType => "CallTrumpRegression";
+    public override string ModelType => "CallTrump";
 
     public override DecisionType DecisionType => DecisionType.CallTrump;
 }

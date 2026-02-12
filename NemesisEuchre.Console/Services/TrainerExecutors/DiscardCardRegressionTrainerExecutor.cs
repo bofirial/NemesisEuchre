@@ -13,7 +13,7 @@ public class DiscardCardRegressionTrainerExecutor(
     ILogger<DiscardCardRegressionTrainerExecutor> logger) :
     RegressionTrainerExecutorBase<DiscardCardTrainingData>(trainer, idvFileService, logger)
 {
-    public override string ModelType => "DiscardCardRegression";
+    public override string ModelType => "DiscardCard";
 
     public override DecisionType DecisionType => DecisionType.Discard;
 }

@@ -150,7 +150,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
         var modelResults = new List<ModelTrainingResult>
         {
             new(
-                ModelType: "CallTrumpRegression",
+                ModelType: "CallTrump",
                 Success: true,
                 ModelPath: null,
                 ErrorMessage: null,

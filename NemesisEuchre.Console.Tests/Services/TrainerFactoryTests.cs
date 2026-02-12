@@ -13,9 +13,9 @@ public class TrainerFactoryTests
     [Fact]
     public void GetTrainers_WhenDecisionTypeIsCallTrump_ReturnsCallTrumpTrainer()
     {
-        var callTrumpTrainer = CreateMockTrainer(DecisionType.CallTrump, "CallTrumpRegression");
-        var discardTrainer = CreateMockTrainer(DecisionType.Discard, "DiscardCardRegression");
-        var playTrainer = CreateMockTrainer(DecisionType.Play, "PlayCardRegression");
+        var callTrumpTrainer = CreateMockTrainer(DecisionType.CallTrump, "CallTrump");
+        var discardTrainer = CreateMockTrainer(DecisionType.Discard, "DiscardCard");
+        var playTrainer = CreateMockTrainer(DecisionType.Play, "PlayCard");
 
         var factory = new TrainerFactory([callTrumpTrainer, discardTrainer, playTrainer]);
 
@@ -23,15 +23,15 @@ public class TrainerFactoryTests
 
         result.Should().HaveCount(1);
         result[0].DecisionType.Should().Be(DecisionType.CallTrump);
-        result[0].ModelType.Should().Be("CallTrumpRegression");
+        result[0].ModelType.Should().Be("CallTrump");
     }
 
     [Fact]
     public void GetTrainers_WhenDecisionTypeIsDiscard_ReturnsDiscardTrainer()
     {
-        var callTrumpTrainer = CreateMockTrainer(DecisionType.CallTrump, "CallTrumpRegression");
-        var discardTrainer = CreateMockTrainer(DecisionType.Discard, "DiscardCardRegression");
-        var playTrainer = CreateMockTrainer(DecisionType.Play, "PlayCardRegression");
+        var callTrumpTrainer = CreateMockTrainer(DecisionType.CallTrump, "CallTrump");
+        var discardTrainer = CreateMockTrainer(DecisionType.Discard, "DiscardCard");
+        var playTrainer = CreateMockTrainer(DecisionType.Play, "PlayCard");
 
         var factory = new TrainerFactory([callTrumpTrainer, discardTrainer, playTrainer]);
 
@@ -39,15 +39,15 @@ public class TrainerFactoryTests
 
         result.Should().HaveCount(1);
         result[0].DecisionType.Should().Be(DecisionType.Discard);
-        result[0].ModelType.Should().Be("DiscardCardRegression");
+        result[0].ModelType.Should().Be("DiscardCard");
     }
 
     [Fact]
     public void GetTrainers_WhenDecisionTypeIsPlay_ReturnsPlayTrainer()
     {
-        var callTrumpTrainer = CreateMockTrainer(DecisionType.CallTrump, "CallTrumpRegression");
-        var discardTrainer = CreateMockTrainer(DecisionType.Discard, "DiscardCardRegression");
-        var playTrainer = CreateMockTrainer(DecisionType.Play, "PlayCardRegression");
+        var callTrumpTrainer = CreateMockTrainer(DecisionType.CallTrump, "CallTrump");
+        var discardTrainer = CreateMockTrainer(DecisionType.Discard, "DiscardCard");
+        var playTrainer = CreateMockTrainer(DecisionType.Play, "PlayCard");
 
         var factory = new TrainerFactory([callTrumpTrainer, discardTrainer, playTrainer]);
 
@@ -55,15 +55,15 @@ public class TrainerFactoryTests
 
         result.Should().HaveCount(1);
         result[0].DecisionType.Should().Be(DecisionType.Play);
-        result[0].ModelType.Should().Be("PlayCardRegression");
+        result[0].ModelType.Should().Be("PlayCard");
     }
 
     [Fact]
     public void GetTrainers_WhenDecisionTypeIsAll_ReturnsAllTrainers()
     {
-        var callTrumpTrainer = CreateMockTrainer(DecisionType.CallTrump, "CallTrumpRegression");
-        var discardTrainer = CreateMockTrainer(DecisionType.Discard, "DiscardCardRegression");
-        var playTrainer = CreateMockTrainer(DecisionType.Play, "PlayCardRegression");
+        var callTrumpTrainer = CreateMockTrainer(DecisionType.CallTrump, "CallTrump");
+        var discardTrainer = CreateMockTrainer(DecisionType.Discard, "DiscardCard");
+        var playTrainer = CreateMockTrainer(DecisionType.Play, "PlayCard");
 
         var factory = new TrainerFactory([callTrumpTrainer, discardTrainer, playTrainer]);
 

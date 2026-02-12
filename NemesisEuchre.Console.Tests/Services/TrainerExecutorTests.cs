@@ -26,7 +26,7 @@ public class TrainerExecutorTests
             Mock.Of<IIdvFileService>(),
             mockLogger);
 
-        executor.ModelType.Should().Be("CallTrumpRegression");
+        executor.ModelType.Should().Be("CallTrump");
         executor.DecisionType.Should().Be(DecisionType.CallTrump);
     }
 

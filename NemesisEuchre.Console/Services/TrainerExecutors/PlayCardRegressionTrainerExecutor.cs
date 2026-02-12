@@ -13,7 +13,7 @@ public class PlayCardRegressionTrainerExecutor(
     ILogger<PlayCardRegressionTrainerExecutor> logger) :
     RegressionTrainerExecutorBase<PlayCardTrainingData>(trainer, idvFileService, logger)
 {
-    public override string ModelType => "PlayCardRegression";
+    public override string ModelType => "PlayCard";
 
     public override DecisionType DecisionType => DecisionType.Play;
 }

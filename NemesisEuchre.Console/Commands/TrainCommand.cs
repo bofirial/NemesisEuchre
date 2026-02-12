@@ -34,7 +34,7 @@ public class TrainCommand(
     public required string Source { get; set; }
 
     [CliOption(
-        Description = "Name of the model to create (e.g. {gen1}_calltrumpregression.zip)",
+        Description = "Name of the model to create (e.g. {gen1}_calltrump.zip)",
         Alias = "m")]
     public required string ModelName { get; set; }
 

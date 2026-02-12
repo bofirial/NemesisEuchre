@@ -36,6 +36,6 @@ public class DiscardCardRegressionModelTrainer(
 
     protected override string GetModelType()
     {
-        return "DiscardCardRegression";
+        return "DiscardCard";
     }
 }
