@@ -49,6 +49,7 @@ public class TrainerExecutorTests
             mockTrainer.Setup(t => t.TrainAsync(
                 It.IsAny<Microsoft.ML.IDataView>(),
                 It.IsAny<bool>(),
+                It.IsAny<IProgress<TrainingIterationUpdate>?>(),
                 It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TrainingResult(null!, new RegressionEvaluationMetrics(0, 0, 0, 0, 0), 100, 70, 30));
 
@@ -69,6 +70,7 @@ public class TrainerExecutorTests
                 t => t.TrainAsync(
                     mockDataView.Object,
                     It.IsAny<bool>(),
+                    It.IsAny<IProgress<TrainingIterationUpdate>?>(),
                     It.IsAny<CancellationToken>()),
                 Times.Once);
         }
@@ -140,6 +142,7 @@ public class TrainerExecutorTests
             mockTrainer.Setup(t => t.TrainAsync(
                 It.IsAny<Microsoft.ML.IDataView>(),
                 It.IsAny<bool>(),
+                It.IsAny<IProgress<TrainingIterationUpdate>?>(),
                 It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TrainingResult(null!, new RegressionEvaluationMetrics(0, 0, 0, 0, 0), 50, 35, 15));
 

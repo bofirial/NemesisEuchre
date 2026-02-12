@@ -74,7 +74,21 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             LoggerMessages.LogIdvMetadataValidated(_logger, idvFilePath, metadata.RowCount, metadata.GameCount);
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 25, "Training model (IDV)..."));
-            var trainingResult = await _trainer.TrainAsync(dataView, preShuffled: true, cancellationToken);
+
+            var iterationProgress = new Progress<TrainingIterationUpdate>(update =>
+            {
+                var pct = 25 + (int)(update.CurrentIteration * 50.0 / update.TotalIterations);
+                progress.Report(new TrainingProgress(
+                    ModelType,
+                    TrainingPhase.Training,
+                    pct,
+                    $"Iteration {update.CurrentIteration:N0} / {update.TotalIterations:N0}",
+                    update.CurrentIteration,
+                    update.TotalIterations,
+                    update.TrainingMetric));
+            });
+
+            var trainingResult = await _trainer.TrainAsync(dataView, preShuffled: true, iterationProgress, cancellationToken);
 
             if (trainingResult.TrainingSamples == 0)
             {
@@ -85,12 +99,18 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 75, "Training complete"));
 
+            var metrics = (RegressionEvaluationMetrics)trainingResult.ValidationMetrics;
+
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Saving, 75, "Saving model..."));
             await _trainer.SaveModelAsync(outputPath, modelName, trainingResult, cancellationToken);
 
-            progress.Report(new TrainingProgress(ModelType, TrainingPhase.Complete, 100, "Complete"));
-
-            var metrics = (RegressionEvaluationMetrics)trainingResult.ValidationMetrics;
+            progress.Report(new TrainingProgress(
+                ModelType,
+                TrainingPhase.Complete,
+                100,
+                "Complete",
+                ValidationMae: metrics.MeanAbsoluteError,
+                ValidationRSquared: metrics.RSquared));
 
             LoggerMessages.LogModelTrainedSuccessfully(
                 _logger,

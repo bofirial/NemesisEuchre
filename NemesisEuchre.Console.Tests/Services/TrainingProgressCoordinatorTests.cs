@@ -7,6 +7,7 @@ using NemesisEuchre.Console.Services;
 
 using NemesisEuchre.Foundation.Constants;
 
+using Spectre.Console;
 using Spectre.Console.Testing;
 
 namespace NemesisEuchre.Console.Tests.Services;
@@ -14,13 +15,18 @@ namespace NemesisEuchre.Console.Tests.Services;
 public class TrainingProgressCoordinatorTests : IDisposable
 {
     private readonly Mock<IModelTrainingOrchestrator> _mockOrchestrator = new();
+    private readonly Mock<ITrainingResultsRenderer> _mockRenderer = new();
     private readonly TrainingProgressCoordinator _coordinator;
     private readonly TestConsole _testConsole;
     private bool _disposed;
 
     public TrainingProgressCoordinatorTests()
     {
-        _coordinator = new TrainingProgressCoordinator(_mockOrchestrator.Object);
+        _mockRenderer
+            .Setup(x => x.BuildLiveTrainingTable(It.IsAny<TrainingDisplaySnapshot>(), It.IsAny<TimeSpan>()))
+            .Returns(new Text(string.Empty));
+
+        _coordinator = new TrainingProgressCoordinator(_mockOrchestrator.Object, _mockRenderer.Object);
         _testConsole = new TestConsole();
     }
 
