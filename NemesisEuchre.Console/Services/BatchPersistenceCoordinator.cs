@@ -60,12 +60,7 @@ public class BatchPersistenceCoordinator(
 
         if (persistenceOptions.IdvGenerationName != null)
         {
-            var idvStopwatch = Stopwatch.StartNew();
-
-            trainingDataAccumulator.Save(persistenceOptions.IdvGenerationName, persistenceOptions.AllowOverwrite);
-
-            idvStopwatch.Stop();
-            state.IdvSaveDuration = idvStopwatch.Elapsed;
+            trainingDataAccumulator.SaveChunk(persistenceOptions.IdvGenerationName, persistenceOptions.AllowOverwrite);
         }
     }
 

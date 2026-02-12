@@ -434,4 +434,29 @@ public static partial class LoggerMessages
         Level = LogLevel.Error,
         Message = "IDV metadata verification failed: {MetadataPath}")]
     public static partial void LogIdvMetadataVerificationFailed(ILogger logger, string metadataPath);
+
+    // EventID 66-69: IDV chunk operations
+    [LoggerMessage(
+        EventId = 66,
+        Level = LogLevel.Information,
+        Message = "Saving IDV chunk {ChunkIndex}: {FilePath} ({RowCount} rows)")]
+    public static partial void LogIdvChunkSaving(ILogger logger, int chunkIndex, string filePath, int rowCount);
+
+    [LoggerMessage(
+        EventId = 67,
+        Level = LogLevel.Information,
+        Message = "Merging {ChunkCount} IDV chunks into final file: {FilePath}")]
+    public static partial void LogIdvChunkMerging(ILogger logger, int chunkCount, string filePath);
+
+    [LoggerMessage(
+        EventId = 68,
+        Level = LogLevel.Information,
+        Message = "IDV merge complete: {FilePath} ({TotalRows} total rows from {ChunkCount} chunks)")]
+    public static partial void LogIdvMergeComplete(ILogger logger, string filePath, int totalRows, int chunkCount);
+
+    [LoggerMessage(
+        EventId = 69,
+        Level = LogLevel.Information,
+        Message = "IDV chunk cleanup complete: {DirectoryPath}")]
+    public static partial void LogIdvChunkCleanup(ILogger logger, string directoryPath);
 }

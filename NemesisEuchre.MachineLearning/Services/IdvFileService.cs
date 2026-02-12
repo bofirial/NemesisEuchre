@@ -14,6 +14,9 @@ public interface IIdvFileService
 
     IDataView Load(string filePath);
 
+    IEnumerable<T> StreamFromBinary<T>(string filePath)
+        where T : class, new();
+
     void SaveMetadata(IdvFileMetadata metadata, string metadataPath);
 
     IdvFileMetadata LoadMetadata(string metadataPath);
@@ -38,6 +41,15 @@ public class IdvFileService(MLContext mlContext) : IIdvFileService
         ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
 
         return mlContext.Data.LoadFromBinary(filePath);
+    }
+
+    public IEnumerable<T> StreamFromBinary<T>(string filePath)
+        where T : class, new()
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+
+        var dataView = mlContext.Data.LoadFromBinary(filePath);
+        return mlContext.Data.CreateEnumerable<T>(dataView, reuseRowObject: false);
     }
 
     public void SaveMetadata(IdvFileMetadata metadata, string metadataPath)

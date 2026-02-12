@@ -30,6 +30,7 @@ public class BatchGameOrchestratorTests
     private readonly Mock<IParallelismCoordinator> _parallelismCoordinatorMock;
     private readonly Mock<ISubBatchStrategy> _subBatchStrategyMock;
     private readonly Mock<IPersistenceCoordinator> _persistenceCoordinatorMock;
+    private readonly Mock<ITrainingDataAccumulator> _trainingDataAccumulatorMock;
     private readonly BatchGameOrchestrator _sut;
 
     public BatchGameOrchestratorTests()
@@ -44,6 +45,7 @@ public class BatchGameOrchestratorTests
         _parallelismCoordinatorMock = new Mock<IParallelismCoordinator>();
         _subBatchStrategyMock = new Mock<ISubBatchStrategy>();
         _persistenceCoordinatorMock = new Mock<IPersistenceCoordinator>();
+        _trainingDataAccumulatorMock = new Mock<ITrainingDataAccumulator>();
 
         _persistenceOptionsMock.Setup(x => x.Value).Returns(new PersistenceOptions
         {
@@ -109,6 +111,7 @@ public class BatchGameOrchestratorTests
             _parallelismCoordinatorMock.Object,
             _subBatchStrategyMock.Object,
             _persistenceCoordinatorMock.Object,
+            _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
     }
@@ -214,6 +217,7 @@ public class BatchGameOrchestratorTests
             realParallelismCoordinator,
             _subBatchStrategyMock.Object,
             _persistenceCoordinatorMock.Object,
+            _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
 
@@ -319,6 +323,7 @@ public class BatchGameOrchestratorTests
             realParallelismCoordinator,
             _subBatchStrategyMock.Object,
             _persistenceCoordinatorMock.Object,
+            _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
 
@@ -359,6 +364,7 @@ public class BatchGameOrchestratorTests
             _parallelismCoordinatorMock.Object,
             _subBatchStrategyMock.Object,
             _persistenceCoordinatorMock.Object,
+            _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
 
@@ -493,6 +499,7 @@ public class BatchGameOrchestratorTests
             _parallelismCoordinatorMock.Object,
             _subBatchStrategyMock.Object,
             realPersistenceCoordinator,
+            _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
 
@@ -610,6 +617,7 @@ public class BatchGameOrchestratorTests
             _parallelismCoordinatorMock.Object,
             _subBatchStrategyMock.Object,
             realPersistenceCoordinator,
+            _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
 

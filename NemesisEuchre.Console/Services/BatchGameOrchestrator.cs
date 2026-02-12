@@ -28,6 +28,7 @@ public class BatchGameOrchestrator(
     IParallelismCoordinator parallelismCoordinator,
     ISubBatchStrategy subBatchStrategy,
     IPersistenceCoordinator persistenceCoordinator,
+    ITrainingDataAccumulator trainingDataAccumulator,
     IOptions<PersistenceOptions> persistenceOptions,
     ILogger<BatchGameOrchestrator> logger) : IBatchGameOrchestrator
 {
@@ -54,6 +55,9 @@ public class BatchGameOrchestrator(
 
         var stopwatch = Stopwatch.StartNew();
         var (_, state) = await ExecuteSingleBatchAsync(numberOfGames, progressReporter, persistenceOptions, team1Actors, team2Actors, cancellationToken).ConfigureAwait(false);
+
+        FinalizeIdv(persistenceOptions, state);
+
         stopwatch.Stop();
 
         var result = AggregateResults(numberOfGames, state, stopwatch.Elapsed);
@@ -91,6 +95,17 @@ public class BatchGameOrchestrator(
     private static int GetPlayCardDecisions(GameEngine.Models.Deal d)
     {
         return d.CompletedTricks.Sum(t => t.PlayCardDecisions.Count);
+    }
+
+    private void FinalizeIdv(GamePersistenceOptions? persistenceOptions, BatchExecutionState state)
+    {
+        if (persistenceOptions?.IdvGenerationName != null)
+        {
+            var idvStopwatch = Stopwatch.StartNew();
+            trainingDataAccumulator.Finalize(persistenceOptions.IdvGenerationName);
+            idvStopwatch.Stop();
+            state.IdvSaveDuration = idvStopwatch.Elapsed;
+        }
     }
 
     private async Task<(BatchGameResults results, BatchExecutionState state)> ExecuteSingleBatchAsync(
@@ -175,6 +190,14 @@ public class BatchGameOrchestrator(
             completedSoFar += gamesInThisBatch;
 
             batchState.Dispose();
+        }
+
+        if (persistenceOptions?.IdvGenerationName != null)
+        {
+            var idvStopwatch = Stopwatch.StartNew();
+            trainingDataAccumulator.Finalize(persistenceOptions.IdvGenerationName);
+            idvStopwatch.Stop();
+            totalIdvSaveDuration += idvStopwatch.Elapsed;
         }
 
         stopwatch.Stop();
