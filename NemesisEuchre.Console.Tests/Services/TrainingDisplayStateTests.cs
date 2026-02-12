@@ -170,6 +170,75 @@ public class TrainingDisplayStateTests
     }
 
     [Fact]
+    public void RefreshSnapshot_UpdatesElapsedTimeBetweenUpdates()
+    {
+        var state = new TrainingDisplayState(1);
+
+        state.Update(new TrainingProgress("PlayCard", TrainingPhase.Training, 50));
+        var elapsedBefore = state.LatestSnapshot!.Models[0].Elapsed;
+
+        Thread.Sleep(100);
+
+        state.RefreshSnapshot();
+        var elapsedAfter = state.LatestSnapshot!.Models[0].Elapsed;
+
+        elapsedAfter.Should().BeGreaterThan(elapsedBefore);
+    }
+
+    [Fact]
+    public void RefreshSnapshot_WhenNoModels_SnapshotRemainsNull()
+    {
+        var state = new TrainingDisplayState(1);
+
+        state.RefreshSnapshot();
+
+        state.LatestSnapshot.Should().BeNull();
+    }
+
+    [Fact]
+    public void RefreshSnapshot_CompletedModel_ElapsedDoesNotChange()
+    {
+        var state = new TrainingDisplayState(1);
+
+        state.Update(new TrainingProgress("PlayCard", TrainingPhase.LoadingData, 0));
+        Thread.Sleep(50);
+        state.Update(new TrainingProgress("PlayCard", TrainingPhase.Complete, 100));
+
+        var elapsedAtComplete = state.LatestSnapshot!.Models[0].Elapsed;
+        Thread.Sleep(100);
+
+        state.RefreshSnapshot();
+
+        state.LatestSnapshot!.Models[0].Elapsed.Should().Be(elapsedAtComplete);
+    }
+
+    [Fact]
+    public void RefreshSnapshot_PreservesModelState()
+    {
+        var state = new TrainingDisplayState(1);
+
+        state.Update(new TrainingProgress(
+            "PlayCard",
+            TrainingPhase.Training,
+            50,
+            "Iteration 100 / 200",
+            CurrentIteration: 100,
+            TotalIterations: 200,
+            TrainingMetric: 0.45));
+
+        state.RefreshSnapshot();
+
+        var model = state.LatestSnapshot!.Models[0];
+        model.ModelType.Should().Be("PlayCard");
+        model.Phase.Should().Be(TrainingPhase.Training);
+        model.PercentComplete.Should().Be(50);
+        model.Message.Should().Be("Iteration 100 / 200");
+        model.CurrentIteration.Should().Be(100);
+        model.TotalIterations.Should().Be(200);
+        model.TrainingMetric.Should().Be(0.45);
+    }
+
+    [Fact]
     public void Update_MultipleModelsTrackedIndependently()
     {
         var state = new TrainingDisplayState(3);

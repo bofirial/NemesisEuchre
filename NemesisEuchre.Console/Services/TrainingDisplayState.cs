@@ -47,6 +47,14 @@ internal sealed class TrainingDisplayState(int totalModels)
         RebuildSnapshot();
     }
 
+    public void RefreshSnapshot()
+    {
+        if (!_models.IsEmpty)
+        {
+            RebuildSnapshot();
+        }
+    }
+
     public void SetValidationMetrics(string modelType, double? mae, double? rSquared)
     {
         if (_models.TryGetValue(modelType, out var state))

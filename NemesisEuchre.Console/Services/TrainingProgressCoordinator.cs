@@ -55,6 +55,7 @@ public class TrainingProgressCoordinator(
 
                 while (!trainingTask.IsCompleted)
                 {
+                    displayState.RefreshSnapshot();
                     var snapshot = displayState.LatestSnapshot;
                     if (snapshot != null)
                     {
