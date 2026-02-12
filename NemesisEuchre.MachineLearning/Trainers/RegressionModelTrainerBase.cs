@@ -109,9 +109,6 @@ public abstract class RegressionModelTrainerBase<TData>(
         }
 
         var metadata = CreateModelMetadata(modelName, trainingResult);
-        var evaluationReport = CreateEvaluationReport(
-            trainingResult.ValidationMetrics as RegressionEvaluationMetrics ?? throw new InvalidOperationException("Expected RegressionEvaluationMetrics"),
-            trainingResult.ValidationSamples);
 
         return PersistenceService.SaveModelAsync<TData>(
             TrainedModel,
@@ -121,7 +118,6 @@ public abstract class RegressionModelTrainerBase<TData>(
             GetModelType(),
             trainingResult,
             metadata,
-            evaluationReport,
             cancellationToken);
     }
 
@@ -189,22 +185,8 @@ public abstract class RegressionModelTrainerBase<TData>(
                 regressionMetrics.RSquared,
                 regressionMetrics.MeanAbsoluteError,
                 regressionMetrics.RootMeanSquaredError,
-                regressionMetrics.MeanSquaredError),
+                regressionMetrics.MeanSquaredError,
+                regressionMetrics.LossFunction),
             "1.0");
-    }
-
-    private RegressionEvaluationReport CreateEvaluationReport(
-        RegressionEvaluationMetrics metrics,
-        int testSamples)
-    {
-        return new RegressionEvaluationReport(
-            GetModelType(),
-            DateTime.UtcNow,
-            testSamples,
-            metrics.RSquared,
-            metrics.MeanAbsoluteError,
-            metrics.RootMeanSquaredError,
-            metrics.MeanSquaredError,
-            metrics.LossFunction);
     }
 }

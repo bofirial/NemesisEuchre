@@ -4,4 +4,5 @@ public record RegressionMetricsMetadata(
     double RSquared,
     double MeanAbsoluteError,
     double RootMeanSquaredError,
-    double MeanSquaredError);
+    double MeanSquaredError,
+    double LossFunction);

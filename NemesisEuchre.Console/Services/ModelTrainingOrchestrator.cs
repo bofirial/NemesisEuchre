@@ -61,7 +61,6 @@ public class ModelTrainingOrchestrator(
                     {
                         Path.Combine(outputPath, baseName + FileExtensions.ModelZip),
                         Path.Combine(outputPath, baseName + FileExtensions.ModelMetadataJson),
-                        Path.Combine(outputPath, baseName + FileExtensions.EvaluationReportJson),
                     };
                 })
                 .Where(File.Exists)

@@ -20,7 +20,6 @@ public interface IModelPersistenceService
         string modelType,
         TrainingResult trainingResult,
         ModelMetadata metadata,
-        object evaluationReport,
         CancellationToken cancellationToken = default)
         where TData : class, new();
 }
@@ -36,7 +35,6 @@ public class ModelPersistenceService(
         string modelType,
         TrainingResult trainingResult,
         ModelMetadata metadata,
-        object evaluationReport,
         CancellationToken cancellationToken = default)
         where TData : class, new()
     {
@@ -52,7 +50,6 @@ public class ModelPersistenceService(
 
         await SaveModelFileAsync<TData>(model, mlContext, modelFilePath, modelName, decisionType, cancellationToken);
         await SaveMetadataAsync(modelFilePath, metadata, cancellationToken);
-        await SaveEvaluationReportAsync(modelFilePath, evaluationReport, cancellationToken);
     }
 
     private static void ValidateSaveModelParameters(
@@ -107,21 +104,9 @@ public class ModelPersistenceService(
         CancellationToken cancellationToken)
     {
         var metadataPath = Path.ChangeExtension(modelPath, FileExtensions.ModelMetadataJson);
-        var json = JsonSerializer.Serialize(metadata, JsonSerializationOptions.Default);
+        var json = JsonSerializer.Serialize(metadata, JsonSerializationOptions.WithNaNHandling);
 
         await File.WriteAllTextAsync(metadataPath, json, cancellationToken);
         LoggerMessages.LogMetadataSaved(logger, metadataPath);
-    }
-
-    private async Task SaveEvaluationReportAsync(
-        string modelPath,
-        object evaluationReport,
-        CancellationToken cancellationToken)
-    {
-        var evaluationPath = Path.ChangeExtension(modelPath, FileExtensions.EvaluationReportJson);
-        var reportJson = JsonSerializer.Serialize(evaluationReport, JsonSerializationOptions.WithNaNHandling);
-
-        await File.WriteAllTextAsync(evaluationPath, reportJson, cancellationToken);
-        LoggerMessages.LogEvaluationReportSaved(logger, evaluationPath);
     }
 }

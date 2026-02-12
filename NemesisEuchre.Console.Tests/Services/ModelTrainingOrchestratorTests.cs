@@ -212,26 +212,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
     }
 
     [Fact]
-    public async Task TrainModelsAsync_ThrowsInvalidOperationException_WhenEvaluationFileExists()
-    {
-        Directory.CreateDirectory(_tempDirectory);
-        await File.WriteAllTextAsync(Path.Combine(_tempDirectory, "gen1_testmodel.evaluation.json"), "existing", TestContext.Current.CancellationToken);
-
-        var orchestrator = CreateOrchestratorWithTrainer("TestModel", DecisionType.CallTrump);
-
-        var act = () => orchestrator.TrainModelsAsync(
-            DecisionType.CallTrump,
-            _tempDirectory,
-            "gen1",
-            new Progress<TrainingProgress>(),
-            "gen1",
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*Model files already exist*--overwrite*");
-    }
-
-    [Fact]
     public async Task TrainModelsAsync_DoesNotCallExecuteAsync_WhenGuardFails()
     {
         Directory.CreateDirectory(_tempDirectory);

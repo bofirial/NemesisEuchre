@@ -149,12 +149,6 @@ public static partial class LoggerMessages
     public static partial void LogModelCacheCleared(ILogger logger);
 
     [LoggerMessage(
-        EventId = 26,
-        Level = LogLevel.Information,
-        Message = "Evaluation report saved to {EvaluationPath}")]
-    public static partial void LogEvaluationReportSaved(ILogger logger, string evaluationPath);
-
-    [LoggerMessage(
         EventId = 27,
         Level = LogLevel.Information,
         Message = "Per-class validation metrics for {ModelType}:")]

@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 using FluentAssertions;
 
 using Microsoft.Extensions.Logging;
@@ -36,7 +38,6 @@ public class ModelPersistenceServiceTests : IDisposable
             "CallTrump",
             trainingResult,
             CreateMetadata(),
-            new object(),
             TestContext.Current.CancellationToken);
 
         return act.Should().ThrowAsync<InvalidOperationException>()
@@ -54,7 +55,6 @@ public class ModelPersistenceServiceTests : IDisposable
             "CallTrump",
             CreateTrainingResult(),
             CreateMetadata(),
-            new object(),
             TestContext.Current.CancellationToken);
 
         return act.Should().ThrowAsync<ArgumentException>();
@@ -71,7 +71,6 @@ public class ModelPersistenceServiceTests : IDisposable
             "CallTrump",
             CreateTrainingResult(),
             CreateMetadata(),
-            new object(),
             TestContext.Current.CancellationToken);
 
         return act.Should().ThrowAsync<ArgumentException>();
@@ -88,7 +87,6 @@ public class ModelPersistenceServiceTests : IDisposable
             "CallTrump",
             null!,
             CreateMetadata(),
-            new object(),
             TestContext.Current.CancellationToken);
 
         return act.Should().ThrowAsync<ArgumentNullException>();
@@ -111,14 +109,13 @@ public class ModelPersistenceServiceTests : IDisposable
             "CallTrump",
             trainingResult,
             CreateMetadata(),
-            new { RSquared = 0.5 },
             TestContext.Current.CancellationToken);
 
         Directory.Exists(outputDir).Should().BeTrue();
     }
 
     [Fact]
-    public async Task SaveModelAsync_CreatesZipJsonAndEvaluationFiles()
+    public async Task SaveModelAsync_CreatesZipAndJsonFiles()
     {
         Directory.CreateDirectory(_tempDirectory);
 
@@ -133,12 +130,18 @@ public class ModelPersistenceServiceTests : IDisposable
             "CallTrump",
             trainingResult,
             CreateMetadata(),
-            new { RSquared = 0.5, MeanAbsoluteError = 1.2 },
             TestContext.Current.CancellationToken);
 
         File.Exists(Path.Combine(_tempDirectory, "mymodel_calltrump.zip")).Should().BeTrue();
         File.Exists(Path.Combine(_tempDirectory, "mymodel_calltrump.json")).Should().BeTrue();
-        File.Exists(Path.Combine(_tempDirectory, "mymodel_calltrump.evaluation.json")).Should().BeTrue();
+
+        var metadataJson = await File.ReadAllTextAsync(
+            Path.Combine(_tempDirectory, "mymodel_calltrump.json"),
+            TestContext.Current.CancellationToken);
+
+        metadataJson.Should().Contain("\n");
+        var metadata = JsonSerializer.Deserialize<JsonElement>(metadataJson);
+        metadata.GetProperty("Metrics").GetProperty("LossFunction").GetDouble().Should().Be(0.3);
     }
 
     public void Dispose()
@@ -183,7 +186,7 @@ public class ModelPersistenceServiceTests : IDisposable
             150,
             150,
             new HyperparametersMetadata("LightGbm", 31, 200, 0.1, 42),
-            new RegressionMetricsMetadata(0.5, 1.0, 1.5, 2.0),
+            new RegressionMetricsMetadata(0.5, 1.0, 1.5, 2.0, 0.3),
             "1.0");
     }
 
