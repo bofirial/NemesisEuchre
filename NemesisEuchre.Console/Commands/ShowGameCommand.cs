@@ -18,10 +18,15 @@ public class ShowGameCommand(
     IEntityToGameMapper gameMapper,
     IGameResultsRenderer gameResultsRenderer) : ICliRunAsyncWithReturn
 {
-    [CliOption(Description = "The ID of the game to display", Required = true)]
+    [CliOption(
+        Description = "The ID of the game to display",
+        Alias = "g",
+        Required = true)]
     public int GameId { get; set; }
 
-    [CliOption(Description = "Show decisions made during the game")]
+    [CliOption(
+        Description = "Show decisions made during the game",
+        Alias = "s")]
     public bool ShowDecisions { get; set; }
 
     public async Task<int> RunAsync()

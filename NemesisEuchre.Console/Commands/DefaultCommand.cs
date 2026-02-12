@@ -20,37 +20,60 @@ public class DefaultCommand(
     IBatchGameOrchestrator batchGameOrchestrator,
     IGameResultsRenderer gameResultsRenderer) : ICliRunAsyncWithReturn
 {
-    [CliOption(Description = "Number of games to play")]
+    [CliOption(
+        Description = "Number of games to play",
+        Alias = "c")]
     public int Count { get; set; } = 1;
 
-    [CliOption(Description = "Persist games to SQL database")]
+    [CliOption(
+        Description = "Persist games to SQL database",
+        Alias = "sql")]
     public bool PersistToSql { get; set; }
 
-    [CliOption(Description = "Persist training data to IDV files with the given generation name (e.g. {gen2}_CallTrump.idv)", Required = false)]
+    [CliOption(
+        Description = "Persist training data to IDV files with the given generation name (e.g. {gen2}_CallTrump.idv)",
+        Required = false,
+        Alias = "idv")]
     public string? PersistToIdv { get; set; }
 
-    [CliOption(Description = "Show decisions made during the game")]
+    [CliOption(
+        Description = "Show decisions made during the game",
+        Alias = "s")]
     public bool ShowDecisions { get; set; }
 
-    [CliOption(Description = "ActorType for Team1")]
+    [CliOption(
+        Description = "ActorType for Team1",
+        Alias = "t1")]
     public ActorType? Team1 { get; set; }
 
-    [CliOption(Description = "ActorType for Team2")]
+    [CliOption(
+        Description = "ActorType for Team2",
+        Alias = "t2")]
     public ActorType? Team2 { get; set; }
 
-    [CliOption(Description = "ModelName for Team1 ModelBots", Alias = "t1m")]
+    [CliOption(
+        Description = "ModelName for Team1 ModelBots",
+        Alias = "t1m")]
     public string? Team1ModelName { get; set; }
 
-    [CliOption(Description = "ExplorationTemperature for Team1 ModelTrainerBots", Alias = "t1t")]
+    [CliOption(
+        Description = "ExplorationTemperature for Team1 ModelTrainerBots",
+        Alias = "t1t")]
     public float Team1ExplorationTemperature { get; set; }
 
-    [CliOption(Description = "ModelName for Team2 ModelBots", Alias = "t2m")]
+    [CliOption(
+        Description = "ModelName for Team2 ModelBots",
+        Alias = "t2m")]
     public string? Team2ModelName { get; set; }
 
-    [CliOption(Description = "ExplorationTemperature for Team2 ModelTrainerBots", Alias = "t2t")]
+    [CliOption(
+        Description = "ExplorationTemperature for Team2 ModelTrainerBots",
+        Alias = "t2t")]
     public float Team2ExplorationTemperature { get; set; }
 
-    [CliOption(Description = "Allow overwriting existing IDV files")]
+    [CliOption(
+        Description = "Allow overwriting existing IDV files",
+        Alias = "o")]
     public bool Overwrite { get; set; }
 
     public async Task<int> RunAsync()
