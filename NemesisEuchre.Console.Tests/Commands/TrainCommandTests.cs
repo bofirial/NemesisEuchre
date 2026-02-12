@@ -35,7 +35,6 @@ public class TrainCommandTests
             options)
         {
             DecisionType = DecisionType.All,
-            OutputPath = null,
             ModelName = "gen1",
             Source = "gen1",
         };
@@ -63,7 +62,6 @@ public class TrainCommandTests
         mockProgressCoordinator.Setup(o => o.CoordinateTrainingWithProgressAsync(
             It.IsAny<DecisionType>(),
             It.IsAny<string>(),
-            It.IsAny<int>(),
             It.IsAny<string>(),
             It.IsAny<Spectre.Console.IAnsiConsole>(),
             It.IsAny<string>(),
@@ -81,7 +79,6 @@ public class TrainCommandTests
             options)
         {
             DecisionType = DecisionType.All,
-            OutputPath = null,
             ModelName = "gen1",
             Source = "gen1",
         };
@@ -113,7 +110,6 @@ public class TrainCommandTests
         mockProgressCoordinator.Setup(o => o.CoordinateTrainingWithProgressAsync(
             It.IsAny<DecisionType>(),
             It.IsAny<string>(),
-            It.IsAny<int>(),
             It.IsAny<string>(),
             It.IsAny<Spectre.Console.IAnsiConsole>(),
             It.IsAny<string>(),
@@ -131,7 +127,6 @@ public class TrainCommandTests
             options)
         {
             DecisionType = DecisionType.CallTrump,
-            OutputPath = "./custom-models",
             ModelName = "gen1",
             Source = "gen1",
         };
@@ -139,57 +134,5 @@ public class TrainCommandTests
         var exitCode = await command.RunAsync();
 
         exitCode.Should().Be(2);
-    }
-
-    [Fact]
-    public async Task RunAsync_UsesCustomOutputPathWhenProvided()
-    {
-        var testConsole = new TestConsole();
-        var mockLogger = Mock.Of<ILogger<TrainCommand>>();
-        var mockProgressCoordinator = new Mock<ITrainingProgressCoordinator>();
-        var mockRenderer = new Mock<ITrainingResultsRenderer>();
-
-        var trainingResults = new TrainingResults(1, 0, [], TimeSpan.FromSeconds(5));
-
-        mockProgressCoordinator.Setup(o => o.CoordinateTrainingWithProgressAsync(
-            DecisionType.CallTrump,
-            "./custom-models",
-            1000,
-            "gen2",
-            It.IsAny<Spectre.Console.IAnsiConsole>(),
-            It.IsAny<string>(),
-            It.IsAny<bool>(),
-            It.IsAny<CancellationToken>()))
-            .ReturnsAsync(trainingResults);
-
-        var options = Options.Create(new MachineLearningOptions { ModelOutputPath = "./default-models" });
-
-        var command = new TrainCommand(
-            mockLogger,
-            testConsole,
-            mockProgressCoordinator.Object,
-            mockRenderer.Object,
-            options)
-        {
-            DecisionType = DecisionType.CallTrump,
-            OutputPath = "./custom-models",
-            SampleLimit = 1000,
-            ModelName = "gen2",
-            Source = "gen2",
-        };
-
-        await command.RunAsync();
-
-        mockProgressCoordinator.Verify(
-            o => o.CoordinateTrainingWithProgressAsync(
-            DecisionType.CallTrump,
-            "./custom-models",
-            1000,
-            "gen2",
-            It.IsAny<Spectre.Console.IAnsiConsole>(),
-            It.IsAny<string>(),
-            It.IsAny<bool>(),
-            It.IsAny<CancellationToken>()),
-            Times.Once);
     }
 }

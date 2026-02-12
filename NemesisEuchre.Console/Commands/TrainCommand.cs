@@ -23,22 +23,24 @@ public class TrainCommand(
     ITrainingResultsRenderer resultsRenderer,
     IOptions<MachineLearningOptions> options) : ICliRunAsyncWithReturn
 {
-    [CliOption(Description = "Decision type to train (CallTrump, Discard, Play, All)")]
+    [CliOption(
+        Description = "Decision type to train (CallTrump, Discard, Play, All)",
+        Alias = "d")]
     public DecisionType DecisionType { get; set; } = DecisionType.All;
 
-    [CliOption(Description = "Output path for trained models", Required = false)]
-    public string? OutputPath { get; set; }
-
-    [CliOption(Description = "Maximum training samples (0 = unlimited)")]
-    public int SampleLimit { get; set; }
-
-    [CliOption(Description = "Load training data from IDV files with the given generation name (e.g. {gen2}_CallTrump.idv)")]
+    [CliOption(
+        Description = "Load training data from IDV files with the given generation name (e.g. {gen2}_CallTrump.idv)",
+        Alias = "s")]
     public required string Source { get; set; }
 
-    [CliOption(Description = "Name of the model to create (e.g. {gen1}_calltrumpregression.zip)")]
+    [CliOption(
+        Description = "Name of the model to create (e.g. {gen1}_calltrumpregression.zip)",
+        Alias = "m")]
     public required string ModelName { get; set; }
 
-    [CliOption(Description = "Allow overwriting existing model files")]
+    [CliOption(
+        Description = "Allow overwriting existing model files",
+        Alias = "o")]
     public bool Overwrite { get; set; }
 
     public async Task<int> RunAsync()
@@ -56,7 +58,6 @@ public class TrainCommand(
         var results = await progressCoordinator.CoordinateTrainingWithProgressAsync(
             DecisionType,
             outputPath,
-            SampleLimit,
             ModelName,
             ansiConsole,
             Source,
@@ -69,7 +70,7 @@ public class TrainCommand(
 
     private string? ValidateAndPrepareOutputPath()
     {
-        var outputPath = OutputPath ?? options.Value.ModelOutputPath;
+        var outputPath = options.Value.ModelOutputPath;
 
         if (string.IsNullOrWhiteSpace(outputPath))
         {
@@ -91,11 +92,6 @@ public class TrainCommand(
         ansiConsole.WriteLine();
         ansiConsole.MarkupLine($"[dim]Output: {outputPath}[/]");
         ansiConsole.MarkupLine($"[dim]Model Name: {ModelName}[/]");
-
-        if (SampleLimit > 0)
-        {
-            ansiConsole.MarkupLine($"[dim]Sample Limit: {SampleLimit:N0}[/]");
-        }
 
         ansiConsole.WriteLine();
     }

@@ -12,7 +12,6 @@ public interface ITrainingProgressCoordinator
     Task<TrainingResults> CoordinateTrainingWithProgressAsync(
         DecisionType decisionType,
         string outputPath,
-        int sampleLimit,
         string modelName,
         IAnsiConsole console,
         string idvName,
@@ -25,7 +24,6 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
     public Task<TrainingResults> CoordinateTrainingWithProgressAsync(
         DecisionType decisionType,
         string outputPath,
-        int sampleLimit,
         string modelName,
         IAnsiConsole console,
         string idvName,
@@ -84,7 +82,6 @@ public class TrainingProgressCoordinator(IModelTrainingOrchestrator trainingOrch
                 return await trainingOrchestrator.TrainModelsAsync(
                     decisionType,
                     outputPath,
-                    sampleLimit,
                     modelName,
                     progress,
                     idvName,

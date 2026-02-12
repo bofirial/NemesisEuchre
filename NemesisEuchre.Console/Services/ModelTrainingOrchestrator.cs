@@ -15,7 +15,6 @@ public interface IModelTrainingOrchestrator
     Task<TrainingResults> TrainModelsAsync(
         DecisionType decisionType,
         string outputPath,
-        int sampleLimit,
         string modelName,
         IProgress<TrainingProgress> progress,
         string idvName,
@@ -32,7 +31,6 @@ public class ModelTrainingOrchestrator(
     public async Task<TrainingResults> TrainModelsAsync(
         DecisionType decisionType,
         string outputPath,
-        int sampleLimit,
         string modelName,
         IProgress<TrainingProgress> progress,
         string idvName,
@@ -89,7 +87,6 @@ public class ModelTrainingOrchestrator(
 
             var result = await trainer.ExecuteAsync(
                 outputPath,
-                sampleLimit,
                 modelName,
                 progress,
                 idvFilePath,

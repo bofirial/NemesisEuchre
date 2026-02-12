@@ -31,7 +31,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
             "./models",
-            0,
             "gen1",
             new Progress<TrainingProgress>(),
             "gen1",
@@ -57,7 +56,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         mockTrainer.Setup(t => t.DecisionType).Returns(DecisionType.CallTrump);
         mockTrainer.Setup(t => t.ExecuteAsync(
             It.IsAny<string>(),
-            It.IsAny<int>(),
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string>(),
@@ -74,7 +72,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
             "./models",
-            1000,
             "gen1",
             new Progress<TrainingProgress>(),
             "gen1",
@@ -100,7 +97,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         mockTrainer.Setup(t => t.DecisionType).Returns(DecisionType.CallTrump);
         mockTrainer.Setup(t => t.ExecuteAsync(
             It.IsAny<string>(),
-            It.IsAny<int>(),
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string>(),
@@ -117,7 +113,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
             "./models",
-            1000,
             "gen1",
             new Progress<TrainingProgress>(),
             "gen1",
@@ -140,7 +135,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         mockTrainer1.Setup(t => t.ModelType).Returns("Model1");
         mockTrainer1.Setup(t => t.ExecuteAsync(
             It.IsAny<string>(),
-            It.IsAny<int>(),
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string>(),
@@ -151,7 +145,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         mockTrainer2.Setup(t => t.ModelType).Returns("Model2");
         mockTrainer2.Setup(t => t.ExecuteAsync(
             It.IsAny<string>(),
-            It.IsAny<int>(),
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string>(),
@@ -168,7 +161,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.All,
             "./models",
-            1000,
             "gen1",
             new Progress<TrainingProgress>(),
             "gen1",
@@ -190,7 +182,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         var act = () => orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
             _tempDirectory,
-            0,
             "gen1",
             new Progress<TrainingProgress>(),
             "gen1",
@@ -211,7 +202,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         var act = () => orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
             _tempDirectory,
-            0,
             "gen1",
             new Progress<TrainingProgress>(),
             "gen1",
@@ -232,7 +222,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         var act = () => orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
             _tempDirectory,
-            0,
             "gen1",
             new Progress<TrainingProgress>(),
             "gen1",
@@ -262,7 +251,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         var act = () => orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
             _tempDirectory,
-            0,
             "gen1",
             new Progress<TrainingProgress>(),
             "gen1",
@@ -272,7 +260,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         mockTrainer.Verify(
             t => t.ExecuteAsync(
                 It.IsAny<string>(),
-                It.IsAny<int>(),
                 It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
@@ -293,7 +280,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         mockTrainer.Setup(t => t.DecisionType).Returns(DecisionType.CallTrump);
         mockTrainer.Setup(t => t.ExecuteAsync(
             It.IsAny<string>(),
-            It.IsAny<int>(),
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string>(),
@@ -310,7 +296,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
             _tempDirectory,
-            0,
             "gen1",
             new Progress<TrainingProgress>(),
             "gen1",

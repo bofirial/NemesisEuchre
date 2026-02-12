@@ -19,7 +19,6 @@ public interface ITrainerExecutor
 
     Task<ModelTrainingResult> ExecuteAsync(
         string outputPath,
-        int sampleLimit,
         string modelName,
         IProgress<TrainingProgress> progress,
         string idvFilePath,
@@ -42,7 +41,6 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
 
     public async Task<ModelTrainingResult> ExecuteAsync(
         string outputPath,
-        int sampleLimit,
         string modelName,
         IProgress<TrainingProgress> progress,
         string idvFilePath,

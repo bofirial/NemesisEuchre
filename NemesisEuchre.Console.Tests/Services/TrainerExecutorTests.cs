@@ -59,7 +59,6 @@ public class TrainerExecutorTests
 
             await executor.ExecuteAsync(
                 "./models",
-                1000,
                 "test-model",
                 new Progress<TrainingProgress>(),
                 idvFilePath: tempFile,
@@ -92,7 +91,6 @@ public class TrainerExecutorTests
 
         var result = await executor.ExecuteAsync(
             "./models",
-            1000,
             "test-model",
             new Progress<TrainingProgress>(),
             idvFilePath: "/nonexistent/path/file.idv",
@@ -115,7 +113,6 @@ public class TrainerExecutorTests
 
         var result = await executor.ExecuteAsync(
             "./models",
-            1000,
             "test-model",
             new Progress<TrainingProgress>(),
             idvFilePath: null!,
@@ -153,7 +150,6 @@ public class TrainerExecutorTests
 
             var result = await executor.ExecuteAsync(
                 "./models",
-                1000,
                 "test-model",
                 new Progress<TrainingProgress>(),
                 idvFilePath: tempFile,
@@ -187,7 +183,6 @@ public class TrainerExecutorTests
 
             var result = await executor.ExecuteAsync(
                 "./models",
-                1000,
                 "test-model",
                 new Progress<TrainingProgress>(),
                 idvFilePath: tempFile,
@@ -225,7 +220,6 @@ public class TrainerExecutorTests
 
             var result = await executor.ExecuteAsync(
                 "./models",
-                1000,
                 "test-model",
                 new Progress<TrainingProgress>(),
                 idvFilePath: tempFile,

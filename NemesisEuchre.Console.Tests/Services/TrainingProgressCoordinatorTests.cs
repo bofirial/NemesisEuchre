@@ -33,7 +33,6 @@ public class TrainingProgressCoordinatorTests : IDisposable
             .Setup(x => x.TrainModelsAsync(
                 DecisionType.CallTrump,
                 "./models",
-                1000,
                 "gen1",
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
@@ -41,7 +40,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
-        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "./models", 1000, "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
+        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "./models", "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(expectedResults);
 
@@ -49,7 +48,6 @@ public class TrainingProgressCoordinatorTests : IDisposable
             x => x.TrainModelsAsync(
                 DecisionType.CallTrump,
                 "./models",
-                1000,
                 "gen1",
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
@@ -64,34 +62,30 @@ public class TrainingProgressCoordinatorTests : IDisposable
         var expectedResults = new TrainingResults(3, 0, [], TimeSpan.FromSeconds(2));
         DecisionType? capturedDecisionType = null;
         string? capturedOutputPath = null;
-        int? capturedSampleLimit = null;
         string? capturedModelName = null;
 
         _mockOrchestrator
             .Setup(x => x.TrainModelsAsync(
                 It.IsAny<DecisionType>(),
                 It.IsAny<string>(),
-                It.IsAny<int>(),
                 It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
                 It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<DecisionType, string, int, string, IProgress<TrainingProgress>, string, bool, CancellationToken>(
-                (decision, path, limit, modelName, _, _, _, _) =>
+            .Callback<DecisionType, string, string, IProgress<TrainingProgress>, string, bool, CancellationToken>(
+                (decision, path, modelName, _, _, _, _) =>
                 {
                     capturedDecisionType = decision;
                     capturedOutputPath = path;
-                    capturedSampleLimit = limit;
                     capturedModelName = modelName;
                 })
             .ReturnsAsync(expectedResults);
 
-        await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.All, "./output", 5000, "gen2", _testConsole, "gen2", cancellationToken: TestContext.Current.CancellationToken);
+        await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.All, "./output", "gen2", _testConsole, "gen2", cancellationToken: TestContext.Current.CancellationToken);
 
         capturedDecisionType.Should().Be(DecisionType.All);
         capturedOutputPath.Should().Be("./output");
-        capturedSampleLimit.Should().Be(5000);
         capturedModelName.Should().Be("gen2");
     }
 
@@ -105,7 +99,6 @@ public class TrainingProgressCoordinatorTests : IDisposable
             .Setup(x => x.TrainModelsAsync(
                 It.IsAny<DecisionType>(),
                 It.IsAny<string>(),
-                It.IsAny<int>(),
                 It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
@@ -116,7 +109,6 @@ public class TrainingProgressCoordinatorTests : IDisposable
         var act = async () => await _coordinator.CoordinateTrainingWithProgressAsync(
             DecisionType.CallTrump,
             "./models",
-            1000,
             "gen1",
             _testConsole,
             "gen1",
@@ -134,7 +126,6 @@ public class TrainingProgressCoordinatorTests : IDisposable
             .Setup(x => x.TrainModelsAsync(
                 It.IsAny<DecisionType>(),
                 It.IsAny<string>(),
-                It.IsAny<int>(),
                 It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
@@ -145,7 +136,6 @@ public class TrainingProgressCoordinatorTests : IDisposable
         var act = async () => await _coordinator.CoordinateTrainingWithProgressAsync(
             DecisionType.CallTrump,
             "./models",
-            1000,
             "gen1",
             _testConsole,
             "gen1");
@@ -174,7 +164,6 @@ public class TrainingProgressCoordinatorTests : IDisposable
             .Setup(x => x.TrainModelsAsync(
                 It.IsAny<DecisionType>(),
                 It.IsAny<string>(),
-                It.IsAny<int>(),
                 It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
@@ -182,7 +171,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
-        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "./models", 0, "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
+        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "./models", "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(expectedResults);
         result.SuccessfulModels.Should().Be(1);
