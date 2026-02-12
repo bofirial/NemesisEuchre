@@ -84,21 +84,21 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         table.AddRow("Call Trump Decisions", $"{results.TotalCallTrumpDecisions:N0}");
         table.AddRow("Discard Card Decisions", $"{results.TotalDiscardCardDecisions:N0}");
         table.AddRow("Play Card Decisions", $"{results.TotalPlayCardDecisions:N0}");
-        table.AddRow("Elapsed Time", results.ElapsedTime.Humanize(2, countEmptyUnits: true));
+        table.AddRow("Elapsed Time", results.ElapsedTime.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second));
 
         if (results.PlayingDuration.HasValue)
         {
-            table.AddRow("[dim]  Playing[/]", $"[dim]{results.PlayingDuration.Value.TotalSeconds:F2}s[/]");
+            table.AddRow("[dim]  Playing[/]", $"[dim]{results.PlayingDuration?.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)}[/]");
         }
 
         if (results.PersistenceDuration.HasValue)
         {
-            table.AddRow("[dim]  Persistence[/]", $"[dim]{results.PersistenceDuration.Value.TotalSeconds:F2}s[/]");
+            table.AddRow("[dim]  Persistence[/]", $"[dim]{results.PersistenceDuration?.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)}[/]");
         }
 
         if (results.IdvSaveDuration.HasValue)
         {
-            table.AddRow("[dim]  IDV Save[/]", $"[dim]{results.IdvSaveDuration.Value.TotalSeconds:F2}s[/]");
+            table.AddRow("[dim]  IDV Save[/]", $"[dim]{results.IdvSaveDuration?.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)}[/]");
         }
 
         if (results.ElapsedTime.TotalSeconds > 0)
@@ -131,7 +131,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         table.AddRow("Call Trump Decisions", $"{snapshot.TotalCallTrumpDecisions:N0}");
         table.AddRow("Discard Card Decisions", $"{snapshot.TotalDiscardCardDecisions:N0}");
         table.AddRow("Play Card Decisions", $"{snapshot.TotalPlayCardDecisions:N0}");
-        table.AddRow("Elapsed Time", elapsed.Humanize(2, countEmptyUnits: true));
+        table.AddRow("Elapsed Time", elapsed.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second));
 
         if (snapshot.CompletedGames > 0 && elapsed.TotalSeconds > 0)
         {
@@ -142,7 +142,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
             if (remaining > 0)
             {
                 var estimatedRemaining = TimeSpan.FromSeconds(remaining / throughput);
-                table.AddRow("Estimated Remaining", estimatedRemaining.Humanize(2, countEmptyUnits: true));
+                table.AddRow("Estimated Remaining", estimatedRemaining.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second));
             }
         }
 
