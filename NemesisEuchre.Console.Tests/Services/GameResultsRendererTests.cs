@@ -343,9 +343,9 @@ public class GameResultsRendererTests
         var output = testConsole.Output;
         output.Should().Contain("800");
         output.Should().Contain("100");
-        output.Should().Contain("6000");
+        output.Should().Contain("6,000");
         output.Should().Contain("500");
-        output.Should().Contain("2000");
+        output.Should().Contain("2,000");
     }
 
     [Fact]

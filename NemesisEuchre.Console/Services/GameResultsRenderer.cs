@@ -75,15 +75,15 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
             .AddColumn(new TableColumn("[bold]Metric[/]").Centered())
             .AddColumn(new TableColumn("[bold]Value[/]").Centered());
 
-        table.AddRow("Total Games", results.TotalGames.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Team 1 Wins", $"{results.Team1Wins} ([{Team1Color}]{results.Team1WinRate:P1}[/])");
-        table.AddRow("Team 2 Wins", $"{results.Team2Wins} ([{Team2Color}]{results.Team2WinRate:P1}[/])");
-        table.AddRow("Failed Games", results.FailedGames.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Total Deals Played", results.TotalDeals.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Total Tricks Played", results.TotalTricks.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Total Call Trump Decisions", results.TotalCallTrumpDecisions.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Total Discard Card Decisions", results.TotalDiscardCardDecisions.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Total Play Card Decisions", results.TotalPlayCardDecisions.ToString(CultureInfo.InvariantCulture));
+        table.AddRow("Total Games", $"{results.TotalGames:N0}");
+        table.AddRow("Team 1 Wins", $"{results.Team1Wins:N0} ([{Team1Color}]{results.Team1WinRate:P1}[/])");
+        table.AddRow("Team 2 Wins", $"{results.Team2Wins:N0} ([{Team2Color}]{results.Team2WinRate:P1}[/])");
+        table.AddRow("Failed Games", $"{results.FailedGames:N0}");
+        table.AddRow("Total Deals", $"{results.TotalDeals:N0}");
+        table.AddRow("Total Tricks", $"{results.TotalTricks:N0}");
+        table.AddRow("Call Trump Decisions", $"{results.TotalCallTrumpDecisions:N0}");
+        table.AddRow("Discard Card Decisions", $"{results.TotalDiscardCardDecisions:N0}");
+        table.AddRow("Play Card Decisions", $"{results.TotalPlayCardDecisions:N0}");
         table.AddRow("Elapsed Time", results.ElapsedTime.Humanize(2, countEmptyUnits: true));
 
         if (results.PlayingDuration.HasValue)
@@ -125,12 +125,12 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         var team2Rate = completedNonFailed > 0 ? (double)snapshot.Team2Wins / completedNonFailed : 0;
         table.AddRow("Team 1 Wins", $"{snapshot.Team1Wins:N0} ([{Team1Color}]{team1Rate:P1}[/])");
         table.AddRow("Team 2 Wins", $"{snapshot.Team2Wins:N0} ([{Team2Color}]{team2Rate:P1}[/])");
-        table.AddRow("Failed Games", snapshot.FailedGames.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Total Deals", snapshot.TotalDeals.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Total Tricks", snapshot.TotalTricks.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Call Trump Decisions", snapshot.TotalCallTrumpDecisions.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Discard Card Decisions", snapshot.TotalDiscardCardDecisions.ToString(CultureInfo.InvariantCulture));
-        table.AddRow("Play Card Decisions", snapshot.TotalPlayCardDecisions.ToString(CultureInfo.InvariantCulture));
+        table.AddRow("Failed Games", $"{snapshot.FailedGames:N0}");
+        table.AddRow("Total Deals", $"{snapshot.TotalDeals:N0}");
+        table.AddRow("Total Tricks", $"{snapshot.TotalTricks:N0}");
+        table.AddRow("Call Trump Decisions", $"{snapshot.TotalCallTrumpDecisions:N0}");
+        table.AddRow("Discard Card Decisions", $"{snapshot.TotalDiscardCardDecisions:N0}");
+        table.AddRow("Play Card Decisions", $"{snapshot.TotalPlayCardDecisions:N0}");
         table.AddRow("Elapsed Time", elapsed.Humanize(2, countEmptyUnits: true));
 
         if (snapshot.CompletedGames > 0 && elapsed.TotalSeconds > 0)
