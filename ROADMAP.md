@@ -494,9 +494,9 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 
 ## Behavioral Model Testing 0.8
 
-1. Add TestCommand for running behavioral model testing and reporting results
-2. Add some kind of TestCase support for running the same scenario multiple times (For example if I have a perfect hand for Diamonds, Hearts, Spades or Clubs the bot shouldn't pass.  I shouldn't need to define that test multiple times)
-3. CallTrump Test - Perfect Hands should not pass
+1. ~~Add TestCommand for running behavioral model testing and reporting results~~
+2. ~~Add some kind of TestCase support for running the same scenario multiple times (For example if I have a perfect hand for Diamonds, Hearts, Spades or Clubs the bot shouldn't pass.  I shouldn't need to define that test multiple times)~~
+3. ~~CallTrump Test - Perfect Hands should not pass~~
 4. CallTrump Test - No Trump should pass
 5. CallTrump Test - UpCard is a Jack should cause PickItUp to have a higher value for dealer than opponents of the dealer
 6. CallTrump Test - Forced Call should choose the best suit

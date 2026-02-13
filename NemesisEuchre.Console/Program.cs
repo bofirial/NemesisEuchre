@@ -68,10 +68,10 @@ public static class Program
             services.AddScoped<IModelBehavioralTest, FiveTrumpGoingAlone>();
             services.AddScoped<IModelBehavioralTest, KeepLoneTrumpCard>();
             services.AddScoped<IModelBehavioralTest, FourTrumpPlusLowNonTrump>();
-            services.AddScoped<IModelBehavioralTest, FiveTrumpInHand>();
-            services.AddScoped<IModelBehavioralTest, NoTrumpNoFaceCards>();
-            services.AddScoped<IModelBehavioralTest, TopThreeTrumpCards>();
-            services.AddScoped<IModelBehavioralTest, PerfectHandGoAlone>();
+            services.AddScoped<IModelBehavioralTest, FiveTrumpInHandShouldNotPass>();
+            services.AddScoped<IModelBehavioralTest, NoTrumpInHandShouldPass>();
+            services.AddScoped<IModelBehavioralTest, TopThreeTrumpCardsInHandShouldNotPass>();
+            services.AddScoped<IModelBehavioralTest, PerfectHandShouldGoAlone>();
             services.AddScoped<IModelBehavioralTest, OnlyOneValidCard>();
             services.AddScoped<IModelBehavioralTest, LeadWithRightBower>();
             services.AddScoped<IModelBehavioralTest, DontTrumpOverPartner>();

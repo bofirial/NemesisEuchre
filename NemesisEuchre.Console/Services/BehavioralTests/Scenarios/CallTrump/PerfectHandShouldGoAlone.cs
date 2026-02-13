@@ -6,15 +6,15 @@ using NemesisEuchre.MachineLearning.FeatureEngineering;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.CallTrump;
 
-public class FiveTrumpInHand(
+public class PerfectHandShouldGoAlone(
     ICallTrumpInferenceFeatureBuilder featureBuilder)
     : CallTrumpBehavioralTest(featureBuilder)
 {
-    public override string Name => "Five trump in hand";
+    public override string Name => "Perfect hand go alone";
 
-    public override string Description => "Holding all 5 trump cards with a trump up card, should not pass";
+    public override string Description => "Holding all 5 top trump cards, should go alone";
 
-    public override string AssertionDescription => "Should not pass";
+    public override string AssertionDescription => "Should go alone";
 
     protected override IReadOnlyList<CallTrumpTestCase> GetTestCases()
     {
@@ -38,6 +38,6 @@ public class FiveTrumpInHand(
 
     protected override bool IsExpectedChoice(CallTrumpDecision chosenDecision)
     {
-        return chosenDecision != CallTrumpDecision.Pass;
+        return chosenDecision == CallTrumpDecision.OrderItUpAndGoAlone;
     }
 }
