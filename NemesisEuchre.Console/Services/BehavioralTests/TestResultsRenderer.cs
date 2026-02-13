@@ -14,7 +14,11 @@ public class TestResultsRenderer(IAnsiConsole console) : ITestResultsRenderer
     public void RenderResults(BehavioralTestSuiteResult suiteResult)
     {
         console.WriteLine();
-        console.Write(new Rule($"[yellow]Behavioral Test Results - {suiteResult.ModelName}[/]").LeftJustified());
+
+        RenderFailureDetails(suiteResult);
+        console.WriteLine();
+
+        console.Write(new Rule($"[yellow]Behavioral Test Results - {suiteResult.ModelName}[/]"));
         console.WriteLine();
 
         var table = new Table()
@@ -39,7 +43,7 @@ public class TestResultsRenderer(IAnsiConsole console) : ITestResultsRenderer
                 result.AssertionDescription);
         }
 
-        console.Write(table);
+        console.Write(Align.Center(table));
         console.WriteLine();
 
         var passed = suiteResult.Results.Count(r => r.Passed);
@@ -49,9 +53,6 @@ public class TestResultsRenderer(IAnsiConsole console) : ITestResultsRenderer
         console.MarkupLine(
             $"[{summaryColor}]Summary: {passed} passed, {failed} failed out of {suiteResult.Results.Count} tests[/]");
         console.MarkupLine($"[dim]Duration: {suiteResult.Duration.TotalSeconds:F1}s[/]");
-        console.WriteLine();
-
-        RenderFailureDetails(suiteResult);
     }
 
     private void RenderFailureDetails(BehavioralTestSuiteResult suiteResult)
