@@ -503,8 +503,7 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 7. ~~DiscardCard Test - Five Trump should result in discarding the non-trump card~~
 8. ~~DiscardCard Test - 1 Trump, 2 low NonTrumpSameColor, 2 low NonTrumpDifferentColor1 and 1 low NonTrumpDifferentColor2 should result in discarding down to 3 suits~~
 9. ~~DiscardCard Test - 2 Trump, 2 low NonTrumpDifferentColor1 and 1 low NonTrumpDifferentColor2 should result in discarding down to 2 suits~~
-10. PlayCard Test - When choosing 1 of 2 Aces to play, if an opponent is void in the suit of 1 the other should be played
-11. Add More Scenarios
+10. ~~PlayCard Test - When choosing 1 of 2 Aces to play, if an opponent is void in the suit of 1 the other should be played~~
 
 ## Interactive Play 0.9
 
