@@ -16,17 +16,64 @@ public class OneTrumpCardShouldNotDiscardTrump(
 
     protected override IReadOnlyList<DiscardCardTestCase> GetTestCases()
     {
-        return GenerateAllSuitVariants(
-            Name,
-            _ =>
-            [
-                new(Rank.Queen, RelativeSuit.Trump),
-                new(Rank.Ace, RelativeSuit.NonTrumpSameColor),
-                new(Rank.King, RelativeSuit.NonTrumpSameColor),
+        return [
+            new DiscardCardTestCase($"{Name} (Right Bower)", [
+                new(Rank.RightBower, RelativeSuit.Trump),
+                new(Rank.Ace, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
                 new(Rank.Queen, RelativeSuit.NonTrumpOppositeColor1),
                 new(Rank.Jack, RelativeSuit.NonTrumpOppositeColor1),
-                new(Rank.Ten, RelativeSuit.NonTrumpOppositeColor2),
-            ]);
+                new(Rank.Ten, RelativeSuit.NonTrumpOppositeColor1),
+            ]),
+            new DiscardCardTestCase($"{Name} (Left Bower)", [
+                new(Rank.LeftBower, RelativeSuit.Trump),
+                new(Rank.Ace, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Queen, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Jack, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Ten, RelativeSuit.NonTrumpOppositeColor1),
+            ]),
+            new DiscardCardTestCase($"{Name} (Ace)", [
+                new(Rank.Ace, RelativeSuit.Trump),
+                new(Rank.Ace, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Queen, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Jack, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Ten, RelativeSuit.NonTrumpOppositeColor1),
+            ]),
+            new DiscardCardTestCase($"{Name} (King)", [
+                new(Rank.King, RelativeSuit.Trump),
+                new(Rank.Ace, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Queen, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Jack, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Ten, RelativeSuit.NonTrumpOppositeColor1),
+            ]),
+            new DiscardCardTestCase($"{Name} (Queen)", [
+                new(Rank.Queen, RelativeSuit.Trump),
+                new(Rank.Ace, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Queen, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Jack, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Ten, RelativeSuit.NonTrumpOppositeColor1),
+            ]),
+            new DiscardCardTestCase($"{Name} (Ten)", [
+                new(Rank.Ten, RelativeSuit.Trump),
+                new(Rank.Ace, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Queen, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Jack, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Ten, RelativeSuit.NonTrumpOppositeColor1),
+            ]),
+            new DiscardCardTestCase($"{Name} (Nine)", [
+                new(Rank.Nine, RelativeSuit.Trump),
+                new(Rank.Ace, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Queen, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Jack, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Ten, RelativeSuit.NonTrumpOppositeColor1),
+            ]),
+        ];
     }
 
     protected override bool IsExpectedChoice(RelativeCard chosenCard)

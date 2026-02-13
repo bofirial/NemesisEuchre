@@ -16,17 +16,32 @@ public class FiveTrumpPlusOneNonTrumpShouldDiscardNonTrump(
 
     protected override IReadOnlyList<DiscardCardTestCase> GetTestCases()
     {
-        return GenerateAllSuitVariants(
-            Name,
-            _ =>
-            [
+        return [
+            new DiscardCardTestCase($"{Name} (NonTrumpSameColor)", [
+                new(Rank.RightBower, RelativeSuit.Trump),
+                new(Rank.LeftBower, RelativeSuit.Trump),
+                new(Rank.Ace, RelativeSuit.Trump),
+                new(Rank.King, RelativeSuit.Trump),
+                new(Rank.Queen, RelativeSuit.Trump),
+                new(Rank.Nine, RelativeSuit.NonTrumpSameColor),
+            ]),
+            new DiscardCardTestCase($"{Name} (NonTrumpOppositeColor1)", [
                 new(Rank.RightBower, RelativeSuit.Trump),
                 new(Rank.LeftBower, RelativeSuit.Trump),
                 new(Rank.Ace, RelativeSuit.Trump),
                 new(Rank.King, RelativeSuit.Trump),
                 new(Rank.Queen, RelativeSuit.Trump),
                 new(Rank.Nine, RelativeSuit.NonTrumpOppositeColor1),
-            ]);
+            ]),
+            new DiscardCardTestCase($"{Name} (NonTrumpOppositeColor2)", [
+                new(Rank.RightBower, RelativeSuit.Trump),
+                new(Rank.LeftBower, RelativeSuit.Trump),
+                new(Rank.Ace, RelativeSuit.Trump),
+                new(Rank.King, RelativeSuit.Trump),
+                new(Rank.Queen, RelativeSuit.Trump),
+                new(Rank.Nine, RelativeSuit.NonTrumpOppositeColor2),
+            ]),
+        ];
     }
 
     protected override bool IsExpectedChoice(RelativeCard chosenCard)

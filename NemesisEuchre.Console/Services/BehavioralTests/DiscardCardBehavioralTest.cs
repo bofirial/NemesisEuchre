@@ -73,7 +73,9 @@ public abstract class DiscardCardBehavioralTest(
                 }
             }
 
-            var passed = bestCard != null && IsExpectedChoice(bestCard);
+            var isExpected = testCase.IsExpectedOverride ?? IsExpectedChoice;
+
+            var passed = bestCard != null && isExpected(bestCard);
             var chosenDisplay = bestCard != null ? FormatCard(bestCard) : "-";
             var failureReason = passed ? null : $"Chose {chosenDisplay} but expected: {AssertionDescription}";
 
@@ -117,5 +119,8 @@ public abstract class DiscardCardBehavioralTest(
         return $"{card.Rank} of {card.Suit}";
     }
 
-    public record DiscardCardTestCase(string Label, RelativeCard[] CardsInHand);
+    public record DiscardCardTestCase(
+        string Label,
+        RelativeCard[] CardsInHand,
+        Func<RelativeCard, bool>? IsExpectedOverride = null);
 }
