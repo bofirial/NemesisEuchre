@@ -1,3 +1,5 @@
+using Humanizer;
+
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Foundation.Constants;
 
@@ -60,7 +62,7 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
             }
 
             var durationMarkup = result.Duration.HasValue
-                ? $"{result.Duration.Value.TotalSeconds:F1}s"
+                ? $"{result.Duration.Value.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)}"
                 : "[dim]-[/]";
 
             table.AddRow(
@@ -78,7 +80,7 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
         var summaryColor = results.FailedModels == 0 ? "green" : "yellow";
         console.MarkupLine(
             $"[{summaryColor}]Training Summary: {results.SuccessfulModels} succeeded, {results.FailedModels} failed[/]");
-        console.MarkupLine($"[dim]Duration: {results.TotalDuration.TotalSeconds:F1}s[/]");
+        console.MarkupLine($"[dim]Duration: {results.TotalDuration.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)}[/]");
         console.WriteLine();
     }
 
@@ -87,7 +89,6 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
         var table = CreateStyledTable()
             .AddColumn(new TableColumn("[bold]Model[/]").Centered())
             .AddColumn(new TableColumn("[bold]Phase[/]").Centered())
-            .AddColumn(new TableColumn("[bold]Iteration[/]").Centered())
             .AddColumn(new TableColumn("[bold]MAE[/]").Centered())
             .AddColumn(new TableColumn("[bold]R²[/]").Centered())
             .AddColumn(new TableColumn("[bold]Elapsed[/]").Centered());
@@ -104,8 +105,6 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
                 _ => "[dim]-[/]",
             };
 
-            var iterationDisplay = GetIterationDisplay(model);
-
             var maeDisplay = model.ValidationMae.HasValue
                 ? $"{model.ValidationMae.Value:F4}"
                 : "[dim]-[/]";
@@ -115,37 +114,21 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
                 : "[dim]-[/]";
 
             var elapsedDisplay = model.Elapsed.TotalSeconds >= 0.1
-                ? FormatElapsed(model.Elapsed)
+                ? model.Elapsed.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)
                 : "[dim]-[/]";
 
-            table.AddRow(model.ModelType, phaseDisplay, iterationDisplay, maeDisplay, rSquaredDisplay, elapsedDisplay);
+            table.AddRow(model.ModelType, phaseDisplay, maeDisplay, rSquaredDisplay, elapsedDisplay);
         }
 
         for (var i = snapshot.Models.Count; i < snapshot.TotalModels; i++)
         {
-            table.AddRow("[dim]—[/]", "[dim]⏳ Pending[/]", "[dim]-[/]", "[dim]-[/]", "[dim]-[/]", "[dim]-[/]");
+            table.AddRow("[dim]—[/]", "[dim]⏳ Pending[/]", "[dim]-[/]", "[dim]-[/]", "[dim]-[/]");
         }
 
         var overallProgress = $"{snapshot.CompletedModels}/{snapshot.TotalModels} complete";
-        table.AddRow("[bold]Overall[/]", $"[bold]{overallProgress}[/]", string.Empty, string.Empty, string.Empty, $"[bold]{FormatElapsed(totalElapsed)}[/]");
+        table.AddRow("[bold]Overall[/]", $"[bold]{overallProgress}[/]", string.Empty, string.Empty, $"[bold]{totalElapsed.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)}[/]");
 
         return new Rows(new Markup("[bold yellow]Training Models (Live)[/]"), new Text(string.Empty), table);
-    }
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0045:Convert to conditional expression", Justification = "Nested Conditional")]
-    private static string GetIterationDisplay(ModelDisplayInfo model)
-    {
-        if (model.Phase == TrainingPhase.Training && model.CurrentIteration.HasValue && model.TotalIterations.HasValue)
-        {
-            return $"{model.CurrentIteration.Value:N0} / {model.TotalIterations.Value:N0}";
-        }
-
-        if (model.Phase == TrainingPhase.Complete && model.TotalIterations.HasValue)
-        {
-            return $"{model.TotalIterations.Value:N0} / {model.TotalIterations.Value:N0}";
-        }
-
-        return "[dim]-[/]";
     }
 
     private static Table CreateStyledTable()
@@ -153,12 +136,5 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
         return new Table()
             .Border(TableBorder.Rounded)
             .BorderColor(Color.Grey);
-    }
-
-    private static string FormatElapsed(TimeSpan elapsed)
-    {
-        return elapsed.TotalMinutes >= 1
-            ? $"{(int)elapsed.TotalMinutes}m {elapsed.Seconds:D2}.{elapsed.Milliseconds / 100}s"
-            : $"{elapsed.TotalSeconds:F1}s";
     }
 }
