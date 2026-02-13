@@ -42,6 +42,9 @@ public class TrainingProgressCoordinator(
             .Cropping(VerticalOverflowCropping.Bottom)
             .StartAsync(async ctx =>
             {
+                var initialSnapshot = new TrainingDisplaySnapshot([], totalModels, 0);
+                ctx.UpdateTarget(trainingResultsRenderer.BuildLiveTrainingTable(initialSnapshot, stopwatch.Elapsed));
+
                 var progress = new Progress<TrainingProgress>(displayState.Update);
 
                 var trainingTask = trainingOrchestrator.TrainModelsAsync(

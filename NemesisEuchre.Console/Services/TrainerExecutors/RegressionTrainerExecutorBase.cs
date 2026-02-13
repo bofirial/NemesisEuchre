@@ -62,7 +62,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.LoadingData, 0, "Streaming training data..."));
 
             LoggerMessages.LogIdvFileLoading(_logger, idvFilePath);
-            var dataView = _idvFileService.Load(idvFilePath);
+            var dataView = await Task.Run(() => _idvFileService.Load(idvFilePath), cancellationToken);
 
             var rowCount = (int)(dataView.GetRowCount() ?? -1);
             if (rowCount != metadata.RowCount)
