@@ -72,6 +72,12 @@ public abstract class PlayCardBehavioralTest(
 
             foreach (var card in testCase.ValidCardsToPlay)
             {
+                RelativeCard[] cardsAccountedFor = [
+                    .. CardsAccountedFor,
+                    .. testCase.CardsInHand,
+                    .. PlayedCardsInTrick.Values
+                ];
+
                 var features = featureBuilder.BuildFeatures(
                     testCase.CardsInHand,
                     LeadPlayer,
@@ -84,7 +90,7 @@ public abstract class PlayCardBehavioralTest(
                     Dealer,
                     DealerPickedUpCard,
                     KnownPlayerSuitVoids,
-                    CardsAccountedFor,
+                    [.. cardsAccountedFor.Distinct()],
                     WinningTrickPlayer,
                     TrickNumber,
                     testCase.ValidCardsToPlay,
@@ -101,7 +107,9 @@ public abstract class PlayCardBehavioralTest(
                 }
             }
 
-            var passed = bestCard != null && IsExpectedChoice(bestCard);
+            var isExpected = testCase.IsExpectedOverride ?? IsExpectedChoice;
+
+            var passed = bestCard != null && isExpected(bestCard);
             var chosenDisplay = bestCard != null ? FormatCard(bestCard) : "-";
             var failureReason = passed ? null : $"Chose {chosenDisplay} but expected: {AssertionDescription}";
 
@@ -133,12 +141,19 @@ public abstract class PlayCardBehavioralTest(
         throw new InvalidOperationException("Override GetTestCases() or GetValidCardsToPlay()");
     }
 
-    protected abstract bool IsExpectedChoice(RelativeCard chosenCard);
+    protected virtual bool IsExpectedChoice(RelativeCard chosenCard)
+    {
+        throw new InvalidOperationException("Override GetTestCases() or IsExpectedChoice()");
+    }
 
     private static string FormatCard(RelativeCard card)
     {
         return $"{card.Rank} of {card.Suit}";
     }
 
-    public record PlayCardTestCase(string Label, RelativeCard[] CardsInHand, RelativeCard[] ValidCardsToPlay);
+    public record PlayCardTestCase(
+        string Label,
+        RelativeCard[] CardsInHand,
+        RelativeCard[] ValidCardsToPlay,
+        Func<RelativeCard, bool>? IsExpectedOverride = null);
 }

@@ -112,7 +112,10 @@ public abstract class DiscardCardBehavioralTest(
         throw new InvalidOperationException("Override GetTestCases() or GetCardsInHand()");
     }
 
-    protected abstract bool IsExpectedChoice(RelativeCard chosenCard);
+    protected virtual bool IsExpectedChoice(RelativeCard chosenCard)
+    {
+        throw new InvalidOperationException("Override GetTestCases() or IsExpectedChoice()");
+    }
 
     private static string FormatCard(RelativeCard card)
     {

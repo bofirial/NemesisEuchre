@@ -127,7 +127,10 @@ public abstract class CallTrumpBehavioralTest(
         throw new InvalidOperationException("Override GetTestCases() or GetValidDecisions()");
     }
 
-    protected abstract bool IsExpectedChoice(CallTrumpDecision chosenDecision);
+    protected virtual bool IsExpectedChoice(CallTrumpDecision chosenDecision)
+    {
+        throw new InvalidOperationException("Override GetTestCases() or IsExpectedChoice()");
+    }
 
     public record CallTrumpTestCase(
         string Label,
