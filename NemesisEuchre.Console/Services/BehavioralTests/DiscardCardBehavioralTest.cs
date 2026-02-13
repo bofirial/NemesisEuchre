@@ -90,6 +90,16 @@ public abstract class DiscardCardBehavioralTest(
         return results;
     }
 
+    protected static IReadOnlyList<DiscardCardTestCase> GenerateAllSuitVariants(
+        string baseName,
+        Func<Suit, RelativeCard[]> buildHand)
+    {
+        return [.. Enum.GetValues<Suit>()
+            .Select(suit => new DiscardCardTestCase(
+                $"{baseName} ({suit})",
+                buildHand(suit)))];
+    }
+
     protected virtual IReadOnlyList<DiscardCardTestCase> GetTestCases()
     {
         return [new(Name, GetCardsInHand())];

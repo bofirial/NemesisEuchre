@@ -50,9 +50,10 @@ public class TestResultsRenderer(IAnsiConsole console) : ITestResultsRenderer
         var failed = suiteResult.Results.Count(r => !r.Passed);
         var summaryColor = failed == 0 ? "green" : "red";
 
-        console.MarkupLine(
-            $"[{summaryColor}]Summary: {passed} passed, {failed} failed out of {suiteResult.Results.Count} tests[/]");
-        console.MarkupLine($"[dim]Duration: {suiteResult.Duration.TotalSeconds:F1}s[/]");
+        console.Write(Align.Center(new Markup(
+            $"[{summaryColor}]Summary: {passed} passed, {failed} failed out of {suiteResult.Results.Count} tests[/]")));
+
+        console.Write(Align.Center(new Markup($"[dim]Duration: {suiteResult.Duration.TotalSeconds:F1}s[/]")));
     }
 
     private void RenderFailureDetails(BehavioralTestSuiteResult suiteResult)
