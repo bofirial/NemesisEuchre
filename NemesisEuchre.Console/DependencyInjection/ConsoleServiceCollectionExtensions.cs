@@ -44,17 +44,22 @@ public static class ConsoleServiceCollectionExtensions
 
         services.AddScoped<IModelBehavioralTestRunner, ModelBehavioralTestRunner>();
         services.AddScoped<ITestResultsRenderer, TestResultsRenderer>();
+
         services.AddScoped<IModelBehavioralTest, FiveTrumpPlusOneNonTrumpShouldDiscardNonTrump>();
+        services.AddScoped<IModelBehavioralTest, ForcedCallShouldChooseBestTrump>();
+        services.AddScoped<IModelBehavioralTest, NoTrumpInHandShouldPass>();
+        services.AddScoped<IModelBehavioralTest, PerfectHandShouldGoAlone>();
+        services.AddScoped<IModelBehavioralTest, StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer>();
+        services.AddScoped<IModelBehavioralTest, TopThreeTrumpCardsInHandShouldNotPass>();
+
         services.AddScoped<IModelBehavioralTest, OneTrumpCardShouldNotDiscardTrump>();
         services.AddScoped<IModelBehavioralTest, LoneSuitShouldBeDiscardedToReduceToThreeSuits>();
         services.AddScoped<IModelBehavioralTest, LoneSuitShouldBeDiscardedToReduceToTwoSuits>();
         services.AddScoped<IModelBehavioralTest, FiveTrumpInHandShouldNotPass>();
-        services.AddScoped<IModelBehavioralTest, NoTrumpInHandShouldPass>();
-        services.AddScoped<IModelBehavioralTest, TopThreeTrumpCardsInHandShouldNotPass>();
-        services.AddScoped<IModelBehavioralTest, PerfectHandShouldGoAlone>();
-        services.AddScoped<IModelBehavioralTest, ForcedCallShouldChooseBestTrump>();
-        services.AddScoped<IModelBehavioralTest, StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer>();
-        services.AddScoped<IModelBehavioralTest, DontTrumpOverPartner>();
+
+        services.AddScoped<IModelBehavioralTest, PartnerWinningTrickShouldNotPlayTrump>();
+        services.AddScoped<IModelBehavioralTest, OpponentWinningTrickShouldPlayTrump>();
+        services.AddScoped<IModelBehavioralTest, OpponentWinningTrickShouldPlayLowestTrump>();
 
         services.Configure<GameOptions>(_ => { });
         services.AddOptions<GameExecutionOptions>()
