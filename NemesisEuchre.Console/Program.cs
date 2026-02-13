@@ -67,6 +67,7 @@ public static class Program
             services.AddScoped<IModelBehavioralTest, FiveTrumpPlusOneNonTrumpShouldDiscardNonTrump>();
             services.AddScoped<IModelBehavioralTest, OneTrumpCardShouldNotDiscardTrump>();
             services.AddScoped<IModelBehavioralTest, LoneSuitShouldBeDiscardedToReduceToThreeSuits>();
+            services.AddScoped<IModelBehavioralTest, LoneSuitShouldBeDiscardedToReduceToTwoSuits>();
             services.AddScoped<IModelBehavioralTest, FiveTrumpInHandShouldNotPass>();
             services.AddScoped<IModelBehavioralTest, NoTrumpInHandShouldPass>();
             services.AddScoped<IModelBehavioralTest, TopThreeTrumpCardsInHandShouldNotPass>();
