@@ -25,6 +25,8 @@ public static class PlayCardFeatureBuilder
         RelativeCard[] cardsAccountedFor,
         RelativePlayerPosition? winningTrickPlayer,
         short trickNumber,
+        short wonTricks,
+        short opponentsWonTricks,
         RelativeCard chosenCard)
     {
         var validityArray = GameEnginePoolManager.RentFloatArray(MaxCardsInHand);
@@ -71,6 +73,8 @@ public static class PlayCardFeatureBuilder
                 OpponentScore = opponentScore,
                 TrickNumber = trickNumber,
                 CardsPlayedInTrick = playedCards.Count,
+                WonTricks = wonTricks,
+                OpponentsWonTricks = opponentsWonTricks,
                 WinningTrickPlayer = winningTrickPlayer.HasValue ? (float)winningTrickPlayer.Value : -1.0f,
                 Card1IsValid = validityArray[0],
                 Card2IsValid = validityArray[1],

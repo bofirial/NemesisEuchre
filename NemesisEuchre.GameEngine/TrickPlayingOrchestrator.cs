@@ -142,6 +142,10 @@ public class TrickPlayingOrchestrator(
         var playerActor = actorResolver.GetPlayerActor(player);
         var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
 
+        var playerTeam = playerPosition.GetTeam();
+        var wonTricks = (short)deal.CompletedTricks.Count(t => t.WinningTeam == playerTeam);
+        var opponentsWonTricks = (short)deal.CompletedTricks.Count(t => t.WinningTeam != null && t.WinningTeam != playerTeam);
+
         var playedCards = trick.CardsPlayed.ToDictionary(
             pc => pc.PlayerPosition,
             pc => pc.Card);
@@ -165,6 +169,8 @@ public class TrickPlayingOrchestrator(
             PlayerPosition = playerPosition,
             TeamScore = teamScore,
             OpponentScore = opponentScore,
+            WonTricks = wonTricks,
+            OpponentsWonTricks = opponentsWonTricks,
             TrumpSuit = deal.Trump!.Value,
             CallingPlayer = deal.CallingPlayer!.Value,
             CallingPlayerIsGoingAlone = deal.CallingPlayerIsGoingAlone,

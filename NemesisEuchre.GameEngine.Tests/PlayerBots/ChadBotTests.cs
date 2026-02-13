@@ -73,6 +73,8 @@ public class ChadBotTests
             playedCards,
             null,
             1,
+            0,
+            0,
             cards);
 
         result.ChosenCard.Rank.Should().Be(Rank.Ace);
@@ -104,6 +106,8 @@ public class ChadBotTests
             playedCards,
             null,
             1,
+            0,
+            0,
             cards);
 
         result.ChosenCard.Rank.Should().Be(Rank.Queen);

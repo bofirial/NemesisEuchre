@@ -36,6 +36,8 @@ public class PlayCardFeatureBuilderTests
             cardsAccountedFor: [],
             winningTrickPlayer: null,
             trickNumber: 1,
+            wonTricks: 0,
+            opponentsWonTricks: 0,
             chosenCard: cards[0]);
 
         result.Card1Rank.Should().Be((float)Rank.Ace);
@@ -76,6 +78,8 @@ public class PlayCardFeatureBuilderTests
             cardsAccountedFor: [],
             winningTrickPlayer: null,
             trickNumber: 1,
+            wonTricks: 0,
+            opponentsWonTricks: 0,
             chosenCard: cards[0]);
 
         result.Card1Rank.Should().Be((float)Rank.Ace);
@@ -116,6 +120,8 @@ public class PlayCardFeatureBuilderTests
             cardsAccountedFor: [],
             winningTrickPlayer: null,
             trickNumber: 1,
+            wonTricks: 0,
+            opponentsWonTricks: 0,
             chosenCard: cards[0]);
 
         result.Card1IsValid.Should().Be(1.0f);
@@ -156,6 +162,8 @@ public class PlayCardFeatureBuilderTests
             cardsAccountedFor: [],
             winningTrickPlayer: RelativePlayerPosition.Partner,
             trickNumber: 2,
+            wonTricks: 0,
+            opponentsWonTricks: 0,
             chosenCard: cards[0]);
 
         result.LeftHandOpponentPlayedCardRank.Should().Be((float)Rank.Jack);
@@ -187,6 +195,8 @@ public class PlayCardFeatureBuilderTests
             cardsAccountedFor: [],
             winningTrickPlayer: null,
             trickNumber: 1,
+            wonTricks: 0,
+            opponentsWonTricks: 0,
             chosenCard: cards[0]);
 
         result.LeftHandOpponentPlayedCardRank.Should().Be(-1.0f);
@@ -224,6 +234,8 @@ public class PlayCardFeatureBuilderTests
             cardsAccountedFor: cardsAccountedFor,
             winningTrickPlayer: null,
             trickNumber: 1,
+            wonTricks: 0,
+            opponentsWonTricks: 0,
             chosenCard: cards[0]);
 
         result.RightBowerOfTrumpHasBeenAccountedFor.Should().Be(1.0f);
@@ -261,6 +273,8 @@ public class PlayCardFeatureBuilderTests
             cardsAccountedFor: [],
             winningTrickPlayer: null,
             trickNumber: 1,
+            wonTricks: 0,
+            opponentsWonTricks: 0,
             chosenCard: cards[0]);
 
         result.LeftHandOpponentMayHaveTrump.Should().Be(0.0f);
@@ -297,6 +311,8 @@ public class PlayCardFeatureBuilderTests
             cardsAccountedFor: [],
             winningTrickPlayer: null,
             trickNumber: 1,
+            wonTricks: 0,
+            opponentsWonTricks: 0,
             chosenCard: cards[chosenIndex]);
 
         result.Card1Chosen.Should().Be(chosenIndex == 0 ? 1.0f : 0.0f);
@@ -328,6 +344,8 @@ public class PlayCardFeatureBuilderTests
             cardsAccountedFor: [],
             winningTrickPlayer: RelativePlayerPosition.Partner,
             trickNumber: 3,
+            wonTricks: 0,
+            opponentsWonTricks: 0,
             chosenCard: cards[0]);
 
         result.TeamScore.Should().Be(4);
@@ -364,6 +382,8 @@ public class PlayCardFeatureBuilderTests
             cardsAccountedFor: [],
             winningTrickPlayer: null,
             trickNumber: 1,
+            wonTricks: 0,
+            opponentsWonTricks: 0,
             chosenCard: cards[0]);
 
         result.LeadSuit.Should().Be(-1.0f);

@@ -12,6 +12,10 @@ public class PlayCardDecisionRecord
 
     public short OpponentScore { get; set; }
 
+    public short WonTricks { get; set; }
+
+    public short OpponentsWonTricks { get; set; }
+
     public Suit TrumpSuit { get; set; }
 
     public PlayerPosition LeadPlayer { get; set; }

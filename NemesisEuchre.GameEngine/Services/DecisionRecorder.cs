@@ -1,4 +1,5 @@
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
@@ -69,6 +70,10 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder, ICardAccount
     {
         var (teamScore, opponentScore) = contextBuilder.GetScores(deal, playerPosition);
 
+        var playerTeam = playerPosition.GetTeam();
+        var wonTricks = (short)deal.CompletedTricks.Count(t => t.WinningTeam == playerTeam);
+        var opponentsWonTricks = (short)deal.CompletedTricks.Count(t => t.WinningTeam != null && t.WinningTeam != playerTeam);
+
         var accountedForCards = cardAccountingService.GetAccountedForCards(
             deal,
             trick,
@@ -81,6 +86,8 @@ public class DecisionRecorder(IPlayerContextBuilder contextBuilder, ICardAccount
             PlayerPosition = playerPosition,
             TeamScore = teamScore,
             OpponentScore = opponentScore,
+            WonTricks = wonTricks,
+            OpponentsWonTricks = opponentsWonTricks,
             TrumpSuit = deal.Trump!.Value,
             LeadPlayer = trick.LeadPosition,
             LeadSuit = trick.LeadSuit,

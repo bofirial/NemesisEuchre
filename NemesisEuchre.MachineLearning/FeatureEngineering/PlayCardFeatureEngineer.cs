@@ -34,6 +34,8 @@ public class PlayCardFeatureEngineer : IFeatureEngineer<PlayCardDecisionEntity, 
             context.CardsAccountedFor,
             entity.WinningTrickRelativePlayerPositionId.HasValue ? (RelativePlayerPosition)entity.WinningTrickRelativePlayerPositionId.Value : null,
             entity.TrickNumber,
+            entity.WonTricks,
+            entity.OpponentsWonTricks,
             context.ChosenCard);
 
         trainingData.ExpectedDealPoints = entity.RelativeDealPoints ?? throw new InvalidOperationException(

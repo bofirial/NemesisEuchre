@@ -91,6 +91,8 @@ public class ChaosBotTests
             playedCards,
             null,
             1,
+            0,
+            0,
             cards);
 
         result.ChosenCard.Should().Be(cards[2]);

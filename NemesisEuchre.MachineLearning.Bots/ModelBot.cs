@@ -113,6 +113,8 @@ public class ModelBot(
         Dictionary<RelativePlayerPosition, RelativeCard> playedCardsInTrick,
         RelativePlayerPosition? currentlyWinningTrickPlayer,
         short trickNumber,
+        short wonTricks,
+        short opponentsWonTricks,
         RelativeCard[] validCardsToPlay)
     {
         var (bestOption, scores) = PredictBestOption(
@@ -133,6 +135,8 @@ public class ModelBot(
                 cardsAccountedFor,
                 currentlyWinningTrickPlayer,
                 trickNumber,
+                wonTricks,
+                opponentsWonTricks,
                 validCardsToPlay,
                 card),
             prediction => prediction.PredictedPoints,

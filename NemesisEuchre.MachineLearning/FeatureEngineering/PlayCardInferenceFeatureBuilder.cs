@@ -21,6 +21,8 @@ public interface IPlayCardInferenceFeatureBuilder
         RelativeCard[] cardsAccountedFor,
         RelativePlayerPosition? winningTrickPlayer,
         short trickNumber,
+        short wonTricks,
+        short opponentsWonTricks,
         RelativeCard[] validCardsToPlay,
         RelativeCard chosenCard);
 }
@@ -42,6 +44,8 @@ public class PlayCardInferenceFeatureBuilder : IPlayCardInferenceFeatureBuilder
         RelativeCard[] cardsAccountedFor,
         RelativePlayerPosition? winningTrickPlayer,
         short trickNumber,
+        short wonTricks,
+        short opponentsWonTricks,
         RelativeCard[] validCardsToPlay,
         RelativeCard chosenCard)
     {
@@ -61,6 +65,8 @@ public class PlayCardInferenceFeatureBuilder : IPlayCardInferenceFeatureBuilder
             cardsAccountedFor,
             winningTrickPlayer,
             trickNumber,
+            wonTricks,
+            opponentsWonTricks,
             chosenCard);
     }
 }

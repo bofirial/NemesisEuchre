@@ -89,6 +89,8 @@ public class BetaBotTests
             playedCards,
             null,
             1,
+            0,
+            0,
             cards);
 
         result.ChosenCard.Rank.Should().Be(Rank.Ten);

@@ -17,6 +17,10 @@ public class PlayCardDecisionEntity
 
     public short OpponentScore { get; set; }
 
+    public short WonTricks { get; set; }
+
+    public short OpponentsWonTricks { get; set; }
+
     public int LeadRelativePlayerPositionId { get; set; }
 
     public int? LeadRelativeSuitId { get; set; }
@@ -99,6 +103,12 @@ public class PlayCardDecisionEntityConfiguration : IEntityTypeConfiguration<Play
             .IsRequired();
 
         builder.Property(e => e.OpponentScore)
+            .IsRequired();
+
+        builder.Property(e => e.WonTricks)
+            .IsRequired();
+
+        builder.Property(e => e.OpponentsWonTricks)
             .IsRequired();
 
         builder.Property(e => e.TrickNumber)

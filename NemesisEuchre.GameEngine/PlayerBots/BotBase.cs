@@ -56,6 +56,8 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         Dictionary<RelativePlayerPosition, RelativeCard> playedCardsInTrick,
         RelativePlayerPosition? currentlyWinningTrickPlayer,
         short trickNumber,
+        short wonTricks,
+        short opponentsWonTricks,
         RelativeCard[] validCardsToPlay);
 
     public Task<CardDecisionContext> DiscardCardAsync(DiscardCardContext context)
@@ -116,6 +118,8 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
             context.PlayedCardsInTrick,
             context.CurrentlyWinningTrickPlayer,
             context.TrickNumber,
+            context.WonTricks,
+            context.OpponentsWonTricks,
             context.ValidCardsToPlay);
     }
 
@@ -136,6 +140,8 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         Dictionary<PlayerPosition, Card> playedCardsInTrick,
         PlayerPosition? currentlyWinningTrickPlayer,
         short trickNumber,
+        short wonTricks,
+        short opponentsWonTricks,
         Card[] validCardsToPlay)
     {
         var relativeHand = cardsInHand.Select(c => c.ToRelative(trumpSuit)).ToArray();
@@ -157,6 +163,8 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
             playedCardsInTrick.ToDictionary(kvp => kvp.Key.ToRelativePosition(playerPosition), kvp => kvp.Value.ToRelative(trumpSuit)),
             currentlyWinningTrickPlayer?.ToRelativePosition(playerPosition),
             trickNumber,
+            wonTricks,
+            opponentsWonTricks,
             relativeValidCards);
 
         return new CardDecisionContext()

@@ -122,6 +122,8 @@ public class ModelTrainerBot(
         Dictionary<RelativePlayerPosition, RelativeCard> playedCardsInTrick,
         RelativePlayerPosition? currentlyWinningTrickPlayer,
         short trickNumber,
+        short wonTricks,
+        short opponentsWonTricks,
         RelativeCard[] validCardsToPlay)
     {
         var decisionContext = await base.PlayCardAsync(
@@ -139,6 +141,8 @@ public class ModelTrainerBot(
             playedCardsInTrick,
             currentlyWinningTrickPlayer,
             trickNumber,
+            wonTricks,
+            opponentsWonTricks,
             validCardsToPlay);
 
         if (decisionContext.DecisionPredictedPoints.Count == 0)

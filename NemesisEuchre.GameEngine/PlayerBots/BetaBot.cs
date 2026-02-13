@@ -56,6 +56,8 @@ public class BetaBot(IRandomNumberGenerator random) : BotBase(random)
         Dictionary<RelativePlayerPosition, RelativeCard> playedCardsInTrick,
         RelativePlayerPosition? currentlyWinningTrickPlayer,
         short trickNumber,
+        short wonTricks,
+        short opponentsWonTricks,
         RelativeCard[] validCardsToPlay)
     {
         return Task.FromResult(new RelativeCardDecisionContext()

@@ -47,6 +47,8 @@ public class TrickToEntityMapper : ITrickToEntityMapper
                     TrickNumber = decision.TrickNumber,
                     TeamScore = decision.TeamScore,
                     OpponentScore = decision.OpponentScore,
+                    WonTricks = decision.WonTricks,
+                    OpponentsWonTricks = decision.OpponentsWonTricks,
                     CallingRelativePlayerPositionId = (int)decision.CallingPlayer.ToRelativePosition(decision.PlayerPosition),
                     CallingPlayerGoingAlone = decision.CallingPlayerGoingAlone,
                     DealerRelativePlayerPositionId = (int)decision.Dealer.ToRelativePosition(decision.PlayerPosition),

@@ -278,6 +278,8 @@ public class TrickToEntityMapperTests
                 PlayerPosition = position,
                 TeamScore = 2,
                 OpponentScore = 0,
+                WonTricks = 0,
+                OpponentsWonTricks = 0,
                 TrumpSuit = Suit.Hearts,
                 LeadPlayer = PlayerPosition.North,
                 LeadSuit = Suit.Hearts,

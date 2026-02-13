@@ -148,6 +148,8 @@ public class Gen1TrainerBotTests
             [],
             null,
             1,
+            0,
+            0,
             validCards);
 
         result.ChosenCard.Should().BeOneOf(validCards);

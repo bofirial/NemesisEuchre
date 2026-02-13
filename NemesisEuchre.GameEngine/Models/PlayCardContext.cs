@@ -14,6 +14,10 @@ public sealed class PlayCardContext
 
     public required short OpponentScore { get; init; }
 
+    public required short WonTricks { get; init; }
+
+    public required short OpponentsWonTricks { get; init; }
+
     public required Suit TrumpSuit { get; init; }
 
     public required PlayerPosition CallingPlayer { get; init; }

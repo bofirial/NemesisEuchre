@@ -227,6 +227,12 @@ public class PlayCardTrainingData
     public float Card5Chosen { get; set; }
 
     [LoadColumn(74)]
+    public float WonTricks { get; set; }
+
+    [LoadColumn(75)]
+    public float OpponentsWonTricks { get; set; }
+
+    [LoadColumn(76)]
     [ColumnName("Label")]
     public float ExpectedDealPoints { get; set; }
 }

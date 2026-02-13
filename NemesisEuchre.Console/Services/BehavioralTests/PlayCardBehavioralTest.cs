@@ -44,6 +44,10 @@ public abstract class PlayCardBehavioralTest(
 
     protected virtual short TrickNumber => 1;
 
+    protected virtual short WonTricks => 0;
+
+    protected virtual short OpponentsWonTricks => 0;
+
     public IReadOnlyList<BehavioralTestResult> Run(IPredictionEngineProvider engineProvider, string modelName)
     {
         var engine = engineProvider.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>(
@@ -93,6 +97,8 @@ public abstract class PlayCardBehavioralTest(
                     [.. cardsAccountedFor.Distinct()],
                     WinningTrickPlayer,
                     TrickNumber,
+                    WonTricks,
+                    OpponentsWonTricks,
                     testCase.ValidCardsToPlay,
                     card);
                 var prediction = engine.Predict(features);
