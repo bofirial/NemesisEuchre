@@ -56,6 +56,7 @@ public class TestResultsRenderer(IAnsiConsole console) : ITestResultsRenderer
         console.Write(Align.Center(new Markup($"[dim]Duration: {suiteResult.Duration.TotalSeconds:F1}s[/]")));
 
         console.WriteLine();
+        console.WriteLine();
     }
 
     private void RenderFailureDetails(BehavioralTestSuiteResult suiteResult)

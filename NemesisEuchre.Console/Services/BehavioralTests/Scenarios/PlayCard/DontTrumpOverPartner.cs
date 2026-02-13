@@ -23,6 +23,7 @@ public class DontTrumpOverPartner(
         {
             [RelativePlayerPosition.LeftHandOpponent] = new(Rank.Ten, RelativeSuit.NonTrumpSameColor),
             [RelativePlayerPosition.Partner] = new(Rank.Ace, RelativeSuit.NonTrumpSameColor),
+            [RelativePlayerPosition.RightHandOpponent] = new(Rank.Queen, RelativeSuit.NonTrumpSameColor),
         };
 
     protected override RelativePlayerPosition? WinningTrickPlayer => RelativePlayerPosition.Partner;
@@ -30,19 +31,23 @@ public class DontTrumpOverPartner(
     protected override RelativeCard[] GetCardsInHand()
     {
         return [
-        new(Rank.Queen, RelativeSuit.Trump),
-        new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
-        new(Rank.Nine, RelativeSuit.NonTrumpOppositeColor2),
-    ];
+            new(Rank.RightBower, RelativeSuit.Trump),
+            new(Rank.Queen, RelativeSuit.Trump),
+            new(Rank.Nine, RelativeSuit.Trump),
+            new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
+            new(Rank.Nine, RelativeSuit.NonTrumpOppositeColor2),
+        ];
     }
 
     protected override RelativeCard[] GetValidCardsToPlay()
     {
         return [
-        new(Rank.Queen, RelativeSuit.Trump),
-        new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
-        new(Rank.Nine, RelativeSuit.NonTrumpOppositeColor2),
-    ];
+            new(Rank.RightBower, RelativeSuit.Trump),
+            new(Rank.Queen, RelativeSuit.Trump),
+            new(Rank.Nine, RelativeSuit.Trump),
+            new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
+            new(Rank.Nine, RelativeSuit.NonTrumpOppositeColor2),
+        ];
     }
 
     protected override bool IsExpectedChoice(RelativeCard chosenCard)
