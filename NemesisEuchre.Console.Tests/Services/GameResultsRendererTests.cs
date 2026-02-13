@@ -386,6 +386,41 @@ public class GameResultsRendererTests
         output.Should().NotContain("Estimated Remaining");
     }
 
+    [Fact]
+    public void BuildLiveResultsTable_DisplaysStatusMessage_WhenProvided()
+    {
+        var testConsole = new TestConsole();
+        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+
+        var snapshot = new BatchProgressSnapshot(1000, 600, 390, 10, 5000, 20000, 8000, 1000, 60000);
+        var elapsed = TimeSpan.FromSeconds(20);
+
+        var renderable = renderer.BuildLiveResultsTable(snapshot, 1000, elapsed, "Merging 5 chunks (60,000 rows)...");
+        testConsole.Write(renderable);
+
+        var output = testConsole.Output;
+        output.Should().Contain("Status");
+        output.Should().Contain("Merging 5 chunks");
+    }
+
+    [Fact]
+    public void BuildLiveResultsTable_OmitsStatusRow_WhenStatusMessageIsNull()
+    {
+        var testConsole = new TestConsole();
+        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
+        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+
+        var snapshot = new BatchProgressSnapshot(500, 300, 190, 10, 2500, 10000, 4000, 500, 30000);
+        var elapsed = TimeSpan.FromSeconds(10);
+
+        var renderable = renderer.BuildLiveResultsTable(snapshot, 1000, elapsed);
+        testConsole.Write(renderable);
+
+        var output = testConsole.Output;
+        output.Should().NotContain("Status");
+    }
+
     private static Deal CreateMinimalDeal(Suit trump)
     {
         var nonTrumpSuit = trump == Suit.Clubs ? Suit.Diamonds : Suit.Clubs;

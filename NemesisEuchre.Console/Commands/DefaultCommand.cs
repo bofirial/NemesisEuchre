@@ -176,7 +176,7 @@ public class DefaultCommand(
                     if (snapshot != null)
                     {
                         ctx.UpdateTarget(
-                            gameResultsRenderer.BuildLiveResultsTable(snapshot, Count, stopwatch.Elapsed));
+                            gameResultsRenderer.BuildLiveResultsTable(snapshot, Count, stopwatch.Elapsed, reporter.StatusMessage));
                     }
 
                     await Task.WhenAny(orchestratorTask, Task.Delay(250));

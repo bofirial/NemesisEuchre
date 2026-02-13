@@ -7,6 +7,7 @@ using NemesisEuchre.Console.Services;
 
 using NemesisEuchre.Foundation.Constants;
 
+using Spectre.Console;
 using Spectre.Console.Testing;
 
 namespace NemesisEuchre.Console.Tests.Services;
@@ -14,13 +15,18 @@ namespace NemesisEuchre.Console.Tests.Services;
 public class TrainingProgressCoordinatorTests : IDisposable
 {
     private readonly Mock<IModelTrainingOrchestrator> _mockOrchestrator = new();
+    private readonly Mock<ITrainingResultsRenderer> _mockRenderer = new();
     private readonly TrainingProgressCoordinator _coordinator;
     private readonly TestConsole _testConsole;
     private bool _disposed;
 
     public TrainingProgressCoordinatorTests()
     {
-        _coordinator = new TrainingProgressCoordinator(_mockOrchestrator.Object);
+        _mockRenderer
+            .Setup(x => x.BuildLiveTrainingTable(It.IsAny<TrainingDisplaySnapshot>(), It.IsAny<TimeSpan>()))
+            .Returns(new Text(string.Empty));
+
+        _coordinator = new TrainingProgressCoordinator(_mockOrchestrator.Object, _mockRenderer.Object);
         _testConsole = new TestConsole();
     }
 
@@ -32,7 +38,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
         _mockOrchestrator
             .Setup(x => x.TrainModelsAsync(
                 DecisionType.CallTrump,
-                "./models",
+                "models",
                 "gen1",
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
@@ -40,14 +46,14 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
-        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "./models", "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
+        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "models", "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(expectedResults);
 
         _mockOrchestrator.Verify(
             x => x.TrainModelsAsync(
                 DecisionType.CallTrump,
-                "./models",
+                "models",
                 "gen1",
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
@@ -82,10 +88,10 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 })
             .ReturnsAsync(expectedResults);
 
-        await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.All, "./output", "gen2", _testConsole, "gen2", cancellationToken: TestContext.Current.CancellationToken);
+        await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.All, "output", "gen2", _testConsole, "gen2", cancellationToken: TestContext.Current.CancellationToken);
 
         capturedDecisionType.Should().Be(DecisionType.All);
-        capturedOutputPath.Should().Be("./output");
+        capturedOutputPath.Should().Be("output");
         capturedModelName.Should().Be("gen2");
     }
 
@@ -108,7 +114,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
 
         var act = async () => await _coordinator.CoordinateTrainingWithProgressAsync(
             DecisionType.CallTrump,
-            "./models",
+            "models",
             "gen1",
             _testConsole,
             "gen1",
@@ -135,7 +141,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
 
         var act = async () => await _coordinator.CoordinateTrainingWithProgressAsync(
             DecisionType.CallTrump,
-            "./models",
+            "models",
             "gen1",
             _testConsole,
             "gen1");
@@ -171,7 +177,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
-        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "./models", "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
+        var result = await _coordinator.CoordinateTrainingWithProgressAsync(DecisionType.CallTrump, "models", "gen1", _testConsole, "gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         result.Should().BeSameAs(expectedResults);
         result.SuccessfulModels.Should().Be(1);

@@ -20,7 +20,7 @@ public interface IGameResultsRenderer
 
     void RenderBatchResults(BatchGameResults results);
 
-    IRenderable BuildLiveResultsTable(BatchProgressSnapshot snapshot, int totalGames, TimeSpan elapsed);
+    IRenderable BuildLiveResultsTable(BatchProgressSnapshot snapshot, int totalGames, TimeSpan elapsed, string? statusMessage = null);
 }
 
 public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMapper callTrumpDecisionMapper, IDecisionRenderer decisionRenderer) : IGameResultsRenderer
@@ -84,21 +84,21 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         table.AddRow("Call Trump Decisions", $"{results.TotalCallTrumpDecisions:N0}");
         table.AddRow("Discard Card Decisions", $"{results.TotalDiscardCardDecisions:N0}");
         table.AddRow("Play Card Decisions", $"{results.TotalPlayCardDecisions:N0}");
-        table.AddRow("Elapsed Time", results.ElapsedTime.Humanize(2, countEmptyUnits: true));
+        table.AddRow("Elapsed Time", results.ElapsedTime.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second));
 
         if (results.PlayingDuration.HasValue)
         {
-            table.AddRow("[dim]  Playing[/]", $"[dim]{results.PlayingDuration.Value.TotalSeconds:F2}s[/]");
+            table.AddRow("[dim]  Playing[/]", $"[dim]{results.PlayingDuration?.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)}[/]");
         }
 
         if (results.PersistenceDuration.HasValue)
         {
-            table.AddRow("[dim]  Persistence[/]", $"[dim]{results.PersistenceDuration.Value.TotalSeconds:F2}s[/]");
+            table.AddRow("[dim]  Persistence[/]", $"[dim]{results.PersistenceDuration?.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)}[/]");
         }
 
         if (results.IdvSaveDuration.HasValue)
         {
-            table.AddRow("[dim]  IDV Save[/]", $"[dim]{results.IdvSaveDuration.Value.TotalSeconds:F2}s[/]");
+            table.AddRow("[dim]  IDV Save[/]", $"[dim]{results.IdvSaveDuration?.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)}[/]");
         }
 
         if (results.ElapsedTime.TotalSeconds > 0)
@@ -111,7 +111,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         ansiConsole.WriteLine();
     }
 
-    public IRenderable BuildLiveResultsTable(BatchProgressSnapshot snapshot, int totalGames, TimeSpan elapsed)
+    public IRenderable BuildLiveResultsTable(BatchProgressSnapshot snapshot, int totalGames, TimeSpan elapsed, string? statusMessage = null)
     {
         var table = CreateStyledTable()
             .AddColumn(new TableColumn("[bold]Metric[/]").Centered())
@@ -119,6 +119,11 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
 
         var percentage = totalGames > 0 ? (double)snapshot.CompletedGames / totalGames * 100 : 0;
         table.AddRow("Progress", $"{snapshot.CompletedGames:N0} / {totalGames:N0} ({percentage:F1}%)");
+
+        if (statusMessage != null)
+        {
+            table.AddRow("[yellow]Status[/]", $"[yellow]{statusMessage}[/]");
+        }
 
         var completedNonFailed = snapshot.Team1Wins + snapshot.Team2Wins;
         var team1Rate = completedNonFailed > 0 ? (double)snapshot.Team1Wins / completedNonFailed : 0;
@@ -131,7 +136,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
         table.AddRow("Call Trump Decisions", $"{snapshot.TotalCallTrumpDecisions:N0}");
         table.AddRow("Discard Card Decisions", $"{snapshot.TotalDiscardCardDecisions:N0}");
         table.AddRow("Play Card Decisions", $"{snapshot.TotalPlayCardDecisions:N0}");
-        table.AddRow("Elapsed Time", elapsed.Humanize(2, countEmptyUnits: true));
+        table.AddRow("Elapsed Time", elapsed.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second));
 
         if (snapshot.CompletedGames > 0 && elapsed.TotalSeconds > 0)
         {
@@ -142,7 +147,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
             if (remaining > 0)
             {
                 var estimatedRemaining = TimeSpan.FromSeconds(remaining / throughput);
-                table.AddRow("Estimated Remaining", estimatedRemaining.Humanize(2, countEmptyUnits: true));
+                table.AddRow("Estimated Remaining", estimatedRemaining.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second));
             }
         }
 

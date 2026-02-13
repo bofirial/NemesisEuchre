@@ -1,13 +1,18 @@
+using Humanizer;
+
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Foundation.Constants;
 
 using Spectre.Console;
+using Spectre.Console.Rendering;
 
 namespace NemesisEuchre.Console.Services;
 
 public interface ITrainingResultsRenderer
 {
     void RenderTrainingResults(TrainingResults results, DecisionType decisionType);
+
+    IRenderable BuildLiveTrainingTable(TrainingDisplaySnapshot snapshot, TimeSpan totalElapsed);
 }
 
 public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRenderer
@@ -57,7 +62,7 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
             }
 
             var durationMarkup = result.Duration.HasValue
-                ? $"{result.Duration.Value.TotalSeconds:F1}s"
+                ? $"{result.Duration.Value.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)}"
                 : "[dim]-[/]";
 
             table.AddRow(
@@ -75,7 +80,61 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
         var summaryColor = results.FailedModels == 0 ? "green" : "yellow";
         console.MarkupLine(
             $"[{summaryColor}]Training Summary: {results.SuccessfulModels} succeeded, {results.FailedModels} failed[/]");
-        console.MarkupLine($"[dim]Duration: {results.TotalDuration.TotalSeconds:F1}s[/]");
+        console.MarkupLine($"[dim]Duration: {results.TotalDuration.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)}[/]");
         console.WriteLine();
+    }
+
+    public IRenderable BuildLiveTrainingTable(TrainingDisplaySnapshot snapshot, TimeSpan totalElapsed)
+    {
+        var table = CreateStyledTable()
+            .AddColumn(new TableColumn("[bold]Model[/]").Centered())
+            .AddColumn(new TableColumn("[bold]Phase[/]").Centered())
+            .AddColumn(new TableColumn("[bold]MAE[/]").Centered())
+            .AddColumn(new TableColumn("[bold]R²[/]").Centered())
+            .AddColumn(new TableColumn("[bold]Elapsed[/]").Centered());
+
+        foreach (var model in snapshot.Models)
+        {
+            var phaseDisplay = model.Phase switch
+            {
+                TrainingPhase.LoadingData => "[blue]📊 Loading[/]",
+                TrainingPhase.Training => "[yellow]🔄 Training[/]",
+                TrainingPhase.Saving => "[blue]💾 Saving[/]",
+                TrainingPhase.Complete => "[green]✓ Complete[/]",
+                TrainingPhase.Failed => "[red]✗ Failed[/]",
+                _ => "[dim]-[/]",
+            };
+
+            var maeDisplay = model.ValidationMae.HasValue
+                ? $"{model.ValidationMae.Value:F4}"
+                : "[dim]-[/]";
+
+            var rSquaredDisplay = model.ValidationRSquared.HasValue
+                ? $"{model.ValidationRSquared.Value:F4}"
+                : "[dim]-[/]";
+
+            var elapsedDisplay = model.Elapsed.TotalSeconds >= 0.1
+                ? model.Elapsed.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)
+                : "[dim]-[/]";
+
+            table.AddRow(model.ModelType, phaseDisplay, maeDisplay, rSquaredDisplay, elapsedDisplay);
+        }
+
+        for (var i = snapshot.Models.Count; i < snapshot.TotalModels; i++)
+        {
+            table.AddRow("[dim]—[/]", "[dim]⏳ Pending[/]", "[dim]-[/]", "[dim]-[/]", "[dim]-[/]");
+        }
+
+        var overallProgress = $"{snapshot.CompletedModels}/{snapshot.TotalModels} complete";
+        table.AddRow("[bold]Overall[/]", $"[bold]{overallProgress}[/]", string.Empty, string.Empty, $"[bold]{totalElapsed.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)}[/]");
+
+        return new Rows(new Markup("[bold yellow]Training Models (Live)[/]"), new Text(string.Empty), table);
+    }
+
+    private static Table CreateStyledTable()
+    {
+        return new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Grey);
     }
 }

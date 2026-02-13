@@ -129,7 +129,8 @@ public abstract class RegressionModelTrainerBase<TData>(
         DataSplit dataSplit,
         CancellationToken cancellationToken)
     {
-        LoggerMessages.LogStartingTraining(Logger, GetModelType());
+        var modelType = GetModelType();
+        LoggerMessages.LogStartingTraining(Logger, modelType);
 
         LoggerMessages.LogDataSplitComplete(
             Logger,

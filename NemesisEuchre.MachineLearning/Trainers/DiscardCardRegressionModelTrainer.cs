@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.ML;
+using Microsoft.ML.Trainers.LightGbm;
 
 using NemesisEuchre.MachineLearning.DataAccess;
 using NemesisEuchre.MachineLearning.Models;
@@ -26,12 +27,15 @@ public class DiscardCardRegressionModelTrainer(
             .Concatenate("Features", featureColumns)
             .AppendCacheCheckpoint(MlContext)
             .Append(MlContext.Regression.Trainers.LightGbm(
-                labelColumnName: "Label",
-                featureColumnName: "Features",
-                numberOfLeaves: Options.NumberOfLeaves,
-                minimumExampleCountPerLeaf: Options.MinimumExampleCountPerLeaf,
-                learningRate: Options.LearningRate,
-                numberOfIterations: Options.NumberOfIterations));
+                new LightGbmRegressionTrainer.Options
+                {
+                    LabelColumnName = "Label",
+                    FeatureColumnName = "Features",
+                    NumberOfLeaves = Options.NumberOfLeaves,
+                    MinimumExampleCountPerLeaf = Options.MinimumExampleCountPerLeaf,
+                    LearningRate = Options.LearningRate,
+                    NumberOfIterations = Options.NumberOfIterations,
+                }));
     }
 
     protected override string GetModelType()

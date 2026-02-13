@@ -30,7 +30,7 @@ public class RegressionModelTrainerBaseTests
         _options = Microsoft.Extensions.Options.Options.Create(new MachineLearningOptions
         {
             RandomSeed = 42,
-            ModelOutputPath = "./models",
+            ModelOutputPath = "models",
             NumberOfLeaves = 31,
             NumberOfIterations = 200,
             LearningRate = 0.1,
@@ -160,7 +160,7 @@ public class RegressionModelTrainerBaseTests
             150);
 
         var act = () => trainer.SaveModelAsync(
-            "./models",
+            "models",
             "test",
             trainingResult,
             TestContext.Current.CancellationToken);

@@ -6,6 +6,16 @@ using Microsoft.Extensions.Logging;
 
 namespace NemesisEuchre.Console.Logging;
 
+[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:File may only contain a single type", Justification = "Extension method helper tightly coupled to FileLoggerProvider")]
+public static class FileLoggerExtensions
+{
+    public static ILoggingBuilder AddFile(this ILoggingBuilder builder, string filePath)
+    {
+        builder.Services.AddSingleton<ILoggerProvider>(new FileLoggerProvider(filePath));
+        return builder;
+    }
+}
+
 [ProviderAlias("File")]
 public sealed class FileLoggerProvider : ILoggerProvider
 {
@@ -35,20 +45,6 @@ public sealed class FileLoggerProvider : ILoggerProvider
         _writer.Dispose();
     }
 }
-
-#pragma warning disable SA1204
-
-[SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:File may only contain a single type", Justification = "Extension method helper tightly coupled to FileLoggerProvider")]
-public static class FileLoggerExtensions
-{
-    public static ILoggingBuilder AddFile(this ILoggingBuilder builder, string filePath)
-    {
-        builder.Services.AddSingleton<ILoggerProvider>(new FileLoggerProvider(filePath));
-        return builder;
-    }
-}
-
-#pragma warning disable SA1201, SA1202
 
 [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:File may only contain a single type", Justification = "Internal logger implementation tightly coupled to FileLoggerProvider")]
 internal sealed class FileLogger(string categoryName, StreamWriter writer, object writeLock) : ILogger

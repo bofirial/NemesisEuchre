@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 using FluentAssertions;
 
 using Microsoft.Extensions.Logging;
@@ -19,7 +21,7 @@ public class TrainingDataAccumulatorTests : IDisposable
     private readonly string _tempDirectory;
     private readonly Mock<IIdvFileService> _mockIdvFileService = new();
     private readonly TrainingDataAccumulator _accumulator;
-    private readonly Dictionary<string, IdvFileMetadata> _lastSavedMetadata = [];
+    private readonly ConcurrentDictionary<string, IdvFileMetadata> _lastSavedMetadata = new();
     private readonly List<(string path, int count)> _savedPlayCardCalls = [];
     private readonly List<(string path, int count)> _savedCallTrumpCalls = [];
     private readonly List<(string path, int count)> _savedDiscardCardCalls = [];
@@ -526,6 +528,62 @@ public class TrainingDataAccumulatorTests : IDisposable
         _mockIdvFileService.Verify(
             x => x.SaveMetadata(It.IsAny<IdvFileMetadata>(), It.IsAny<string>()),
             Times.Never);
+    }
+
+    [Fact]
+    public void Finalize_InvokesStatusCallback_AtKeyPoints()
+    {
+        _mockIdvFileService
+            .Setup(x => x.StreamFromBinary<PlayCardTrainingData>(It.IsAny<string>()))
+            .Returns([new PlayCardTrainingData()]);
+        _mockIdvFileService
+            .Setup(x => x.StreamFromBinary<CallTrumpTrainingData>(It.IsAny<string>()))
+            .Returns([new CallTrumpTrainingData()]);
+        _mockIdvFileService
+            .Setup(x => x.StreamFromBinary<DiscardCardTrainingData>(It.IsAny<string>()))
+            .Returns([new DiscardCardTrainingData()]);
+
+        _accumulator.Add(CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1));
+        _accumulator.SaveChunk("gen1");
+        _accumulator.Add(CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1));
+        _accumulator.SaveChunk("gen1");
+
+        var statusMessages = new List<string>();
+
+        _accumulator.Finalize("gen1", statusMessages.Add);
+
+        statusMessages.Should().HaveCountGreaterThanOrEqualTo(2);
+        statusMessages.Should().Contain(msg => msg.Contains("Merging"));
+        statusMessages.Should().Contain(msg => msg.Contains("Cleaning up"));
+    }
+
+    [Fact]
+    public void Finalize_InvokesStatusCallback_ForSingleChunkRename()
+    {
+        var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
+        _accumulator.Add(batch);
+        _accumulator.SaveChunk("gen1");
+
+        var statusMessages = new List<string>();
+
+        _accumulator.Finalize("gen1", statusMessages.Add);
+
+        statusMessages.Should().HaveCountGreaterThanOrEqualTo(2);
+        statusMessages.Should().Contain(msg => msg.Contains("Finalizing"));
+        statusMessages.Should().Contain(msg => msg.Contains("Cleaning up"));
+    }
+
+    [Fact]
+    public void Finalize_InvokesStatusCallback_WhenFlushingRemainingData()
+    {
+        var batch = CreateBatch(playCardCount: 2, callTrumpCount: 1, discardCardCount: 1);
+        _accumulator.Add(batch);
+
+        var statusMessages = new List<string>();
+
+        _accumulator.Finalize("gen1", statusMessages.Add);
+
+        statusMessages.Should().Contain(msg => msg.Contains("Saving remaining"));
     }
 
     [Fact]

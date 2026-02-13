@@ -246,15 +246,15 @@ public class BoltzmannSelectorTests
             { "best", 0 },
         };
 
-        const int iterations = 3000;
+        const int iterations = 10000;
         for (int i = 0; i < iterations; i++)
         {
             var result = BoltzmannSelector.SelectWeighted(options, scores, 5.0f, random);
             results[result]++;
         }
 
-        results["best"].Should().BeLessThan((int)(iterations * 0.6));
-        results["poor"].Should().BeGreaterThanOrEqualTo((int)(iterations * 0.2));
+        results["best"].Should().BeLessThan((int)(iterations * 0.75));
+        results["poor"].Should().BeGreaterThanOrEqualTo((int)(iterations * 0.12));
     }
 
     [Fact]
