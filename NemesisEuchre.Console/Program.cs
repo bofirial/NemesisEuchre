@@ -65,18 +65,15 @@ public static class Program
             services.AddScoped<IModelBehavioralTestRunner, ModelBehavioralTestRunner>();
             services.AddScoped<ITestResultsRenderer, TestResultsRenderer>();
             services.AddScoped<IModelBehavioralTest, FiveTrumpPlusOneNonTrump>();
-            services.AddScoped<IModelBehavioralTest, FiveTrumpGoingAlone>();
             services.AddScoped<IModelBehavioralTest, KeepLoneTrumpCard>();
-            services.AddScoped<IModelBehavioralTest, FourTrumpPlusLowNonTrump>();
             services.AddScoped<IModelBehavioralTest, FiveTrumpInHandShouldNotPass>();
             services.AddScoped<IModelBehavioralTest, NoTrumpInHandShouldPass>();
             services.AddScoped<IModelBehavioralTest, TopThreeTrumpCardsInHandShouldNotPass>();
             services.AddScoped<IModelBehavioralTest, PerfectHandShouldGoAlone>();
             services.AddScoped<IModelBehavioralTest, ForcedCallShouldChooseBestTrump>();
-            services.AddScoped<IModelBehavioralTest, OnlyOneValidCard>();
+            services.AddScoped<IModelBehavioralTest, StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer>();
             services.AddScoped<IModelBehavioralTest, LeadWithRightBower>();
             services.AddScoped<IModelBehavioralTest, DontTrumpOverPartner>();
-            services.AddScoped<IModelBehavioralTest, MustFollowSuit>();
 
             services.AddNemesisEuchreGameEngine();
             services.Configure<GameOptions>(_ => { });

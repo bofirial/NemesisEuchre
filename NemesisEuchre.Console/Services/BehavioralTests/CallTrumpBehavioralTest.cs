@@ -19,13 +19,15 @@ public abstract class CallTrumpBehavioralTest(
 
     public abstract string AssertionDescription { get; }
 
+    protected ICallTrumpInferenceFeatureBuilder FeatureBuilder { get; } = featureBuilder;
+
     protected virtual RelativePlayerPosition DealerPosition => RelativePlayerPosition.LeftHandOpponent;
 
     protected virtual short TeamScore => 0;
 
     protected virtual short OpponentScore => 0;
 
-    public IReadOnlyList<BehavioralTestResult> Run(IPredictionEngineProvider engineProvider, string modelName)
+    public virtual IReadOnlyList<BehavioralTestResult> Run(IPredictionEngineProvider engineProvider, string modelName)
     {
         var engine = engineProvider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
             "CallTrump", modelName);
@@ -53,10 +55,10 @@ public abstract class CallTrumpBehavioralTest(
 
             foreach (var decision in testCase.ValidDecisions)
             {
-                var features = featureBuilder.BuildFeatures(
+                var features = FeatureBuilder.BuildFeatures(
                     testCase.CardsInHand,
                     testCase.UpCard,
-                    DealerPosition,
+                    testCase.DealerPosition ?? DealerPosition,
                     TeamScore,
                     OpponentScore,
                     testCase.ValidDecisions,
@@ -132,5 +134,6 @@ public abstract class CallTrumpBehavioralTest(
         Card[] CardsInHand,
         Card UpCard,
         CallTrumpDecision[] ValidDecisions,
-        Func<CallTrumpDecision, bool>? IsExpectedOverride = null);
+        Func<CallTrumpDecision, bool>? IsExpectedOverride = null,
+        RelativePlayerPosition? DealerPosition = null);
 }
