@@ -109,7 +109,7 @@ public class ModelPersistenceServiceTests
             700,
             150,
             150,
-            new HyperparametersMetadata("LightGbm", 31, 200, 0.1, 42),
+            new HyperparametersMetadata("LightGbm", 31, 200, 0.1, 20, 42),
             new RegressionMetricsMetadata(0.5, 1.0, 1.5, 2.0, 0.3),
             "1.0");
     }

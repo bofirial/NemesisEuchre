@@ -5,4 +5,5 @@ public record HyperparametersMetadata(
     int NumberOfLeaves,
     int NumberOfIterations,
     double LearningRate,
+    int MinimumExampleCountPerLeaf,
     int RandomSeed);

@@ -163,6 +163,7 @@ public class RegressionModelTrainerBaseTests
             "models",
             "test",
             trainingResult,
+            idvFileMetadata: null,
             TestContext.Current.CancellationToken);
 
         return act.Should().ThrowAsync<InvalidOperationException>()

@@ -9,4 +9,5 @@ public record ModelMetadata(
     int TestSamples,
     HyperparametersMetadata Hyperparameters,
     object Metrics,
-    string FeatureSchemaVersion);
+    string FeatureSchemaVersion,
+    TrainingDataSourceMetadata? TrainingDataSource = null);

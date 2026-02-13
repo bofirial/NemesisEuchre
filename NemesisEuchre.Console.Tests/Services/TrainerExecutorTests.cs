@@ -71,6 +71,14 @@ public class TrainerExecutorTests
                     It.IsAny<bool>(),
                     It.IsAny<CancellationToken>()),
                 Times.Once);
+            mockTrainer.Verify(
+                t => t.SaveModelAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<TrainingResult>(),
+                    It.Is<IdvFileMetadata>(m => m != null),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
         }
         finally
         {

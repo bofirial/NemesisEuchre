@@ -26,6 +26,7 @@ public interface IModelTrainer<TData>
         string modelsDirectory,
         string modelName,
         TrainingResult trainingResult,
+        IdvFileMetadata? idvFileMetadata = null,
         CancellationToken cancellationToken = default);
 }
 
@@ -101,6 +102,7 @@ public abstract class RegressionModelTrainerBase<TData>(
         string modelsDirectory,
         string modelName,
         TrainingResult trainingResult,
+        IdvFileMetadata? idvFileMetadata = null,
         CancellationToken cancellationToken = default)
     {
         if (TrainedModel == null)
@@ -108,7 +110,7 @@ public abstract class RegressionModelTrainerBase<TData>(
             throw new InvalidOperationException("No trained model to save. Call TrainAsync first.");
         }
 
-        var metadata = CreateModelMetadata(modelName, trainingResult);
+        var metadata = CreateModelMetadata(modelName, trainingResult, idvFileMetadata);
 
         return PersistenceService.SaveModelAsync<TData>(
             TrainedModel,
@@ -164,10 +166,18 @@ public abstract class RegressionModelTrainerBase<TData>(
 
     private ModelMetadata CreateModelMetadata(
         string modelName,
-        TrainingResult trainingResult)
+        TrainingResult trainingResult,
+        IdvFileMetadata? idvFileMetadata)
     {
         var regressionMetrics = trainingResult.ValidationMetrics as RegressionEvaluationMetrics
             ?? throw new InvalidOperationException("Expected RegressionEvaluationMetrics");
+
+        var trainingDataSource = idvFileMetadata is not null
+            ? new TrainingDataSourceMetadata(
+                idvFileMetadata.GenerationName,
+                idvFileMetadata.GameCount,
+                idvFileMetadata.Actors)
+            : null;
 
         return new ModelMetadata(
             GetModelType(),
@@ -181,6 +191,7 @@ public abstract class RegressionModelTrainerBase<TData>(
                 Options.NumberOfLeaves,
                 Options.NumberOfIterations,
                 Options.LearningRate,
+                Options.MinimumExampleCountPerLeaf,
                 Options.RandomSeed),
             new RegressionMetricsMetadata(
                 regressionMetrics.RSquared,
@@ -188,6 +199,7 @@ public abstract class RegressionModelTrainerBase<TData>(
                 regressionMetrics.RootMeanSquaredError,
                 regressionMetrics.MeanSquaredError,
                 regressionMetrics.LossFunction),
-            "1.0");
+            "1.0",
+            trainingDataSource);
     }
 }

@@ -89,7 +89,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             var metrics = (RegressionEvaluationMetrics)trainingResult.ValidationMetrics;
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Saving, 75, "Saving model..."));
-            await _trainer.SaveModelAsync(outputPath, modelName, trainingResult, cancellationToken);
+            await _trainer.SaveModelAsync(outputPath, modelName, trainingResult, metadata, cancellationToken);
 
             progress.Report(new TrainingProgress(
                 ModelType,
