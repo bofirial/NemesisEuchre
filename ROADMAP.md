@@ -498,8 +498,8 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 2. ~~Add some kind of TestCase support for running the same scenario multiple times (For example if I have a perfect hand for Diamonds, Hearts, Spades or Clubs the bot shouldn't pass.  I shouldn't need to define that test multiple times)~~
 3. ~~CallTrump Test - Perfect Hands should not pass~~
 4. ~~CallTrump Test - No Trump should pass~~
-5. CallTrump Test - UpCard is a Jack should cause PickItUp to have a higher value for dealer than opponents of the dealer
-6. CallTrump Test - Forced Call should choose the best suit
+5. ~~CallTrump Test - UpCard is a Jack should cause PickItUp to have a higher value for dealer than opponents of the dealer~~
+6. ~~CallTrump Test - Forced Call should choose the best suit~~
 7. DiscardCard Test - Five Trump should result in discarding the non-trump card
 8. DiscardCard Test - 1 Trump, 2 low NonTrumpSameColor, 2 low NonTrumpDifferentColor1 and 1 low NonTrumpDifferentColor2 should result in discarding down to 3 suits
 9. DiscardCard Test - 2 Trump, 2 low NonTrumpDifferentColor1 and 1 low NonTrumpDifferentColor2 should result in discarding down to 2 suits
