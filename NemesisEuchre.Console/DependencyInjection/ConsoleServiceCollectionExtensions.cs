@@ -60,6 +60,7 @@ public static class ConsoleServiceCollectionExtensions
         services.AddScoped<IModelBehavioralTest, PartnerWinningTrickShouldNotPlayTrump>();
         services.AddScoped<IModelBehavioralTest, OpponentWinningTrickShouldPlayTrump>();
         services.AddScoped<IModelBehavioralTest, OpponentWinningTrickShouldPlayLowestTrump>();
+        services.AddScoped<IModelBehavioralTest, OpponentVoidInSuitShouldLeadTheOtherAce>();
 
         services.Configure<GameOptions>(_ => { });
         services.AddOptions<GameExecutionOptions>()

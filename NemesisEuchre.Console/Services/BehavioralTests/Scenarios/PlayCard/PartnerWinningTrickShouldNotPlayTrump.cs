@@ -8,7 +8,7 @@ public class PartnerWinningTrickShouldNotPlayTrump(
     IPlayCardInferenceFeatureBuilder featureBuilder)
     : PlayCardBehavioralTest(featureBuilder)
 {
-    public override string Name => "Partner winning trick, don't play trump";
+    public override string Name => "Partner winning trick don't play trump";
 
     public override string Description => "Partner winning with ace, should not play trump";
 

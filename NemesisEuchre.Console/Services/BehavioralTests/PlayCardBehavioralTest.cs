@@ -73,7 +73,7 @@ public abstract class PlayCardBehavioralTest(
             foreach (var card in testCase.ValidCardsToPlay)
             {
                 RelativeCard[] cardsAccountedFor = [
-                    .. CardsAccountedFor,
+                    .. testCase.CardsAccountedFor ?? CardsAccountedFor,
                     .. testCase.CardsInHand,
                     .. PlayedCardsInTrick.Values
                 ];
@@ -89,7 +89,7 @@ public abstract class PlayCardBehavioralTest(
                     CallingPlayerGoingAlone,
                     Dealer,
                     DealerPickedUpCard,
-                    KnownPlayerSuitVoids,
+                    testCase.KnownPlayerSuitVoids ?? KnownPlayerSuitVoids,
                     [.. cardsAccountedFor.Distinct()],
                     WinningTrickPlayer,
                     TrickNumber,
@@ -155,5 +155,7 @@ public abstract class PlayCardBehavioralTest(
         string Label,
         RelativeCard[] CardsInHand,
         RelativeCard[] ValidCardsToPlay,
-        Func<RelativeCard, bool>? IsExpectedOverride = null);
+        Func<RelativeCard, bool>? IsExpectedOverride = null,
+        RelativeCard[]? CardsAccountedFor = null,
+        RelativePlayerSuitVoid[]? KnownPlayerSuitVoids = null);
 }
