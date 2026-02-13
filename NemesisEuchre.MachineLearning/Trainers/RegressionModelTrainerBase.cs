@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.ML;
@@ -18,7 +16,6 @@ public interface IModelTrainer<TData>
     Task<TrainingResult> TrainAsync(
         IDataView dataView,
         bool preShuffled = false,
-        IProgress<TrainingIterationUpdate>? iterationProgress = null,
         CancellationToken cancellationToken = default);
 
     Task<EvaluationMetrics> EvaluateAsync(
@@ -32,7 +29,7 @@ public interface IModelTrainer<TData>
         CancellationToken cancellationToken = default);
 }
 
-public abstract partial class RegressionModelTrainerBase<TData>(
+public abstract class RegressionModelTrainerBase<TData>(
     MLContext mlContext,
     IDataSplitter dataSplitter,
     IModelPersistenceService persistenceService,
@@ -55,13 +52,12 @@ public abstract partial class RegressionModelTrainerBase<TData>(
     public Task<TrainingResult> TrainAsync(
         IDataView dataView,
         bool preShuffled = false,
-        IProgress<TrainingIterationUpdate>? iterationProgress = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(dataView);
 
         var dataSplit = DataSplitter.Split(dataView, preShuffled: preShuffled);
-        return TrainFromSplitAsync(dataSplit, iterationProgress, cancellationToken);
+        return TrainFromSplitAsync(dataSplit, cancellationToken);
     }
 
     Task<EvaluationMetrics> IModelTrainer<TData>.EvaluateAsync(
@@ -125,40 +121,12 @@ public abstract partial class RegressionModelTrainerBase<TData>(
             cancellationToken);
     }
 
-#pragma warning disable RCS1158 // Static member in generic type - TryParseIterationProgress is intentionally type-independent
-    internal static bool TryParseIterationProgress(string message, out int iteration, out double? metric)
-    {
-        iteration = 0;
-        metric = null;
-
-        var match = IterationLogPattern().Match(message);
-        if (!match.Success)
-        {
-            return false;
-        }
-
-        iteration = int.Parse(match.Groups["iter"].Value, System.Globalization.CultureInfo.InvariantCulture);
-
-        if (match.Groups["metric"].Success
-            && double.TryParse(match.Groups["metric"].Value, System.Globalization.CultureInfo.InvariantCulture, out var metricValue))
-        {
-            metric = metricValue;
-        }
-
-        return true;
-    }
-#pragma warning restore RCS1158
-
     protected abstract IEstimator<ITransformer> BuildPipeline(IDataView trainingData);
 
     protected abstract string GetModelType();
 
-    [GeneratedRegex(@"\[(?<iter>\d+)\].*?:\s*(?<metric>[\d.]+(?:e[+-]?\d+)?)", RegexOptions.Compiled)]
-    private static partial Regex IterationLogPattern();
-
     private async Task<TrainingResult> TrainFromSplitAsync(
         DataSplit dataSplit,
-        IProgress<TrainingIterationUpdate>? iterationProgress,
         CancellationToken cancellationToken)
     {
         var modelType = GetModelType();
@@ -174,31 +142,7 @@ public abstract partial class RegressionModelTrainerBase<TData>(
 
         LoggerMessages.LogTrainingModel(Logger, Options.NumberOfIterations);
 
-        EventHandler<LoggingEventArgs>? logHandler = null;
-        if (iterationProgress != null)
-        {
-            logHandler = (_, e) =>
-            {
-                if (TryParseIterationProgress(e.RawMessage, out var iteration, out var metricValue))
-                {
-                    iterationProgress.Report(new TrainingIterationUpdate(
-                        iteration, Options.NumberOfIterations, metricValue));
-                }
-            };
-            MlContext.Log += logHandler;
-        }
-
-        try
-        {
-            TrainedModel = await Task.Run(() => pipeline.Fit(dataSplit.Train), cancellationToken);
-        }
-        finally
-        {
-            if (logHandler != null)
-            {
-                MlContext.Log -= logHandler;
-            }
-        }
+        TrainedModel = await Task.Run(() => pipeline.Fit(dataSplit.Train), cancellationToken);
 
         LoggerMessages.LogTrainingComplete(Logger);
 

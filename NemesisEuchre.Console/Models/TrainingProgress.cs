@@ -5,8 +5,5 @@ public record TrainingProgress(
     TrainingPhase Phase,
     int PercentComplete,
     string? Message = null,
-    int? CurrentIteration = null,
-    int? TotalIterations = null,
-    double? TrainingMetric = null,
     double? ValidationMae = null,
     double? ValidationRSquared = null);

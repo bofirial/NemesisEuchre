@@ -75,20 +75,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 25, "Training model (IDV)..."));
 
-            var iterationProgress = new Progress<TrainingIterationUpdate>(update =>
-            {
-                var pct = 25 + (int)(update.CurrentIteration * 50.0 / update.TotalIterations);
-                progress.Report(new TrainingProgress(
-                    ModelType,
-                    TrainingPhase.Training,
-                    pct,
-                    $"Iteration {update.CurrentIteration:N0} / {update.TotalIterations:N0}",
-                    update.CurrentIteration,
-                    update.TotalIterations,
-                    update.TrainingMetric));
-            });
-
-            var trainingResult = await _trainer.TrainAsync(dataView, preShuffled: true, iterationProgress, cancellationToken);
+            var trainingResult = await _trainer.TrainAsync(dataView, preShuffled: true, cancellationToken);
 
             if (trainingResult.TrainingSamples == 0)
             {

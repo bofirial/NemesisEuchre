@@ -19,9 +19,6 @@ internal sealed class TrainingDisplayState(int totalModels)
         state.Phase = progress.Phase;
         state.PercentComplete = progress.PercentComplete;
         state.Message = progress.Message;
-        state.CurrentIteration = progress.CurrentIteration;
-        state.TotalIterations = progress.TotalIterations;
-        state.TrainingMetric = progress.TrainingMetric;
 
         if (progress.ValidationMae.HasValue)
         {
@@ -73,9 +70,6 @@ internal sealed class TrainingDisplayState(int totalModels)
                 kvp.Value.Phase,
                 kvp.Value.PercentComplete,
                 kvp.Value.Message,
-                kvp.Value.CurrentIteration,
-                kvp.Value.TotalIterations,
-                kvp.Value.TrainingMetric,
                 kvp.Value.ValidationMae,
                 kvp.Value.ValidationRSquared,
                 kvp.Value.Stopwatch.Elapsed))
@@ -98,12 +92,6 @@ internal sealed class TrainingDisplayState(int totalModels)
         public int PercentComplete { get; set; }
 
         public string? Message { get; set; }
-
-        public int? CurrentIteration { get; set; }
-
-        public int? TotalIterations { get; set; }
-
-        public double? TrainingMetric { get; set; }
 
         public double? ValidationMae { get; set; }
 

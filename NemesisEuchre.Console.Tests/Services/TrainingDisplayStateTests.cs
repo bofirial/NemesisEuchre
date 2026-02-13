@@ -43,26 +43,6 @@ public class TrainingDisplayStateTests
     }
 
     [Fact]
-    public void Update_IterationFieldsTracked()
-    {
-        var state = new TrainingDisplayState(1);
-
-        state.Update(new TrainingProgress(
-            "PlayCard",
-            TrainingPhase.Training,
-            50,
-            "Iteration 100 / 200",
-            CurrentIteration: 100,
-            TotalIterations: 200,
-            TrainingMetric: 0.45));
-
-        var model = state.LatestSnapshot!.Models[0];
-        model.CurrentIteration.Should().Be(100);
-        model.TotalIterations.Should().Be(200);
-        model.TrainingMetric.Should().Be(0.45);
-    }
-
-    [Fact]
     public void Update_ValidationMetricsFromProgress()
     {
         var state = new TrainingDisplayState(1);
@@ -221,10 +201,7 @@ public class TrainingDisplayStateTests
             "PlayCard",
             TrainingPhase.Training,
             50,
-            "Iteration 100 / 200",
-            CurrentIteration: 100,
-            TotalIterations: 200,
-            TrainingMetric: 0.45));
+            "Training model (IDV)..."));
 
         state.RefreshSnapshot();
 
@@ -232,10 +209,7 @@ public class TrainingDisplayStateTests
         model.ModelType.Should().Be("PlayCard");
         model.Phase.Should().Be(TrainingPhase.Training);
         model.PercentComplete.Should().Be(50);
-        model.Message.Should().Be("Iteration 100 / 200");
-        model.CurrentIteration.Should().Be(100);
-        model.TotalIterations.Should().Be(200);
-        model.TrainingMetric.Should().Be(0.45);
+        model.Message.Should().Be("Training model (IDV)...");
     }
 
     [Fact]
@@ -254,9 +228,7 @@ public class TrainingDisplayStateTests
             "CallTrump",
             TrainingPhase.Training,
             50,
-            "Iteration 100 / 200",
-            CurrentIteration: 100,
-            TotalIterations: 200));
+            "Training model (IDV)..."));
         state.Update(new TrainingProgress("DiscardCard", TrainingPhase.LoadingData, 0));
 
         var snapshot = state.LatestSnapshot!;
@@ -269,7 +241,6 @@ public class TrainingDisplayStateTests
 
         var callTrump = snapshot.Models.First(m => m.ModelType == "CallTrump");
         callTrump.Phase.Should().Be(TrainingPhase.Training);
-        callTrump.CurrentIteration.Should().Be(100);
 
         var discardCard = snapshot.Models.First(m => m.ModelType == "DiscardCard");
         discardCard.Phase.Should().Be(TrainingPhase.LoadingData);

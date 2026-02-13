@@ -39,7 +39,7 @@ public class TrainingResultsRendererTests : IDisposable
     {
         var models = new List<ModelDisplayInfo>
         {
-            new("PlayCard", TrainingPhase.Training, 50, "Iteration 100 / 200", 100, 200, null, null, null, TimeSpan.FromSeconds(10)),
+            new("PlayCard", TrainingPhase.Training, 50, "Training model (IDV)...", null, null, TimeSpan.FromSeconds(10)),
         };
         var snapshot = new TrainingDisplaySnapshot(models, 3, 0);
 
@@ -49,8 +49,6 @@ public class TrainingResultsRendererTests : IDisposable
         var output = _testConsole.Output;
         output.Should().Contain("PlayCard");
         output.Should().Contain("Training");
-        output.Should().Contain("100");
-        output.Should().Contain("200");
     }
 
     [Fact]
@@ -58,7 +56,7 @@ public class TrainingResultsRendererTests : IDisposable
     {
         var models = new List<ModelDisplayInfo>
         {
-            new("PlayCard", TrainingPhase.Complete, 100, "Complete", null, 200, null, 0.1892, 0.6234, TimeSpan.FromSeconds(45)),
+            new("PlayCard", TrainingPhase.Complete, 100, "Complete", 0.1892, 0.6234, TimeSpan.FromSeconds(45)),
         };
         var snapshot = new TrainingDisplaySnapshot(models, 1, 1);
 
@@ -77,7 +75,7 @@ public class TrainingResultsRendererTests : IDisposable
     {
         var models = new List<ModelDisplayInfo>
         {
-            new("CallTrump", TrainingPhase.Failed, 0, "Error: file not found", null, null, null, null, null, TimeSpan.FromSeconds(2)),
+            new("CallTrump", TrainingPhase.Failed, 0, "Error: file not found", null, null, TimeSpan.FromSeconds(2)),
         };
         var snapshot = new TrainingDisplaySnapshot(models, 1, 1);
 
@@ -93,7 +91,7 @@ public class TrainingResultsRendererTests : IDisposable
     {
         var models = new List<ModelDisplayInfo>
         {
-            new("CallTrump", TrainingPhase.Training, 50, "Training...", 100, 200, null, null, null, TimeSpan.FromSeconds(10)),
+            new("CallTrump", TrainingPhase.Training, 50, "Training...", null, null, TimeSpan.FromSeconds(10)),
         };
         var snapshot = new TrainingDisplaySnapshot(models, 3, 0);
 
@@ -109,7 +107,7 @@ public class TrainingResultsRendererTests : IDisposable
     {
         var models = new List<ModelDisplayInfo>
         {
-            new("PlayCard", TrainingPhase.Complete, 100, "Complete", null, null, null, null, null, TimeSpan.FromSeconds(45)),
+            new("PlayCard", TrainingPhase.Complete, 100, "Complete", null, null, TimeSpan.FromSeconds(45)),
         };
         var snapshot = new TrainingDisplaySnapshot(models, 1, 1);
 
@@ -117,7 +115,7 @@ public class TrainingResultsRendererTests : IDisposable
 
         _testConsole.Write(renderable);
         var output = _testConsole.Output;
-        output.Should().Contain("1m");
+        output.Should().Contain("1 minute");
     }
 
     public void Dispose()

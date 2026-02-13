@@ -10,9 +10,6 @@ public record ModelDisplayInfo(
     TrainingPhase Phase,
     int PercentComplete,
     string? Message,
-    int? CurrentIteration,
-    int? TotalIterations,
-    double? TrainingMetric,
     double? ValidationMae,
     double? ValidationRSquared,
     TimeSpan Elapsed);

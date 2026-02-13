@@ -35,8 +35,6 @@ public class CallTrumpRegressionModelTrainer(
                     MinimumExampleCountPerLeaf = Options.MinimumExampleCountPerLeaf,
                     LearningRate = Options.LearningRate,
                     NumberOfIterations = Options.NumberOfIterations,
-                    Verbose = true,
-                    Silent = false,
                 }));
     }
 
