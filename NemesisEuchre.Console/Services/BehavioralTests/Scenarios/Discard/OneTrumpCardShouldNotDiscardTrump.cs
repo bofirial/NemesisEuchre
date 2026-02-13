@@ -14,16 +14,19 @@ public class OneTrumpCardShouldNotDiscardTrump(
 
     public override string AssertionDescription => "Must not discard trump card";
 
-    protected override RelativeCard[] GetCardsInHand()
+    protected override IReadOnlyList<DiscardCardTestCase> GetTestCases()
     {
-        return [
-        new(Rank.Queen, RelativeSuit.Trump),
-        new(Rank.Ace, RelativeSuit.NonTrumpSameColor),
-        new(Rank.King, RelativeSuit.NonTrumpSameColor),
-        new(Rank.Queen, RelativeSuit.NonTrumpOppositeColor1),
-        new(Rank.Jack, RelativeSuit.NonTrumpOppositeColor1),
-        new(Rank.Ten, RelativeSuit.NonTrumpOppositeColor2),
-    ];
+        return GenerateAllSuitVariants(
+            Name,
+            _ =>
+            [
+                new(Rank.Queen, RelativeSuit.Trump),
+                new(Rank.Ace, RelativeSuit.NonTrumpSameColor),
+                new(Rank.King, RelativeSuit.NonTrumpSameColor),
+                new(Rank.Queen, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Jack, RelativeSuit.NonTrumpOppositeColor1),
+                new(Rank.Ten, RelativeSuit.NonTrumpOppositeColor2),
+            ]);
     }
 
     protected override bool IsExpectedChoice(RelativeCard chosenCard)

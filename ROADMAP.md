@@ -500,7 +500,7 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 4. ~~CallTrump Test - No Trump should pass~~
 5. ~~CallTrump Test - UpCard is a Jack should cause PickItUp to have a higher value for dealer than opponents of the dealer~~
 6. ~~CallTrump Test - Forced Call should choose the best suit~~
-7. DiscardCard Test - Five Trump should result in discarding the non-trump card
+7. ~~DiscardCard Test - Five Trump should result in discarding the non-trump card~~
 8. DiscardCard Test - 1 Trump, 2 low NonTrumpSameColor, 2 low NonTrumpDifferentColor1 and 1 low NonTrumpDifferentColor2 should result in discarding down to 3 suits
 9. DiscardCard Test - 2 Trump, 2 low NonTrumpDifferentColor1 and 1 low NonTrumpDifferentColor2 should result in discarding down to 2 suits
 10. PlayCard Test - When choosing 1 of 2 Aces to play, if an opponent is void in the suit of 1 the other should be played
