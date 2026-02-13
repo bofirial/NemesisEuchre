@@ -72,6 +72,7 @@ public static class Program
             services.AddScoped<IModelBehavioralTest, NoTrumpInHandShouldPass>();
             services.AddScoped<IModelBehavioralTest, TopThreeTrumpCardsInHandShouldNotPass>();
             services.AddScoped<IModelBehavioralTest, PerfectHandShouldGoAlone>();
+            services.AddScoped<IModelBehavioralTest, ForcedCallShouldChooseBestTrump>();
             services.AddScoped<IModelBehavioralTest, OnlyOneValidCard>();
             services.AddScoped<IModelBehavioralTest, LeadWithRightBower>();
             services.AddScoped<IModelBehavioralTest, DontTrumpOverPartner>();

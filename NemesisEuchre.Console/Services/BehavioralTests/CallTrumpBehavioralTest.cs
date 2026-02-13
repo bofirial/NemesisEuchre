@@ -73,7 +73,8 @@ public abstract class CallTrumpBehavioralTest(
                 }
             }
 
-            var passed = bestDecision.HasValue && IsExpectedChoice(bestDecision.Value);
+            var isExpected = testCase.IsExpectedOverride ?? IsExpectedChoice;
+            var passed = bestDecision.HasValue && isExpected(bestDecision.Value);
             var chosenDisplay = bestDecision.HasValue ? bestDecision.Value.ToString() : "-";
             var failureReason = passed ? null : $"Chose {chosenDisplay} but expected: {AssertionDescription}";
 
@@ -126,5 +127,10 @@ public abstract class CallTrumpBehavioralTest(
 
     protected abstract bool IsExpectedChoice(CallTrumpDecision chosenDecision);
 
-    public record CallTrumpTestCase(string Label, Card[] CardsInHand, Card UpCard, CallTrumpDecision[] ValidDecisions);
+    public record CallTrumpTestCase(
+        string Label,
+        Card[] CardsInHand,
+        Card UpCard,
+        CallTrumpDecision[] ValidDecisions,
+        Func<CallTrumpDecision, bool>? IsExpectedOverride = null);
 }
