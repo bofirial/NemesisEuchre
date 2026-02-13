@@ -21,7 +21,7 @@ public class ModelBehavioralTestRunner(
         var results = tests
             .OrderBy(t => t.DecisionType)
             .ThenBy(t => t.Name)
-            .Select(t => t.Run(engineProvider, modelName))
+            .SelectMany(t => t.Run(engineProvider, modelName))
             .ToList();
 
         return new BehavioralTestSuiteResult(modelName, results, sw.Elapsed);

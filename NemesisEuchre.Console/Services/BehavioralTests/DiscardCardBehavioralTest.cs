@@ -26,64 +26,79 @@ public abstract class DiscardCardBehavioralTest(
 
     protected virtual short OpponentScore => 0;
 
-    public BehavioralTestResult Run(IPredictionEngineProvider engineProvider, string modelName)
+    public IReadOnlyList<BehavioralTestResult> Run(IPredictionEngineProvider engineProvider, string modelName)
     {
         var engine = engineProvider.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>(
             "DiscardCard", modelName);
 
         if (engine == null)
         {
-            return new BehavioralTestResult(
+            return [new BehavioralTestResult(
                 Name,
                 DecisionType,
                 false,
                 "-",
                 AssertionDescription,
                 [],
-                "Failed to load DiscardCard model");
+                "Failed to load DiscardCard model")];
         }
 
-        var cardsInHand = GetCardsInHand();
-        var scores = new Dictionary<string, float>();
-        RelativeCard? bestCard = null;
-        var bestScore = float.MinValue;
+        var testCases = GetTestCases();
+        var results = new List<BehavioralTestResult>(testCases.Count);
 
-        foreach (var card in cardsInHand)
+        foreach (var testCase in testCases)
         {
-            var features = featureBuilder.BuildFeatures(
-                cardsInHand,
-                CallingPlayer,
-                CallingPlayerGoingAlone,
-                TeamScore,
-                OpponentScore,
-                card);
-            var prediction = engine.Predict(features);
-            var score = prediction.PredictedPoints;
-            var display = FormatCard(card);
-            scores[display] = score;
+            var scores = new Dictionary<string, float>();
+            RelativeCard? bestCard = null;
+            var bestScore = float.MinValue;
 
-            if (score > bestScore)
+            foreach (var card in testCase.CardsInHand)
             {
-                bestScore = score;
-                bestCard = card;
+                var features = featureBuilder.BuildFeatures(
+                    testCase.CardsInHand,
+                    CallingPlayer,
+                    CallingPlayerGoingAlone,
+                    TeamScore,
+                    OpponentScore,
+                    card);
+                var prediction = engine.Predict(features);
+                var score = prediction.PredictedPoints;
+                var display = FormatCard(card);
+                scores[display] = score;
+
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestCard = card;
+                }
             }
+
+            var passed = bestCard != null && IsExpectedChoice(bestCard);
+            var chosenDisplay = bestCard != null ? FormatCard(bestCard) : "-";
+            var failureReason = passed ? null : $"Chose {chosenDisplay} but expected: {AssertionDescription}";
+
+            results.Add(new BehavioralTestResult(
+                testCase.Label,
+                DecisionType,
+                passed,
+                chosenDisplay,
+                AssertionDescription,
+                scores,
+                failureReason));
         }
 
-        var passed = bestCard != null && IsExpectedChoice(bestCard);
-        var chosenDisplay = bestCard != null ? FormatCard(bestCard) : "-";
-        var failureReason = passed ? null : $"Chose {chosenDisplay} but expected: {AssertionDescription}";
-
-        return new BehavioralTestResult(
-            Name,
-            DecisionType,
-            passed,
-            chosenDisplay,
-            AssertionDescription,
-            scores,
-            failureReason);
+        return results;
     }
 
-    protected abstract RelativeCard[] GetCardsInHand();
+    protected virtual IReadOnlyList<DiscardCardTestCase> GetTestCases()
+    {
+        return [new(Name, GetCardsInHand())];
+    }
+
+    protected virtual RelativeCard[] GetCardsInHand()
+    {
+        throw new InvalidOperationException("Override GetTestCases() or GetCardsInHand()");
+    }
 
     protected abstract bool IsExpectedChoice(RelativeCard chosenCard);
 
@@ -91,4 +106,6 @@ public abstract class DiscardCardBehavioralTest(
     {
         return $"{card.Rank} of {card.Suit}";
     }
+
+    public record DiscardCardTestCase(string Label, RelativeCard[] CardsInHand);
 }

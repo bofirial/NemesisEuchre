@@ -25,71 +25,106 @@ public abstract class CallTrumpBehavioralTest(
 
     protected virtual short OpponentScore => 0;
 
-    public BehavioralTestResult Run(IPredictionEngineProvider engineProvider, string modelName)
+    public IReadOnlyList<BehavioralTestResult> Run(IPredictionEngineProvider engineProvider, string modelName)
     {
         var engine = engineProvider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
             "CallTrump", modelName);
 
         if (engine == null)
         {
-            return new BehavioralTestResult(
+            return [new BehavioralTestResult(
                 Name,
                 DecisionType,
                 false,
                 "-",
                 AssertionDescription,
                 [],
-                "Failed to load CallTrump model");
+                "Failed to load CallTrump model")];
         }
 
-        var cardsInHand = GetCardsInHand();
-        var upCard = GetUpCard();
-        var validDecisions = GetValidDecisions();
-        var scores = new Dictionary<string, float>();
-        CallTrumpDecision? bestDecision = null;
-        var bestScore = float.MinValue;
+        var testCases = GetTestCases();
+        var results = new List<BehavioralTestResult>(testCases.Count);
 
-        foreach (var decision in validDecisions)
+        foreach (var testCase in testCases)
         {
-            var features = featureBuilder.BuildFeatures(
-                cardsInHand,
-                upCard,
-                DealerPosition,
-                TeamScore,
-                OpponentScore,
-                validDecisions,
-                decision);
-            var prediction = engine.Predict(features);
-            var score = prediction.PredictedPoints;
-            var display = decision.ToString();
-            scores[display] = score;
+            var scores = new Dictionary<string, float>();
+            CallTrumpDecision? bestDecision = null;
+            var bestScore = float.MinValue;
 
-            if (score > bestScore)
+            foreach (var decision in testCase.ValidDecisions)
             {
-                bestScore = score;
-                bestDecision = decision;
+                var features = featureBuilder.BuildFeatures(
+                    testCase.CardsInHand,
+                    testCase.UpCard,
+                    DealerPosition,
+                    TeamScore,
+                    OpponentScore,
+                    testCase.ValidDecisions,
+                    decision);
+                var prediction = engine.Predict(features);
+                var score = prediction.PredictedPoints;
+                var display = decision.ToString();
+                scores[display] = score;
+
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestDecision = decision;
+                }
             }
+
+            var passed = bestDecision.HasValue && IsExpectedChoice(bestDecision.Value);
+            var chosenDisplay = bestDecision.HasValue ? bestDecision.Value.ToString() : "-";
+            var failureReason = passed ? null : $"Chose {chosenDisplay} but expected: {AssertionDescription}";
+
+            results.Add(new BehavioralTestResult(
+                testCase.Label,
+                DecisionType,
+                passed,
+                chosenDisplay,
+                AssertionDescription,
+                scores,
+                failureReason));
         }
 
-        var passed = bestDecision.HasValue && IsExpectedChoice(bestDecision.Value);
-        var chosenDisplay = bestDecision.HasValue ? bestDecision.Value.ToString() : "-";
-        var failureReason = passed ? null : $"Chose {chosenDisplay} but expected: {AssertionDescription}";
-
-        return new BehavioralTestResult(
-            Name,
-            DecisionType,
-            passed,
-            chosenDisplay,
-            AssertionDescription,
-            scores,
-            failureReason);
+        return results;
     }
 
-    protected abstract Card[] GetCardsInHand();
+    protected static IReadOnlyList<CallTrumpTestCase> GenerateAllSuitVariants(
+        string baseName,
+        Func<Suit, Card[]> buildHand,
+        Func<Suit, Card> buildUpCard,
+        CallTrumpDecision[] validDecisions)
+    {
+        return [.. Enum.GetValues<Suit>()
+            .Select(suit => new CallTrumpTestCase(
+                $"{baseName} ({suit})",
+                buildHand(suit),
+                buildUpCard(suit),
+                validDecisions))];
+    }
 
-    protected abstract Card GetUpCard();
+    protected virtual IReadOnlyList<CallTrumpTestCase> GetTestCases()
+    {
+        return [new(Name, GetCardsInHand(), GetUpCard(), GetValidDecisions())];
+    }
 
-    protected abstract CallTrumpDecision[] GetValidDecisions();
+    protected virtual Card[] GetCardsInHand()
+    {
+        throw new InvalidOperationException("Override GetTestCases() or GetCardsInHand()");
+    }
+
+    protected virtual Card GetUpCard()
+    {
+        throw new InvalidOperationException("Override GetTestCases() or GetUpCard()");
+    }
+
+    protected virtual CallTrumpDecision[] GetValidDecisions()
+    {
+        throw new InvalidOperationException("Override GetTestCases() or GetValidDecisions()");
+    }
 
     protected abstract bool IsExpectedChoice(CallTrumpDecision chosenDecision);
+
+    public record CallTrumpTestCase(string Label, Card[] CardsInHand, Card UpCard, CallTrumpDecision[] ValidDecisions);
 }

@@ -14,5 +14,5 @@ public interface IModelBehavioralTest
 
     string AssertionDescription { get; }
 
-    BehavioralTestResult Run(IPredictionEngineProvider engineProvider, string modelName);
+    IReadOnlyList<BehavioralTestResult> Run(IPredictionEngineProvider engineProvider, string modelName);
 }

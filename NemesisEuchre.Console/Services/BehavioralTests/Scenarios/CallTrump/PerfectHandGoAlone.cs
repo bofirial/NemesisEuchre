@@ -1,4 +1,5 @@
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
@@ -15,29 +16,24 @@ public class PerfectHandGoAlone(
 
     public override string AssertionDescription => "Should go alone";
 
-    protected override Card[] GetCardsInHand()
+    protected override IReadOnlyList<CallTrumpTestCase> GetTestCases()
     {
-        return [
-        new(Suit.Spades, Rank.Jack),
-        new(Suit.Clubs, Rank.Jack),
-        new(Suit.Spades, Rank.Ace),
-        new(Suit.Spades, Rank.King),
-        new(Suit.Spades, Rank.Queen),
-    ];
-    }
-
-    protected override Card GetUpCard()
-    {
-        return new(Suit.Spades, Rank.Ten);
-    }
-
-    protected override CallTrumpDecision[] GetValidDecisions()
-    {
-        return [
-        CallTrumpDecision.Pass,
-        CallTrumpDecision.OrderItUp,
-        CallTrumpDecision.OrderItUpAndGoAlone,
-    ];
+        return GenerateAllSuitVariants(
+            Name,
+            suit =>
+            [
+                new(suit, Rank.Jack),
+                new(suit.GetSameColorSuit(), Rank.Jack),
+                new(suit, Rank.Ace),
+                new(suit, Rank.King),
+                new(suit, Rank.Queen),
+            ],
+            suit => new Card(suit, Rank.Ten),
+            [
+                CallTrumpDecision.Pass,
+                CallTrumpDecision.OrderItUp,
+                CallTrumpDecision.OrderItUpAndGoAlone,
+            ]);
     }
 
     protected override bool IsExpectedChoice(CallTrumpDecision chosenDecision)
