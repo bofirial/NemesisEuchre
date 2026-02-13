@@ -54,6 +54,8 @@ public class TestResultsRenderer(IAnsiConsole console) : ITestResultsRenderer
             $"[{summaryColor}]Summary: {passed} passed, {failed} failed out of {suiteResult.Results.Count} tests[/]")));
 
         console.Write(Align.Center(new Markup($"[dim]Duration: {suiteResult.Duration.TotalSeconds:F1}s[/]")));
+
+        console.WriteLine();
     }
 
     private void RenderFailureDetails(BehavioralTestSuiteResult suiteResult)
