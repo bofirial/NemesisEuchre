@@ -15,7 +15,8 @@ namespace NemesisEuchre.Console.Commands;
 
 [CliCommand(
     Description = "Train ML models for Euchre decision making",
-    Parent = typeof(DefaultCommand))]
+    Parent = typeof(DefaultCommand),
+    Alias = "tr")]
 public class TrainCommand(
     ILogger<TrainCommand> logger,
     IAnsiConsole ansiConsole,
