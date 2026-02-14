@@ -1,5 +1,6 @@
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.DataAccess.Extensions;
+using NemesisEuchre.DataAccess.Models;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
@@ -8,12 +9,12 @@ namespace NemesisEuchre.DataAccess.Mappers;
 
 public interface IDealToEntityMapper
 {
-    DealEntity Map(Deal deal, int dealNumber, Dictionary<PlayerPosition, Player> gamePlayers, bool didTeam1WinGame, bool didTeam2WinGame);
+    DealEntity Map(Deal deal, int dealNumber, Dictionary<PlayerPosition, Player> gamePlayers, GameOutcomeContext gameOutcome);
 }
 
 public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntityMapper
 {
-    public DealEntity Map(Deal deal, int dealNumber, Dictionary<PlayerPosition, Player> gamePlayers, bool didTeam1WinGame, bool didTeam2WinGame)
+    public DealEntity Map(Deal deal, int dealNumber, Dictionary<PlayerPosition, Player> gamePlayers, GameOutcomeContext gameOutcome)
     {
         if (deal.DealNumber == 0)
         {
@@ -63,18 +64,18 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
                 PlayerPositionId = (int)v.PlayerPosition,
                 SuitId = (int)v.Suit,
             })],
-            Tricks = [.. deal.CompletedTricks.Select((trick, index) => trickMapper.Map(trick, index + 1, gamePlayers, didTeam1WinGame, didTeam2WinGame, deal.WinningTeam, deal.DealResult))],
+            Tricks = [.. deal.CompletedTricks.Select((trick, index) => trickMapper.Map(trick, index + 1, gamePlayers, gameOutcome, deal.WinningTeam, deal.DealResult))],
         };
 
-        MapCallTrumpDecisions(deal, dealEntity, gamePlayers, didTeam1WinGame, didTeam2WinGame);
-        MapDiscardCardDecisions(deal, dealEntity, gamePlayers, didTeam1WinGame, didTeam2WinGame);
+        MapCallTrumpDecisions(deal, dealEntity, gamePlayers, gameOutcome);
+        MapDiscardCardDecisions(deal, dealEntity, gamePlayers, gameOutcome);
 
         dealEntity.PlayCardDecisions = [.. dealEntity.Tricks.SelectMany(t => t.PlayCardDecisions)];
 
         return dealEntity;
     }
 
-    private static void MapCallTrumpDecisions(Deal deal, DealEntity dealEntity, Dictionary<PlayerPosition, Player> gamePlayers, bool didTeam1WinGame, bool didTeam2WinGame)
+    private static void MapCallTrumpDecisions(Deal deal, DealEntity dealEntity, Dictionary<PlayerPosition, Player> gamePlayers, GameOutcomeContext gameOutcome)
     {
         var didTeam1WinDeal = deal.WinningTeam == Team.Team1;
         var didTeam2WinDeal = deal.WinningTeam == Team.Team2;
@@ -84,7 +85,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
             var actorType = gamePlayers[decision.PlayerPosition].Actor.ActorType;
             var playerTeam = decision.PlayerPosition.GetTeam();
             var didTeamWinDeal = playerTeam == Team.Team1 ? didTeam1WinDeal : didTeam2WinDeal;
-            var didTeamWinGame = playerTeam == Team.Team1 ? didTeam1WinGame : didTeam2WinGame;
+            var didTeamWinGame = playerTeam == Team.Team1 ? gameOutcome.DidTeam1WinGame : gameOutcome.DidTeam2WinGame;
 
             return new CallTrumpDecisionEntity
             {
@@ -116,7 +117,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
         })];
     }
 
-    private static void MapDiscardCardDecisions(Deal deal, DealEntity dealEntity, Dictionary<PlayerPosition, Player> gamePlayers, bool didTeam1WinGame, bool didTeam2WinGame)
+    private static void MapDiscardCardDecisions(Deal deal, DealEntity dealEntity, Dictionary<PlayerPosition, Player> gamePlayers, GameOutcomeContext gameOutcome)
     {
         var didTeam1WinDeal = deal.WinningTeam == Team.Team1;
         var didTeam2WinDeal = deal.WinningTeam == Team.Team2;
@@ -126,7 +127,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
             var actorType = gamePlayers[decision.PlayerPosition].Actor.ActorType;
             var playerTeam = decision.PlayerPosition.GetTeam();
             var didTeamWinDeal = playerTeam == Team.Team1 ? didTeam1WinDeal : didTeam2WinDeal;
-            var didTeamWinGame = playerTeam == Team.Team1 ? didTeam1WinGame : didTeam2WinGame;
+            var didTeamWinGame = playerTeam == Team.Team1 ? gameOutcome.DidTeam1WinGame : gameOutcome.DidTeam2WinGame;
 
             return new DiscardCardDecisionEntity
             {

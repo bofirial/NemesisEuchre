@@ -3,6 +3,7 @@ using FluentAssertions;
 using Moq;
 
 using NemesisEuchre.DataAccess.Mappers;
+using NemesisEuchre.DataAccess.Models;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
@@ -27,7 +28,7 @@ public class DealToEntityMapperTests
         deal.KnownPlayerSuitVoids = [];
 
         var gamePlayers = CreateTestGamePlayers();
-        var entity = _mapper.Map(deal, 1, gamePlayers, false, false);
+        var entity = _mapper.Map(deal, 1, gamePlayers, GameOutcomeContext.None);
 
         entity.DealKnownPlayerSuitVoids.Should().BeEmpty();
     }
@@ -43,7 +44,7 @@ public class DealToEntityMapperTests
         ];
 
         var gamePlayers = CreateTestGamePlayers();
-        var entity = _mapper.Map(deal, 1, gamePlayers, false, false);
+        var entity = _mapper.Map(deal, 1, gamePlayers, GameOutcomeContext.None);
 
         entity.DealKnownPlayerSuitVoids.Should().HaveCount(2);
         entity.DealKnownPlayerSuitVoids.Should().Contain(v =>
@@ -64,7 +65,7 @@ public class DealToEntityMapperTests
         ];
 
         var gamePlayers = CreateTestGamePlayers();
-        var entity = _mapper.Map(deal, 1, gamePlayers, false, false);
+        var entity = _mapper.Map(deal, 1, gamePlayers, GameOutcomeContext.None);
 
         entity.DealKnownPlayerSuitVoids.Should().HaveCount(3);
         entity.DealKnownPlayerSuitVoids.Should().Contain(v =>
@@ -98,7 +99,7 @@ public class DealToEntityMapperTests
         });
 
         var gamePlayers = CreateTestGamePlayers();
-        var entity = _mapper.Map(deal, 1, gamePlayers, false, false);
+        var entity = _mapper.Map(deal, 1, gamePlayers, GameOutcomeContext.None);
 
         entity.CallTrumpDecisions.Should().HaveCount(1);
         var decision = entity.CallTrumpDecisions.First();
@@ -133,7 +134,7 @@ public class DealToEntityMapperTests
         });
 
         var gamePlayers = CreateTestGamePlayers();
-        var entity = _mapper.Map(deal, 1, gamePlayers, false, false);
+        var entity = _mapper.Map(deal, 1, gamePlayers, GameOutcomeContext.None);
 
         entity.CallTrumpDecisions.First().PredictedPoints.Should().BeEmpty();
     }
@@ -163,7 +164,7 @@ public class DealToEntityMapperTests
         });
 
         var gamePlayers = CreateTestGamePlayers();
-        var entity = _mapper.Map(deal, 1, gamePlayers, false, false);
+        var entity = _mapper.Map(deal, 1, gamePlayers, GameOutcomeContext.None);
 
         entity.DiscardCardDecisions.Should().HaveCount(1);
         var decision = entity.DiscardCardDecisions.First();
@@ -193,7 +194,7 @@ public class DealToEntityMapperTests
         });
 
         var gamePlayers = CreateTestGamePlayers();
-        var entity = _mapper.Map(deal, 1, gamePlayers, false, false);
+        var entity = _mapper.Map(deal, 1, gamePlayers, GameOutcomeContext.None);
 
         entity.DiscardCardDecisions.First().PredictedPoints.Should().BeEmpty();
     }
@@ -205,7 +206,7 @@ public class DealToEntityMapperTests
         deal.Deck.AddRange([new Card(Suit.Hearts, Rank.Nine), new Card(Suit.Spades, Rank.Ace)]);
 
         var gamePlayers = CreateTestGamePlayers();
-        var entity = _mapper.Map(deal, 1, gamePlayers, false, false);
+        var entity = _mapper.Map(deal, 1, gamePlayers, GameOutcomeContext.None);
 
         entity.DealDeckCards.Should().HaveCount(2);
     }

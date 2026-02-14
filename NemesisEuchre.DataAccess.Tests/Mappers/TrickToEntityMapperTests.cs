@@ -1,6 +1,7 @@
 using FluentAssertions;
 
 using NemesisEuchre.DataAccess.Mappers;
+using NemesisEuchre.DataAccess.Models;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 
@@ -15,7 +16,7 @@ public class TrickToEntityMapperTests
         var trick = CreateSampleTrick();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 3, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+        var entity = mapper.Map(trick, trickNumber: 3, gamePlayers, new GameOutcomeContext(false, false), dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         entity.TrickNumber.Should().Be(3);
         entity.LeadPlayerPositionId.Should().Be((int)PlayerPosition.North);
@@ -32,7 +33,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, new GameOutcomeContext(false, false), dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         entity.PlayCardDecisions.Should().NotBeNull();
         entity.PlayCardDecisions.Should().HaveCount(4);
@@ -45,7 +46,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: true, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, new GameOutcomeContext(true, false), dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
         decision.CardsInHand.Should().NotBeEmpty();
@@ -63,7 +64,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, new GameOutcomeContext(false, false), dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var northDecision = entity.PlayCardDecisions[0];
         northDecision.LeadRelativePlayerPositionId.Should().Be((int)RelativePlayerPosition.Self);
@@ -79,7 +80,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, new GameOutcomeContext(false, false), dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
         decision.LeadRelativeSuitId.Should().Be((int)RelativeSuit.Trump);
@@ -92,7 +93,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, new GameOutcomeContext(false, false), dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
         decision.CardsInHand.Should().NotBeEmpty();
@@ -111,7 +112,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, new GameOutcomeContext(false, false), dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
         decision.PlayedCards.Should().NotBeEmpty();
@@ -129,7 +130,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: true, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, new GameOutcomeContext(true, false), dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         entity.PlayCardDecisions.Should().HaveCount(4);
 
@@ -152,7 +153,7 @@ public class TrickToEntityMapperTests
         trick.WinningPosition = PlayerPosition.East;
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: true, dealWinningTeam: Team.Team2, dealResult: DealResult.WonStandardBid);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, new GameOutcomeContext(false, true), dealWinningTeam: Team.Team2, dealResult: DealResult.WonStandardBid);
 
         entity.PlayCardDecisions.Should().HaveCount(4);
 
@@ -179,7 +180,7 @@ public class TrickToEntityMapperTests
             { PlayerPosition.West, new Player { Position = PlayerPosition.West, Actor = new Actor(ActorType.Chaos, null) } },
         };
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, new GameOutcomeContext(false, false), dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decisions = entity.PlayCardDecisions.ToList();
         foreach (var decision in decisions)
@@ -199,7 +200,7 @@ public class TrickToEntityMapperTests
         var trick = CreateTrickWithDecisions();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, new GameOutcomeContext(false, false), dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         var decision = entity.PlayCardDecisions[0];
         decision.PredictedPoints.Should().HaveCount(2);
@@ -219,7 +220,7 @@ public class TrickToEntityMapperTests
 
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, new GameOutcomeContext(false, false), dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         entity.PlayCardDecisions.Should().AllSatisfy(d => d.PredictedPoints.Should().BeEmpty());
     }
@@ -231,7 +232,7 @@ public class TrickToEntityMapperTests
         var trick = CreateSampleTrick();
         var gamePlayers = CreateSamplePlayers();
 
-        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, didTeam1WinGame: false, didTeam2WinGame: false, dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
+        var entity = mapper.Map(trick, trickNumber: 1, gamePlayers, new GameOutcomeContext(false, false), dealWinningTeam: Team.Team1, dealResult: DealResult.WonStandardBid);
 
         entity.TrickCardsPlayed.Should().HaveCount(2);
         entity.TrickCardsPlayed.Should().Contain(c =>

@@ -1,5 +1,5 @@
 using NemesisEuchre.DataAccess.Entities;
-using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.DataAccess.Models;
 using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.DataAccess.Mappers;
@@ -13,8 +13,7 @@ public class GameToEntityMapper(IDealToEntityMapper dealMapper) : IGameToEntityM
 {
     public GameEntity Map(Game game)
     {
-        var didTeam1WinGame = game.WinningTeam == Team.Team1;
-        var didTeam2WinGame = game.WinningTeam == Team.Team2;
+        var gameOutcome = GameOutcomeContext.From(game);
 
         return new GameEntity
         {
@@ -28,7 +27,7 @@ public class GameToEntityMapper(IDealToEntityMapper dealMapper) : IGameToEntityM
                 PlayerPositionId = (int)kvp.Key,
                 ActorTypeId = (int)kvp.Value.Actor.ActorType,
             })],
-            Deals = [.. game.CompletedDeals.Select((deal, index) => dealMapper.Map(deal, index + 1, game.Players, didTeam1WinGame, didTeam2WinGame))],
+            Deals = [.. game.CompletedDeals.Select((deal, index) => dealMapper.Map(deal, index + 1, game.Players, gameOutcome))],
         };
     }
 }
