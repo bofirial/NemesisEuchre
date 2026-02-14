@@ -135,11 +135,8 @@ public class TrainingDataAccumulator(
 
         onStatusUpdate?.Invoke("Cleaning up temporary files...");
         var chunkDir = GetChunkDirectory(outputPath, generationName);
-        if (Directory.Exists(chunkDir))
-        {
-            Directory.Delete(chunkDir, true);
-            LoggerMessages.LogIdvChunkCleanup(logger, chunkDir);
-        }
+        CleanupChunkDirectory(chunkDir);
+        LoggerMessages.LogIdvChunkCleanup(logger, chunkDir);
 
         var parentChunkDir = Path.Combine(outputPath, "_chunks");
         if (Directory.Exists(parentChunkDir) && Directory.GetDirectories(parentChunkDir).Length == 0)
@@ -148,6 +145,27 @@ public class TrainingDataAccumulator(
         }
 
         _savedGenerationNames.Add(generationName);
+    }
+
+    private static void CleanupChunkDirectory(string chunkDir)
+    {
+        if (!Directory.Exists(chunkDir))
+        {
+            return;
+        }
+
+        try
+        {
+            Directory.Delete(chunkDir, true);
+        }
+        catch (IOException)
+        {
+            // ML.NET's BinaryLoader holds file handles until GC collects it
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            Thread.Sleep(100);
+            Directory.Delete(chunkDir, true);
+        }
     }
 
     private static string GetChunkDirectory(string outputPath, string generationName)
