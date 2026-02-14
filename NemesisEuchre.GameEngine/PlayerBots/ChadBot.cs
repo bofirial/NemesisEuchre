@@ -17,13 +17,10 @@ public class ChadBot(IRandomNumberGenerator random) : BotBase(random)
         Card upCard,
         CallTrumpDecision[] validCallTrumpDecisions)
     {
-        return Task.FromResult(new CallTrumpDecisionContext()
-        {
-            ChosenCallTrumpDecision = validCallTrumpDecisions.Contains(CallTrumpDecision.Pass)
-                ? CallTrumpDecision.OrderItUpAndGoAlone
-                : SelectRandom(validCallTrumpDecisions),
-            DecisionPredictedPoints = validCallTrumpDecisions.ToDictionary(d => d, _ => 0f),
-        });
+        var chosenDecision = validCallTrumpDecisions.Contains(CallTrumpDecision.Pass)
+            ? CallTrumpDecision.OrderItUpAndGoAlone
+            : SelectRandom(validCallTrumpDecisions);
+        return CreateCallTrumpDecisionAsync(chosenDecision, validCallTrumpDecisions);
     }
 
     public override Task<RelativeCardDecisionContext> DiscardCardAsync(
@@ -34,17 +31,10 @@ public class ChadBot(IRandomNumberGenerator random) : BotBase(random)
         bool callingPlayerGoingAlone,
         RelativeCard[] validCardsToDiscard)
     {
-        var nonTrumpCards = validCardsToDiscard
-            .Where(card => card.Suit != RelativeSuit.Trump)
-            .ToArray();
-
-        return Task.FromResult(new RelativeCardDecisionContext()
-        {
-            ChosenCard = nonTrumpCards.Length > 0
-            ? nonTrumpCards.OrderBy(card => card.Rank).First()
-            : validCardsToDiscard.OrderBy(card => card.Rank).First(),
-            DecisionPredictedPoints = validCardsToDiscard.ToDictionary(d => d, _ => 0f),
-        });
+        var chosenCard = SelectLowestNonTrumpOr(
+            validCardsToDiscard,
+            cards => cards.OrderBy(c => c.Rank).First());
+        return CreateCardDecisionAsync(chosenCard, validCardsToDiscard);
     }
 
     public override Task<RelativeCardDecisionContext> PlayCardAsync(
@@ -66,16 +56,9 @@ public class ChadBot(IRandomNumberGenerator random) : BotBase(random)
         short opponentsWonTricks,
         RelativeCard[] validCardsToPlay)
     {
-        var trumpCards = validCardsToPlay
-            .Where(card => card.Suit == RelativeSuit.Trump)
-            .ToArray();
-
-        return Task.FromResult(new RelativeCardDecisionContext()
-        {
-            ChosenCard = trumpCards.Length > 0
-            ? trumpCards.OrderByDescending(card => card.Rank).First()
-            : validCardsToPlay.OrderByDescending(card => card.Rank).First(),
-            DecisionPredictedPoints = validCardsToPlay.ToDictionary(d => d, _ => 0f),
-        });
+        var chosenCard = SelectHighestTrumpOr(
+            validCardsToPlay,
+            cards => cards.OrderByDescending(c => c.Rank).First());
+        return CreateCardDecisionAsync(chosenCard, validCardsToPlay);
     }
 }

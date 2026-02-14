@@ -174,6 +174,48 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         };
     }
 
+    protected static Task<RelativeCardDecisionContext> CreateCardDecisionAsync(
+        RelativeCard chosenCard,
+        RelativeCard[] validCards)
+    {
+        return Task.FromResult(new RelativeCardDecisionContext()
+        {
+            ChosenCard = chosenCard,
+            DecisionPredictedPoints = validCards.ToDictionary(d => d, _ => 0f),
+        });
+    }
+
+    protected static Task<CallTrumpDecisionContext> CreateCallTrumpDecisionAsync(
+        CallTrumpDecision chosenDecision,
+        CallTrumpDecision[] validDecisions)
+    {
+        return Task.FromResult(new CallTrumpDecisionContext()
+        {
+            ChosenCallTrumpDecision = chosenDecision,
+            DecisionPredictedPoints = validDecisions.ToDictionary(d => d, _ => 0f),
+        });
+    }
+
+    protected static RelativeCard SelectLowestNonTrumpOr(
+        RelativeCard[] cards,
+        Func<RelativeCard[], RelativeCard> fallback)
+    {
+        var nonTrumpCards = cards.Where(c => c.Suit != RelativeSuit.Trump).ToArray();
+        return nonTrumpCards.Length > 0
+            ? nonTrumpCards.OrderBy(c => c.Rank).First()
+            : fallback(cards);
+    }
+
+    protected static RelativeCard SelectHighestTrumpOr(
+        RelativeCard[] cards,
+        Func<RelativeCard[], RelativeCard> fallback)
+    {
+        var trumpCards = cards.Where(c => c.Suit == RelativeSuit.Trump).ToArray();
+        return trumpCards.Length > 0
+            ? trumpCards.OrderByDescending(c => c.Rank).First()
+            : fallback(cards);
+    }
+
     protected T SelectRandom<T>(T[] options)
     {
         return options.Length == 0

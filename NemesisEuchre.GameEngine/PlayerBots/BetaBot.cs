@@ -17,13 +17,10 @@ public class BetaBot(IRandomNumberGenerator random) : BotBase(random)
         Card upCard,
         CallTrumpDecision[] validCallTrumpDecisions)
     {
-        return Task.FromResult(new CallTrumpDecisionContext()
-        {
-            ChosenCallTrumpDecision = validCallTrumpDecisions.Contains(CallTrumpDecision.Pass)
-                ? CallTrumpDecision.Pass
-                : SelectRandom(validCallTrumpDecisions),
-            DecisionPredictedPoints = validCallTrumpDecisions.ToDictionary(d => d, _ => 0f),
-        });
+        var chosenDecision = validCallTrumpDecisions.Contains(CallTrumpDecision.Pass)
+            ? CallTrumpDecision.Pass
+            : SelectRandom(validCallTrumpDecisions);
+        return CreateCallTrumpDecisionAsync(chosenDecision, validCallTrumpDecisions);
     }
 
     public override Task<RelativeCardDecisionContext> DiscardCardAsync(
@@ -34,11 +31,10 @@ public class BetaBot(IRandomNumberGenerator random) : BotBase(random)
         bool callingPlayerGoingAlone,
         RelativeCard[] validCardsToDiscard)
     {
-        return Task.FromResult(new RelativeCardDecisionContext()
-        {
-            ChosenCard = SelectLowestNonTrumpCardOrLowest(validCardsToDiscard),
-            DecisionPredictedPoints = validCardsToDiscard.ToDictionary(d => d, _ => 0f),
-        });
+        var chosenCard = SelectLowestNonTrumpOr(
+            validCardsToDiscard,
+            cards => cards.OrderBy(c => c.Rank).First());
+        return CreateCardDecisionAsync(chosenCard, validCardsToDiscard);
     }
 
     public override Task<RelativeCardDecisionContext> PlayCardAsync(
@@ -60,26 +56,9 @@ public class BetaBot(IRandomNumberGenerator random) : BotBase(random)
         short opponentsWonTricks,
         RelativeCard[] validCardsToPlay)
     {
-        return Task.FromResult(new RelativeCardDecisionContext()
-        {
-            ChosenCard = SelectLowestNonTrumpCardOrLowest(validCardsToPlay),
-            DecisionPredictedPoints = validCardsToPlay.ToDictionary(d => d, _ => 0f),
-        });
-    }
-
-    private static RelativeCard SelectLowestNonTrumpCardOrLowest(RelativeCard[] cards)
-    {
-        var nonTrumpCards = cards
-            .Where(card => card.Suit != RelativeSuit.Trump)
-            .ToArray();
-
-        return nonTrumpCards.Length > 0
-            ? SelectLowestCard(nonTrumpCards)
-            : SelectLowestCard(cards);
-    }
-
-    private static RelativeCard SelectLowestCard(RelativeCard[] cards)
-    {
-        return cards.OrderBy(card => card.Rank).First();
+        var chosenCard = SelectLowestNonTrumpOr(
+            validCardsToPlay,
+            cards => cards.OrderBy(c => c.Rank).First());
+        return CreateCardDecisionAsync(chosenCard, validCardsToPlay);
     }
 }

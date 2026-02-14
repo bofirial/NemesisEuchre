@@ -17,11 +17,7 @@ public class ChaosBot(IRandomNumberGenerator random) : BotBase(random)
         Card upCard,
         CallTrumpDecision[] validCallTrumpDecisions)
     {
-        return Task.FromResult(new CallTrumpDecisionContext()
-        {
-            ChosenCallTrumpDecision = SelectRandom(validCallTrumpDecisions),
-            DecisionPredictedPoints = validCallTrumpDecisions.ToDictionary(d => d, _ => 0f),
-        });
+        return CreateCallTrumpDecisionAsync(SelectRandom(validCallTrumpDecisions), validCallTrumpDecisions);
     }
 
     public override Task<RelativeCardDecisionContext> DiscardCardAsync(
@@ -32,11 +28,7 @@ public class ChaosBot(IRandomNumberGenerator random) : BotBase(random)
         bool callingPlayerGoingAlone,
         RelativeCard[] validCardsToDiscard)
     {
-        return Task.FromResult(new RelativeCardDecisionContext()
-        {
-            ChosenCard = SelectRandom(validCardsToDiscard),
-            DecisionPredictedPoints = validCardsToDiscard.ToDictionary(d => d, _ => 0f),
-        });
+        return CreateCardDecisionAsync(SelectRandom(validCardsToDiscard), validCardsToDiscard);
     }
 
     public override Task<RelativeCardDecisionContext> PlayCardAsync(
@@ -58,10 +50,6 @@ public class ChaosBot(IRandomNumberGenerator random) : BotBase(random)
         short opponentsWonTricks,
         RelativeCard[] validCardsToPlay)
     {
-        return Task.FromResult(new RelativeCardDecisionContext()
-        {
-            ChosenCard = SelectRandom(validCardsToPlay),
-            DecisionPredictedPoints = validCardsToPlay.ToDictionary(d => d, _ => 0f),
-        });
+        return CreateCardDecisionAsync(SelectRandom(validCardsToPlay), validCardsToPlay);
     }
 }
