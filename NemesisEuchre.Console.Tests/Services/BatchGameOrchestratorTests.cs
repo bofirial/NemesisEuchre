@@ -29,6 +29,7 @@ public class BatchGameOrchestratorTests
     private readonly Mock<ILogger<BatchGameOrchestrator>> _loggerMock;
     private readonly Mock<IParallelismCoordinator> _parallelismCoordinatorMock;
     private readonly Mock<ISubBatchStrategy> _subBatchStrategyMock;
+    private readonly Mock<IBatchExecutionFacade> _executionFacadeMock;
     private readonly Mock<IPersistenceCoordinator> _persistenceCoordinatorMock;
     private readonly Mock<ITrainingDataAccumulator> _trainingDataAccumulatorMock;
     private readonly BatchGameOrchestrator _sut;
@@ -75,6 +76,12 @@ public class BatchGameOrchestratorTests
         _parallelismCoordinatorMock.Setup(x => x.CalculateEffectiveParallelism())
             .Returns(4);
 
+        _executionFacadeMock = new Mock<IBatchExecutionFacade>();
+        _executionFacadeMock.Setup(x => x.CalculateEffectiveParallelism())
+            .Returns(4);
+        _executionFacadeMock.Setup(x => x.ShouldUseSubBatches(It.IsAny<int>(), It.IsAny<int>()))
+            .Returns((int games, int max) => _subBatchStrategyMock.Object.ShouldUseSubBatches(games, max));
+
         _persistenceCoordinatorMock.Setup(x => x.ConsumeAndPersistAsync(
             It.IsAny<BatchExecutionState>(),
             It.IsAny<GamePersistenceOptions?>(),
@@ -108,8 +115,7 @@ public class BatchGameOrchestratorTests
 
         _sut = new BatchGameOrchestrator(
             _serviceScopeFactoryMock.Object,
-            _parallelismCoordinatorMock.Object,
-            _subBatchStrategyMock.Object,
+            _executionFacadeMock.Object,
             _persistenceCoordinatorMock.Object,
             _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
@@ -214,10 +220,10 @@ public class BatchGameOrchestratorTests
         });
         var realParallelismCoordinator = new ParallelismCoordinator(parallelismOptions.Object);
 
+        var executionFacade = new BatchExecutionFacade(realParallelismCoordinator, _subBatchStrategyMock.Object);
         var sut = new BatchGameOrchestrator(
             _serviceScopeFactoryMock.Object,
-            realParallelismCoordinator,
-            _subBatchStrategyMock.Object,
+            executionFacade,
             _persistenceCoordinatorMock.Object,
             _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
@@ -320,10 +326,10 @@ public class BatchGameOrchestratorTests
         });
         var realParallelismCoordinator = new ParallelismCoordinator(parallelismOptions.Object);
 
+        var executionFacade = new BatchExecutionFacade(realParallelismCoordinator, _subBatchStrategyMock.Object);
         var sut = new BatchGameOrchestrator(
             _serviceScopeFactoryMock.Object,
-            realParallelismCoordinator,
-            _subBatchStrategyMock.Object,
+            executionFacade,
             _persistenceCoordinatorMock.Object,
             _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
@@ -361,10 +367,10 @@ public class BatchGameOrchestratorTests
     [Fact]
     public Task RunBatchAsync_UsesDefaultOptionsWhenNotConfigured()
     {
+        var executionFacade = new BatchExecutionFacade(_parallelismCoordinatorMock.Object, _subBatchStrategyMock.Object);
         var sut = new BatchGameOrchestrator(
             _serviceScopeFactoryMock.Object,
-            _parallelismCoordinatorMock.Object,
-            _subBatchStrategyMock.Object,
+            executionFacade,
             _persistenceCoordinatorMock.Object,
             _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
@@ -496,10 +502,10 @@ public class BatchGameOrchestratorTests
             Options.Create(new PersistenceOptions { BatchSize = 100 }),
             persistenceLogger.Object);
 
+        var executionFacade = new BatchExecutionFacade(_parallelismCoordinatorMock.Object, _subBatchStrategyMock.Object);
         var sut = new BatchGameOrchestrator(
             _serviceScopeFactoryMock.Object,
-            _parallelismCoordinatorMock.Object,
-            _subBatchStrategyMock.Object,
+            executionFacade,
             realPersistenceCoordinator,
             _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,

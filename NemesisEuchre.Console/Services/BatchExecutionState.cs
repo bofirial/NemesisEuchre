@@ -1,5 +1,7 @@
 using System.Threading.Channels;
 
+using NemesisEuchre.Console.Models;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 
 namespace NemesisEuchre.Console.Services;
@@ -68,6 +70,60 @@ public sealed class BatchExecutionState(int channelCapacity) : IDisposable
         {
             _semaphore.Release();
         }
+    }
+
+    public Task RecordGameCompletionAsync(
+        Game game,
+        Func<BatchProgressSnapshot> snapshotFactory,
+        Action<BatchProgressSnapshot>? progressReporter,
+        CancellationToken cancellationToken = default)
+    {
+        return ExecuteWithLockAsync(
+            () =>
+            {
+                if (game.WinningTeam == Team.Team1)
+                {
+                    Team1Wins++;
+                }
+                else if (game.WinningTeam == Team.Team2)
+                {
+                    Team2Wins++;
+                }
+
+                TotalDeals += game.CompletedDeals.Count;
+                TotalTricks += game.CompletedDeals.Sum(d => d.CompletedTricks.Count);
+                TotalCallTrumpDecisions += game.CompletedDeals.Sum(d => d.CallTrumpDecisions.Count);
+                TotalDiscardCardDecisions += game.CompletedDeals.Sum(d => d.DiscardCardDecisions.Count);
+                TotalPlayCardDecisions += game.CompletedDeals.Sum(d => d.CompletedTricks.Sum(t => t.PlayCardDecisions.Count));
+                CompletedGames++;
+                progressReporter?.Invoke(snapshotFactory());
+            },
+            cancellationToken);
+    }
+
+    public Task RecordGameFailureAsync(
+        Func<BatchProgressSnapshot> snapshotFactory,
+        Action<BatchProgressSnapshot>? progressReporter,
+        CancellationToken cancellationToken = default)
+    {
+        return ExecuteWithLockAsync(
+            () =>
+            {
+                FailedGames++;
+                CompletedGames++;
+                progressReporter?.Invoke(snapshotFactory());
+            },
+            cancellationToken);
+    }
+
+    public async Task WriteGameAsync(Game game, CancellationToken cancellationToken = default)
+    {
+        await Writer.WriteAsync(game, cancellationToken).ConfigureAwait(false);
+    }
+
+    public void CompleteWriting()
+    {
+        Writer.Complete();
     }
 
     public void Dispose()

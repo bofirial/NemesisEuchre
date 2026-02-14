@@ -26,8 +26,7 @@ public interface IBatchGameOrchestrator
 
 public class BatchGameOrchestrator(
     IServiceScopeFactory serviceScopeFactory,
-    IParallelismCoordinator parallelismCoordinator,
-    ISubBatchStrategy subBatchStrategy,
+    IBatchExecutionFacade executionFacade,
     IPersistenceCoordinator persistenceCoordinator,
     ITrainingDataAccumulator trainingDataAccumulator,
     IOptions<PersistenceOptions> persistenceOptions,
@@ -48,7 +47,7 @@ public class BatchGameOrchestrator(
             throw new ArgumentOutOfRangeException(nameof(numberOfGames), "Number of games must be greater than zero.");
         }
 
-        if (subBatchStrategy.ShouldUseSubBatches(numberOfGames, BatchProcessingConstants.MaxGamesPerSubBatch))
+        if (executionFacade.ShouldUseSubBatches(numberOfGames, BatchProcessingConstants.MaxGamesPerSubBatch))
         {
             return await RunBatchesInSubBatchesAsync(numberOfGames, BatchProcessingConstants.MaxGamesPerSubBatch, progressReporter, persistenceOptions, cancellationToken, team1Actors, team2Actors).ConfigureAwait(false);
         }
@@ -106,11 +105,6 @@ public class BatchGameOrchestrator(
         state.TotalPlayCardDecisions);
     }
 
-    private static int GetPlayCardDecisions(GameEngine.Models.Deal d)
-    {
-        return d.CompletedTricks.Sum(t => t.PlayCardDecisions.Count);
-    }
-
     private void FinalizeIdv(GamePersistenceOptions? persistenceOptions, BatchExecutionState state, IBatchProgressReporter? progressReporter = null)
     {
         if (persistenceOptions?.IdvGenerationName != null)
@@ -139,7 +133,7 @@ public class BatchGameOrchestrator(
 
         var consumerTask = persistenceCoordinator.ConsumeAndPersistAsync(state, persistenceOptions, cancellationToken);
 
-        var effectiveParallelism = parallelismCoordinator.CalculateEffectiveParallelism();
+        var effectiveParallelism = executionFacade.CalculateEffectiveParallelism();
         var parallelOptions = new ParallelOptions
         {
             MaxDegreeOfParallelism = effectiveParallelism,
@@ -151,7 +145,7 @@ public class BatchGameOrchestrator(
             parallelOptions,
             async (gameNumber, ct) => await RunSingleGameAsync(gameNumber, state, progressReporter, team1Actors, team2Actors, ct).ConfigureAwait(false)).ConfigureAwait(false);
 
-        state.Writer.Complete();
+        state.CompleteWriting();
         await consumerTask.ConfigureAwait(false);
 
         return (AggregateResults(numberOfGames, state, TimeSpan.Zero), state);
@@ -269,40 +263,29 @@ public class BatchGameOrchestrator(
             var gameOrchestrator = scope.ServiceProvider.GetRequiredService<IGameOrchestrator>();
             var game = await gameOrchestrator.OrchestrateGameAsync(team1Actors, team2Actors).ConfigureAwait(false);
 
-            await state.ExecuteWithLockAsync(
-                () =>
-                {
-                    if (game.WinningTeam == Team.Team1)
-                    {
-                        state.Team1Wins++;
-                    }
-                    else if (game.WinningTeam == Team.Team2)
-                    {
-                        state.Team2Wins++;
-                    }
+            Action<BatchProgressSnapshot>? reportProgress = progressReporter is not null
+                ? progressReporter.ReportProgress
+                : null;
 
-                    state.TotalDeals += game.CompletedDeals.Count;
-                    state.TotalTricks += game.CompletedDeals.Sum(d => d.CompletedTricks.Count);
-                    state.TotalCallTrumpDecisions += game.CompletedDeals.Sum(d => d.CallTrumpDecisions.Count);
-                    state.TotalDiscardCardDecisions += game.CompletedDeals.Sum(d => d.DiscardCardDecisions.Count);
-                    state.TotalPlayCardDecisions += game.CompletedDeals.Sum(d => GetPlayCardDecisions(d));
-                    state.CompletedGames++;
-                    progressReporter?.ReportProgress(CreateSnapshot(state));
-                },
+            await state.RecordGameCompletionAsync(
+                game,
+                () => CreateSnapshot(state),
+                reportProgress,
                 cancellationToken).ConfigureAwait(false);
 
-            await state.Writer.WriteAsync(game, cancellationToken).ConfigureAwait(false);
+            await state.WriteGameAsync(game, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             Foundation.LoggerMessages.LogGameFailed(logger, gameNumber, ex);
-            await state.ExecuteWithLockAsync(
-                () =>
-                    {
-                        state.FailedGames++;
-                        state.CompletedGames++;
-                        progressReporter?.ReportProgress(CreateSnapshot(state));
-                    },
+
+            Action<BatchProgressSnapshot>? reportProgress = progressReporter is not null
+                ? progressReporter.ReportProgress
+                : null;
+
+            await state.RecordGameFailureAsync(
+                () => CreateSnapshot(state),
+                reportProgress,
                 cancellationToken).ConfigureAwait(false);
         }
     }
