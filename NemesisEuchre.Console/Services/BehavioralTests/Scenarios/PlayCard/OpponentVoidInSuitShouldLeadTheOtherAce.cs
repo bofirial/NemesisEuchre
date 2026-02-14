@@ -17,6 +17,10 @@ public class OpponentVoidInSuitShouldLeadTheOtherAce(
 
     protected override short TrickNumber => 4;
 
+    protected override short WonTricks => 2;
+
+    protected override short OpponentsWonTricks => 1;
+
     protected override IReadOnlyList<PlayCardTestCase> GetTestCases()
     {
         return [
