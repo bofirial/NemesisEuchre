@@ -198,16 +198,7 @@ public class GameResultsRenderer(IAnsiConsole ansiConsole, ICallTrumpDecisionMap
 
     private static Table CreateStyledTable(string? title = null)
     {
-        var table = new Table()
-            .Border(TableBorder.Rounded)
-            .BorderColor(Color.Grey);
-
-        if (title is not null)
-        {
-            table.Title(title);
-        }
-
-        return table;
+        return RenderingUtilities.CreateStyledTable(title);
     }
 
     private static IRenderable[] GetTrickRowPreSpacers(Trick trick)

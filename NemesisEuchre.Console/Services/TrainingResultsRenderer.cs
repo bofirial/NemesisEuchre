@@ -61,9 +61,7 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
                 pathMarkup = "[dim]-[/]";
             }
 
-            var durationMarkup = result.Duration.HasValue
-                ? $"{result.Duration.Value.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)}"
-                : "[dim]-[/]";
+            var durationMarkup = RenderingUtilities.FormatNullableDuration(result.Duration);
 
             table.AddRow(
                 result.ModelType,
@@ -105,13 +103,9 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
                 _ => "[dim]-[/]",
             };
 
-            var maeDisplay = model.ValidationMae.HasValue
-                ? $"{model.ValidationMae.Value:F4}"
-                : "[dim]-[/]";
+            var maeDisplay = RenderingUtilities.FormatNullableMetric(model.ValidationMae);
 
-            var rSquaredDisplay = model.ValidationRSquared.HasValue
-                ? $"{model.ValidationRSquared.Value:F4}"
-                : "[dim]-[/]";
+            var rSquaredDisplay = RenderingUtilities.FormatNullableMetric(model.ValidationRSquared);
 
             var elapsedDisplay = model.Elapsed.TotalSeconds >= 0.1
                 ? model.Elapsed.Humanize(2, countEmptyUnits: true, minUnit: TimeUnit.Second)
@@ -133,8 +127,6 @@ public class TrainingResultsRenderer(IAnsiConsole console) : ITrainingResultsRen
 
     private static Table CreateStyledTable()
     {
-        return new Table()
-            .Border(TableBorder.Rounded)
-            .BorderColor(Color.Grey);
+        return RenderingUtilities.CreateStyledTable();
     }
 }

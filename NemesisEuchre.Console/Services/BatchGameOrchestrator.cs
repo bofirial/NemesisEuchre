@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using NemesisEuchre.Console.Constants;
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services.Orchestration;
 using NemesisEuchre.DataAccess.Options;
@@ -47,10 +48,9 @@ public class BatchGameOrchestrator(
             throw new ArgumentOutOfRangeException(nameof(numberOfGames), "Number of games must be greater than zero.");
         }
 
-        const int maxGamesPerSubBatch = 100_000;
-        if (subBatchStrategy.ShouldUseSubBatches(numberOfGames, maxGamesPerSubBatch))
+        if (subBatchStrategy.ShouldUseSubBatches(numberOfGames, BatchProcessingConstants.MaxGamesPerSubBatch))
         {
-            return await RunBatchesInSubBatchesAsync(numberOfGames, maxGamesPerSubBatch, progressReporter, persistenceOptions, cancellationToken, team1Actors, team2Actors).ConfigureAwait(false);
+            return await RunBatchesInSubBatchesAsync(numberOfGames, BatchProcessingConstants.MaxGamesPerSubBatch, progressReporter, persistenceOptions, cancellationToken, team1Actors, team2Actors).ConfigureAwait(false);
         }
 
         var stopwatch = Stopwatch.StartNew();
