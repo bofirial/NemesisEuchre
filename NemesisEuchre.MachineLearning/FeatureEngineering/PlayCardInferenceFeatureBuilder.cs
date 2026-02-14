@@ -49,7 +49,7 @@ public class PlayCardInferenceFeatureBuilder : IPlayCardInferenceFeatureBuilder
         RelativeCard[] validCardsToPlay,
         RelativeCard chosenCard)
     {
-        return PlayCardFeatureBuilder.BuildFeatures(
+        var context = new PlayCardFeatureBuilderContext(
             cardsInHand,
             validCardsToPlay,
             playedCards,
@@ -68,5 +68,7 @@ public class PlayCardInferenceFeatureBuilder : IPlayCardInferenceFeatureBuilder
             wonTricks,
             opponentsWonTricks,
             chosenCard);
+
+        return PlayCardFeatureBuilder.BuildFeatures(context);
     }
 }

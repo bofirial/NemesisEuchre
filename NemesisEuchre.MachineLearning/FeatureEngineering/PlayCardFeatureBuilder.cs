@@ -11,63 +11,27 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
 {
     private const int MaxCardsInHand = FeatureEngineeringConstants.MaxCardsInHand;
 
-    public static PlayCardTrainingData BuildFeatures(
-        RelativeCard[] cardsInHand,
-        RelativeCard[] validCards,
-        Dictionary<RelativePlayerPosition, RelativeCard> playedCards,
-        short teamScore,
-        short opponentScore,
-        RelativePlayerPosition leadPlayer,
-        RelativeSuit? leadSuit,
-        RelativePlayerPosition callingPlayer,
-        bool callingPlayerGoingAlone,
-        RelativePlayerPosition dealer,
-        RelativeCard? dealerPickedUpCard,
-        RelativePlayerSuitVoid[] knownPlayerSuitVoids,
-        RelativeCard[] cardsAccountedFor,
-        RelativePlayerPosition? winningTrickPlayer,
-        short trickNumber,
-        short wonTricks,
-        short opponentsWonTricks,
-        RelativeCard chosenCard)
+    public static PlayCardTrainingData BuildFeatures(PlayCardFeatureBuilderContext context)
     {
-        return BuildFeaturesFromContext(
-            cardsInHand,
-            validCards,
-            playedCards,
-            teamScore,
-            opponentScore,
-            leadPlayer,
-            leadSuit,
-            callingPlayer,
-            callingPlayerGoingAlone,
-            dealer,
-            dealerPickedUpCard,
-            knownPlayerSuitVoids,
-            cardsAccountedFor,
-            winningTrickPlayer,
-            trickNumber,
-            wonTricks,
-            opponentsWonTricks,
-            chosenCard);
+        return BuildFeaturesFromContext(context);
     }
 
     protected override PlayCardTrainingData BuildFeaturesCore(PlayCardDecisionEntity entity)
     {
-        var context = PlayCardFeatureContextBuilder.Build(entity);
+        var featureContext = PlayCardFeatureContextBuilder.Build(entity);
 
-        var chosenCardIndex = Array.FindIndex(context.CardsInHand, c => c == context.ChosenCard);
+        var chosenCardIndex = Array.FindIndex(featureContext.CardsInHand, c => c == featureContext.ChosenCard);
 
         if (chosenCardIndex == -1)
         {
             throw new InvalidOperationException(
-                $"Chosen card {context.ChosenCard.Rank} of {context.ChosenCard.Suit} not found in hand");
+                $"Chosen card {featureContext.ChosenCard.Rank} of {featureContext.ChosenCard.Suit} not found in hand");
         }
 
-        var trainingData = BuildFeaturesFromContext(
-            context.CardsInHand,
-            context.ValidCards,
-            context.PlayedCards,
+        var builderContext = new PlayCardFeatureBuilderContext(
+            featureContext.CardsInHand,
+            featureContext.ValidCards,
+            featureContext.PlayedCards,
             entity.TeamScore,
             entity.OpponentScore,
             (RelativePlayerPosition)entity.LeadRelativePlayerPositionId,
@@ -75,14 +39,16 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
             (RelativePlayerPosition)entity.CallingRelativePlayerPositionId,
             entity.CallingPlayerGoingAlone,
             (RelativePlayerPosition)entity.DealerRelativePlayerPositionId,
-            context.DealerPickedUpCard,
-            context.KnownPlayerSuitVoids,
-            context.CardsAccountedFor,
+            featureContext.DealerPickedUpCard,
+            featureContext.KnownPlayerSuitVoids,
+            featureContext.CardsAccountedFor,
             entity.WinningTrickRelativePlayerPositionId.HasValue ? (RelativePlayerPosition)entity.WinningTrickRelativePlayerPositionId.Value : null,
             entity.TrickNumber,
             entity.WonTricks,
             entity.OpponentsWonTricks,
-            context.ChosenCard);
+            featureContext.ChosenCard);
+
+        var trainingData = BuildFeaturesFromContext(builderContext);
 
         trainingData.ExpectedDealPoints = entity.RelativeDealPoints ?? throw new InvalidOperationException(
             "RelativeDealPoints is required for regression training");
@@ -98,26 +64,27 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
         }
     }
 
-    private static PlayCardTrainingData BuildFeaturesFromContext(
-        RelativeCard[] cardsInHand,
-        RelativeCard[] validCards,
-        Dictionary<RelativePlayerPosition, RelativeCard> playedCards,
-        short teamScore,
-        short opponentScore,
-        RelativePlayerPosition leadPlayer,
-        RelativeSuit? leadSuit,
-        RelativePlayerPosition callingPlayer,
-        bool callingPlayerGoingAlone,
-        RelativePlayerPosition dealer,
-        RelativeCard? dealerPickedUpCard,
-        RelativePlayerSuitVoid[] knownPlayerSuitVoids,
-        RelativeCard[] cardsAccountedFor,
-        RelativePlayerPosition? winningTrickPlayer,
-        short trickNumber,
-        short wonTricks,
-        short opponentsWonTricks,
-        RelativeCard chosenCard)
+    private static PlayCardTrainingData BuildFeaturesFromContext(PlayCardFeatureBuilderContext context)
     {
+        var cardsInHand = context.CardsInHand;
+        var validCards = context.ValidCards;
+        var playedCards = context.PlayedCards;
+        var teamScore = context.TeamScore;
+        var opponentScore = context.OpponentScore;
+        var leadPlayer = context.LeadPlayer;
+        var leadSuit = context.LeadSuit;
+        var callingPlayer = context.CallingPlayer;
+        var callingPlayerGoingAlone = context.CallingPlayerGoingAlone;
+        var dealer = context.Dealer;
+        var dealerPickedUpCard = context.DealerPickedUpCard;
+        var knownPlayerSuitVoids = context.KnownPlayerSuitVoids;
+        var cardsAccountedFor = context.CardsAccountedFor;
+        var winningTrickPlayer = context.WinningTrickPlayer;
+        var trickNumber = context.TrickNumber;
+        var wonTricks = context.WonTricks;
+        var opponentsWonTricks = context.OpponentsWonTricks;
+        var chosenCard = context.ChosenCard;
+
         var validityArray = GameEnginePoolManager.RentFloatArray(MaxCardsInHand);
         try
         {

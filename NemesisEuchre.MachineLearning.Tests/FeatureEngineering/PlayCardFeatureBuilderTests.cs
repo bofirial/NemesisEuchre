@@ -20,25 +20,26 @@ public class PlayCardFeatureBuilderTests
             new(Rank.Nine, RelativeSuit.Trump),
         };
 
-        var result = PlayCardFeatureBuilder.BuildFeatures(
-            cards,
-            validCards: cards,
-            playedCards: [],
-            teamScore: 3,
-            opponentScore: 5,
-            leadPlayer: RelativePlayerPosition.Self,
-            leadSuit: RelativeSuit.Trump,
-            callingPlayer: RelativePlayerPosition.Self,
-            callingPlayerGoingAlone: false,
-            dealer: RelativePlayerPosition.Partner,
-            dealerPickedUpCard: null,
-            knownPlayerSuitVoids: [],
-            cardsAccountedFor: [],
-            winningTrickPlayer: null,
-            trickNumber: 1,
-            wonTricks: 0,
-            opponentsWonTricks: 0,
-            chosenCard: cards[0]);
+        var context = new PlayCardFeatureBuilderContext(
+            CardsInHand: cards,
+            ValidCards: cards,
+            PlayedCards: [],
+            TeamScore: 3,
+            OpponentScore: 5,
+            LeadPlayer: RelativePlayerPosition.Self,
+            LeadSuit: RelativeSuit.Trump,
+            CallingPlayer: RelativePlayerPosition.Self,
+            CallingPlayerGoingAlone: false,
+            Dealer: RelativePlayerPosition.Partner,
+            DealerPickedUpCard: null,
+            KnownPlayerSuitVoids: [],
+            CardsAccountedFor: [],
+            WinningTrickPlayer: null,
+            TrickNumber: 1,
+            WonTricks: 0,
+            OpponentsWonTricks: 0,
+            ChosenCard: cards[0]);
+        var result = PlayCardFeatureBuilder.BuildFeatures(context);
 
         result.Card1Rank.Should().Be((float)Rank.Ace);
         result.Card1Suit.Should().Be((float)RelativeSuit.Trump);
@@ -62,25 +63,26 @@ public class PlayCardFeatureBuilderTests
             new(Rank.Queen, RelativeSuit.NonTrumpOppositeColor1),
         };
 
-        var result = PlayCardFeatureBuilder.BuildFeatures(
-            cards,
-            validCards: cards,
-            playedCards: [],
-            teamScore: 0,
-            opponentScore: 0,
-            leadPlayer: RelativePlayerPosition.Self,
-            leadSuit: null,
-            callingPlayer: RelativePlayerPosition.Self,
-            callingPlayerGoingAlone: false,
-            dealer: RelativePlayerPosition.Self,
-            dealerPickedUpCard: null,
-            knownPlayerSuitVoids: [],
-            cardsAccountedFor: [],
-            winningTrickPlayer: null,
-            trickNumber: 1,
-            wonTricks: 0,
-            opponentsWonTricks: 0,
-            chosenCard: cards[0]);
+        var context = new PlayCardFeatureBuilderContext(
+            CardsInHand: cards,
+            ValidCards: cards,
+            PlayedCards: [],
+            TeamScore: 0,
+            OpponentScore: 0,
+            LeadPlayer: RelativePlayerPosition.Self,
+            LeadSuit: null,
+            CallingPlayer: RelativePlayerPosition.Self,
+            CallingPlayerGoingAlone: false,
+            Dealer: RelativePlayerPosition.Self,
+            DealerPickedUpCard: null,
+            KnownPlayerSuitVoids: [],
+            CardsAccountedFor: [],
+            WinningTrickPlayer: null,
+            TrickNumber: 1,
+            WonTricks: 0,
+            OpponentsWonTricks: 0,
+            ChosenCard: cards[0]);
+        var result = PlayCardFeatureBuilder.BuildFeatures(context);
 
         result.Card1Rank.Should().Be((float)Rank.Ace);
         result.Card2Rank.Should().Be((float)Rank.King);
@@ -104,25 +106,26 @@ public class PlayCardFeatureBuilderTests
         };
         var validCards = new[] { cards[0], cards[2], cards[4] };
 
-        var result = PlayCardFeatureBuilder.BuildFeatures(
-            cards,
-            validCards: validCards,
-            playedCards: [],
-            teamScore: 0,
-            opponentScore: 0,
-            leadPlayer: RelativePlayerPosition.Self,
-            leadSuit: RelativeSuit.Trump,
-            callingPlayer: RelativePlayerPosition.Self,
-            callingPlayerGoingAlone: false,
-            dealer: RelativePlayerPosition.Self,
-            dealerPickedUpCard: null,
-            knownPlayerSuitVoids: [],
-            cardsAccountedFor: [],
-            winningTrickPlayer: null,
-            trickNumber: 1,
-            wonTricks: 0,
-            opponentsWonTricks: 0,
-            chosenCard: cards[0]);
+        var context = new PlayCardFeatureBuilderContext(
+            CardsInHand: cards,
+            ValidCards: validCards,
+            PlayedCards: [],
+            TeamScore: 0,
+            OpponentScore: 0,
+            LeadPlayer: RelativePlayerPosition.Self,
+            LeadSuit: RelativeSuit.Trump,
+            CallingPlayer: RelativePlayerPosition.Self,
+            CallingPlayerGoingAlone: false,
+            Dealer: RelativePlayerPosition.Self,
+            DealerPickedUpCard: null,
+            KnownPlayerSuitVoids: [],
+            CardsAccountedFor: [],
+            WinningTrickPlayer: null,
+            TrickNumber: 1,
+            WonTricks: 0,
+            OpponentsWonTricks: 0,
+            ChosenCard: cards[0]);
+        var result = PlayCardFeatureBuilder.BuildFeatures(context);
 
         result.Card1IsValid.Should().Be(1.0f);
         result.Card2IsValid.Should().Be(0.0f);
@@ -146,25 +149,26 @@ public class PlayCardFeatureBuilderTests
             [RelativePlayerPosition.RightHandOpponent] = rhoCard,
         };
 
-        var result = PlayCardFeatureBuilder.BuildFeatures(
-            cards,
-            validCards: cards,
-            playedCards: playedCards,
-            teamScore: 0,
-            opponentScore: 0,
-            leadPlayer: RelativePlayerPosition.LeftHandOpponent,
-            leadSuit: RelativeSuit.NonTrumpSameColor,
-            callingPlayer: RelativePlayerPosition.Self,
-            callingPlayerGoingAlone: false,
-            dealer: RelativePlayerPosition.Self,
-            dealerPickedUpCard: null,
-            knownPlayerSuitVoids: [],
-            cardsAccountedFor: [],
-            winningTrickPlayer: RelativePlayerPosition.Partner,
-            trickNumber: 2,
-            wonTricks: 0,
-            opponentsWonTricks: 0,
-            chosenCard: cards[0]);
+        var context = new PlayCardFeatureBuilderContext(
+            CardsInHand: cards,
+            ValidCards: cards,
+            PlayedCards: playedCards,
+            TeamScore: 0,
+            OpponentScore: 0,
+            LeadPlayer: RelativePlayerPosition.LeftHandOpponent,
+            LeadSuit: RelativeSuit.NonTrumpSameColor,
+            CallingPlayer: RelativePlayerPosition.Self,
+            CallingPlayerGoingAlone: false,
+            Dealer: RelativePlayerPosition.Self,
+            DealerPickedUpCard: null,
+            KnownPlayerSuitVoids: [],
+            CardsAccountedFor: [],
+            WinningTrickPlayer: RelativePlayerPosition.Partner,
+            TrickNumber: 2,
+            WonTricks: 0,
+            OpponentsWonTricks: 0,
+            ChosenCard: cards[0]);
+        var result = PlayCardFeatureBuilder.BuildFeatures(context);
 
         result.LeftHandOpponentPlayedCardRank.Should().Be((float)Rank.Jack);
         result.LeftHandOpponentPlayedCardSuit.Should().Be((float)RelativeSuit.NonTrumpSameColor);
@@ -179,25 +183,26 @@ public class PlayCardFeatureBuilderTests
     {
         var cards = CreateDefaultHand();
 
-        var result = PlayCardFeatureBuilder.BuildFeatures(
-            cards,
-            validCards: cards,
-            playedCards: [],
-            teamScore: 0,
-            opponentScore: 0,
-            leadPlayer: RelativePlayerPosition.Self,
-            leadSuit: null,
-            callingPlayer: RelativePlayerPosition.Self,
-            callingPlayerGoingAlone: false,
-            dealer: RelativePlayerPosition.Self,
-            dealerPickedUpCard: null,
-            knownPlayerSuitVoids: [],
-            cardsAccountedFor: [],
-            winningTrickPlayer: null,
-            trickNumber: 1,
-            wonTricks: 0,
-            opponentsWonTricks: 0,
-            chosenCard: cards[0]);
+        var context = new PlayCardFeatureBuilderContext(
+            CardsInHand: cards,
+            ValidCards: cards,
+            PlayedCards: [],
+            TeamScore: 0,
+            OpponentScore: 0,
+            LeadPlayer: RelativePlayerPosition.Self,
+            LeadSuit: null,
+            CallingPlayer: RelativePlayerPosition.Self,
+            CallingPlayerGoingAlone: false,
+            Dealer: RelativePlayerPosition.Self,
+            DealerPickedUpCard: null,
+            KnownPlayerSuitVoids: [],
+            CardsAccountedFor: [],
+            WinningTrickPlayer: null,
+            TrickNumber: 1,
+            WonTricks: 0,
+            OpponentsWonTricks: 0,
+            ChosenCard: cards[0]);
+        var result = PlayCardFeatureBuilder.BuildFeatures(context);
 
         result.LeftHandOpponentPlayedCardRank.Should().Be(-1.0f);
         result.LeftHandOpponentPlayedCardSuit.Should().Be(-1.0f);
@@ -218,25 +223,26 @@ public class PlayCardFeatureBuilderTests
             new(Rank.Nine, RelativeSuit.NonTrumpOppositeColor2),
         };
 
-        var result = PlayCardFeatureBuilder.BuildFeatures(
-            cards,
-            validCards: cards,
-            playedCards: [],
-            teamScore: 0,
-            opponentScore: 0,
-            leadPlayer: RelativePlayerPosition.Self,
-            leadSuit: null,
-            callingPlayer: RelativePlayerPosition.Self,
-            callingPlayerGoingAlone: false,
-            dealer: RelativePlayerPosition.Self,
-            dealerPickedUpCard: null,
-            knownPlayerSuitVoids: [],
-            cardsAccountedFor: cardsAccountedFor,
-            winningTrickPlayer: null,
-            trickNumber: 1,
-            wonTricks: 0,
-            opponentsWonTricks: 0,
-            chosenCard: cards[0]);
+        var context = new PlayCardFeatureBuilderContext(
+            CardsInHand: cards,
+            ValidCards: cards,
+            PlayedCards: [],
+            TeamScore: 0,
+            OpponentScore: 0,
+            LeadPlayer: RelativePlayerPosition.Self,
+            LeadSuit: null,
+            CallingPlayer: RelativePlayerPosition.Self,
+            CallingPlayerGoingAlone: false,
+            Dealer: RelativePlayerPosition.Self,
+            DealerPickedUpCard: null,
+            KnownPlayerSuitVoids: [],
+            CardsAccountedFor: cardsAccountedFor,
+            WinningTrickPlayer: null,
+            TrickNumber: 1,
+            WonTricks: 0,
+            OpponentsWonTricks: 0,
+            ChosenCard: cards[0]);
+        var result = PlayCardFeatureBuilder.BuildFeatures(context);
 
         result.RightBowerOfTrumpHasBeenAccountedFor.Should().Be(1.0f);
         result.LeftBowerOfTrumpHasBeenAccountedFor.Should().Be(0.0f);
@@ -257,25 +263,26 @@ public class PlayCardFeatureBuilderTests
             new() { PlayerPosition = RelativePlayerPosition.RightHandOpponent, Suit = RelativeSuit.NonTrumpOppositeColor1 },
         };
 
-        var result = PlayCardFeatureBuilder.BuildFeatures(
-            cards,
-            validCards: cards,
-            playedCards: [],
-            teamScore: 0,
-            opponentScore: 0,
-            leadPlayer: RelativePlayerPosition.Self,
-            leadSuit: null,
-            callingPlayer: RelativePlayerPosition.Self,
-            callingPlayerGoingAlone: false,
-            dealer: RelativePlayerPosition.Self,
-            dealerPickedUpCard: null,
-            knownPlayerSuitVoids: voids,
-            cardsAccountedFor: [],
-            winningTrickPlayer: null,
-            trickNumber: 1,
-            wonTricks: 0,
-            opponentsWonTricks: 0,
-            chosenCard: cards[0]);
+        var context = new PlayCardFeatureBuilderContext(
+            CardsInHand: cards,
+            ValidCards: cards,
+            PlayedCards: [],
+            TeamScore: 0,
+            OpponentScore: 0,
+            LeadPlayer: RelativePlayerPosition.Self,
+            LeadSuit: null,
+            CallingPlayer: RelativePlayerPosition.Self,
+            CallingPlayerGoingAlone: false,
+            Dealer: RelativePlayerPosition.Self,
+            DealerPickedUpCard: null,
+            KnownPlayerSuitVoids: voids,
+            CardsAccountedFor: [],
+            WinningTrickPlayer: null,
+            TrickNumber: 1,
+            WonTricks: 0,
+            OpponentsWonTricks: 0,
+            ChosenCard: cards[0]);
+        var result = PlayCardFeatureBuilder.BuildFeatures(context);
 
         result.LeftHandOpponentMayHaveTrump.Should().Be(0.0f);
         result.LeftHandOpponentMayHaveNonTrumpSameColor.Should().Be(1.0f);
@@ -295,25 +302,26 @@ public class PlayCardFeatureBuilderTests
     {
         var cards = CreateDefaultHand();
 
-        var result = PlayCardFeatureBuilder.BuildFeatures(
-            cards,
-            validCards: cards,
-            playedCards: [],
-            teamScore: 0,
-            opponentScore: 0,
-            leadPlayer: RelativePlayerPosition.Self,
-            leadSuit: null,
-            callingPlayer: RelativePlayerPosition.Self,
-            callingPlayerGoingAlone: false,
-            dealer: RelativePlayerPosition.Self,
-            dealerPickedUpCard: null,
-            knownPlayerSuitVoids: [],
-            cardsAccountedFor: [],
-            winningTrickPlayer: null,
-            trickNumber: 1,
-            wonTricks: 0,
-            opponentsWonTricks: 0,
-            chosenCard: cards[chosenIndex]);
+        var context = new PlayCardFeatureBuilderContext(
+            CardsInHand: cards,
+            ValidCards: cards,
+            PlayedCards: [],
+            TeamScore: 0,
+            OpponentScore: 0,
+            LeadPlayer: RelativePlayerPosition.Self,
+            LeadSuit: null,
+            CallingPlayer: RelativePlayerPosition.Self,
+            CallingPlayerGoingAlone: false,
+            Dealer: RelativePlayerPosition.Self,
+            DealerPickedUpCard: null,
+            KnownPlayerSuitVoids: [],
+            CardsAccountedFor: [],
+            WinningTrickPlayer: null,
+            TrickNumber: 1,
+            WonTricks: 0,
+            OpponentsWonTricks: 0,
+            ChosenCard: cards[chosenIndex]);
+        var result = PlayCardFeatureBuilder.BuildFeatures(context);
 
         result.Card1Chosen.Should().Be(chosenIndex == 0 ? 1.0f : 0.0f);
         result.Card2Chosen.Should().Be(chosenIndex == 1 ? 1.0f : 0.0f);
@@ -328,25 +336,26 @@ public class PlayCardFeatureBuilderTests
         var cards = CreateDefaultHand();
         var dealerPickedUpCard = new RelativeCard(Rank.King, RelativeSuit.Trump);
 
-        var result = PlayCardFeatureBuilder.BuildFeatures(
-            cards,
-            validCards: cards,
-            playedCards: [],
-            teamScore: 4,
-            opponentScore: 7,
-            leadPlayer: RelativePlayerPosition.LeftHandOpponent,
-            leadSuit: RelativeSuit.NonTrumpSameColor,
-            callingPlayer: RelativePlayerPosition.Partner,
-            callingPlayerGoingAlone: true,
-            dealer: RelativePlayerPosition.RightHandOpponent,
-            dealerPickedUpCard: dealerPickedUpCard,
-            knownPlayerSuitVoids: [],
-            cardsAccountedFor: [],
-            winningTrickPlayer: RelativePlayerPosition.Partner,
-            trickNumber: 3,
-            wonTricks: 0,
-            opponentsWonTricks: 0,
-            chosenCard: cards[0]);
+        var context = new PlayCardFeatureBuilderContext(
+            CardsInHand: cards,
+            ValidCards: cards,
+            PlayedCards: [],
+            TeamScore: 4,
+            OpponentScore: 7,
+            LeadPlayer: RelativePlayerPosition.LeftHandOpponent,
+            LeadSuit: RelativeSuit.NonTrumpSameColor,
+            CallingPlayer: RelativePlayerPosition.Partner,
+            CallingPlayerGoingAlone: true,
+            Dealer: RelativePlayerPosition.RightHandOpponent,
+            DealerPickedUpCard: dealerPickedUpCard,
+            KnownPlayerSuitVoids: [],
+            CardsAccountedFor: [],
+            WinningTrickPlayer: RelativePlayerPosition.Partner,
+            TrickNumber: 3,
+            WonTricks: 0,
+            OpponentsWonTricks: 0,
+            ChosenCard: cards[0]);
+        var result = PlayCardFeatureBuilder.BuildFeatures(context);
 
         result.TeamScore.Should().Be(4);
         result.OpponentScore.Should().Be(7);
@@ -366,25 +375,26 @@ public class PlayCardFeatureBuilderTests
     {
         var cards = CreateDefaultHand();
 
-        var result = PlayCardFeatureBuilder.BuildFeatures(
-            cards,
-            validCards: cards,
-            playedCards: [],
-            teamScore: 0,
-            opponentScore: 0,
-            leadPlayer: RelativePlayerPosition.Self,
-            leadSuit: null,
-            callingPlayer: RelativePlayerPosition.Self,
-            callingPlayerGoingAlone: false,
-            dealer: RelativePlayerPosition.Self,
-            dealerPickedUpCard: null,
-            knownPlayerSuitVoids: [],
-            cardsAccountedFor: [],
-            winningTrickPlayer: null,
-            trickNumber: 1,
-            wonTricks: 0,
-            opponentsWonTricks: 0,
-            chosenCard: cards[0]);
+        var context = new PlayCardFeatureBuilderContext(
+            CardsInHand: cards,
+            ValidCards: cards,
+            PlayedCards: [],
+            TeamScore: 0,
+            OpponentScore: 0,
+            LeadPlayer: RelativePlayerPosition.Self,
+            LeadSuit: null,
+            CallingPlayer: RelativePlayerPosition.Self,
+            CallingPlayerGoingAlone: false,
+            Dealer: RelativePlayerPosition.Self,
+            DealerPickedUpCard: null,
+            KnownPlayerSuitVoids: [],
+            CardsAccountedFor: [],
+            WinningTrickPlayer: null,
+            TrickNumber: 1,
+            WonTricks: 0,
+            OpponentsWonTricks: 0,
+            ChosenCard: cards[0]);
+        var result = PlayCardFeatureBuilder.BuildFeatures(context);
 
         result.LeadSuit.Should().Be(-1.0f);
         result.WinningTrickPlayer.Should().Be(-1.0f);
