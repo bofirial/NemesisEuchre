@@ -69,8 +69,20 @@ public class TrainingDataAccumulatorTests : IDisposable
                 CreateStubFile(path);
             });
 
-        _accumulator = new TrainingDataAccumulator(
+        var buffer = new TrainingDataBuffer(
             _mockIdvFileService.Object,
+            Mock.Of<ILogger<TrainingDataBuffer>>());
+        var merger = new IdvChunkMerger(
+            _mockIdvFileService.Object,
+            Mock.Of<ILogger<IdvChunkMerger>>());
+        var metadataService = new IdvMetadataService(
+            _mockIdvFileService.Object,
+            Mock.Of<ILogger<IdvMetadataService>>());
+
+        _accumulator = new TrainingDataAccumulator(
+            buffer,
+            merger,
+            metadataService,
             options,
             Mock.Of<ILogger<TrainingDataAccumulator>>());
     }

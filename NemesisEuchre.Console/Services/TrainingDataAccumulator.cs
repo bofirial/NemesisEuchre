@@ -6,7 +6,6 @@ using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Models;
-using NemesisEuchre.MachineLearning.Services;
 
 namespace NemesisEuchre.Console.Services;
 
@@ -20,31 +19,22 @@ public interface ITrainingDataAccumulator
 }
 
 public class TrainingDataAccumulator(
-    IIdvFileService idvFileService,
+    ITrainingDataBuffer buffer,
+    IIdvChunkMerger merger,
+    IIdvMetadataService metadataService,
     IOptions<PersistenceOptions> persistenceOptions,
     ILogger<TrainingDataAccumulator> logger) : ITrainingDataAccumulator
 {
-    private readonly List<PlayCardTrainingData> _playCardData = [];
-    private readonly List<CallTrumpTrainingData> _callTrumpData = [];
-    private readonly List<DiscardCardTrainingData> _discardCardData = [];
     private readonly HashSet<Actor> _actors = [];
     private readonly HashSet<string> _savedGenerationNames = [];
-    private readonly List<string> _playCardChunkPaths = [];
-    private readonly List<string> _callTrumpChunkPaths = [];
-    private readonly List<string> _discardCardChunkPaths = [];
     private int _chunkIndex;
-    private int _totalPlayCardRows;
-    private int _totalCallTrumpRows;
-    private int _totalDiscardCardRows;
     private int _gameCount;
     private int _dealCount;
     private int _trickCount;
 
     public void Add(TrainingDataBatch batch)
     {
-        _playCardData.AddRange(batch.PlayCardData);
-        _callTrumpData.AddRange(batch.CallTrumpData);
-        _discardCardData.AddRange(batch.DiscardCardData);
+        buffer.Add(batch);
 
         _gameCount += batch.Stats.GameCount;
         _dealCount += batch.Stats.DealCount;
@@ -73,35 +63,14 @@ public class TrainingDataAccumulator(
         }
 
         var chunkDirectory = GetChunkDirectory(outputPath, generationName);
-        var chunkSuffix = $"_chunk{_chunkIndex + 1:D4}";
-
-        var playPath = GetChunkPath(chunkDirectory, "PlayCard", chunkSuffix);
-        var callPath = GetChunkPath(chunkDirectory, "CallTrump", chunkSuffix);
-        var discardPath = GetChunkPath(chunkDirectory, "DiscardCard", chunkSuffix);
-
-        Parallel.Invoke(
-            () => SaveChunkFileToPath(_playCardData, playPath),
-            () => SaveChunkFileToPath(_callTrumpData, callPath),
-            () => SaveChunkFileToPath(_discardCardData, discardPath));
-
-        _playCardChunkPaths.Add(playPath);
-        _callTrumpChunkPaths.Add(callPath);
-        _discardCardChunkPaths.Add(discardPath);
-
-        _totalPlayCardRows += _playCardData.Count;
-        _totalCallTrumpRows += _callTrumpData.Count;
-        _totalDiscardCardRows += _discardCardData.Count;
-
-        _playCardData.Clear();
-        _callTrumpData.Clear();
-        _discardCardData.Clear();
+        buffer.SaveChunk(chunkDirectory, _chunkIndex);
 
         _chunkIndex++;
     }
 
     public void Finalize(string generationName, Action<string>? onStatusUpdate = null)
     {
-        if (_playCardData.Count > 0 || _callTrumpData.Count > 0 || _discardCardData.Count > 0)
+        if (buffer.HasData())
         {
             onStatusUpdate?.Invoke("Saving remaining training data...");
             SaveChunk(generationName);
@@ -114,28 +83,30 @@ public class TrainingDataAccumulator(
 
         var outputPath = persistenceOptions.Value.IdvOutputPath;
         var actorInfos = _actors.Select(a => new ActorInfo(a.ActorType, a.ModelName, a.ExplorationTemperature)).ToList();
+        var (playCardPaths, callTrumpPaths, discardCardPaths) = buffer.GetChunkPaths();
+        var (playCardRows, callTrumpRows, discardCardRows) = buffer.GetTotalRows();
 
         if (_chunkIndex == 1)
         {
             onStatusUpdate?.Invoke("Finalizing IDV files...");
             Parallel.Invoke(
-                () => RenameChunkToFinal(_playCardChunkPaths, outputPath, generationName, "PlayCard", DecisionType.Play, _totalPlayCardRows, actorInfos),
-                () => RenameChunkToFinal(_callTrumpChunkPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, _totalCallTrumpRows, actorInfos),
-                () => RenameChunkToFinal(_discardCardChunkPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, _totalDiscardCardRows, actorInfos));
+                () => RenameChunkToFinal(playCardPaths, outputPath, generationName, "PlayCard", DecisionType.Play, playCardRows, actorInfos),
+                () => RenameChunkToFinal(callTrumpPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, callTrumpRows, actorInfos),
+                () => RenameChunkToFinal(discardCardPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, discardCardRows, actorInfos));
         }
         else
         {
-            var totalRows = _totalPlayCardRows + _totalCallTrumpRows + _totalDiscardCardRows;
+            var totalRows = playCardRows + callTrumpRows + discardCardRows;
             onStatusUpdate?.Invoke($"Merging {_chunkIndex} chunks ({totalRows:N0} rows)...");
             Parallel.Invoke(
-                () => MergeChunksToFinal<PlayCardTrainingData>(_playCardChunkPaths, outputPath, generationName, "PlayCard", DecisionType.Play, _totalPlayCardRows, actorInfos),
-                () => MergeChunksToFinal<CallTrumpTrainingData>(_callTrumpChunkPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, _totalCallTrumpRows, actorInfos),
-                () => MergeChunksToFinal<DiscardCardTrainingData>(_discardCardChunkPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, _totalDiscardCardRows, actorInfos));
+                () => MergeChunksToFinal<PlayCardTrainingData>(playCardPaths, outputPath, generationName, "PlayCard", DecisionType.Play, playCardRows, actorInfos),
+                () => MergeChunksToFinal<CallTrumpTrainingData>(callTrumpPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, callTrumpRows, actorInfos),
+                () => MergeChunksToFinal<DiscardCardTrainingData>(discardCardPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, discardCardRows, actorInfos));
         }
 
         onStatusUpdate?.Invoke("Cleaning up temporary files...");
         var chunkDir = GetChunkDirectory(outputPath, generationName);
-        CleanupChunkDirectory(chunkDir);
+        merger.CleanupChunkDirectory(chunkDir);
         LoggerMessages.LogIdvChunkCleanup(logger, chunkDir);
 
         var parentChunkDir = Path.Combine(outputPath, "_chunks");
@@ -147,35 +118,9 @@ public class TrainingDataAccumulator(
         _savedGenerationNames.Add(generationName);
     }
 
-    private static void CleanupChunkDirectory(string chunkDir)
-    {
-        if (!Directory.Exists(chunkDir))
-        {
-            return;
-        }
-
-        try
-        {
-            Directory.Delete(chunkDir, true);
-        }
-        catch (IOException)
-        {
-            // ML.NET's BinaryLoader holds file handles until GC collects it
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            Thread.Sleep(100);
-            Directory.Delete(chunkDir, true);
-        }
-    }
-
     private static string GetChunkDirectory(string outputPath, string generationName)
     {
         return Path.Combine(outputPath, "_chunks", generationName);
-    }
-
-    private static string GetChunkPath(string chunkDirectory, string decisionName, string chunkSuffix)
-    {
-        return Path.Combine(chunkDirectory, decisionName + chunkSuffix + FileExtensions.Idv);
     }
 
     private void GuardAgainstOverwrite(string outputPath, string generationName, bool allowOverwrite)
@@ -204,15 +149,8 @@ public class TrainingDataAccumulator(
         }
     }
 
-    private void SaveChunkFileToPath<T>(List<T> data, string chunkPath)
-        where T : class
-    {
-        LoggerMessages.LogIdvChunkSaving(logger, _chunkIndex + 1, chunkPath, data.Count);
-        idvFileService.Save(data, chunkPath);
-    }
-
     private void RenameChunkToFinal(
-        List<string> chunkPaths,
+        IReadOnlyList<string> chunkPaths,
         string outputPath,
         string generationName,
         string decisionName,
@@ -221,14 +159,13 @@ public class TrainingDataAccumulator(
         List<ActorInfo> actorInfos)
     {
         var finalPath = Path.Combine(outputPath, $"{generationName}_{decisionName}{FileExtensions.Idv}");
-        File.Move(chunkPaths[0], finalPath, overwrite: true);
-        LoggerMessages.LogIdvFileSaved(logger, finalPath, totalRows);
+        merger.RenameChunk(chunkPaths[0], finalPath, totalRows);
 
-        SaveMetadataWithVerification(finalPath, generationName, decisionType, totalRows, actorInfos);
+        SaveMetadata(finalPath, generationName, decisionType, totalRows, actorInfos);
     }
 
     private void MergeChunksToFinal<T>(
-        List<string> chunkPaths,
+        IReadOnlyList<string> chunkPaths,
         string outputPath,
         string generationName,
         string decisionName,
@@ -238,34 +175,18 @@ public class TrainingDataAccumulator(
         where T : class, new()
     {
         var finalPath = Path.Combine(outputPath, $"{generationName}_{decisionName}{FileExtensions.Idv}");
-        LoggerMessages.LogIdvChunkMerging(logger, chunkPaths.Count, finalPath);
+        merger.MergeChunks<T>(chunkPaths, finalPath, totalRows);
 
-        idvFileService.Save(StreamAllChunks<T>(chunkPaths), finalPath);
-        LoggerMessages.LogIdvMergeComplete(logger, finalPath, totalRows, chunkPaths.Count);
-
-        SaveMetadataWithVerification(finalPath, generationName, decisionType, totalRows, actorInfos);
+        SaveMetadata(finalPath, generationName, decisionType, totalRows, actorInfos);
     }
 
-    private IEnumerable<T> StreamAllChunks<T>(List<string> chunkPaths)
-        where T : class, new()
-    {
-        foreach (var path in chunkPaths)
-        {
-            foreach (var row in idvFileService.StreamFromBinary<T>(path))
-            {
-                yield return row;
-            }
-        }
-    }
-
-    private void SaveMetadataWithVerification(
+    private void SaveMetadata(
         string filePath,
         string generationName,
         DecisionType decisionType,
         int rowCount,
         List<ActorInfo> actorInfos)
     {
-        var metadataPath = filePath + FileExtensions.IdvMetadataSuffix;
         var metadata = new IdvFileMetadata(
             generationName,
             decisionType,
@@ -276,15 +197,6 @@ public class TrainingDataAccumulator(
             actorInfos,
             DateTime.UtcNow);
 
-        idvFileService.SaveMetadata(metadata, metadataPath);
-        LoggerMessages.LogIdvMetadataSaved(logger, metadataPath);
-
-        var readBack = idvFileService.LoadMetadata(metadataPath);
-        if (readBack.RowCount != rowCount)
-        {
-            LoggerMessages.LogIdvMetadataVerificationFailed(logger, metadataPath);
-            throw new InvalidOperationException(
-                $"IDV metadata verification failed for {metadataPath}: expected {rowCount} rows but read back {readBack.RowCount}");
-        }
+        metadataService.SaveMetadataWithVerification(filePath, metadata);
     }
 }
