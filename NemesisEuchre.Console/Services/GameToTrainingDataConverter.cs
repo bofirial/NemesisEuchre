@@ -68,6 +68,17 @@ public partial class GameToTrainingDataConverter(
         return new TrainingDataBatch(playCardData, callTrumpData, discardCardData, stats);
     }
 
+    private static short? GetRelativeDealPoints(object entity)
+    {
+        return entity switch
+        {
+            PlayCardDecisionEntity p => p.RelativeDealPoints,
+            CallTrumpDecisionEntity c => c.RelativeDealPoints,
+            DiscardCardDecisionEntity d => d.RelativeDealPoints,
+            _ => null,
+        };
+    }
+
     private GameConversionResult ConvertSingle(Game game)
     {
         var playCardData = new List<PlayCardTrainingData>();
@@ -88,61 +99,39 @@ public partial class GameToTrainingDataConverter(
 
         foreach (var deal in gameEntity.Deals)
         {
-            foreach (var decision in deal.CallTrumpDecisions)
-            {
-                if (decision.RelativeDealPoints == null)
-                {
-                    continue;
-                }
-
-                try
-                {
-                    callTrumpData.Add(callTrumpFeatureEngineer.Transform(decision));
-                }
-                catch (Exception ex)
-                {
-                    errorCount++;
-                    LoggerMessages.LogFeatureEngineeringError(logger, ex);
-                }
-            }
-
-            foreach (var decision in deal.DiscardCardDecisions)
-            {
-                if (decision.RelativeDealPoints == null)
-                {
-                    continue;
-                }
-
-                try
-                {
-                    discardCardData.Add(discardCardFeatureEngineer.Transform(decision));
-                }
-                catch (Exception ex)
-                {
-                    errorCount++;
-                    LoggerMessages.LogFeatureEngineeringError(logger, ex);
-                }
-            }
-
-            foreach (var decision in deal.PlayCardDecisions)
-            {
-                if (decision.RelativeDealPoints == null)
-                {
-                    continue;
-                }
-
-                try
-                {
-                    playCardData.Add(playCardFeatureEngineer.Transform(decision));
-                }
-                catch (Exception ex)
-                {
-                    errorCount++;
-                    LoggerMessages.LogFeatureEngineeringError(logger, ex);
-                }
-            }
+            ProcessDecisions(deal.CallTrumpDecisions, callTrumpFeatureEngineer, callTrumpData, ref errorCount);
+            ProcessDecisions(deal.DiscardCardDecisions, discardCardFeatureEngineer, discardCardData, ref errorCount);
+            ProcessDecisions(deal.PlayCardDecisions, playCardFeatureEngineer, playCardData, ref errorCount);
         }
 
         return new GameConversionResult(playCardData, callTrumpData, discardCardData, dealCount, trickCount, actors, errorCount);
+    }
+
+    private void ProcessDecisions<TDecisionEntity, TTrainingData>(
+        IEnumerable<TDecisionEntity> decisions,
+        IFeatureEngineer<TDecisionEntity, TTrainingData> featureEngineer,
+        List<TTrainingData> dataList,
+        ref int errorCount)
+        where TDecisionEntity : class
+        where TTrainingData : class, new()
+    {
+        foreach (var decision in decisions)
+        {
+            var relativePoints = GetRelativeDealPoints(decision);
+            if (relativePoints == null)
+            {
+                continue;
+            }
+
+            try
+            {
+                dataList.Add(featureEngineer.Transform(decision));
+            }
+            catch (Exception ex)
+            {
+                errorCount++;
+                LoggerMessages.LogFeatureEngineeringError(logger, ex);
+            }
+        }
     }
 }
