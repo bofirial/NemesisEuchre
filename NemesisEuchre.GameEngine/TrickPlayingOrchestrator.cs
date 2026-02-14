@@ -113,7 +113,15 @@ public class TrickPlayingOrchestrator(
             var validCards = GetValidCardsToPlay(handArray, deal.Trump!.Value, trick.LeadSuit);
 
             var cardDecisionContext = await GetPlayerCardChoiceAsync(deal, trick, position, handArray, validCards).ConfigureAwait(false);
-            decisionRecorder.RecordPlayCardDecision(deal, trick, position, handArray, validCards, cardDecisionContext, trickWinnerCalculator);
+            var recordingContext = new PlayCardRecordingContext(
+                Deal: deal,
+                Trick: trick,
+                PlayerPosition: position,
+                Hand: handArray,
+                ValidCards: validCards,
+                CardDecisionContext: cardDecisionContext,
+                TrickWinnerCalculator: trickWinnerCalculator);
+            decisionRecorder.RecordPlayCardDecision(recordingContext);
             validator.ValidateCardChoice(cardDecisionContext.ChosenCard, validCards);
 
             if (voidDetector.TryDetectVoid(deal, cardDecisionContext.ChosenCard, trick.LeadSuit, deal.Trump!.Value, position, out var voidSuit))

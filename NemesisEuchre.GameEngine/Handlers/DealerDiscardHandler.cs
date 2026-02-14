@@ -27,7 +27,12 @@ public class DealerDiscardHandler(
         var hand = dealer.CurrentHand.SortByTrump(deal.Trump);
         var cardToDiscardContext = await GetDealerDiscardDecisionAsync(deal, dealerPosition, dealer, hand);
 
-        decisionRecorder.RecordDiscardDecision(deal, dealerPosition, hand, cardToDiscardContext);
+        var recordingContext = new DiscardCardRecordingContext(
+            Deal: deal,
+            PlayerPosition: dealerPosition,
+            Hand: hand,
+            CardDecisionContext: cardToDiscardContext);
+        decisionRecorder.RecordDiscardDecision(recordingContext);
 
         validator.ValidateDiscard(cardToDiscardContext.ChosenCard, hand);
 

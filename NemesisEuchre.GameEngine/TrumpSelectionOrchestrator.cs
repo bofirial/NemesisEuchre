@@ -70,7 +70,12 @@ public class TrumpSelectionOrchestrator(
         {
             var callTrumpDecisionContext = await GetAndValidatePlayerDecisionAsync(deal, currentPosition, validDecisions);
 
-            decisionRecorder.RecordCallTrumpDecision(deal, currentPosition, validDecisions, callTrumpDecisionContext, ref _decisionOrder);
+            var recordingContext = new CallTrumpRecordingContext(
+                Deal: deal,
+                PlayerPosition: currentPosition,
+                ValidDecisions: validDecisions,
+                CallTrumpDecisionContext: callTrumpDecisionContext);
+            decisionRecorder.RecordCallTrumpDecision(recordingContext, ref _decisionOrder);
 
             if (callTrumpDecisionContext.ChosenCallTrumpDecision != CallTrumpDecision.Pass)
             {
@@ -97,7 +102,12 @@ public class TrumpSelectionOrchestrator(
 
             var callTrumpDecisionContext = await GetAndValidatePlayerDecisionAsync(deal, currentPosition, validDecisions);
 
-            decisionRecorder.RecordCallTrumpDecision(deal, currentPosition, validDecisions, callTrumpDecisionContext, ref _decisionOrder);
+            var recordingContext = new CallTrumpRecordingContext(
+                Deal: deal,
+                PlayerPosition: currentPosition,
+                ValidDecisions: validDecisions,
+                CallTrumpDecisionContext: callTrumpDecisionContext);
+            decisionRecorder.RecordCallTrumpDecision(recordingContext, ref _decisionOrder);
 
             if (callTrumpDecisionContext.ChosenCallTrumpDecision != CallTrumpDecision.Pass)
             {

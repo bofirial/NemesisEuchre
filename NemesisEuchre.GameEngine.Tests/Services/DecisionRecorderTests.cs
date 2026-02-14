@@ -37,7 +37,12 @@ public class DecisionRecorderTests
         };
         byte counter = 0;
 
-        _recorder.RecordCallTrumpDecision(deal, PlayerPosition.North, validDecisions, context, ref counter);
+        var recordingContext = new CallTrumpRecordingContext(
+            Deal: deal,
+            PlayerPosition: PlayerPosition.North,
+            ValidDecisions: validDecisions,
+            CallTrumpDecisionContext: context);
+        _recorder.RecordCallTrumpDecision(recordingContext, ref counter);
 
         deal.CallTrumpDecisions.Should().HaveCount(1);
     }
@@ -54,7 +59,12 @@ public class DecisionRecorderTests
         };
         byte counter = 0;
 
-        _recorder.RecordCallTrumpDecision(deal, PlayerPosition.East, validDecisions, context, ref counter);
+        var recordingContext = new CallTrumpRecordingContext(
+            Deal: deal,
+            PlayerPosition: PlayerPosition.East,
+            ValidDecisions: validDecisions,
+            CallTrumpDecisionContext: context);
+        _recorder.RecordCallTrumpDecision(recordingContext, ref counter);
 
         deal.CallTrumpDecisions[0].PlayerPosition.Should().Be(PlayerPosition.East);
     }
@@ -68,7 +78,12 @@ public class DecisionRecorderTests
         var context = new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass };
         byte counter = 0;
 
-        _recorder.RecordCallTrumpDecision(deal, PlayerPosition.North, validDecisions, context, ref counter);
+        var recordingContext = new CallTrumpRecordingContext(
+            Deal: deal,
+            PlayerPosition: PlayerPosition.North,
+            ValidDecisions: validDecisions,
+            CallTrumpDecisionContext: context);
+        _recorder.RecordCallTrumpDecision(recordingContext, ref counter);
 
         deal.CallTrumpDecisions[0].TeamScore.Should().Be(7);
         deal.CallTrumpDecisions[0].OpponentScore.Should().Be(2);
@@ -83,7 +98,12 @@ public class DecisionRecorderTests
         var context = new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass };
         byte counter = 2;
 
-        _recorder.RecordCallTrumpDecision(deal, PlayerPosition.North, validDecisions, context, ref counter);
+        var recordingContext = new CallTrumpRecordingContext(
+            Deal: deal,
+            PlayerPosition: PlayerPosition.North,
+            ValidDecisions: validDecisions,
+            CallTrumpDecisionContext: context);
+        _recorder.RecordCallTrumpDecision(recordingContext, ref counter);
 
         counter.Should().Be(3);
         deal.CallTrumpDecisions[0].DecisionOrder.Should().Be(3);
@@ -102,7 +122,12 @@ public class DecisionRecorderTests
         var context = new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass };
         byte counter = 0;
 
-        _recorder.RecordCallTrumpDecision(deal, PlayerPosition.North, [], context, ref counter);
+        var recordingContext = new CallTrumpRecordingContext(
+            Deal: deal,
+            PlayerPosition: PlayerPosition.North,
+            ValidDecisions: [],
+            CallTrumpDecisionContext: context);
+        _recorder.RecordCallTrumpDecision(recordingContext, ref counter);
 
         deal.CallTrumpDecisions[0].CardsInHand.Should().HaveCount(2);
     }
@@ -116,7 +141,12 @@ public class DecisionRecorderTests
         var context = new CallTrumpDecisionContext { ChosenCallTrumpDecision = CallTrumpDecision.Pass };
         byte counter = 0;
 
-        _recorder.RecordCallTrumpDecision(deal, PlayerPosition.North, [], context, ref counter);
+        var recordingContext = new CallTrumpRecordingContext(
+            Deal: deal,
+            PlayerPosition: PlayerPosition.North,
+            ValidDecisions: [],
+            CallTrumpDecisionContext: context);
+        _recorder.RecordCallTrumpDecision(recordingContext, ref counter);
 
         deal.CallTrumpDecisions[0].UpCard.Should().Be(new Card(Suit.Diamonds, Rank.Jack));
     }
@@ -133,7 +163,12 @@ public class DecisionRecorderTests
         };
         byte counter = 0;
 
-        _recorder.RecordCallTrumpDecision(deal, PlayerPosition.North, validDecisions, context, ref counter);
+        var recordingContext = new CallTrumpRecordingContext(
+            Deal: deal,
+            PlayerPosition: PlayerPosition.North,
+            ValidDecisions: validDecisions,
+            CallTrumpDecisionContext: context);
+        _recorder.RecordCallTrumpDecision(recordingContext, ref counter);
 
         deal.CallTrumpDecisions[0].ChosenDecision.Should().Be(CallTrumpDecision.OrderItUp);
     }
@@ -153,7 +188,15 @@ public class DecisionRecorderTests
         _mockCardAccountingService.Setup(x => x.GetAccountedForCards(deal, trick, PlayerPosition.North, hand)).Returns([]);
         var mockCalculator = new Mock<ITrickWinnerCalculator>();
 
-        _recorder.RecordPlayCardDecision(deal, trick, PlayerPosition.North, hand, validCards, cardContext, mockCalculator.Object);
+        var recordingContext = new PlayCardRecordingContext(
+            Deal: deal,
+            Trick: trick,
+            PlayerPosition: PlayerPosition.North,
+            Hand: hand,
+            ValidCards: validCards,
+            CardDecisionContext: cardContext,
+            TrickWinnerCalculator: mockCalculator.Object);
+        _recorder.RecordPlayCardDecision(recordingContext);
 
         trick.PlayCardDecisions.Should().HaveCount(1);
     }
@@ -169,7 +212,15 @@ public class DecisionRecorderTests
         _mockContextBuilder.Setup(x => x.GetScores(deal, PlayerPosition.North)).Returns((0, 0));
         _mockCardAccountingService.Setup(x => x.GetAccountedForCards(deal, trick, PlayerPosition.North, hand)).Returns([]);
 
-        _recorder.RecordPlayCardDecision(deal, trick, PlayerPosition.North, hand, hand, cardContext, new Mock<ITrickWinnerCalculator>().Object);
+        var recordingContext = new PlayCardRecordingContext(
+            Deal: deal,
+            Trick: trick,
+            PlayerPosition: PlayerPosition.North,
+            Hand: hand,
+            ValidCards: hand,
+            CardDecisionContext: cardContext,
+            TrickWinnerCalculator: new Mock<ITrickWinnerCalculator>().Object);
+        _recorder.RecordPlayCardDecision(recordingContext);
 
         trick.PlayCardDecisions[0].TrumpSuit.Should().Be(Suit.Spades);
     }
@@ -184,7 +235,15 @@ public class DecisionRecorderTests
         _mockContextBuilder.Setup(x => x.GetScores(deal, PlayerPosition.North)).Returns((0, 0));
         _mockCardAccountingService.Setup(x => x.GetAccountedForCards(deal, trick, PlayerPosition.North, hand)).Returns([]);
 
-        _recorder.RecordPlayCardDecision(deal, trick, PlayerPosition.North, hand, hand, cardContext, new Mock<ITrickWinnerCalculator>().Object);
+        var recordingContext = new PlayCardRecordingContext(
+            Deal: deal,
+            Trick: trick,
+            PlayerPosition: PlayerPosition.North,
+            Hand: hand,
+            ValidCards: hand,
+            CardDecisionContext: cardContext,
+            TrickWinnerCalculator: new Mock<ITrickWinnerCalculator>().Object);
+        _recorder.RecordPlayCardDecision(recordingContext);
 
         trick.PlayCardDecisions[0].LeadSuit.Should().Be(Suit.Hearts);
     }
@@ -202,7 +261,15 @@ public class DecisionRecorderTests
         var mockCalculator = new Mock<ITrickWinnerCalculator>();
         mockCalculator.Setup(x => x.CalculateWinner(trick, Suit.Clubs)).Returns(PlayerPosition.North);
 
-        _recorder.RecordPlayCardDecision(deal, trick, PlayerPosition.East, hand, hand, cardContext, mockCalculator.Object);
+        var recordingContext = new PlayCardRecordingContext(
+            Deal: deal,
+            Trick: trick,
+            PlayerPosition: PlayerPosition.East,
+            Hand: hand,
+            ValidCards: hand,
+            CardDecisionContext: cardContext,
+            TrickWinnerCalculator: mockCalculator.Object);
+        _recorder.RecordPlayCardDecision(recordingContext);
 
         trick.PlayCardDecisions[0].WinningTrickPlayer.Should().Be(PlayerPosition.North);
     }
@@ -217,7 +284,15 @@ public class DecisionRecorderTests
         _mockContextBuilder.Setup(x => x.GetScores(deal, PlayerPosition.North)).Returns((0, 0));
         _mockCardAccountingService.Setup(x => x.GetAccountedForCards(deal, trick, PlayerPosition.North, hand)).Returns([]);
 
-        _recorder.RecordPlayCardDecision(deal, trick, PlayerPosition.North, hand, hand, cardContext, new Mock<ITrickWinnerCalculator>().Object);
+        var recordingContext = new PlayCardRecordingContext(
+            Deal: deal,
+            Trick: trick,
+            PlayerPosition: PlayerPosition.North,
+            Hand: hand,
+            ValidCards: hand,
+            CardDecisionContext: cardContext,
+            TrickWinnerCalculator: new Mock<ITrickWinnerCalculator>().Object);
+        _recorder.RecordPlayCardDecision(recordingContext);
 
         trick.PlayCardDecisions[0].WinningTrickPlayer.Should().BeNull();
     }
@@ -231,7 +306,12 @@ public class DecisionRecorderTests
         var cardContext = new CardDecisionContext { ChosenCard = new Card(Suit.Hearts, Rank.Ace) };
         _mockContextBuilder.Setup(x => x.GetScores(deal, PlayerPosition.North)).Returns((0, 0));
 
-        _recorder.RecordDiscardDecision(deal, PlayerPosition.North, hand, cardContext);
+        var recordingContext = new DiscardCardRecordingContext(
+            Deal: deal,
+            PlayerPosition: PlayerPosition.North,
+            Hand: hand,
+            CardDecisionContext: cardContext);
+        _recorder.RecordDiscardDecision(recordingContext);
 
         deal.DiscardCardDecisions.Should().HaveCount(1);
     }
@@ -246,7 +326,12 @@ public class DecisionRecorderTests
         var cardContext = new CardDecisionContext { ChosenCard = chosenCard };
         _mockContextBuilder.Setup(x => x.GetScores(deal, PlayerPosition.North)).Returns((0, 0));
 
-        _recorder.RecordDiscardDecision(deal, PlayerPosition.North, hand, cardContext);
+        var recordingContext = new DiscardCardRecordingContext(
+            Deal: deal,
+            PlayerPosition: PlayerPosition.North,
+            Hand: hand,
+            CardDecisionContext: cardContext);
+        _recorder.RecordDiscardDecision(recordingContext);
 
         deal.DiscardCardDecisions[0].ChosenCard.Should().Be(chosenCard);
     }
@@ -260,7 +345,12 @@ public class DecisionRecorderTests
         var cardContext = new CardDecisionContext { ChosenCard = hand[0] };
         _mockContextBuilder.Setup(x => x.GetScores(deal, PlayerPosition.North)).Returns((0, 0));
 
-        _recorder.RecordDiscardDecision(deal, PlayerPosition.North, hand, cardContext);
+        var recordingContext = new DiscardCardRecordingContext(
+            Deal: deal,
+            PlayerPosition: PlayerPosition.North,
+            Hand: hand,
+            CardDecisionContext: cardContext);
+        _recorder.RecordDiscardDecision(recordingContext);
 
         deal.DiscardCardDecisions[0].ValidCardsToDiscard.Should().HaveCount(2);
     }
