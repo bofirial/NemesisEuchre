@@ -1,5 +1,7 @@
 using FluentAssertions;
 
+using Moq;
+
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
@@ -9,7 +11,17 @@ namespace NemesisEuchre.Console.Tests.Services;
 
 public class DecisionRendererTests
 {
-    private readonly DecisionRenderer _renderer = new();
+    private readonly DecisionRenderer _renderer;
+
+    public DecisionRendererTests()
+    {
+        var mockCardDisplayRenderer = new Mock<ICardDisplayRenderer>();
+        mockCardDisplayRenderer.Setup(x => x.GetDisplayPlayer(It.IsAny<PlayerPosition>(), It.IsAny<Deal>())).Returns("Player");
+        mockCardDisplayRenderer.Setup(x => x.GetDisplayCard(It.IsAny<Card>(), It.IsAny<Suit?>())).Returns("Card");
+        mockCardDisplayRenderer.Setup(x => x.GetDisplaySuit(It.IsAny<Suit>())).Returns("Suit");
+        mockCardDisplayRenderer.Setup(x => x.GetPlayCardDecisionCardDisplay(It.IsAny<Card>(), It.IsAny<PlayCardDecisionRecord>(), It.IsAny<Suit>())).Returns("CardDisplay");
+        _renderer = new DecisionRenderer(mockCardDisplayRenderer.Object);
+    }
 
     [Fact]
     public void RenderDecisions_ShouldReturnRenderables_ForDealWithCallTrumpDecisions()

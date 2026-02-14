@@ -16,7 +16,7 @@ public interface IDecisionRenderer
     List<IRenderable> RenderDecisions(Deal deal);
 }
 
-public class DecisionRenderer : IDecisionRenderer
+public sealed class DecisionRenderer(ICardDisplayRenderer cardDisplayRenderer) : IDecisionRenderer
 {
     private static readonly (Suit suit, CallTrumpDecision callDecision, CallTrumpDecision aloneDecision)[] SuitDecisionMap =
     [
@@ -37,7 +37,15 @@ public class DecisionRenderer : IDecisionRenderer
         return renderables;
     }
 
-    private static List<IRenderable> RenderCallTrumpDecisions(Deal deal)
+    private static Markup FormatDecisionScore(float score, bool isChosen)
+    {
+        var scoreText = score.ToString("F3", CultureInfo.InvariantCulture);
+        return isChosen
+            ? new Markup($":diamond_with_a_dot: {scoreText} :diamond_with_a_dot:")
+            : new Markup(scoreText);
+    }
+
+    private List<IRenderable> RenderCallTrumpDecisions(Deal deal)
     {
         var renderables = new List<IRenderable>
         {
@@ -92,7 +100,7 @@ public class DecisionRenderer : IDecisionRenderer
         return renderables;
     }
 
-    private static void AddRound1Row(Table table, CallTrumpDecisionRecord callDecision, Deal deal)
+    private void AddRound1Row(Table table, CallTrumpDecisionRecord callDecision, Deal deal)
     {
         callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.Pass, out float passDecisionPredictedPoints);
         callDecision.DecisionPredictedPoints.TryGetValue(CallTrumpDecision.OrderItUp, out float orderItUpDecisionPredictedPoints);
@@ -100,10 +108,10 @@ public class DecisionRenderer : IDecisionRenderer
 
         var cells = new List<IRenderable>
         {
-            new Markup(GameResultsRenderer.GetDisplayPlayer(callDecision.PlayerPosition, deal)),
+            new Markup(cardDisplayRenderer.GetDisplayPlayer(callDecision.PlayerPosition, deal)),
             new Markup(deal.Players[callDecision.PlayerPosition].Actor.ActorType.Humanize()),
-            new Columns(callDecision.CardsInHand.Select(c => GameResultsRenderer.GetDisplayCard(c, deal.Trump!.Value))),
-            new Markup(GameResultsRenderer.GetDisplayCard(callDecision.UpCard!)),
+            new Columns(callDecision.CardsInHand.Select(c => cardDisplayRenderer.GetDisplayCard(c, deal.Trump!.Value))),
+            new Markup(cardDisplayRenderer.GetDisplayCard(callDecision.UpCard!)),
             FormatDecisionScore(passDecisionPredictedPoints, callDecision.ChosenDecision == CallTrumpDecision.Pass),
             FormatDecisionScore(orderItUpDecisionPredictedPoints, callDecision.ChosenDecision == CallTrumpDecision.OrderItUp),
             FormatDecisionScore(orderItUpAndGoAloneDecisionPredictedPoints, callDecision.ChosenDecision == CallTrumpDecision.OrderItUpAndGoAlone),
@@ -112,14 +120,14 @@ public class DecisionRenderer : IDecisionRenderer
         table.AddRow(cells);
     }
 
-    private static void AddRound2Row(Table table, CallTrumpDecisionRecord callDecision, Deal deal)
+    private void AddRound2Row(Table table, CallTrumpDecisionRecord callDecision, Deal deal)
     {
         var cells = new List<IRenderable>
         {
-            new Markup(GameResultsRenderer.GetDisplayPlayer(callDecision.PlayerPosition, deal)),
+            new Markup(cardDisplayRenderer.GetDisplayPlayer(callDecision.PlayerPosition, deal)),
             new Markup(deal.Players[callDecision.PlayerPosition].Actor.ActorType.Humanize()),
-            new Columns(callDecision.CardsInHand.Select(c => GameResultsRenderer.GetDisplayCard(c, deal.Trump!.Value))),
-            new Markup(GameResultsRenderer.GetDisplayCard(callDecision.UpCard!)),
+            new Columns(callDecision.CardsInHand.Select(c => cardDisplayRenderer.GetDisplayCard(c, deal.Trump!.Value))),
+            new Markup(cardDisplayRenderer.GetDisplayCard(callDecision.UpCard!)),
         };
 
         if (callDecision.ValidCallTrumpDecisions.Contains(CallTrumpDecision.Pass))
@@ -147,7 +155,7 @@ public class DecisionRenderer : IDecisionRenderer
         table.AddRow(cells);
     }
 
-    private static List<IRenderable> RenderDiscardDecisions(Deal deal)
+    private List<IRenderable> RenderDiscardDecisions(Deal deal)
     {
         var renderables = new List<IRenderable>();
 
@@ -172,9 +180,9 @@ public class DecisionRenderer : IDecisionRenderer
                 var decisionPredictedPoints = discardCardDecision.DecisionPredictedPoints.First(p => p.Key == card).Value;
 
                 discardDecisionsTable.AddRow(
-                    GameResultsRenderer.GetDisplayPlayer(discardCardDecision.PlayerPosition, deal),
+                    cardDisplayRenderer.GetDisplayPlayer(discardCardDecision.PlayerPosition, deal),
                     deal.Players[discardCardDecision.PlayerPosition].Actor.ActorType.Humanize(),
-                    GameResultsRenderer.GetDisplayCard(card, deal.Trump),
+                    cardDisplayRenderer.GetDisplayCard(card, deal.Trump),
                     discardCardDecision.ChosenCard == card ? $":diamond_with_a_dot: {decisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture)} :diamond_with_a_dot:" : decisionPredictedPoints.ToString("F3", CultureInfo.InvariantCulture));
             }
 
@@ -184,7 +192,7 @@ public class DecisionRenderer : IDecisionRenderer
         return renderables;
     }
 
-    private static List<IRenderable> RenderPlayCardDecisions(Deal deal)
+    private List<IRenderable> RenderPlayCardDecisions(Deal deal)
     {
         var renderables = new List<IRenderable>
         {
@@ -211,27 +219,19 @@ public class DecisionRenderer : IDecisionRenderer
 
                 playCardDecisionsTable.AddRow(
                     trick.TrickNumber.ToString(CultureInfo.InvariantCulture),
-                    GameResultsRenderer.GetDisplayPlayer(playCardDecision.PlayerPosition, deal),
+                    cardDisplayRenderer.GetDisplayPlayer(playCardDecision.PlayerPosition, deal),
                     deal.Players[playCardDecision.PlayerPosition].Actor.ActorType.Humanize(),
-                    playCardDecision.LeadSuit != null ? GameResultsRenderer.GetDisplaySuit(playCardDecision.LeadSuit!.Value) : string.Empty,
-                    playCardDecision.ValidCardsToPlay.Length > 0 ? GameResultsRenderer.GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[0], playCardDecision, deal.Trump!.Value) : string.Empty,
-                    playCardDecision.ValidCardsToPlay.Length > 1 ? GameResultsRenderer.GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[1], playCardDecision, deal.Trump!.Value) : string.Empty,
-                    playCardDecision.ValidCardsToPlay.Length > 2 ? GameResultsRenderer.GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[2], playCardDecision, deal.Trump!.Value) : string.Empty,
-                    playCardDecision.ValidCardsToPlay.Length > 3 ? GameResultsRenderer.GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[3], playCardDecision, deal.Trump!.Value) : string.Empty,
-                    playCardDecision.ValidCardsToPlay.Length > 4 ? GameResultsRenderer.GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[4], playCardDecision, deal.Trump!.Value) : string.Empty);
+                    playCardDecision.LeadSuit != null ? cardDisplayRenderer.GetDisplaySuit(playCardDecision.LeadSuit!.Value) : string.Empty,
+                    playCardDecision.ValidCardsToPlay.Length > 0 ? cardDisplayRenderer.GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[0], playCardDecision, deal.Trump!.Value) : string.Empty,
+                    playCardDecision.ValidCardsToPlay.Length > 1 ? cardDisplayRenderer.GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[1], playCardDecision, deal.Trump!.Value) : string.Empty,
+                    playCardDecision.ValidCardsToPlay.Length > 2 ? cardDisplayRenderer.GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[2], playCardDecision, deal.Trump!.Value) : string.Empty,
+                    playCardDecision.ValidCardsToPlay.Length > 3 ? cardDisplayRenderer.GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[3], playCardDecision, deal.Trump!.Value) : string.Empty,
+                    playCardDecision.ValidCardsToPlay.Length > 4 ? cardDisplayRenderer.GetPlayCardDecisionCardDisplay(playCardDecision.ValidCardsToPlay[4], playCardDecision, deal.Trump!.Value) : string.Empty);
             }
         }
 
         renderables.Add(playCardDecisionsTable);
 
         return renderables;
-    }
-
-    private static Markup FormatDecisionScore(float score, bool isChosen)
-    {
-        var scoreText = score.ToString("F3", CultureInfo.InvariantCulture);
-        return isChosen
-            ? new Markup($":diamond_with_a_dot: {scoreText} :diamond_with_a_dot:")
-            : new Markup(scoreText);
     }
 }

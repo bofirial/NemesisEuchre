@@ -24,6 +24,9 @@ public static class ConsoleServiceCollectionExtensions
         services.AddScoped(_ => AnsiConsole.Console);
 
         services.AddScoped<IApplicationBanner, ApplicationBanner>();
+        services.AddScoped<ICardDisplayRenderer, CardDisplayRenderer>();
+        services.AddScoped<IBatchProgressRenderer, BatchProgressRenderer>();
+        services.AddScoped<ITrickTableRenderer, TrickTableRenderer>();
         services.AddScoped<IDecisionRenderer, DecisionRenderer>();
         services.AddScoped<IGameResultsRenderer, GameResultsRenderer>();
         services.AddScoped<ISingleGameRunner, SingleGameRunner>();

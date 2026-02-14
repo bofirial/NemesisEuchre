@@ -19,8 +19,7 @@ public class GameResultsRendererTests
     public void RenderResults_WhenTeam1Wins_DisplaysTeam1AsWinner()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var game = new Game
         {
@@ -40,8 +39,7 @@ public class GameResultsRendererTests
     public void RenderResults_WhenExecuted_DisplaysScores()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var game = new Game
         {
@@ -61,8 +59,7 @@ public class GameResultsRendererTests
     public void RenderResults_WhenExecuted_DisplaysDealCount()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var game = new Game
         {
@@ -85,9 +82,7 @@ public class GameResultsRendererTests
     public void RenderResults_WhenDealHasGoingAlone_DisplaysWentAloneStatus()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        mockMapper.Setup(m => m.IsGoingAloneDecision(It.IsAny<CallTrumpDecision>())).Returns(true);
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var game = new Game
         {
@@ -150,8 +145,7 @@ public class GameResultsRendererTests
     public void RenderResults_WhenDealHasPlayerHands_DisplaysCardStrings()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var game = new Game
         {
@@ -180,8 +174,7 @@ public class GameResultsRendererTests
     public void RenderResults_WhenDealHasRedCards_DisplaysRedMarkup()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var game = new Game
         {
@@ -210,8 +203,7 @@ public class GameResultsRendererTests
     public void RenderResults_WhenDealHasTrump_SortsTrumpCardsFirst()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var game = new Game
         {
@@ -243,8 +235,7 @@ public class GameResultsRendererTests
     public void RenderResults_WhenPlayerHasNoHand_DisplaysNA()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var game = new Game
         {
@@ -268,8 +259,7 @@ public class GameResultsRendererTests
     public void RenderResults_WhenTeam2Wins_DisplaysCorrectWinnerWithYellowColor()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var game = new Game
         {
@@ -289,8 +279,7 @@ public class GameResultsRendererTests
     public void RenderResults_WhenNoDealsPlayed_HandlesGracefully()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var game = new Game
         {
@@ -309,8 +298,7 @@ public class GameResultsRendererTests
     public void BuildLiveResultsTable_DisplaysProgressAndWinRates()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var snapshot = new BatchProgressSnapshot(450, 260, 180, 10, 2250, 9000, 3600, 450, 27000);
         var elapsed = TimeSpan.FromSeconds(10);
@@ -331,8 +319,7 @@ public class GameResultsRendererTests
     public void BuildLiveResultsTable_DisplaysDecisionCounts()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var snapshot = new BatchProgressSnapshot(100, 60, 35, 5, 500, 2000, 800, 100, 6000);
         var elapsed = TimeSpan.FromSeconds(5);
@@ -352,8 +339,7 @@ public class GameResultsRendererTests
     public void BuildLiveResultsTable_DisplaysThroughputAndEstimatedRemaining()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var snapshot = new BatchProgressSnapshot(500, 300, 190, 10, 2500, 10000, 4000, 500, 30000);
         var elapsed = TimeSpan.FromSeconds(10);
@@ -372,8 +358,7 @@ public class GameResultsRendererTests
     public void BuildLiveResultsTable_WithZeroCompleted_OmitsThroughput()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var snapshot = BatchProgressSnapshot.Empty;
         var elapsed = TimeSpan.FromSeconds(1);
@@ -390,8 +375,7 @@ public class GameResultsRendererTests
     public void BuildLiveResultsTable_DisplaysStatusMessage_WhenProvided()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var snapshot = new BatchProgressSnapshot(1000, 600, 390, 10, 5000, 20000, 8000, 1000, 60000);
         var elapsed = TimeSpan.FromSeconds(20);
@@ -408,8 +392,7 @@ public class GameResultsRendererTests
     public void BuildLiveResultsTable_OmitsStatusRow_WhenStatusMessageIsNull()
     {
         var testConsole = new TestConsole();
-        var mockMapper = new Mock<ICallTrumpDecisionMapper>();
-        var renderer = new GameResultsRenderer(testConsole, mockMapper.Object, new Mock<IDecisionRenderer>().Object);
+        var renderer = CreateRenderer(testConsole);
 
         var snapshot = new BatchProgressSnapshot(500, 300, 190, 10, 2500, 10000, 4000, 500, 30000);
         var elapsed = TimeSpan.FromSeconds(10);
@@ -419,6 +402,24 @@ public class GameResultsRendererTests
 
         var output = testConsole.Output;
         output.Should().NotContain("Status");
+    }
+
+    private static GameResultsRenderer CreateRenderer(TestConsole testConsole)
+    {
+        var cardDisplayRenderer = new CardDisplayRenderer();
+        var batchProgressRenderer = new BatchProgressRenderer(testConsole, cardDisplayRenderer);
+
+        var mockCallTrumpMapper = new Mock<ICallTrumpDecisionMapper>();
+        mockCallTrumpMapper.Setup(x => x.IsGoingAloneDecision(It.IsAny<CallTrumpDecision>())).Returns(false);
+
+        var trickTableRenderer = new TrickTableRenderer(cardDisplayRenderer, mockCallTrumpMapper.Object);
+
+        return new GameResultsRenderer(
+            testConsole,
+            cardDisplayRenderer,
+            batchProgressRenderer,
+            trickTableRenderer,
+            new Mock<IDecisionRenderer>().Object);
     }
 
     private static Deal CreateMinimalDeal(Suit trump)
