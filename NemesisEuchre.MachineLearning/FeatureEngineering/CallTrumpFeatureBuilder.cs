@@ -2,13 +2,14 @@ using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.GameEngine.Pooling;
+using NemesisEuchre.MachineLearning.Constants;
 using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.FeatureEngineering;
 
 public static class CallTrumpFeatureBuilder
 {
-    private const int NumberOfDecisionClasses = 11;
+    private const int NumberOfDecisionClasses = FeatureEngineeringConstants.CallTrumpDecisionCount;
 
     public static CallTrumpTrainingData BuildFeatures(
         Card[] cards,
