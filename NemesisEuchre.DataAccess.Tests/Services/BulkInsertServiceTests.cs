@@ -11,7 +11,7 @@ public class BulkInsertServiceTests
     public async Task BulkInsertLeafEntitiesAsync_WithEmptyCache_DoesNotThrow()
     {
         var cache = new LeafCollectionCache([]);
-        var service = new BulkInsertService();
+        var service = new BulkInsertService(CreateConfiguredFactory());
 
         var act = () => service.BulkInsertLeafEntitiesAsync(
             cache,
@@ -27,7 +27,7 @@ public class BulkInsertServiceTests
     [Fact]
     public void BulkInsertService_ImplementsInterface()
     {
-        var service = new BulkInsertService();
+        var service = new BulkInsertService(CreateConfiguredFactory());
         service.Should().BeAssignableTo<IBulkInsertService>();
     }
 
@@ -36,7 +36,7 @@ public class BulkInsertServiceTests
     {
         var game = new GameEntity { GameStatusId = 1 };
         var cache = new LeafCollectionCache([game]);
-        var service = new BulkInsertService();
+        var service = new BulkInsertService(CreateConfiguredFactory());
 
         cache.LeafCount.Should().Be(0);
 
@@ -49,5 +49,12 @@ public class BulkInsertServiceTests
 
         await act.Should().NotThrowAsync();
         cache.LeafCount.Should().Be(0);
+    }
+
+    private static EntityReaderFactory CreateConfiguredFactory()
+    {
+        var factory = new EntityReaderFactory();
+        EntityReaderConfiguration.ConfigureReaders(factory);
+        return factory;
     }
 }

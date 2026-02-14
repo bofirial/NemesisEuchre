@@ -32,8 +32,15 @@ public static class DataAccessServiceCollectionExtensions
         services.AddScoped<IEntityToTrickMapper, EntityToTrickMapper>();
         services.AddScoped<IEntityToDealMapper, EntityToDealMapper>();
         services.AddScoped<IEntityToGameMapper, EntityToGameMapper>();
-        services.AddScoped<IBulkInsertService, BulkInsertService>();
         services.AddScoped<IGameRepository, GameRepository>();
+
+        services.AddSingleton<IEntityReaderFactory>(_ =>
+        {
+            var factory = new EntityReaderFactory();
+            EntityReaderConfiguration.ConfigureReaders(factory);
+            return factory;
+        });
+        services.AddScoped<IBulkInsertService, BulkInsertService>();
 
         return services;
     }
