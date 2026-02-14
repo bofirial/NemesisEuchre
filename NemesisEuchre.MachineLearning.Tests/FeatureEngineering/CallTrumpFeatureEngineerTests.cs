@@ -18,7 +18,8 @@ public class CallTrumpFeatureEngineerTests
 
     public CallTrumpFeatureEngineerTests()
     {
-        _engineer = new CallTrumpFeatureEngineer();
+        var builder = new CallTrumpFeatureBuilder();
+        _engineer = new CallTrumpFeatureEngineer(builder);
         _faker = new Faker();
     }
 

@@ -32,6 +32,9 @@ public static class MachineLearningServiceCollectionExtensions
         services.AddScoped<IModelTrainer<DiscardCardTrainingData>, DiscardCardRegressionModelTrainer>();
         services.AddScoped<IModelTrainer<PlayCardTrainingData>, PlayCardRegressionModelTrainer>();
 
+        services.AddSingleton<PlayCardFeatureBuilder>();
+        services.AddSingleton<CallTrumpFeatureBuilder>();
+        services.AddSingleton<DiscardCardFeatureBuilder>();
         services.AddSingleton<IFeatureEngineer<CallTrumpDecisionEntity, CallTrumpTrainingData>, CallTrumpFeatureEngineer>();
         services.AddSingleton<IFeatureEngineer<DiscardCardDecisionEntity, DiscardCardTrainingData>, DiscardCardFeatureEngineer>();
         services.AddSingleton<IFeatureEngineer<PlayCardDecisionEntity, PlayCardTrainingData>, PlayCardFeatureEngineer>();

@@ -1,3 +1,4 @@
+using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.GameEngine.Pooling;
@@ -6,11 +7,98 @@ using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.FeatureEngineering;
 
-public static class PlayCardFeatureBuilder
+public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecisionEntity, PlayCardTrainingData>
 {
     private const int MaxCardsInHand = FeatureEngineeringConstants.MaxCardsInHand;
 
     public static PlayCardTrainingData BuildFeatures(
+        RelativeCard[] cardsInHand,
+        RelativeCard[] validCards,
+        Dictionary<RelativePlayerPosition, RelativeCard> playedCards,
+        short teamScore,
+        short opponentScore,
+        RelativePlayerPosition leadPlayer,
+        RelativeSuit? leadSuit,
+        RelativePlayerPosition callingPlayer,
+        bool callingPlayerGoingAlone,
+        RelativePlayerPosition dealer,
+        RelativeCard? dealerPickedUpCard,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids,
+        RelativeCard[] cardsAccountedFor,
+        RelativePlayerPosition? winningTrickPlayer,
+        short trickNumber,
+        short wonTricks,
+        short opponentsWonTricks,
+        RelativeCard chosenCard)
+    {
+        return BuildFeaturesFromContext(
+            cardsInHand,
+            validCards,
+            playedCards,
+            teamScore,
+            opponentScore,
+            leadPlayer,
+            leadSuit,
+            callingPlayer,
+            callingPlayerGoingAlone,
+            dealer,
+            dealerPickedUpCard,
+            knownPlayerSuitVoids,
+            cardsAccountedFor,
+            winningTrickPlayer,
+            trickNumber,
+            wonTricks,
+            opponentsWonTricks,
+            chosenCard);
+    }
+
+    protected override PlayCardTrainingData BuildFeaturesCore(PlayCardDecisionEntity entity)
+    {
+        var context = PlayCardFeatureContextBuilder.Build(entity);
+
+        var chosenCardIndex = Array.FindIndex(context.CardsInHand, c => c == context.ChosenCard);
+
+        if (chosenCardIndex == -1)
+        {
+            throw new InvalidOperationException(
+                $"Chosen card {context.ChosenCard.Rank} of {context.ChosenCard.Suit} not found in hand");
+        }
+
+        var trainingData = BuildFeaturesFromContext(
+            context.CardsInHand,
+            context.ValidCards,
+            context.PlayedCards,
+            entity.TeamScore,
+            entity.OpponentScore,
+            (RelativePlayerPosition)entity.LeadRelativePlayerPositionId,
+            entity.LeadRelativeSuitId.HasValue ? (RelativeSuit)entity.LeadRelativeSuitId.Value : null,
+            (RelativePlayerPosition)entity.CallingRelativePlayerPositionId,
+            entity.CallingPlayerGoingAlone,
+            (RelativePlayerPosition)entity.DealerRelativePlayerPositionId,
+            context.DealerPickedUpCard,
+            context.KnownPlayerSuitVoids,
+            context.CardsAccountedFor,
+            entity.WinningTrickRelativePlayerPositionId.HasValue ? (RelativePlayerPosition)entity.WinningTrickRelativePlayerPositionId.Value : null,
+            entity.TrickNumber,
+            entity.WonTricks,
+            entity.OpponentsWonTricks,
+            context.ChosenCard);
+
+        trainingData.ExpectedDealPoints = entity.RelativeDealPoints ?? throw new InvalidOperationException(
+            "RelativeDealPoints is required for regression training");
+
+        return trainingData;
+    }
+
+    protected override void ValidateEntity(PlayCardDecisionEntity entity)
+    {
+        if (entity.RelativeDealPoints == null)
+        {
+            throw new InvalidOperationException("RelativeDealPoints cannot be null");
+        }
+    }
+
+    private static PlayCardTrainingData BuildFeaturesFromContext(
         RelativeCard[] cardsInHand,
         RelativeCard[] validCards,
         Dictionary<RelativePlayerPosition, RelativeCard> playedCards,

@@ -1,3 +1,4 @@
+using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
@@ -7,11 +8,69 @@ using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.FeatureEngineering;
 
-public static class CallTrumpFeatureBuilder
+public sealed class CallTrumpFeatureBuilder : FeatureBuilderBase<CallTrumpDecisionEntity, CallTrumpTrainingData>
 {
     private const int NumberOfDecisionClasses = FeatureEngineeringConstants.CallTrumpDecisionCount;
 
     public static CallTrumpTrainingData BuildFeatures(
+        Card[] cards,
+        Card upCard,
+        RelativePlayerPosition dealerPosition,
+        short teamScore,
+        short opponentScore,
+        float decisionOrder,
+        CallTrumpDecision[] validDecisions,
+        CallTrumpDecision chosenDecision)
+    {
+        return BuildFeaturesFromContext(
+            cards,
+            upCard,
+            dealerPosition,
+            teamScore,
+            opponentScore,
+            decisionOrder,
+            validDecisions,
+            chosenDecision);
+    }
+
+    protected override CallTrumpTrainingData BuildFeaturesCore(CallTrumpDecisionEntity entity)
+    {
+        var context = CallTrumpFeatureContextBuilder.Build(entity);
+
+        if (!context.ValidDecisions.Contains(context.ChosenDecision))
+        {
+            var validStr = context.ValidDecisions.Length == 0
+                ? "(empty)"
+                : string.Join(", ", context.ValidDecisions);
+            throw new InvalidOperationException(
+                $"Chosen decision {context.ChosenDecision} is not in the valid decisions array [{validStr}] (entity ID: {entity.CallTrumpDecisionId}, ValidDecisions count: {entity.ValidDecisions.Count})");
+        }
+
+        var trainingData = BuildFeaturesFromContext(
+            context.Cards,
+            context.UpCard,
+            (RelativePlayerPosition)entity.DealerRelativePositionId,
+            entity.TeamScore,
+            entity.OpponentScore,
+            entity.DecisionOrder,
+            context.ValidDecisions,
+            context.ChosenDecision);
+
+        trainingData.ExpectedDealPoints = entity.RelativeDealPoints ?? throw new InvalidOperationException(
+            "RelativeDealPoints is required for regression training");
+
+        return trainingData;
+    }
+
+    protected override void ValidateEntity(CallTrumpDecisionEntity entity)
+    {
+        if (entity.RelativeDealPoints == null)
+        {
+            throw new InvalidOperationException("RelativeDealPoints cannot be null");
+        }
+    }
+
+    private static CallTrumpTrainingData BuildFeaturesFromContext(
         Card[] cards,
         Card upCard,
         RelativePlayerPosition dealerPosition,

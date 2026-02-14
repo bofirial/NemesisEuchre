@@ -17,7 +17,8 @@ public class DiscardCardFeatureEngineerTests
 
     public DiscardCardFeatureEngineerTests()
     {
-        _engineer = new DiscardCardFeatureEngineer();
+        var builder = new DiscardCardFeatureBuilder();
+        _engineer = new DiscardCardFeatureEngineer(builder);
         _faker = new Faker();
     }
 

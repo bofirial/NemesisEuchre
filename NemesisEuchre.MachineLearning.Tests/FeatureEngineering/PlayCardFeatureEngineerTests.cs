@@ -17,7 +17,8 @@ public class PlayCardFeatureEngineerTests
 
     public PlayCardFeatureEngineerTests()
     {
-        _engineer = new PlayCardFeatureEngineer();
+        var builder = new PlayCardFeatureBuilder();
+        _engineer = new PlayCardFeatureEngineer(builder);
         _faker = new Faker();
     }
 
