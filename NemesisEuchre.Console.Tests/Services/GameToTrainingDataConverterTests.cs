@@ -391,7 +391,7 @@ public class GameToTrainingDataConverterTests
     public void Convert_ReturnsStats_WithUniqueActors()
     {
         var actor1 = new Actor(ActorType.Chaos);
-        var actor2 = new Actor(ActorType.Model, "gen1", 0.1f);
+        var actor2 = Actor.WithModel(ActorType.Model, "gen1", 0.1f);
 
         var game1 = new Game { GameStatus = GameStatus.Complete };
         game1.Players[PlayerPosition.South] = new Player { Actor = actor1 };

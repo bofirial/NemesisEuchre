@@ -77,6 +77,42 @@ public class DefaultCommand(
     public float Team2ExplorationTemperature { get; set; }
 
     [CliOption(
+        Description = "ModelName for Team1 PlayCard decision (overrides --t1m)",
+        Required = false,
+        Alias = "t1m-play")]
+    public string? Team1PlayCardModelName { get; set; }
+
+    [CliOption(
+        Description = "ModelName for Team1 CallTrump decision (overrides --t1m)",
+        Required = false,
+        Alias = "t1m-call")]
+    public string? Team1CallTrumpModelName { get; set; }
+
+    [CliOption(
+        Description = "ModelName for Team1 DiscardCard decision (overrides --t1m)",
+        Required = false,
+        Alias = "t1m-discard")]
+    public string? Team1DiscardCardModelName { get; set; }
+
+    [CliOption(
+        Description = "ModelName for Team2 PlayCard decision (overrides --t2m)",
+        Required = false,
+        Alias = "t2m-play")]
+    public string? Team2PlayCardModelName { get; set; }
+
+    [CliOption(
+        Description = "ModelName for Team2 CallTrump decision (overrides --t2m)",
+        Required = false,
+        Alias = "t2m-call")]
+    public string? Team2CallTrumpModelName { get; set; }
+
+    [CliOption(
+        Description = "ModelName for Team2 DiscardCard decision (overrides --t2m)",
+        Required = false,
+        Alias = "t2m-discard")]
+    public string? Team2DiscardCardModelName { get; set; }
+
+    [CliOption(
         Description = "Allow overwriting existing IDV files",
         Alias = "o")]
     public bool Overwrite { get; set; }
@@ -109,18 +145,91 @@ public class DefaultCommand(
         return 0;
     }
 
-    private static Actor? GetTeamActor(ActorType? teamActorType, string? teamModelName, float teamExplorationTemperature)
+    private static Actor? GetTeamActor(
+        ActorType? teamActorType,
+        string? teamModelName,
+        float teamExplorationTemperature,
+        string? teamPlayCardModelName,
+        string? teamCallTrumpModelName,
+        string? teamDiscardCardModelName)
     {
+        bool hasAnyModel = !string.IsNullOrEmpty(teamModelName)
+            || !string.IsNullOrEmpty(teamPlayCardModelName)
+            || !string.IsNullOrEmpty(teamCallTrumpModelName)
+            || !string.IsNullOrEmpty(teamDiscardCardModelName);
+
         if (teamExplorationTemperature != default)
         {
             teamActorType = ActorType.ModelTrainer;
         }
-        else if (!string.IsNullOrEmpty(teamModelName))
+        else if (hasAnyModel)
         {
             teamActorType = ActorType.Model;
         }
 
-        return teamActorType != null ? new Actor(teamActorType.Value, teamModelName, teamExplorationTemperature) : null;
+        if (teamActorType == null)
+        {
+            return null;
+        }
+
+        bool hasPerDecisionTypeModel = !string.IsNullOrEmpty(teamPlayCardModelName)
+            || !string.IsNullOrEmpty(teamCallTrumpModelName)
+            || !string.IsNullOrEmpty(teamDiscardCardModelName);
+
+        if (hasPerDecisionTypeModel)
+        {
+            return Actor.WithModels(
+                teamActorType.Value,
+                teamPlayCardModelName,
+                teamCallTrumpModelName,
+                teamDiscardCardModelName,
+                teamModelName,
+                teamExplorationTemperature);
+        }
+
+        if (!string.IsNullOrEmpty(teamModelName))
+        {
+            return Actor.WithModel(teamActorType.Value, teamModelName, teamExplorationTemperature);
+        }
+
+        return new Actor(teamActorType.Value, null, teamExplorationTemperature);
+    }
+
+    private static string GetModelDisplay(Actor? actor)
+    {
+        if (actor?.ModelNames == null || actor.ModelNames.Count == 0)
+        {
+            return "no model";
+        }
+
+        if (actor.ModelNames.Count == 1 && actor.ModelNames.TryGetValue("default", out var singleModel))
+        {
+            return singleModel;
+        }
+
+        var parts = new List<string>();
+
+        if (actor.ModelNames.TryGetValue("PlayCard", out var playModel))
+        {
+            parts.Add($"play:{playModel}");
+        }
+
+        if (actor.ModelNames.TryGetValue("CallTrump", out var callModel))
+        {
+            parts.Add($"call:{callModel}");
+        }
+
+        if (actor.ModelNames.TryGetValue("DiscardCard", out var discardModel))
+        {
+            parts.Add($"discard:{discardModel}");
+        }
+
+        if (actor.ModelNames.TryGetValue("default", out var defaultModel))
+        {
+            parts.Add($"default:{defaultModel}");
+        }
+
+        return string.Join(", ", parts);
     }
 
     private static string GetActorDisplay(Actor? actor)
@@ -129,8 +238,8 @@ public class DefaultCommand(
         {
             ActorType.User => "the player",
             ActorType.Chaos or ActorType.Chad or ActorType.Beta => $"{actor.ActorType}Bots",
-            ActorType.Model => $"{actor.ActorType}Bots ({actor.ModelName})",
-            ActorType.ModelTrainer => $"{actor.ActorType}Bots ({actor.ModelName} {actor.ExplorationTemperature})",
+            ActorType.Model => $"{actor.ActorType}Bots ({GetModelDisplay(actor)})",
+            ActorType.ModelTrainer => $"{actor.ActorType}Bots ({GetModelDisplay(actor)} {actor.ExplorationTemperature})",
             _ => $"{ActorType.Chaos}Bots",
         };
     }
@@ -139,8 +248,20 @@ public class DefaultCommand(
     {
         var teamActor = team switch
         {
-            Team.Team1 => GetTeamActor(Team1, Team1ModelName, Team1ExplorationTemperature),
-            Team.Team2 => GetTeamActor(Team2, Team2ModelName, Team2ExplorationTemperature),
+            Team.Team1 => GetTeamActor(
+                Team1,
+                Team1ModelName,
+                Team1ExplorationTemperature,
+                Team1PlayCardModelName,
+                Team1CallTrumpModelName,
+                Team1DiscardCardModelName),
+            Team.Team2 => GetTeamActor(
+                Team2,
+                Team2ModelName,
+                Team2ExplorationTemperature,
+                Team2PlayCardModelName,
+                Team2CallTrumpModelName,
+                Team2DiscardCardModelName),
             _ => throw new ArgumentOutOfRangeException(nameof(team), team, $"Invalid Team: {team}"),
         };
         return teamActor != null ? [teamActor, teamActor] : null;

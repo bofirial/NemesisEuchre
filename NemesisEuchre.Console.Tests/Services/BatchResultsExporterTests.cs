@@ -171,7 +171,7 @@ public class BatchResultsExporterTests : IDisposable
             ElapsedTime = TimeSpan.FromSeconds(30),
         };
 
-        var team1Actors = new[] { new Actor(ActorType.Model, "gen2", 0.0f) };
+        var team1Actors = new[] { Actor.WithModel(ActorType.Model, "gen2", 0.0f) };
         var team2Actors = new[] { new Actor(ActorType.Chaos) };
 
         var outputPath = Path.Combine(_tempDirectory, "teams-results.json");
@@ -264,7 +264,7 @@ public class BatchResultsExporterTests : IDisposable
             IdvSaveDuration = TimeSpan.FromSeconds(15),
         };
 
-        var team1Actors = new[] { new Actor(ActorType.Model, "gen3", 0.0f) };
+        var team1Actors = new[] { Actor.WithModel(ActorType.Model, "gen3", 0.0f) };
         var team2Actors = new[] { new Actor(ActorType.Chad) };
 
         var outputPath = Path.Combine(_tempDirectory, "deserialization-test.json");

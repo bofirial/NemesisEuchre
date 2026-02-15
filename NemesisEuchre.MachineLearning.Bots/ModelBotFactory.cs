@@ -20,9 +20,12 @@ public class ModelBotFactory(
 
     public IPlayerActor CreatePlayerActor(Actor actor)
     {
-        if (actor.ModelName is null)
+        if (actor.ModelNames == null || actor.ModelNames.Count == 0)
         {
-            throw new ArgumentException("Model name must be provided for ModelBot.");
+            throw new ArgumentException(
+                "At least one model name must be provided for ModelBot. " +
+                "Use --t1m <model> for all decision types, or " +
+                "--t1m-play, --t1m-call, --t1m-discard for specific types.");
         }
 
         return new ModelBot(engineProvider, callTrumpFeatureBuilder, discardCardFeatureBuilder, playCardFeatureBuilder, random, logger, actor);

@@ -826,4 +826,258 @@ public class DefaultCommandTests
                 default),
             Times.Once);
     }
+
+    [Fact]
+    public async Task RunAsync_WithTeam1ModelName_CreatesActorWithModel()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockSingleGameRunner = new Mock<ISingleGameRunner>();
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
+
+        var batchResults = new BatchGameResults
+        {
+            TotalGames = 10,
+            Team1Wins = 6,
+            Team2Wins = 4,
+            FailedGames = 0,
+            TotalDeals = 50,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
+            ElapsedTime = TimeSpan.FromSeconds(5),
+        };
+
+        mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
+                It.IsAny<int>(),
+                It.IsAny<IBatchProgressReporter>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(batchResults);
+
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
+        var command = new DefaultCommand(
+            mockLogger,
+            testConsole,
+            mockBanner,
+            mockSingleGameRunner.Object,
+            mockBatchGameOrchestrator.Object,
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
+        {
+            Count = 10,
+            Team1ModelName = "Gen2",
+        };
+
+        await command.RunAsync();
+
+        mockBatchGameOrchestrator.Verify(
+            o => o.RunBatchAsync(
+                10,
+                It.IsAny<IBatchProgressReporter>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.Is<Actor[]>(a => a.Length == 2 && a[0].ActorType == ActorType.Model && a[0].ModelName == "Gen2"),
+                null,
+                default),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task RunAsync_WithPerDecisionTypeModels_CreatesActorWithSpecificModels()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockSingleGameRunner = new Mock<ISingleGameRunner>();
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
+
+        var batchResults = new BatchGameResults
+        {
+            TotalGames = 10,
+            Team1Wins = 6,
+            Team2Wins = 4,
+            FailedGames = 0,
+            TotalDeals = 50,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
+            ElapsedTime = TimeSpan.FromSeconds(5),
+        };
+
+        mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
+                It.IsAny<int>(),
+                It.IsAny<IBatchProgressReporter>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(batchResults);
+
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
+        var command = new DefaultCommand(
+            mockLogger,
+            testConsole,
+            mockBanner,
+            mockSingleGameRunner.Object,
+            mockBatchGameOrchestrator.Object,
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
+        {
+            Count = 10,
+            Team1PlayCardModelName = "Gen2A",
+            Team1CallTrumpModelName = "Gen2B",
+            Team1DiscardCardModelName = "Gen2C",
+        };
+
+        await command.RunAsync();
+
+        mockBatchGameOrchestrator.Verify(
+            o => o.RunBatchAsync(
+                10,
+                It.IsAny<IBatchProgressReporter>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.Is<Actor[]>(a => a.Length == 2
+                    && a[0].ActorType == ActorType.Model
+                    && a[0].GetModelName("PlayCard") == "Gen2A"
+                    && a[0].GetModelName("CallTrump") == "Gen2B"
+                    && a[0].GetModelName("DiscardCard") == "Gen2C"),
+                null,
+                default),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task RunAsync_WithMixedModels_UsesDefaultPlusOverrides()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockSingleGameRunner = new Mock<ISingleGameRunner>();
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
+
+        var batchResults = new BatchGameResults
+        {
+            TotalGames = 10,
+            Team1Wins = 6,
+            Team2Wins = 4,
+            FailedGames = 0,
+            TotalDeals = 50,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
+            ElapsedTime = TimeSpan.FromSeconds(5),
+        };
+
+        mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
+                It.IsAny<int>(),
+                It.IsAny<IBatchProgressReporter>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(batchResults);
+
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
+        var command = new DefaultCommand(
+            mockLogger,
+            testConsole,
+            mockBanner,
+            mockSingleGameRunner.Object,
+            mockBatchGameOrchestrator.Object,
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
+        {
+            Count = 10,
+            Team1ModelName = "Gen2",
+            Team1PlayCardModelName = "Gen2A",
+        };
+
+        await command.RunAsync();
+
+        mockBatchGameOrchestrator.Verify(
+            o => o.RunBatchAsync(
+                10,
+                It.IsAny<IBatchProgressReporter>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.Is<Actor[]>(a => a.Length == 2
+                    && a[0].ActorType == ActorType.Model
+                    && a[0].GetModelName("PlayCard") == "Gen2A"
+                    && a[0].GetModelName("CallTrump") == "Gen2"
+                    && a[0].GetModelName("DiscardCard") == "Gen2"),
+                null,
+                default),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task RunAsync_WithExplorationTemperature_CreatesModelTrainerBot()
+    {
+        var testConsole = new TestConsole();
+        var mockLogger = Mock.Of<ILogger<DefaultCommand>>();
+        var mockBanner = Mock.Of<IApplicationBanner>();
+        var mockSingleGameRunner = new Mock<ISingleGameRunner>();
+        var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
+        var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
+
+        var batchResults = new BatchGameResults
+        {
+            TotalGames = 10,
+            Team1Wins = 6,
+            Team2Wins = 4,
+            FailedGames = 0,
+            TotalDeals = 50,
+            TotalTricks = 0,
+            TotalCallTrumpDecisions = 0,
+            TotalDiscardCardDecisions = 0,
+            TotalPlayCardDecisions = 0,
+            ElapsedTime = TimeSpan.FromSeconds(5),
+        };
+
+        mockBatchGameOrchestrator.Setup(x => x.RunBatchAsync(
+                It.IsAny<int>(),
+                It.IsAny<IBatchProgressReporter>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<Actor[]?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(batchResults);
+
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
+        var command = new DefaultCommand(
+            mockLogger,
+            testConsole,
+            mockBanner,
+            mockSingleGameRunner.Object,
+            mockBatchGameOrchestrator.Object,
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
+        {
+            Count = 10,
+            Team1ModelName = "Gen2",
+            Team1ExplorationTemperature = 0.5f,
+        };
+
+        await command.RunAsync();
+
+        mockBatchGameOrchestrator.Verify(
+            o => o.RunBatchAsync(
+                10,
+                It.IsAny<IBatchProgressReporter>(),
+                It.IsAny<GamePersistenceOptions?>(),
+                It.Is<Actor[]>(a => a.Length == 2
+                    && a[0].ActorType == ActorType.ModelTrainer
+                    && a[0].ExplorationTemperature == 0.5f),
+                null,
+                default),
+            Times.Once);
+    }
 }

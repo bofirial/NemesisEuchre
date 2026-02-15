@@ -31,7 +31,7 @@ public class Gen1TrainerBotTests
     private readonly Mock<IRandomNumberGenerator> _mockRandom = new();
     private readonly Mock<ILogger<ModelTrainerBot>> _mockLogger = new();
     private readonly IOptions<MachineLearningOptions> _machineLearningOptions = Microsoft.Extensions.Options.Options.Create(new MachineLearningOptions());
-    private readonly Actor _actor = new(ActorType.ModelTrainer, "Gen1");
+    private readonly Actor _actor = Actor.WithModel(ActorType.ModelTrainer, "Gen1");
 
     [Fact]
     public void ActorType_ShouldReturnGen1Trainer()

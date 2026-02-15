@@ -244,7 +244,7 @@ public class TrainingDataAccumulatorTests : IDisposable
     public void Add_ShouldAccumulateStats_AcrossMultipleBatches()
     {
         var actor1 = new Actor(ActorType.Chaos);
-        var actor2 = new Actor(ActorType.Model, "gen1", 0.1f);
+        var actor2 = Actor.WithModel(ActorType.Model, "gen1", 0.1f);
 
         var stats1 = new TrainingDataBatchStats(3, 15, 60, [actor1]);
         var batch1 = new TrainingDataBatch([], [], [], stats1);
