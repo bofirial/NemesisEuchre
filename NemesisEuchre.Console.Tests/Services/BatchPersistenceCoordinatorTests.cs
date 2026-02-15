@@ -2,7 +2,6 @@ using FluentAssertions;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 using Moq;
 
@@ -11,6 +10,8 @@ using NemesisEuchre.Console.Services;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.DataAccess.Repositories;
 using NemesisEuchre.GameEngine.Models;
+
+using MicrosoftOptions = Microsoft.Extensions.Options.Options;
 
 namespace NemesisEuchre.Console.Tests.Services;
 
@@ -34,7 +35,7 @@ public class BatchPersistenceCoordinatorTests
             _mockScopeFactory.Object,
             Mock.Of<IGameToTrainingDataConverter>(),
             Mock.Of<ITrainingDataAccumulator>(),
-            Options.Create(new PersistenceOptions { BatchSize = 2 }),
+            MicrosoftOptions.Create(new PersistenceOptions { BatchSize = 2 }),
             Mock.Of<ILogger<BatchPersistenceCoordinator>>());
     }
 

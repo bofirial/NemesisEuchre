@@ -1,10 +1,10 @@
 using FluentAssertions;
 
-using Microsoft.Extensions.Options;
-
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.Console.Services.Orchestration;
 using NemesisEuchre.GameEngine.Options;
+
+using MicrosoftOptions = Microsoft.Extensions.Options.Options;
 
 namespace NemesisEuchre.Console.Tests.Services.Orchestration;
 
@@ -14,7 +14,7 @@ public class ParallelismCoordinatorTests
 
     public ParallelismCoordinatorTests()
     {
-        var options = Options.Create(new GameExecutionOptions
+        var options = MicrosoftOptions.Create(new GameExecutionOptions
         {
             MaxDegreeOfParallelism = 4,
         });

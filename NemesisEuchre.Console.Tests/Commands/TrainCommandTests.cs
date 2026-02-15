@@ -13,6 +13,8 @@ using NemesisEuchre.MachineLearning.Options;
 
 using Spectre.Console.Testing;
 
+using MicrosoftOptions = Microsoft.Extensions.Options.Options;
+
 namespace NemesisEuchre.Console.Tests.Commands;
 
 public class TrainCommandTests
@@ -25,7 +27,7 @@ public class TrainCommandTests
         var mockProgressCoordinator = new Mock<ITrainingProgressCoordinator>();
         var mockRenderer = new Mock<ITrainingResultsRenderer>();
 
-        var options = Options.Create(new MachineLearningOptions { ModelOutputPath = string.Empty });
+        var options = MicrosoftOptions.Create(new MachineLearningOptions { ModelOutputPath = string.Empty });
 
         var command = new TrainCommand(
             mockLogger,
@@ -66,10 +68,11 @@ public class TrainCommandTests
             It.IsAny<Spectre.Console.IAnsiConsole>(),
             It.IsAny<string>(),
             It.IsAny<bool>(),
+            It.IsAny<IOptions<MachineLearningOptions>?>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(trainingResults);
 
-        var options = Options.Create(new MachineLearningOptions { ModelOutputPath = "models" });
+        var options = MicrosoftOptions.Create(new MachineLearningOptions { ModelOutputPath = "models" });
 
         var command = new TrainCommand(
             mockLogger,
@@ -114,10 +117,11 @@ public class TrainCommandTests
             It.IsAny<Spectre.Console.IAnsiConsole>(),
             It.IsAny<string>(),
             It.IsAny<bool>(),
+            It.IsAny<IOptions<MachineLearningOptions>?>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(trainingResults);
 
-        var options = Options.Create(new MachineLearningOptions { ModelOutputPath = "models" });
+        var options = MicrosoftOptions.Create(new MachineLearningOptions { ModelOutputPath = "models" });
 
         var command = new TrainCommand(
             mockLogger,

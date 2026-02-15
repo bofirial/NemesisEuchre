@@ -1,11 +1,14 @@
 using FluentAssertions;
 
+using Microsoft.Extensions.Options;
+
 using Moq;
 
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services;
 
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.MachineLearning.Options;
 
 using Spectre.Console;
 using Spectre.Console.Testing;
@@ -43,6 +46,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
                 It.IsAny<bool>(),
+                It.IsAny<IOptions<MachineLearningOptions>?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 
@@ -58,6 +62,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
                 It.IsAny<bool>(),
+                It.IsAny<IOptions<MachineLearningOptions>?>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -78,9 +83,10 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
                 It.IsAny<bool>(),
+                It.IsAny<IOptions<MachineLearningOptions>?>(),
                 It.IsAny<CancellationToken>()))
-            .Callback<DecisionType, string, string, IProgress<TrainingProgress>, string, bool, CancellationToken>(
-                (decision, path, modelName, _, _, _, _) =>
+            .Callback<DecisionType, string, string, IProgress<TrainingProgress>, string, bool, IOptions<MachineLearningOptions>?, CancellationToken>(
+                (decision, path, modelName, _, _, _, _, _) =>
                 {
                     capturedDecisionType = decision;
                     capturedOutputPath = path;
@@ -109,6 +115,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
                 It.IsAny<bool>(),
+                It.IsAny<IOptions<MachineLearningOptions>?>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new OperationCanceledException());
 
@@ -136,6 +143,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
                 It.IsAny<bool>(),
+                It.IsAny<IOptions<MachineLearningOptions>?>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Training failed"));
 
@@ -174,6 +182,7 @@ public class TrainingProgressCoordinatorTests : IDisposable
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
                 It.IsAny<bool>(),
+                It.IsAny<IOptions<MachineLearningOptions>?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResults);
 

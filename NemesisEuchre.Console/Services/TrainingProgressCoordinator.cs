@@ -1,7 +1,10 @@
 using System.Diagnostics;
 
+using Microsoft.Extensions.Options;
+
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.MachineLearning.Options;
 
 using Spectre.Console;
 
@@ -16,6 +19,7 @@ public interface ITrainingProgressCoordinator
         IAnsiConsole console,
         string idvName,
         bool allowOverwrite = false,
+        IOptions<MachineLearningOptions>? optionsOverride = null,
         CancellationToken cancellationToken = default);
 }
 
@@ -30,6 +34,7 @@ public class TrainingProgressCoordinator(
         IAnsiConsole console,
         string idvName,
         bool allowOverwrite = false,
+        IOptions<MachineLearningOptions>? optionsOverride = null,
         CancellationToken cancellationToken = default)
     {
         var totalModels = decisionType == DecisionType.All ? 3 : 1;
@@ -54,6 +59,7 @@ public class TrainingProgressCoordinator(
                     progress,
                     idvName,
                     allowOverwrite,
+                    optionsOverride,
                     cancellationToken);
 
                 while (!trainingTask.IsCompleted)

@@ -7,6 +7,7 @@ using NemesisEuchre.Console.Models;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.MachineLearning.Options;
 
 namespace NemesisEuchre.Console.Services;
 
@@ -19,6 +20,7 @@ public interface IModelTrainingOrchestrator
         IProgress<TrainingProgress> progress,
         string idvName,
         bool allowOverwrite = false,
+        IOptions<MachineLearningOptions>? optionsOverride = null,
         CancellationToken cancellationToken = default);
 }
 
@@ -35,6 +37,7 @@ public class ModelTrainingOrchestrator(
         IProgress<TrainingProgress> progress,
         string idvName,
         bool allowOverwrite = false,
+        IOptions<MachineLearningOptions>? optionsOverride = null,
         CancellationToken cancellationToken = default)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -87,6 +90,7 @@ public class ModelTrainingOrchestrator(
                 modelName,
                 progress,
                 idvFilePath,
+                optionsOverride,
                 cancellationToken);
 
             results.Add(result);

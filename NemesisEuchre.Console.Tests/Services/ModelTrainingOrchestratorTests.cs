@@ -10,6 +10,9 @@ using NemesisEuchre.Console.Services;
 using NemesisEuchre.Console.Services.TrainerExecutors;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.MachineLearning.Options;
+
+using MicrosoftOptions = Microsoft.Extensions.Options.Options;
 
 namespace NemesisEuchre.Console.Tests.Services;
 
@@ -26,7 +29,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
             .Returns([]);
 
         var mockLogger = Mock.Of<ILogger<ModelTrainingOrchestrator>>();
-        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, Options.Create(new PersistenceOptions()), mockLogger);
+        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, MicrosoftOptions.Create(new PersistenceOptions()), mockLogger);
 
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
@@ -59,6 +62,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string>(),
+            It.IsAny<IOptions<MachineLearningOptions>?>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(successResult);
 
@@ -67,7 +71,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
             .Returns([mockTrainer.Object]);
 
         var mockLogger = Mock.Of<ILogger<ModelTrainingOrchestrator>>();
-        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, Options.Create(new PersistenceOptions()), mockLogger);
+        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, MicrosoftOptions.Create(new PersistenceOptions()), mockLogger);
 
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
@@ -100,6 +104,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string>(),
+            It.IsAny<IOptions<MachineLearningOptions>?>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(failureResult);
 
@@ -108,7 +113,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
             .Returns([mockTrainer.Object]);
 
         var mockLogger = Mock.Of<ILogger<ModelTrainingOrchestrator>>();
-        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, Options.Create(new PersistenceOptions()), mockLogger);
+        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, MicrosoftOptions.Create(new PersistenceOptions()), mockLogger);
 
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
@@ -138,6 +143,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string>(),
+            It.IsAny<IOptions<MachineLearningOptions>?>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(successResult);
 
@@ -148,6 +154,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string>(),
+            It.IsAny<IOptions<MachineLearningOptions>?>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(failureResult);
 
@@ -156,7 +163,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
             .Returns([mockTrainer1.Object, mockTrainer2.Object]);
 
         var mockLogger = Mock.Of<ILogger<ModelTrainingOrchestrator>>();
-        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, Options.Create(new PersistenceOptions()), mockLogger);
+        var orchestrator = new ModelTrainingOrchestrator(mockFactory.Object, MicrosoftOptions.Create(new PersistenceOptions()), mockLogger);
 
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.All,
@@ -226,7 +233,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
             .Returns([mockTrainer.Object]);
 
         var orchestrator = new ModelTrainingOrchestrator(
-            mockFactory.Object, Options.Create(new PersistenceOptions()), Mock.Of<ILogger<ModelTrainingOrchestrator>>());
+            mockFactory.Object, MicrosoftOptions.Create(new PersistenceOptions()), Mock.Of<ILogger<ModelTrainingOrchestrator>>());
 
         var act = () => orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
@@ -243,6 +250,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
                 It.IsAny<string>(),
                 It.IsAny<IProgress<TrainingProgress>>(),
                 It.IsAny<string>(),
+                It.IsAny<IOptions<MachineLearningOptions>?>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
     }
@@ -263,6 +271,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
             It.IsAny<string>(),
             It.IsAny<IProgress<TrainingProgress>>(),
             It.IsAny<string>(),
+            It.IsAny<IOptions<MachineLearningOptions>?>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(successResult);
 
@@ -271,7 +280,7 @@ public class ModelTrainingOrchestratorTests : IDisposable
             .Returns([mockTrainer.Object]);
 
         var orchestrator = new ModelTrainingOrchestrator(
-            mockFactory.Object, Options.Create(new PersistenceOptions()), Mock.Of<ILogger<ModelTrainingOrchestrator>>());
+            mockFactory.Object, MicrosoftOptions.Create(new PersistenceOptions()), Mock.Of<ILogger<ModelTrainingOrchestrator>>());
 
         var results = await orchestrator.TrainModelsAsync(
             DecisionType.CallTrump,
@@ -323,6 +332,6 @@ public class ModelTrainingOrchestratorTests : IDisposable
             .Returns([mockTrainer.Object]);
 
         return new ModelTrainingOrchestrator(
-            mockFactory.Object, Options.Create(new PersistenceOptions()), Mock.Of<ILogger<ModelTrainingOrchestrator>>());
+            mockFactory.Object, MicrosoftOptions.Create(new PersistenceOptions()), Mock.Of<ILogger<ModelTrainingOrchestrator>>());
     }
 }

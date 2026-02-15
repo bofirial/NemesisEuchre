@@ -16,6 +16,8 @@ using NemesisEuchre.GameEngine;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.Options;
 
+using MicrosoftOptions = Microsoft.Extensions.Options.Options;
+
 namespace NemesisEuchre.Console.Tests.Services;
 
 public class BatchGameOrchestratorTests
@@ -499,7 +501,7 @@ public class BatchGameOrchestratorTests
             _serviceScopeFactoryMock.Object,
             Mock.Of<IGameToTrainingDataConverter>(),
             Mock.Of<ITrainingDataAccumulator>(),
-            Options.Create(new PersistenceOptions { BatchSize = 100 }),
+            MicrosoftOptions.Create(new PersistenceOptions { BatchSize = 100 }),
             persistenceLogger.Object);
 
         var executionFacade = new BatchExecutionFacade(_parallelismCoordinatorMock.Object, _subBatchStrategyMock.Object);

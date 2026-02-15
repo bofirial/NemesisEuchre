@@ -24,6 +24,7 @@ public class TrainerExecutorTests
         var executor = new CallTrumpRegressionTrainerExecutor(
             mockTrainer.Object,
             Mock.Of<IIdvFileService>(),
+            Mock.Of<IServiceProvider>(),
             mockLogger);
 
         executor.ModelType.Should().Be("CallTrump");
@@ -55,6 +56,7 @@ public class TrainerExecutorTests
             var executor = new CallTrumpRegressionTrainerExecutor(
                 mockTrainer.Object,
                 mockIdvFileService.Object,
+                Mock.Of<IServiceProvider>(),
                 Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
             await executor.ExecuteAsync(
@@ -95,6 +97,7 @@ public class TrainerExecutorTests
         var executor = new CallTrumpRegressionTrainerExecutor(
             mockTrainer.Object,
             mockIdvFileService.Object,
+            Mock.Of<IServiceProvider>(),
             Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
         var result = await executor.ExecuteAsync(
@@ -117,6 +120,7 @@ public class TrainerExecutorTests
         var executor = new CallTrumpRegressionTrainerExecutor(
             mockTrainer.Object,
             mockIdvFileService.Object,
+            Mock.Of<IServiceProvider>(),
             Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
         var result = await executor.ExecuteAsync(
@@ -154,6 +158,7 @@ public class TrainerExecutorTests
             var executor = new CallTrumpRegressionTrainerExecutor(
                 mockTrainer.Object,
                 mockIdvFileService.Object,
+                Mock.Of<IServiceProvider>(),
                 Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
             var result = await executor.ExecuteAsync(
@@ -187,6 +192,7 @@ public class TrainerExecutorTests
             var executor = new CallTrumpRegressionTrainerExecutor(
                 mockTrainer.Object,
                 mockIdvFileService.Object,
+                Mock.Of<IServiceProvider>(),
                 Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
             var result = await executor.ExecuteAsync(
@@ -224,6 +230,7 @@ public class TrainerExecutorTests
             var executor = new CallTrumpRegressionTrainerExecutor(
                 mockTrainer.Object,
                 mockIdvFileService.Object,
+                Mock.Of<IServiceProvider>(),
                 Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
 
             var result = await executor.ExecuteAsync(

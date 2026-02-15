@@ -1,11 +1,14 @@
 using System.Diagnostics;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Models;
+using NemesisEuchre.MachineLearning.Options;
 using NemesisEuchre.MachineLearning.Services;
 using NemesisEuchre.MachineLearning.Trainers;
 
@@ -22,17 +25,20 @@ public interface ITrainerExecutor
         string modelName,
         IProgress<TrainingProgress> progress,
         string idvFilePath,
+        IOptions<MachineLearningOptions>? optionsOverride = null,
         CancellationToken cancellationToken = default);
 }
 
 public abstract class RegressionTrainerExecutorBase<TTrainingData>(
     IModelTrainer<TTrainingData> trainer,
     IIdvFileService idvFileService,
+    IServiceProvider serviceProvider,
     ILogger logger) : ITrainerExecutor
     where TTrainingData : class, new()
 {
     private readonly IModelTrainer<TTrainingData> _trainer = trainer ?? throw new ArgumentNullException(nameof(trainer));
     private readonly IIdvFileService _idvFileService = idvFileService ?? throw new ArgumentNullException(nameof(idvFileService));
+    private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public abstract string ModelType { get; }
@@ -44,6 +50,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
         string modelName,
         IProgress<TrainingProgress> progress,
         string idvFilePath,
+        IOptions<MachineLearningOptions>? optionsOverride = null,
         CancellationToken cancellationToken = default)
     {
         var modelStopwatch = Stopwatch.StartNew();
@@ -73,9 +80,19 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
 
             LoggerMessages.LogIdvMetadataValidated(_logger, idvFilePath, metadata.RowCount, metadata.GameCount);
 
+            var trainerToUse = _trainer;
+            if (optionsOverride != null)
+            {
+                var trainerType = GetTrainerType();
+                trainerToUse = (IModelTrainer<TTrainingData>)ActivatorUtilities.CreateInstance(
+                    _serviceProvider,
+                    trainerType,
+                    optionsOverride);
+            }
+
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Training, 25, "Training model (IDV)..."));
 
-            var trainingResult = await _trainer.TrainAsync(dataView, preShuffled: true, cancellationToken);
+            var trainingResult = await trainerToUse.TrainAsync(dataView, preShuffled: true, cancellationToken);
 
             if (trainingResult.TrainingSamples == 0)
             {
@@ -89,7 +106,7 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             var metrics = (RegressionEvaluationMetrics)trainingResult.ValidationMetrics;
 
             progress.Report(new TrainingProgress(ModelType, TrainingPhase.Saving, 75, "Saving model..."));
-            await _trainer.SaveModelAsync(outputPath, modelName, trainingResult, metadata, cancellationToken);
+            await trainerToUse.SaveModelAsync(outputPath, modelName, trainingResult, metadata, cancellationToken);
 
             progress.Report(new TrainingProgress(
                 ModelType,
@@ -120,4 +137,6 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             return new ModelTrainingResult(ModelType, false, ErrorMessage: ex.Message, Duration: modelStopwatch.Elapsed);
         }
     }
+
+    protected abstract Type GetTrainerType();
 }

@@ -507,17 +507,23 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 
 ## Interactive Play 0.9
 
-1. Add a PlayGame command to allow interactive play
-2. Implement IPlayerActor with methods in NemesisEuchre.Console for handling player actions
-3. Create Display for Cards in terminal ASCII art
-4. Add interactivity for selecting an option or card from the terminal
-5. Create Display for current state of Deal
-6. Create Display for current state of Trick
-7. Implement Call Trump action in the terminal
-8.  Implement Discard Card action in the terminal
-9.  Implement Play Card action in the terminal
-10. Add animations? to simulate bot actions and allow for human reactions
-11. CONSIDER Adding hooks into the GameEngine to allow players to get GameState updates in more real time (Would allow for multiple players in the future)
-12. Play games against ChaosBot to record win percentage
-13. Play games against GenX bots to record win percentage and prove they are improving
+1. Create a Web Project using ASP.NET and React
+2. Create a CI/CD Build and Deploy to Azure
+3. Create a Data Store (Cosmos?  SQL?)
+6. GitHub JWT Sign-In
+7. Role-Based Authentication
+9. Add SignalR to the Server and Client
+4. Create a Home Page
+5. Create a Game Lobby
+8. Create an Upload Model page
+10. Create an Active Game Page
+11. Create a Card Component
+12. Create a Score Component
+13. Create a Hand Component
+14. Create a Current Trick Component
+15. Create an UpCard Component
+16. Process Call Trump Decision using SignalR
+16. Process Discard Card Decision using SignalR
+16. Process Play Card Decision using SignalR
+17. Add animations? to simulate bot actions and allow for human reactions
 

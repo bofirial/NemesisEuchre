@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Console.Models;
+using NemesisEuchre.Console.Options;
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
@@ -44,6 +45,18 @@ public class TrainCommand(
         Alias = "o")]
     public bool Overwrite { get; set; }
 
+    [CliOption(Description = "Number of boosting iterations (10-500)", Alias = "i")]
+    public int? NumberOfIterations { get; set; }
+
+    [CliOption(Description = "Learning rate for gradient boosting (0.01-1.0)", Alias = "lr")]
+    public double? LearningRate { get; set; }
+
+    [CliOption(Description = "Maximum leaves per tree (2-1024)", Alias = "l")]
+    public int? NumberOfLeaves { get; set; }
+
+    [CliOption(Description = "Minimum samples per leaf node (1-1000)", Alias = "msl")]
+    public int? MinimumExampleCountPerLeaf { get; set; }
+
     public async Task<int> RunAsync()
     {
         LoggerMessages.LogTrainingStarting(logger, DecisionType);
@@ -54,7 +67,20 @@ public class TrainCommand(
             return 1;
         }
 
-        DisplayTrainingConfiguration(outputPath);
+        var validationResult = ValidateCliHyperparameters();
+        if (validationResult != 0)
+        {
+            return validationResult;
+        }
+
+        var mergedOptions = new MergedMachineLearningOptions(
+            options.Value,
+            numberOfIterations: NumberOfIterations,
+            learningRate: LearningRate,
+            numberOfLeaves: NumberOfLeaves,
+            minimumExampleCountPerLeaf: MinimumExampleCountPerLeaf);
+
+        DisplayTrainingConfiguration(outputPath, mergedOptions.Value);
 
         var results = await progressCoordinator.CoordinateTrainingWithProgressAsync(
             DecisionType,
@@ -62,7 +88,8 @@ public class TrainCommand(
             ModelName,
             ansiConsole,
             Source,
-            Overwrite);
+            Overwrite,
+            mergedOptions);
 
         resultsRenderer.RenderTrainingResults(results, DecisionType);
 
@@ -88,11 +115,64 @@ public class TrainCommand(
         return outputPath;
     }
 
-    private void DisplayTrainingConfiguration(string outputPath)
+    private int ValidateCliHyperparameters()
+    {
+        var errors = new List<string>();
+
+        if (NumberOfIterations.HasValue && (NumberOfIterations < 10 || NumberOfIterations > 500))
+        {
+            errors.Add($"--iter value {NumberOfIterations} is out of range. Valid range: 10-500");
+        }
+
+        if (LearningRate.HasValue && (LearningRate < 0.01 || LearningRate > 1.0))
+        {
+            errors.Add($"--lr value {LearningRate} is out of range. Valid range: 0.01-1.0");
+        }
+
+        if (NumberOfLeaves.HasValue && (NumberOfLeaves < 2 || NumberOfLeaves > 1024))
+        {
+            errors.Add($"--leaves value {NumberOfLeaves} is out of range. Valid range: 2-1024");
+        }
+
+        if (MinimumExampleCountPerLeaf.HasValue && (MinimumExampleCountPerLeaf < 1 || MinimumExampleCountPerLeaf > 1000))
+        {
+            errors.Add($"--minleaf value {MinimumExampleCountPerLeaf} is out of range. Valid range: 1-1000");
+        }
+
+        if (errors.Count > 0)
+        {
+            foreach (var error in errors)
+            {
+                ansiConsole.MarkupLine($"[red]Error:[/] {error}");
+            }
+
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private void DisplayTrainingConfiguration(string outputPath, MachineLearningOptions effectiveOptions)
     {
         ansiConsole.WriteLine();
-        ansiConsole.MarkupLine($"[dim]Output: {outputPath}[/]");
-        ansiConsole.MarkupLine($"[dim]Model Name: {ModelName}[/]");
+        ansiConsole.MarkupLine("[bold]Configuration:[/]");
+        ansiConsole.MarkupLine($"  Output: [cyan]{outputPath}[/]");
+        ansiConsole.MarkupLine($"  Model Name: [cyan]{ModelName}[/]");
+        ansiConsole.MarkupLine($"  Source: [cyan]{Source}[/]");
+        ansiConsole.WriteLine();
+        ansiConsole.MarkupLine("[bold]Hyperparameters:[/]");
+
+        var iterSource = NumberOfIterations.HasValue ? "[yellow](CLI)[/]" : "[dim](Config)[/]";
+        ansiConsole.MarkupLine($"  Number of Iterations: [cyan]{effectiveOptions.NumberOfIterations}[/] {iterSource}");
+
+        var lrSource = LearningRate.HasValue ? "[yellow](CLI)[/]" : "[dim](Config)[/]";
+        ansiConsole.MarkupLine($"  Learning Rate: [cyan]{effectiveOptions.LearningRate}[/] {lrSource}");
+
+        var leavesSource = NumberOfLeaves.HasValue ? "[yellow](CLI)[/]" : "[dim](Config)[/]";
+        ansiConsole.MarkupLine($"  Number of Leaves: [cyan]{effectiveOptions.NumberOfLeaves}[/] {leavesSource}");
+
+        var minLeafSource = MinimumExampleCountPerLeaf.HasValue ? "[yellow](CLI)[/]" : "[dim](Config)[/]";
+        ansiConsole.MarkupLine($"  Min Examples Per Leaf: [cyan]{effectiveOptions.MinimumExampleCountPerLeaf}[/] {minLeafSource}");
 
         ansiConsole.WriteLine();
     }

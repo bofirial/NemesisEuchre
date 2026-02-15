@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using FluentAssertions;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 using Moq;
 
@@ -13,6 +12,8 @@ using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Models;
 using NemesisEuchre.MachineLearning.Services;
+
+using MicrosoftOptions = Microsoft.Extensions.Options.Options;
 
 namespace NemesisEuchre.Console.Tests.Services;
 
@@ -30,7 +31,7 @@ public class TrainingDataAccumulatorTests : IDisposable
     public TrainingDataAccumulatorTests()
     {
         _tempDirectory = Path.Combine(Path.GetTempPath(), $"TrainingDataAccumulatorTests_{Guid.NewGuid()}");
-        var options = Options.Create(new PersistenceOptions { IdvOutputPath = _tempDirectory });
+        var options = MicrosoftOptions.Create(new PersistenceOptions { IdvOutputPath = _tempDirectory });
 
         _mockIdvFileService
             .Setup(x => x.LoadMetadata(It.IsAny<string>()))
