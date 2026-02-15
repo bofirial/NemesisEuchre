@@ -29,6 +29,7 @@ public static class ConsoleServiceCollectionExtensions
         services.AddScoped<ITrickTableRenderer, TrickTableRenderer>();
         services.AddScoped<IDecisionRenderer, DecisionRenderer>();
         services.AddScoped<IGameResultsRenderer, GameResultsRenderer>();
+        services.AddScoped<IBatchResultsExporter, BatchResultsExporter>();
         services.AddScoped<ISingleGameRunner, SingleGameRunner>();
         services.AddScoped<IParallelismCoordinator, ParallelismCoordinator>();
         services.AddScoped<ISubBatchStrategy, SubBatchStrategy>();

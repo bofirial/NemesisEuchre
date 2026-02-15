@@ -453,4 +453,17 @@ public static partial class LoggerMessages
         Level = LogLevel.Information,
         Message = "IDV chunk cleanup complete: {DirectoryPath}")]
     public static partial void LogIdvChunkCleanup(ILogger logger, string directoryPath);
+
+    // EventID 70-71: JSON export operations
+    [LoggerMessage(
+        EventId = 70,
+        Level = LogLevel.Information,
+        Message = "Results exported to JSON file: {FileName}")]
+    public static partial void LogResultsExported(ILogger logger, string fileName);
+
+    [LoggerMessage(
+        EventId = 71,
+        Level = LogLevel.Error,
+        Message = "Failed to export results to JSON file: {FileName}")]
+    public static partial void LogResultsExportFailed(ILogger logger, string fileName, Exception exception);
 }

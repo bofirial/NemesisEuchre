@@ -20,7 +20,8 @@ public class DefaultCommand(
     IApplicationBanner applicationBanner,
     ISingleGameRunner singleGameRunner,
     IBatchGameOrchestrator batchGameOrchestrator,
-    IGameResultsRenderer gameResultsRenderer) : ICliRunAsyncWithReturn
+    IGameResultsRenderer gameResultsRenderer,
+    IBatchResultsExporter batchResultsExporter) : ICliRunAsyncWithReturn
 {
     [CliOption(
         Description = "Number of games to play",
@@ -55,6 +56,7 @@ public class DefaultCommand(
 
     [CliOption(
         Description = "ModelName for Team1 ModelBots",
+        Required = false,
         Alias = "t1m")]
     public string? Team1ModelName { get; set; }
 
@@ -65,6 +67,7 @@ public class DefaultCommand(
 
     [CliOption(
         Description = "ModelName for Team2 ModelBots",
+        Required = false,
         Alias = "t2m")]
     public string? Team2ModelName { get; set; }
 
@@ -77,6 +80,12 @@ public class DefaultCommand(
         Description = "Allow overwriting existing IDV files",
         Alias = "o")]
     public bool Overwrite { get; set; }
+
+    [CliOption(
+        Description = "Export batch results to JSON file for automation and analysis",
+        Required = false,
+        Alias = "json")]
+    public string? OutputJson { get; set; }
 
     public async Task<int> RunAsync()
     {
@@ -186,5 +195,20 @@ public class DefaultCommand(
             });
 
         gameResultsRenderer.RenderBatchResults(results);
+
+        if (!string.IsNullOrWhiteSpace(OutputJson))
+        {
+            try
+            {
+                batchResultsExporter.ExportToJson(results, OutputJson, team1Actors, team2Actors);
+                var exportedPath = Path.GetFullPath(OutputJson);
+                ansiConsole.MarkupLine($"[green]✓ Results exported to: {exportedPath}[/]");
+            }
+            catch (Exception ex)
+            {
+                Foundation.LoggerMessages.LogResultsExportFailed(logger, OutputJson, ex);
+                ansiConsole.MarkupLine($"[yellow]⚠ Warning: Failed to export results - {ex.Message}[/]");
+            }
+        }
     }
 }

@@ -35,7 +35,8 @@ public class DefaultCommandTests
         mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer, mockBatchResultsExporter);
 
         await command.RunAsync();
 
@@ -61,7 +62,8 @@ public class DefaultCommandTests
         mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner.Object, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer, mockBatchResultsExporter);
 
         await command.RunAsync();
 
@@ -87,7 +89,8 @@ public class DefaultCommandTests
         mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer, mockBatchResultsExporter);
 
         var result = await command.RunAsync();
 
@@ -113,7 +116,8 @@ public class DefaultCommandTests
         mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer, mockBatchResultsExporter);
 
         await command.RunAsync();
 
@@ -139,7 +143,8 @@ public class DefaultCommandTests
         mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
         var mockBatchGameOrchestrator = new Mock<IBatchGameOrchestrator>();
-        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer);
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
+        var command = new DefaultCommand(mockLogger, testConsole, mockBanner, mockSingleGameRunner.Object, mockBatchGameOrchestrator.Object, mockGameResultsRenderer, mockBatchResultsExporter);
 
         await command.RunAsync();
 
@@ -156,13 +161,15 @@ public class DefaultCommandTests
         var mockBatchGameOrchestrator = Mock.Of<IBatchGameOrchestrator>();
         var mockGameResultsRenderer = Mock.Of<IGameResultsRenderer>();
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner,
             mockBatchGameOrchestrator,
-            mockGameResultsRenderer);
+            mockGameResultsRenderer,
+            mockBatchResultsExporter);
 
         command.Count.Should().Be(1);
     }
@@ -186,13 +193,15 @@ public class DefaultCommandTests
         };
         mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner.Object,
             mockBatchGameOrchestrator.Object,
-            mockGameResultsRenderer)
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
         {
             Count = 1,
         };
@@ -238,13 +247,15 @@ public class DefaultCommandTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner.Object,
             mockBatchGameOrchestrator.Object,
-            mockGameResultsRenderer)
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
         {
             Count = 10,
         };
@@ -290,13 +301,15 @@ public class DefaultCommandTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner,
             mockBatchGameOrchestrator.Object,
-            mockGameResultsRenderer.Object)
+            mockGameResultsRenderer.Object,
+            mockBatchResultsExporter)
         {
             Count = 10,
         };
@@ -339,13 +352,15 @@ public class DefaultCommandTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner.Object,
             mockBatchGameOrchestrator.Object,
-            mockGameResultsRenderer.Object)
+            mockGameResultsRenderer.Object,
+            mockBatchResultsExporter)
         {
             Count = 10,
         };
@@ -388,13 +403,15 @@ public class DefaultCommandTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner,
             mockBatchGameOrchestrator.Object,
-            mockGameResultsRenderer)
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
         {
             Count = 5,
         };
@@ -425,13 +442,15 @@ public class DefaultCommandTests
         };
         mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner.Object,
             mockBatchGameOrchestrator,
-            mockGameResultsRenderer)
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
         {
             Count = 1,
         };
@@ -460,13 +479,15 @@ public class DefaultCommandTests
         };
         mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner.Object,
             mockBatchGameOrchestrator,
-            mockGameResultsRenderer)
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
         {
             Count = 1,
             Team1 = ActorType.Model,
@@ -502,13 +523,15 @@ public class DefaultCommandTests
         };
         mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner.Object,
             mockBatchGameOrchestrator,
-            mockGameResultsRenderer)
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
         {
             Count = 1,
             Team2 = ActorType.Model,
@@ -544,13 +567,15 @@ public class DefaultCommandTests
         };
         mockSingleGameRunner.Setup(x => x.RunAsync(It.IsAny<GamePersistenceOptions?>(), It.IsAny<Actor[]?>(), It.IsAny<Actor[]?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())).ReturnsAsync(game);
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner.Object,
             mockBatchGameOrchestrator,
-            mockGameResultsRenderer)
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
         {
             Count = 1,
             Team1 = ActorType.Model,
@@ -601,13 +626,15 @@ public class DefaultCommandTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner,
             mockBatchGameOrchestrator.Object,
-            mockGameResultsRenderer)
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
         {
             Count = 10,
         };
@@ -652,13 +679,15 @@ public class DefaultCommandTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner,
             mockBatchGameOrchestrator.Object,
-            mockGameResultsRenderer)
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
         {
             Count = 10,
             Team1 = ActorType.Model,
@@ -710,13 +739,15 @@ public class DefaultCommandTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner,
             mockBatchGameOrchestrator.Object,
-            mockGameResultsRenderer)
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
         {
             Count = 10,
             Team2 = ActorType.Chaos,
@@ -768,13 +799,15 @@ public class DefaultCommandTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(batchResults);
 
+        var mockBatchResultsExporter = Mock.Of<IBatchResultsExporter>();
         var command = new DefaultCommand(
             mockLogger,
             testConsole,
             mockBanner,
             mockSingleGameRunner,
             mockBatchGameOrchestrator.Object,
-            mockGameResultsRenderer)
+            mockGameResultsRenderer,
+            mockBatchResultsExporter)
         {
             Count = 10,
             Team1 = ActorType.Model,

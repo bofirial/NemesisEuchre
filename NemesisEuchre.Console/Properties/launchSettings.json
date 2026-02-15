@@ -2,8 +2,8 @@
   "profiles": {
     "NemesisEuchre.Console": {
       "commandName": "Project",
-      "commandLineArgs": "--team-1 Gen1 --team-2 Gen3 --count 1000",
-      "commandLineArgs-PLAY": "--team-1 Gen1 --team-2 Chaos --count 10000",
+      "commandLineArgs": "--team-1 Model --team-1-model-name Gen1 --team-2 Model --team-2-model-name Gen3 --count 1000",
+      "commandLineArgs-PLAY": "--team-1 Model --team-1-model-name Gen1 --team-2 Chaos --count 10000",
       "commandLineArgs-TRAIN": "train --decision-type All"
     }
   }
