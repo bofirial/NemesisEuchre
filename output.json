@@ -1,81 +1,81 @@
 {
-  "ModelName": "gen3t1.75b",
-  "TotalTests": 55,
-  "PassedTests": 18,
-  "FailedTests": 37,
-  "PassRate": 0.32727272727272727,
-  "Duration": "00:00:00.2390798",
-  "GeneratedAtUtc": "2026-02-16T03:45:25.065042Z",
+  "ModelName": "gen2x",
+  "TotalTests": 32,
+  "PassedTests": 15,
+  "FailedTests": 17,
+  "PassRate": 0.46875,
+  "Duration": "00:00:00.1896048",
+  "GeneratedAtUtc": "2026-02-16T20:32:02.9970467Z",
   "TestsByDecisionType": {
     "CallTrump": {
       "Total": 24,
-      "Passed": 7,
-      "Failed": 17,
-      "PassRate": 0.2916666666666667
-    },
-    "Discard": {
-      "Total": 16,
-      "Passed": 10,
-      "Failed": 6,
+      "Passed": 15,
+      "Failed": 9,
       "PassRate": 0.625
     },
+    "Discard": {
+      "Total": 4,
+      "Passed": 0,
+      "Failed": 4,
+      "PassRate": 0
+    },
     "Play": {
-      "Total": 15,
-      "Passed": 1,
-      "Failed": 14,
-      "PassRate": 0.06666666666666667
+      "Total": 4,
+      "Passed": 0,
+      "Failed": 4,
+      "PassRate": 0
     }
   },
   "TestResults": [
     {
       "TestName": "Five trump in hand (Spades)",
       "DecisionType": "CallTrump",
-      "Passed": false,
-      "ChosenOption": "Pass",
+      "Passed": true,
+      "ChosenOption": "OrderItUpAndGoAlone",
       "ExpectedBehavior": "Should not pass",
       "OptionScores": {
-        "Pass": 0.52422696,
-        "OrderItUp": -0.1914689,
-        "OrderItUpAndGoAlone": -0.22677377
+        "Pass": 0.55901694,
+        "OrderItUp": 0.90598536,
+        "OrderItUpAndGoAlone": 1.1102228
       },
-      "FailureReason": "Chose Pass but expected: Should not pass"
+      "FailureReason": null
     },
     {
       "TestName": "Five trump in hand (Hearts)",
       "DecisionType": "CallTrump",
-      "Passed": false,
-      "ChosenOption": "Pass",
+      "Passed": true,
+      "ChosenOption": "OrderItUp",
       "ExpectedBehavior": "Should not pass",
       "OptionScores": {
-        "Pass": 0.56711555,
-        "OrderItUp": -0.09089525,
-        "OrderItUpAndGoAlone": -0.12620012
+        "Pass": 0.7980306,
+        "OrderItUp": 1.4968336,
+        "OrderItUpAndGoAlone": 1.0421221
       },
-      "FailureReason": "Chose Pass but expected: Should not pass"
+      "FailureReason": null
     },
     {
       "TestName": "Five trump in hand (Clubs)",
-      "DecisionType": "CallTrump",
-      "Passed": false,
-      "ChosenOption": "Pass",
-      "ExpectedBehavior": "Should not pass",
-      "OptionScores": {
-        "Pass": 0.4273501,
-        "OrderItUp": 0.13046436,
-        "OrderItUpAndGoAlone": 0.18251655
-      },
-      "FailureReason": "Chose Pass but expected: Should not pass"
-    },
-    {
-      "TestName": "Five trump in hand (Diamonds)",
       "DecisionType": "CallTrump",
       "Passed": true,
       "ChosenOption": "OrderItUpAndGoAlone",
       "ExpectedBehavior": "Should not pass",
       "OptionScores": {
-        "Pass": 0.6460641,
-        "OrderItUp": 0.38145608,
-        "OrderItUpAndGoAlone": 0.7856349
+        "Pass": 0.709346,
+        "OrderItUp": 2.2711668,
+        "OrderItUpAndGoAlone": 2.273038
+      },
+      "FailureReason": null
+    },
+    {
+      "TestName": "Five trump in hand (Diamonds)",
+      "DecisionType": "CallTrump",
+      "Passed": true,
+      "ChosenOption": "OrderItUp",
+      "ExpectedBehavior": "Should not pass",
+      "OptionScores": {
+        "Pass": 0.7697815,
+        "OrderItUp": 1.3191988,
+        "OrderItUpAndGoAlone": 1.1893382
       },
       "FailureReason": null
     },
@@ -83,65 +83,65 @@
       "TestName": "Forced call should choose best trump (Spades)",
       "DecisionType": "CallTrump",
       "Passed": false,
-      "ChosenOption": "CallHearts",
+      "ChosenOption": "CallDiamonds",
       "ExpectedBehavior": "Should call suit of the ten",
       "OptionScores": {
-        "CallSpades": -1.4180348,
-        "CallSpadesAndGoAlone": -1.9533588,
-        "CallHearts": -1.3613493,
-        "CallHeartsAndGoAlone": -1.6872474,
-        "CallDiamonds": -1.4255216,
-        "CallDiamondsAndGoAlone": -1.9793774
+        "CallSpades": -1.6748317,
+        "CallSpadesAndGoAlone": -2.3344054,
+        "CallHearts": -1.4248534,
+        "CallHeartsAndGoAlone": -1.7191511,
+        "CallDiamonds": -1.3998961,
+        "CallDiamondsAndGoAlone": -2.4433827
       },
-      "FailureReason": "Chose CallHearts but expected: Should call suit of the ten"
+      "FailureReason": "Chose CallDiamonds but expected: Should call suit of the ten"
     },
     {
       "TestName": "Forced call should choose best trump (Hearts)",
-      "DecisionType": "CallTrump",
-      "Passed": true,
-      "ChosenOption": "CallHearts",
-      "ExpectedBehavior": "Should call suit of the ten",
-      "OptionScores": {
-        "CallSpades": -1.368917,
-        "CallSpadesAndGoAlone": -1.904241,
-        "CallHearts": -1.276029,
-        "CallHeartsAndGoAlone": -1.6381296,
-        "CallClubs": -1.3718617,
-        "CallClubsAndGoAlone": -2.0055692
-      },
-      "FailureReason": null
-    },
-    {
-      "TestName": "Forced call should choose best trump (Clubs)",
-      "DecisionType": "CallTrump",
-      "Passed": false,
-      "ChosenOption": "CallHearts",
-      "ExpectedBehavior": "Should call suit of the ten",
-      "OptionScores": {
-        "CallHearts": -1.3764013,
-        "CallHeartsAndGoAlone": -1.9548488,
-        "CallClubs": -1.4274348,
-        "CallClubsAndGoAlone": -2.0412004,
-        "CallDiamonds": -1.4319769,
-        "CallDiamondsAndGoAlone": -1.9797347
-      },
-      "FailureReason": "Chose CallHearts but expected: Should call suit of the ten"
-    },
-    {
-      "TestName": "Forced call should choose best trump (Diamonds)",
       "DecisionType": "CallTrump",
       "Passed": false,
       "ChosenOption": "CallClubs",
       "ExpectedBehavior": "Should call suit of the ten",
       "OptionScores": {
-        "CallSpades": -1.4147844,
-        "CallSpadesAndGoAlone": -1.9447621,
-        "CallClubs": -1.4123828,
-        "CallClubsAndGoAlone": -2.1520627,
-        "CallDiamonds": -1.416925,
-        "CallDiamondsAndGoAlone": -1.9707807
+        "CallSpades": -1.9648225,
+        "CallSpadesAndGoAlone": -2.6080916,
+        "CallHearts": -1.7240838,
+        "CallHeartsAndGoAlone": -2.0092628,
+        "CallClubs": -1.5201312,
+        "CallClubsAndGoAlone": -2.5268373
       },
       "FailureReason": "Chose CallClubs but expected: Should call suit of the ten"
+    },
+    {
+      "TestName": "Forced call should choose best trump (Clubs)",
+      "DecisionType": "CallTrump",
+      "Passed": true,
+      "ChosenOption": "CallClubs",
+      "ExpectedBehavior": "Should call suit of the ten",
+      "OptionScores": {
+        "CallHearts": -1.7040863,
+        "CallHeartsAndGoAlone": -2.1852796,
+        "CallClubs": -0.82316387,
+        "CallClubsAndGoAlone": -2.0879502,
+        "CallDiamonds": -1.3486221,
+        "CallDiamondsAndGoAlone": -2.2683415
+      },
+      "FailureReason": null
+    },
+    {
+      "TestName": "Forced call should choose best trump (Diamonds)",
+      "DecisionType": "CallTrump",
+      "Passed": true,
+      "ChosenOption": "CallDiamonds",
+      "ExpectedBehavior": "Should call suit of the ten",
+      "OptionScores": {
+        "CallSpades": -1.637796,
+        "CallSpadesAndGoAlone": -2.2106936,
+        "CallClubs": -1.250002,
+        "CallClubsAndGoAlone": -2.4729123,
+        "CallDiamonds": -1.0974957,
+        "CallDiamondsAndGoAlone": -2.2909732
+      },
+      "FailureReason": null
     },
     {
       "TestName": "No trump in hand (Spades)",
@@ -150,9 +150,9 @@
       "ChosenOption": "Pass",
       "ExpectedBehavior": "Should pass",
       "OptionScores": {
-        "Pass": -0.5632626,
-        "OrderItUp": -1.4065452,
-        "OrderItUpAndGoAlone": -2.2468128
+        "Pass": -0.77262765,
+        "OrderItUp": -1.2666106,
+        "OrderItUpAndGoAlone": -2.4330904
       },
       "FailureReason": null
     },
@@ -163,9 +163,9 @@
       "ChosenOption": "Pass",
       "ExpectedBehavior": "Should pass",
       "OptionScores": {
-        "Pass": -0.5572331,
-        "OrderItUp": -1.3771901,
-        "OrderItUpAndGoAlone": -2.214088
+        "Pass": -0.7781432,
+        "OrderItUp": -1.4260144,
+        "OrderItUpAndGoAlone": -2.4727025
       },
       "FailureReason": null
     },
@@ -176,9 +176,9 @@
       "ChosenOption": "Pass",
       "ExpectedBehavior": "Should pass",
       "OptionScores": {
-        "Pass": -0.5572331,
-        "OrderItUp": -1.3857868,
-        "OrderItUpAndGoAlone": -2.210397
+        "Pass": -0.77545834,
+        "OrderItUp": -1.4369619,
+        "OrderItUpAndGoAlone": -2.263207
       },
       "FailureReason": null
     },
@@ -189,119 +189,119 @@
       "ChosenOption": "Pass",
       "ExpectedBehavior": "Should pass",
       "OptionScores": {
-        "Pass": -0.56204903,
-        "OrderItUp": -1.4170938,
-        "OrderItUpAndGoAlone": -2.2417037
+        "Pass": -0.7446639,
+        "OrderItUp": -1.4886523,
+        "OrderItUpAndGoAlone": -2.5396478
       },
       "FailureReason": null
     },
     {
       "TestName": "Perfect hand go alone (Spades)",
       "DecisionType": "CallTrump",
-      "Passed": false,
-      "ChosenOption": "Pass",
+      "Passed": true,
+      "ChosenOption": "OrderItUpAndGoAlone",
       "ExpectedBehavior": "Should go alone",
       "OptionScores": {
-        "Pass": 0.52422696,
-        "OrderItUp": -0.1914689,
-        "OrderItUpAndGoAlone": -0.22677377
+        "Pass": 0.55901694,
+        "OrderItUp": 0.90598536,
+        "OrderItUpAndGoAlone": 1.1102228
       },
-      "FailureReason": "Chose Pass but expected: Should go alone"
+      "FailureReason": null
     },
     {
       "TestName": "Perfect hand go alone (Hearts)",
       "DecisionType": "CallTrump",
       "Passed": false,
-      "ChosenOption": "Pass",
+      "ChosenOption": "OrderItUp",
       "ExpectedBehavior": "Should go alone",
       "OptionScores": {
-        "Pass": 0.56711555,
-        "OrderItUp": -0.09089525,
-        "OrderItUpAndGoAlone": -0.12620012
+        "Pass": 0.7980306,
+        "OrderItUp": 1.4968336,
+        "OrderItUpAndGoAlone": 1.0421221
       },
-      "FailureReason": "Chose Pass but expected: Should go alone"
+      "FailureReason": "Chose OrderItUp but expected: Should go alone"
     },
     {
       "TestName": "Perfect hand go alone (Clubs)",
-      "DecisionType": "CallTrump",
-      "Passed": false,
-      "ChosenOption": "Pass",
-      "ExpectedBehavior": "Should go alone",
-      "OptionScores": {
-        "Pass": 0.4273501,
-        "OrderItUp": 0.13046436,
-        "OrderItUpAndGoAlone": 0.18251655
-      },
-      "FailureReason": "Chose Pass but expected: Should go alone"
-    },
-    {
-      "TestName": "Perfect hand go alone (Diamonds)",
       "DecisionType": "CallTrump",
       "Passed": true,
       "ChosenOption": "OrderItUpAndGoAlone",
       "ExpectedBehavior": "Should go alone",
       "OptionScores": {
-        "Pass": 0.6460641,
-        "OrderItUp": 0.38145608,
-        "OrderItUpAndGoAlone": 0.7856349
+        "Pass": 0.709346,
+        "OrderItUp": 2.2711668,
+        "OrderItUpAndGoAlone": 2.273038
       },
       "FailureReason": null
     },
     {
-      "TestName": "Right bower up scores higher with team dealer (Spades)",
+      "TestName": "Perfect hand go alone (Diamonds)",
       "DecisionType": "CallTrump",
       "Passed": false,
-      "ChosenOption": "Team: -0.3339, Opp: -0.3339",
+      "ChosenOption": "OrderItUp",
+      "ExpectedBehavior": "Should go alone",
+      "OptionScores": {
+        "Pass": 0.7697815,
+        "OrderItUp": 1.3191988,
+        "OrderItUpAndGoAlone": 1.1893382
+      },
+      "FailureReason": "Chose OrderItUp but expected: Should go alone"
+    },
+    {
+      "TestName": "Right bower up scores higher with team dealer (Spades)",
+      "DecisionType": "CallTrump",
+      "Passed": true,
+      "ChosenOption": "Team: -0.3213, Opp: -0.3776",
       "ExpectedBehavior": "Team score \u003E opponent score",
       "OptionScores": {
-        "Self": -0.3339306,
-        "LeftHandOpponent": -0.3339306,
-        "Partner": -0.3339306,
-        "RightHandOpponent": -0.3339306
+        "Self": -0.5982027,
+        "LeftHandOpponent": -0.40676653,
+        "Partner": -0.3212902,
+        "RightHandOpponent": -0.3775786
       },
-      "FailureReason": "Team max (-0.3339) \u003C= Opponent max (-0.3339)"
+      "FailureReason": null
     },
     {
       "TestName": "Right bower up scores higher with team dealer (Hearts)",
       "DecisionType": "CallTrump",
       "Passed": false,
-      "ChosenOption": "Team: -0.3402, Opp: -0.3402",
+      "ChosenOption": "Team: 0.5268, Opp: 0.5720",
       "ExpectedBehavior": "Team score \u003E opponent score",
       "OptionScores": {
-        "Self": -0.3402063,
-        "LeftHandOpponent": -0.3402063,
-        "Partner": -0.3402063,
-        "RightHandOpponent": -0.3402063
+        "Self": 0.52684957,
+        "LeftHandOpponent": 0.572046,
+        "Partner": 0.256051,
+        "RightHandOpponent": 0.024209516
       },
-      "FailureReason": "Team max (-0.3402) \u003C= Opponent max (-0.3402)"
+      "FailureReason": "Team max (0.5268) \u003C= Opponent max (0.5720)"
     },
     {
       "TestName": "Right bower up scores higher with team dealer (Clubs)",
       "DecisionType": "CallTrump",
-      "Passed": false,
-      "ChosenOption": "Team: -0.3402, Opp: -0.3402",
+      "Passed": true,
+      "ChosenOption": "Team: -0.2527, Opp: -0.3090",
       "ExpectedBehavior": "Team score \u003E opponent score",
       "OptionScores": {
-        "Self": -0.3402063,
-        "LeftHandOpponent": -0.3402063,
-        "Partner": -0.3402063,
-        "RightHandOpponent": -0.3402063
+        "Self": -0.28806776,
+        "LeftHandOpponent": -0.33822027,
+        "Partner": -0.25274393,
+        "RightHandOpponent": -0.3090323
       },
-      "FailureReason": "Team max (-0.3402) \u003C= Opponent max (-0.3402)"
+      "FailureReason": null
     },
     {
       "TestName": "Right bower up scores higher with team dealer (Diamonds)",
       "DecisionType": "CallTrump",
-      "Passed": false,
-      "ChosenOption": "Team: -0.3402, Opp: -0.3402",
+      "Passed": true,
+      "ChosenOption": "Team: 0.1041, Opp: -0.2135",
       "ExpectedBehavior": "Team score \u003E opponent score",
       "OptionScores": {
-        "Self": -0.3402063,
-        "LeftHandOpponent": -0.3402063,
-        "Partner": -0.3402063,
-        "RightHandOpponent": -0.3402063
+        "Self": 0.104123145,
+        "LeftHandOpponent": -0.21346729,
+        "Partner": -0.20482475,
+        "RightHandOpponent": -0.25645727
       },
-      "FailureReason": "Team max (-0.3402) \u003C= Opponent max (-0.3402)"
+      "FailureReason": null
     },
     {
       "TestName": "Top three trump cards in hand (Spades)",
@@ -310,9 +310,9 @@
       "ChosenOption": "Pass",
       "ExpectedBehavior": "Should not pass",
       "OptionScores": {
-        "Pass": 0.22782323,
-        "OrderItUp": -0.5118993,
-        "OrderItUpAndGoAlone": -1.0626456
+        "Pass": 0.18765922,
+        "OrderItUp": 0.086006016,
+        "OrderItUpAndGoAlone": -0.7551012
       },
       "FailureReason": "Chose Pass but expected: Should not pass"
     },
@@ -323,9 +323,9 @@
       "ChosenOption": "Pass",
       "ExpectedBehavior": "Should not pass",
       "OptionScores": {
-        "Pass": 0.2741359,
-        "OrderItUp": -0.47848853,
-        "OrderItUpAndGoAlone": -1.0292348
+        "Pass": 0.4029099,
+        "OrderItUp": 0.28655243,
+        "OrderItUpAndGoAlone": -0.94649893
       },
       "FailureReason": "Chose Pass but expected: Should not pass"
     },
@@ -336,9 +336,9 @@
       "ChosenOption": "Pass",
       "ExpectedBehavior": "Should not pass",
       "OptionScores": {
-        "Pass": 0.10379435,
-        "OrderItUp": -0.5571831,
-        "OrderItUpAndGoAlone": -0.9217779
+        "Pass": 0.36540052,
+        "OrderItUp": -0.124232695,
+        "OrderItUpAndGoAlone": -0.95475817
       },
       "FailureReason": "Chose Pass but expected: Should not pass"
     },
@@ -349,456 +349,83 @@
       "ChosenOption": "Pass",
       "ExpectedBehavior": "Should not pass",
       "OptionScores": {
-        "Pass": 0.28257957,
-        "OrderItUp": -0.42501602,
-        "OrderItUpAndGoAlone": -0.53242433
+        "Pass": 0.3809013,
+        "OrderItUp": -0.274249,
+        "OrderItUpAndGoAlone": -1.862214
       },
       "FailureReason": "Chose Pass but expected: Should not pass"
     },
     {
-      "TestName": "Discard lone suit to reduce to three suits (NonTrumpSameColor)",
+      "TestName": "Discard lone suit to reduce to three suits",
       "DecisionType": "Discard",
       "Passed": false,
-      "ChosenOption": "Ten of NonTrumpOppositeColor1",
+      "ChosenOption": "-",
       "ExpectedBehavior": "Must discard the lone non-trump card",
-      "OptionScores": {
-        "Queen of Trump": -1.1661366,
-        "Queen of NonTrumpSameColor": -1.0743176,
-        "Ten of NonTrumpOppositeColor1": -1.0649441,
-        "Nine of NonTrumpOppositeColor1": -1.0997051,
-        "Ten of NonTrumpOppositeColor2": -1.078852,
-        "Nine of NonTrumpOppositeColor2": -1.1047617
-      },
-      "FailureReason": "Chose Ten of NonTrumpOppositeColor1 but expected: Must discard the lone non-trump card"
+      "OptionScores": {},
+      "FailureReason": "Failed to load DiscardCard model"
     },
     {
-      "TestName": "Discard lone suit to reduce to three suits (NonTrumpOppositeColor1)",
+      "TestName": "Discard lone suit to reduce to two suits",
       "DecisionType": "Discard",
       "Passed": false,
-      "ChosenOption": "Ten of NonTrumpSameColor",
+      "ChosenOption": "-",
       "ExpectedBehavior": "Must discard the lone non-trump card",
-      "OptionScores": {
-        "Queen of Trump": -1.1671859,
-        "Ten of NonTrumpSameColor": -0.995147,
-        "Nine of NonTrumpSameColor": -1.0518084,
-        "Queen of NonTrumpOppositeColor1": -1.1286702,
-        "Ten of NonTrumpOppositeColor2": -1.066626,
-        "Nine of NonTrumpOppositeColor2": -1.092132
-      },
-      "FailureReason": "Chose Ten of NonTrumpSameColor but expected: Must discard the lone non-trump card"
+      "OptionScores": {},
+      "FailureReason": "Failed to load DiscardCard model"
     },
     {
-      "TestName": "Discard lone suit to reduce to three suits (NonTrumpOppositeColor2)",
+      "TestName": "Five trump plus one non-trump",
       "DecisionType": "Discard",
       "Passed": false,
-      "ChosenOption": "Ten of NonTrumpSameColor",
-      "ExpectedBehavior": "Must discard the lone non-trump card",
-      "OptionScores": {
-        "Queen of Trump": -1.1687367,
-        "Ten of NonTrumpSameColor": -0.9839958,
-        "Nine of NonTrumpSameColor": -1.0563668,
-        "Ten of NonTrumpOppositeColor1": -1.0302614,
-        "Nine of NonTrumpOppositeColor1": -1.0233536,
-        "Queen of NonTrumpOppositeColor2": -1.1385103
-      },
-      "FailureReason": "Chose Ten of NonTrumpSameColor but expected: Must discard the lone non-trump card"
-    },
-    {
-      "TestName": "Discard lone suit to reduce to two suits (NonTrumpSameColor)",
-      "DecisionType": "Discard",
-      "Passed": false,
-      "ChosenOption": "Nine of NonTrumpOppositeColor1",
-      "ExpectedBehavior": "Must discard the lone non-trump card",
-      "OptionScores": {
-        "Queen of Trump": -1.059861,
-        "Ten of Trump": -1.0268039,
-        "Queen of NonTrumpSameColor": -0.8909935,
-        "Queen of NonTrumpOppositeColor1": -0.8801699,
-        "Ten of NonTrumpOppositeColor1": -0.8172163,
-        "Nine of NonTrumpOppositeColor1": -0.71637297
-      },
-      "FailureReason": "Chose Nine of NonTrumpOppositeColor1 but expected: Must discard the lone non-trump card"
-    },
-    {
-      "TestName": "Discard lone suit to reduce to two suits (NonTrumpOppositeColor1)",
-      "DecisionType": "Discard",
-      "Passed": false,
-      "ChosenOption": "Ten of NonTrumpSameColor",
-      "ExpectedBehavior": "Must discard the lone non-trump card",
-      "OptionScores": {
-        "Queen of Trump": -1.0819827,
-        "Ten of Trump": -1.0362238,
-        "Queen of NonTrumpSameColor": -0.90045434,
-        "Ten of NonTrumpSameColor": -0.7772574,
-        "Nine of NonTrumpSameColor": -0.8040291,
-        "Queen of NonTrumpOppositeColor1": -0.8765282
-      },
-      "FailureReason": "Chose Ten of NonTrumpSameColor but expected: Must discard the lone non-trump card"
-    },
-    {
-      "TestName": "Discard lone suit to reduce to two suits (NonTrumpOppositeColor2)",
-      "DecisionType": "Discard",
-      "Passed": false,
-      "ChosenOption": "Ten of NonTrumpSameColor",
-      "ExpectedBehavior": "Must discard the lone non-trump card",
-      "OptionScores": {
-        "Queen of Trump": -1.0819827,
-        "Ten of Trump": -1.0362238,
-        "Queen of NonTrumpSameColor": -0.90045434,
-        "Ten of NonTrumpSameColor": -0.7772574,
-        "Nine of NonTrumpSameColor": -0.8040291,
-        "Queen of NonTrumpOppositeColor2": -0.8765282
-      },
-      "FailureReason": "Chose Ten of NonTrumpSameColor but expected: Must discard the lone non-trump card"
-    },
-    {
-      "TestName": "Five trump plus one non-trump (NonTrumpSameColor)",
-      "DecisionType": "Discard",
-      "Passed": true,
-      "ChosenOption": "Nine of NonTrumpSameColor",
+      "ChosenOption": "-",
       "ExpectedBehavior": "Must discard non-trump card",
-      "OptionScores": {
-        "RightBower of Trump": 1.0498025,
-        "LeftBower of Trump": 1.2004545,
-        "Ace of Trump": 1.3049694,
-        "King of Trump": 1.62674,
-        "Queen of Trump": 1.7817371,
-        "Nine of NonTrumpSameColor": 2.0947385
-      },
-      "FailureReason": null
+      "OptionScores": {},
+      "FailureReason": "Failed to load DiscardCard model"
     },
     {
-      "TestName": "Five trump plus one non-trump (NonTrumpOppositeColor1)",
+      "TestName": "Keep lone trump card",
       "DecisionType": "Discard",
-      "Passed": true,
-      "ChosenOption": "Nine of NonTrumpOppositeColor1",
-      "ExpectedBehavior": "Must discard non-trump card",
-      "OptionScores": {
-        "RightBower of Trump": 1.0519545,
-        "LeftBower of Trump": 1.2026064,
-        "Ace of Trump": 1.2969618,
-        "King of Trump": 1.628892,
-        "Queen of Trump": 1.783889,
-        "Nine of NonTrumpOppositeColor1": 2.0947385
-      },
-      "FailureReason": null
-    },
-    {
-      "TestName": "Five trump plus one non-trump (NonTrumpOppositeColor2)",
-      "DecisionType": "Discard",
-      "Passed": true,
-      "ChosenOption": "Nine of NonTrumpOppositeColor2",
-      "ExpectedBehavior": "Must discard non-trump card",
-      "OptionScores": {
-        "RightBower of Trump": 1.0519545,
-        "LeftBower of Trump": 1.2026064,
-        "Ace of Trump": 1.2969618,
-        "King of Trump": 1.628892,
-        "Queen of Trump": 1.783889,
-        "Nine of NonTrumpOppositeColor2": 2.0947385
-      },
-      "FailureReason": null
-    },
-    {
-      "TestName": "Keep lone trump card (Right Bower)",
-      "DecisionType": "Discard",
-      "Passed": true,
-      "ChosenOption": "Jack of NonTrumpOppositeColor1",
+      "Passed": false,
+      "ChosenOption": "-",
       "ExpectedBehavior": "Must not discard trump card",
-      "OptionScores": {
-        "RightBower of Trump": -0.701537,
-        "Ace of NonTrumpOppositeColor1": -0.49244606,
-        "King of NonTrumpOppositeColor1": -0.33707932,
-        "Queen of NonTrumpOppositeColor1": -0.31730363,
-        "Jack of NonTrumpOppositeColor1": -0.27123782,
-        "Ten of NonTrumpOppositeColor1": -0.2794339
-      },
-      "FailureReason": null
+      "OptionScores": {},
+      "FailureReason": "Failed to load DiscardCard model"
     },
     {
-      "TestName": "Keep lone trump card (Left Bower)",
-      "DecisionType": "Discard",
-      "Passed": true,
-      "ChosenOption": "Jack of NonTrumpOppositeColor1",
-      "ExpectedBehavior": "Must not discard trump card",
-      "OptionScores": {
-        "LeftBower of Trump": -0.7063714,
-        "Ace of NonTrumpOppositeColor1": -0.66683096,
-        "King of NonTrumpOppositeColor1": -0.40727255,
-        "Queen of NonTrumpOppositeColor1": -0.39705056,
-        "Jack of NonTrumpOppositeColor1": -0.34143108,
-        "Ten of NonTrumpOppositeColor1": -0.36924863
-      },
-      "FailureReason": null
-    },
-    {
-      "TestName": "Keep lone trump card (Ace)",
-      "DecisionType": "Discard",
-      "Passed": true,
-      "ChosenOption": "Jack of NonTrumpOppositeColor1",
-      "ExpectedBehavior": "Must not discard trump card",
-      "OptionScores": {
-        "Ace of Trump": -0.8599284,
-        "Ace of NonTrumpOppositeColor1": -0.87239206,
-        "King of NonTrumpOppositeColor1": -0.70534307,
-        "Queen of NonTrumpOppositeColor1": -0.69512105,
-        "Jack of NonTrumpOppositeColor1": -0.6395016,
-        "Ten of NonTrumpOppositeColor1": -0.6946408
-      },
-      "FailureReason": null
-    },
-    {
-      "TestName": "Keep lone trump card (King)",
-      "DecisionType": "Discard",
-      "Passed": true,
-      "ChosenOption": "Jack of NonTrumpOppositeColor1",
-      "ExpectedBehavior": "Must not discard trump card",
-      "OptionScores": {
-        "King of Trump": -0.8900219,
-        "Ace of NonTrumpOppositeColor1": -0.87812215,
-        "King of NonTrumpOppositeColor1": -0.74543446,
-        "Queen of NonTrumpOppositeColor1": -0.73521245,
-        "Jack of NonTrumpOppositeColor1": -0.710952,
-        "Ten of NonTrumpOppositeColor1": -0.7347322
-      },
-      "FailureReason": null
-    },
-    {
-      "TestName": "Keep lone trump card (Queen)",
-      "DecisionType": "Discard",
-      "Passed": true,
-      "ChosenOption": "Jack of NonTrumpOppositeColor1",
-      "ExpectedBehavior": "Must not discard trump card",
-      "OptionScores": {
-        "Queen of Trump": -0.8976583,
-        "Ace of NonTrumpOppositeColor1": -0.8936437,
-        "King of NonTrumpOppositeColor1": -0.77461296,
-        "Queen of NonTrumpOppositeColor1": -0.7569802,
-        "Jack of NonTrumpOppositeColor1": -0.7401305,
-        "Ten of NonTrumpOppositeColor1": -0.7639108
-      },
-      "FailureReason": null
-    },
-    {
-      "TestName": "Keep lone trump card (Ten)",
-      "DecisionType": "Discard",
-      "Passed": true,
-      "ChosenOption": "Jack of NonTrumpOppositeColor1",
-      "ExpectedBehavior": "Must not discard trump card",
-      "OptionScores": {
-        "Ten of Trump": -0.889329,
-        "Ace of NonTrumpOppositeColor1": -0.92729473,
-        "King of NonTrumpOppositeColor1": -0.78908056,
-        "Queen of NonTrumpOppositeColor1": -0.7854535,
-        "Jack of NonTrumpOppositeColor1": -0.7738296,
-        "Ten of NonTrumpOppositeColor1": -0.7975354
-      },
-      "FailureReason": null
-    },
-    {
-      "TestName": "Keep lone trump card (Nine)",
-      "DecisionType": "Discard",
-      "Passed": true,
-      "ChosenOption": "Jack of NonTrumpOppositeColor1",
-      "ExpectedBehavior": "Must not discard trump card",
-      "OptionScores": {
-        "Nine of Trump": -0.889329,
-        "Ace of NonTrumpOppositeColor1": -0.92729473,
-        "King of NonTrumpOppositeColor1": -0.78908056,
-        "Queen of NonTrumpOppositeColor1": -0.7854535,
-        "Jack of NonTrumpOppositeColor1": -0.7738296,
-        "Ten of NonTrumpOppositeColor1": -0.7975354
-      },
-      "FailureReason": null
-    },
-    {
-      "TestName": "2 Aces in hand should lead suit not played (OC1 over OC2 [[LHO void]])",
+      "TestName": "2 Aces in hand should lead suit not played",
       "DecisionType": "Play",
       "Passed": false,
-      "ChosenOption": "Ace of NonTrumpSameColor",
+      "ChosenOption": "-",
       "ExpectedBehavior": "Should lead ace in unplayed suit",
-      "OptionScores": {
-        "Ace of NonTrumpSameColor": 0.25299722,
-        "Ace of NonTrumpOppositeColor1": 0.25299722
-      },
-      "FailureReason": "Chose Ace of NonTrumpSameColor but expected: Should lead ace in unplayed suit"
-    },
-    {
-      "TestName": "2 Aces in hand should lead suit not played (OC1 over OC2 [[RHO void]])",
-      "DecisionType": "Play",
-      "Passed": false,
-      "ChosenOption": "Ace of NonTrumpSameColor",
-      "ExpectedBehavior": "Should lead ace in unplayed suit",
-      "OptionScores": {
-        "Ace of NonTrumpSameColor": 0.28404683,
-        "Ace of NonTrumpOppositeColor1": 0.28404683
-      },
-      "FailureReason": "Chose Ace of NonTrumpSameColor but expected: Should lead ace in unplayed suit"
-    },
-    {
-      "TestName": "2 Aces in hand should lead suit not played (SC  over OC2 [[LHO void]])",
-      "DecisionType": "Play",
-      "Passed": false,
-      "ChosenOption": "Ace of NonTrumpOppositeColor1",
-      "ExpectedBehavior": "Should lead ace in unplayed suit",
-      "OptionScores": {
-        "Ace of NonTrumpOppositeColor1": 0.22150391,
-        "Ace of NonTrumpSameColor": 0.22150391
-      },
-      "FailureReason": "Chose Ace of NonTrumpOppositeColor1 but expected: Should lead ace in unplayed suit"
-    },
-    {
-      "TestName": "2 Aces in hand should lead suit not played (SC  over OC2 [[RHO void]])",
-      "DecisionType": "Play",
-      "Passed": false,
-      "ChosenOption": "Ace of NonTrumpOppositeColor1",
-      "ExpectedBehavior": "Should lead ace in unplayed suit",
-      "OptionScores": {
-        "Ace of NonTrumpOppositeColor1": 0.2537662,
-        "Ace of NonTrumpSameColor": 0.2537662
-      },
-      "FailureReason": "Chose Ace of NonTrumpOppositeColor1 but expected: Should lead ace in unplayed suit"
-    },
-    {
-      "TestName": "2 Aces in hand should lead suit not played (OC2 over OC1 [[LHO void]])",
-      "DecisionType": "Play",
-      "Passed": false,
-      "ChosenOption": "Ace of NonTrumpSameColor",
-      "ExpectedBehavior": "Should lead ace in unplayed suit",
-      "OptionScores": {
-        "Ace of NonTrumpSameColor": 0.23566653,
-        "Ace of NonTrumpOppositeColor2": 0.23566653
-      },
-      "FailureReason": "Chose Ace of NonTrumpSameColor but expected: Should lead ace in unplayed suit"
-    },
-    {
-      "TestName": "2 Aces in hand should lead suit not played (OC2 over OC1 [[RHO void]])",
-      "DecisionType": "Play",
-      "Passed": false,
-      "ChosenOption": "Ace of NonTrumpSameColor",
-      "ExpectedBehavior": "Should lead ace in unplayed suit",
-      "OptionScores": {
-        "Ace of NonTrumpSameColor": 0.26671612,
-        "Ace of NonTrumpOppositeColor2": 0.26671612
-      },
-      "FailureReason": "Chose Ace of NonTrumpSameColor but expected: Should lead ace in unplayed suit"
-    },
-    {
-      "TestName": "2 Aces in hand should lead suit not played (SC  over OC1 [[LHO void]])",
-      "DecisionType": "Play",
-      "Passed": false,
-      "ChosenOption": "Ace of NonTrumpOppositeColor2",
-      "ExpectedBehavior": "Should lead ace in unplayed suit",
-      "OptionScores": {
-        "Ace of NonTrumpOppositeColor2": 0.22504179,
-        "Ace of NonTrumpSameColor": 0.22504179
-      },
-      "FailureReason": "Chose Ace of NonTrumpOppositeColor2 but expected: Should lead ace in unplayed suit"
-    },
-    {
-      "TestName": "2 Aces in hand should lead suit not played (SC  over OC1 [[RHO void]])",
-      "DecisionType": "Play",
-      "Passed": false,
-      "ChosenOption": "Ace of NonTrumpOppositeColor2",
-      "ExpectedBehavior": "Should lead ace in unplayed suit",
-      "OptionScores": {
-        "Ace of NonTrumpOppositeColor2": 0.24501672,
-        "Ace of NonTrumpSameColor": 0.24501672
-      },
-      "FailureReason": "Chose Ace of NonTrumpOppositeColor2 but expected: Should lead ace in unplayed suit"
-    },
-    {
-      "TestName": "2 Aces in hand should lead suit not played (OC2 over SC  [[LHO void]])",
-      "DecisionType": "Play",
-      "Passed": false,
-      "ChosenOption": "Ace of NonTrumpOppositeColor1",
-      "ExpectedBehavior": "Should lead ace in unplayed suit",
-      "OptionScores": {
-        "Ace of NonTrumpOppositeColor1": 0.22530678,
-        "Ace of NonTrumpOppositeColor2": 0.22530678
-      },
-      "FailureReason": "Chose Ace of NonTrumpOppositeColor1 but expected: Should lead ace in unplayed suit"
-    },
-    {
-      "TestName": "2 Aces in hand should lead suit not played (OC2 over SC  [[RHO void]])",
-      "DecisionType": "Play",
-      "Passed": false,
-      "ChosenOption": "Ace of NonTrumpOppositeColor1",
-      "ExpectedBehavior": "Should lead ace in unplayed suit",
-      "OptionScores": {
-        "Ace of NonTrumpOppositeColor1": 0.25756907,
-        "Ace of NonTrumpOppositeColor2": 0.25756907
-      },
-      "FailureReason": "Chose Ace of NonTrumpOppositeColor1 but expected: Should lead ace in unplayed suit"
-    },
-    {
-      "TestName": "2 Aces in hand should lead suit not played (OC1 over SC  [[LHO void]])",
-      "DecisionType": "Play",
-      "Passed": false,
-      "ChosenOption": "Ace of NonTrumpOppositeColor2",
-      "ExpectedBehavior": "Should lead ace in unplayed suit",
-      "OptionScores": {
-        "Ace of NonTrumpOppositeColor2": 0.24617535,
-        "Ace of NonTrumpOppositeColor1": 0.24617535
-      },
-      "FailureReason": "Chose Ace of NonTrumpOppositeColor2 but expected: Should lead ace in unplayed suit"
-    },
-    {
-      "TestName": "2 Aces in hand should lead suit not played (OC1 over SC  [[RHO void]])",
-      "DecisionType": "Play",
-      "Passed": false,
-      "ChosenOption": "Ace of NonTrumpOppositeColor2",
-      "ExpectedBehavior": "Should lead ace in unplayed suit",
-      "OptionScores": {
-        "Ace of NonTrumpOppositeColor2": 0.26615027,
-        "Ace of NonTrumpOppositeColor1": 0.26615027
-      },
-      "FailureReason": "Chose Ace of NonTrumpOppositeColor2 but expected: Should lead ace in unplayed suit"
+      "OptionScores": {},
+      "FailureReason": "Failed to load PlayCard model"
     },
     {
       "TestName": "Opponent winning trick should play lowest trump",
       "DecisionType": "Play",
       "Passed": false,
-      "ChosenOption": "RightBower of Trump",
+      "ChosenOption": "-",
       "ExpectedBehavior": "Should play lowest trump",
-      "OptionScores": {
-        "RightBower of Trump": 0.13008663,
-        "Queen of Trump": 0.06910574,
-        "Nine of Trump": 0.06910574,
-        "King of NonTrumpOppositeColor1": 0.06910574,
-        "Nine of NonTrumpOppositeColor2": 0.06910574
-      },
-      "FailureReason": "Chose RightBower of Trump but expected: Should play lowest trump"
+      "OptionScores": {},
+      "FailureReason": "Failed to load PlayCard model"
     },
     {
       "TestName": "Opponent winning trick should play trump",
       "DecisionType": "Play",
-      "Passed": true,
-      "ChosenOption": "RightBower of Trump",
+      "Passed": false,
+      "ChosenOption": "-",
       "ExpectedBehavior": "Should play trump",
-      "OptionScores": {
-        "RightBower of Trump": 0.13008663,
-        "Queen of Trump": 0.06910574,
-        "Nine of Trump": 0.06910574,
-        "King of NonTrumpOppositeColor1": 0.06910574,
-        "Nine of NonTrumpOppositeColor2": 0.06910574
-      },
-      "FailureReason": null
+      "OptionScores": {},
+      "FailureReason": "Failed to load PlayCard model"
     },
     {
       "TestName": "Partner winning trick don\u0027t play trump",
       "DecisionType": "Play",
       "Passed": false,
-      "ChosenOption": "Queen of Trump",
+      "ChosenOption": "-",
       "ExpectedBehavior": "Should not play trump",
-      "OptionScores": {
-        "RightBower of Trump": 0.5106317,
-        "Queen of Trump": 0.5236201,
-        "Nine of Trump": 0.5236201,
-        "King of NonTrumpOppositeColor1": 0.5236201,
-        "Nine of NonTrumpOppositeColor2": 0.5236201
-      },
-      "FailureReason": "Chose Queen of Trump but expected: Should not play trump"
+      "OptionScores": {},
+      "FailureReason": "Failed to load PlayCard model"
     }
   ]
 }

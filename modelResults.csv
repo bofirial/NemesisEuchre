@@ -35,3 +35,5 @@ Model Name,Win Rate vs Gen1,Win Rate vs Gen2,Call Trump Passed Tests,Discard Car
 "gen3t1.45b CallTrump","0.56212","0.33748","13","",""
 "gen3t1.6b CallTrump","0.57064","0.34588","8","",""
 "gen3t1.75b CallTrump","0.56356","0.33916","7","",""
+"Gen1 CallTrump","0.53764","0.33344","10","",""
+"Gen2 CallTrump","0.67536","0.50128","12","",""

@@ -1,51 +1,58 @@
 Param(
     [Parameter(Mandatory = $true, Position = 0)]
-    [string]$Suffix
+    [string]$Model,
+    [Parameter(Position = 1)]
+    [double]$Temperature = 1,
+    [Parameter(Position = 2)]
+    [double]$LearnRate = 0.7,
+    [Parameter(Position = 3)]
+    [int]$Iterations = 200,
+    [Parameter(Position = 4)]
+    [int]$NumberOfLeaves = 16,
+    [Parameter(Position = 5)]
+    [int]$MinimumExampleCountPerLeaf = 25
 )
 
-$CsvPath = "modelResults.csv";
-
-$sources = @("gen3t0.1", "gen3t0.25", "gen3t0.4", "gen3t0.55", "gen3t0.7", "gen3t0.85", "gen3t1", "gen3t1.15", "gen3t1.3", "gen3t1.45", "gen3t1.6", "gen3t1.75");
+$CsvPath = "callTrumpModelResults.csv";
 
 $outputFile = "output.json";
 
-foreach ($source in $sources) {
-    $model = $source + $Suffix;
+$command = "dotnet run --project NemesisEuchre.Console -- -t1m Gen2 -t1m-call Gen1 -t2m Gen2 -t2m-call $Model -c 25000 -json $outputFile";
 
-    $command = "dotnet run --project NemesisEuchre.Console -- -t1m Gen1 -t2m Gen2 -t2m-call $model -c 25000 -json $outputFile";
+Write-Host $command;
 
-    Write-Host $command;
+Invoke-Expression $command
 
-    Invoke-Expression $command
+$gen1BattleOutput = Get-Content -Path $outputFile -Raw | ConvertFrom-Json
 
-    $gen1BattleOutput = Get-Content -Path $outputFile -Raw | ConvertFrom-Json
+$command = "dotnet run --project NemesisEuchre.Console -- -t1m Gen2                -t2m Gen2 -t2m-call $Model -c 25000 -json $outputFile";
 
-    $command = "dotnet run --project NemesisEuchre.Console -- -t1m Gen2 -t2m Gen2 -t2m-call $model -c 25000 -json $outputFile";
+Write-Host $command;
 
-    Write-Host $command;
+Invoke-Expression $command
 
-    Invoke-Expression $command
+$gen2BattleOutput = Get-Content -Path $outputFile -Raw | ConvertFrom-Json
 
-    $gen2BattleOutput = Get-Content -Path $outputFile -Raw | ConvertFrom-Json
+$command = "dotnet run --project NemesisEuchre.Console -- test -m $Model -json $outputFile";
 
-    $command = "dotnet run --project NemesisEuchre.Console -- test -m $model -json $outputFile";
+Write-Host $command;
 
-    Write-Host $command;
+Invoke-Expression $command
 
-    Invoke-Expression $command
+$testOutput = Get-Content -Path $outputFile -Raw | ConvertFrom-Json
 
-    $testOutput = Get-Content -Path $outputFile -Raw | ConvertFrom-Json
+Write-Host $testOutput
 
-    Write-Host $testOutput
-
-    $newRow = [PSCustomObject]@{
-        "Model Name"                = "$model CallTrump"
-        "Win Rate vs Gen1"          = $gen1BattleOutput.Team2WinRate
-        "Win Rate vs Gen2"          = $gen2BattleOutput.Team2WinRate
-        "Call Trump Passed Tests"   = $testOutput.TestsByDecisionType.CallTrump.Passed
-        "Discard Card Passed Tests" = "" #$testOutput.TestsByDecisionType.Discard.Passed
-        "Play Card Passed Tests"    = "" #$testOutput.TestsByDecisionType.Play.Passed
-    }
-
-    $newRow | Export-Csv -Path $CsvPath -Append -NoTypeInformation
+$newRow = [PSCustomObject]@{
+    "Model Name"                     = "$Model CallTrump"
+    "Temperature"                    = $Temperature
+    "Learn Rate"                     = $LearnRate
+    "Iterations"                     = $Iterations
+    "Number Of Leaves"               = $NumberOfLeaves
+    "Minimum Example Count Per Leaf" = $MinimumExampleCountPerLeaf
+    "Win Rate vs Gen1 CallTrump"     = $gen1BattleOutput.Team2WinRate
+    "Win Rate vs Gen2 CallTrump"     = $gen2BattleOutput.Team2WinRate
+    "Call Trump Passed Tests"        = $testOutput.TestsByDecisionType.CallTrump.Passed
 }
+
+$newRow | Export-Csv -Path $CsvPath -Append -NoTypeInformation

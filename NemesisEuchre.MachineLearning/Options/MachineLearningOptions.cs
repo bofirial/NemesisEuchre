@@ -27,7 +27,7 @@ public class MachineLearningOptions
     /// Gets or sets the learning rate for gradient boosting. Controls step size during optimization.
     /// Lower values require more iterations but may achieve better accuracy.
     /// </summary>
-    [Range(0.01, 1.0)]
+    [Range(0.01, 2.0)]
     public double LearningRate { get; set; } = 0.1;
 
     /// <summary>

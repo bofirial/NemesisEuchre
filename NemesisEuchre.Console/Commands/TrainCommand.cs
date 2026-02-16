@@ -48,7 +48,7 @@ public class TrainCommand(
     [CliOption(Description = "Number of boosting iterations (10-500)", Alias = "i")]
     public int? NumberOfIterations { get; set; }
 
-    [CliOption(Description = "Learning rate for gradient boosting (0.01-1.0)", Alias = "lr")]
+    [CliOption(Description = "Learning rate for gradient boosting (0.01-2.0)", Alias = "lr")]
     public double? LearningRate { get; set; }
 
     [CliOption(Description = "Maximum leaves per tree (2-1024)", Alias = "l")]
@@ -124,9 +124,9 @@ public class TrainCommand(
             errors.Add($"--iter value {NumberOfIterations} is out of range. Valid range: 10-500");
         }
 
-        if (LearningRate.HasValue && (LearningRate < 0.01 || LearningRate > 1.0))
+        if (LearningRate.HasValue && (LearningRate < 0.01 || LearningRate > 2.0))
         {
-            errors.Add($"--lr value {LearningRate} is out of range. Valid range: 0.01-1.0");
+            errors.Add($"--lr value {LearningRate} is out of range. Valid range: 0.01-2.0");
         }
 
         if (NumberOfLeaves.HasValue && (NumberOfLeaves < 2 || NumberOfLeaves > 1024))
