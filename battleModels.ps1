@@ -12,7 +12,7 @@ $outputFile = "output.json";
 foreach ($source in $sources) {
     $model = $source + $Suffix;
 
-    $command = "dotnet run --project NemesisEuchre.Console -- -t1m Gen1 -t2m $model -c 10000 -json $outputFile";
+    $command = "dotnet run --project NemesisEuchre.Console -- -t1m Gen1 -t2m Gen2 -t2m-call $model -c 25000 -json $outputFile";
 
     Write-Host $command;
 
@@ -20,7 +20,7 @@ foreach ($source in $sources) {
 
     $gen1BattleOutput = Get-Content -Path $outputFile -Raw | ConvertFrom-Json
 
-    $command = "dotnet run --project NemesisEuchre.Console -- -t1m Gen2 -t2m $model -c 10000 -json $outputFile";
+    $command = "dotnet run --project NemesisEuchre.Console -- -t1m Gen2 -t2m Gen2 -t2m-call $model -c 25000 -json $outputFile";
 
     Write-Host $command;
 
@@ -36,13 +36,15 @@ foreach ($source in $sources) {
 
     $testOutput = Get-Content -Path $outputFile -Raw | ConvertFrom-Json
 
+    Write-Host $testOutput
+
     $newRow = [PSCustomObject]@{
-        "Model Name" = $model
-        "Win Rate vs Gen1" = $gen1BattleOutput.Team2WinRate
-        "Win Rate vs Gen2" = $gen2BattleOutput.Team2WinRate
-        "Call Trump Passed Tests" = $testOutput.TestsByDecisionType[0].Passed
-        "Discard Card Passed Tests" = $testOutput.TestsByDecisionType[1].Passed
-        "Play Card Passed Tests" = $testOutput.TestsByDecisionType[2].Passed
+        "Model Name"                = "$model CallTrump"
+        "Win Rate vs Gen1"          = $gen1BattleOutput.Team2WinRate
+        "Win Rate vs Gen2"          = $gen2BattleOutput.Team2WinRate
+        "Call Trump Passed Tests"   = $testOutput.TestsByDecisionType.CallTrump.Passed
+        "Discard Card Passed Tests" = "" #$testOutput.TestsByDecisionType.Discard.Passed
+        "Play Card Passed Tests"    = "" #$testOutput.TestsByDecisionType.Play.Passed
     }
 
     $newRow | Export-Csv -Path $CsvPath -Append -NoTypeInformation
