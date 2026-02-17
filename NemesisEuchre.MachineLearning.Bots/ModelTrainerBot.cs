@@ -49,7 +49,7 @@ public class ModelTrainerBot(
             upCard,
             validCallTrumpDecisions);
 
-        if (decisionContext.DecisionPredictedPoints.Count == 0)
+        if (decisionContext.DecisionPredictedPoints.Count == 0 || actor.ExplorationDecisionType is not DecisionType.All or DecisionType.CallTrump)
         {
             return decisionContext;
         }
@@ -86,7 +86,7 @@ public class ModelTrainerBot(
             callingPlayerGoingAlone,
             validCardsToDiscard);
 
-        if (decisionContext.DecisionPredictedPoints.Count == 0)
+        if (decisionContext.DecisionPredictedPoints.Count == 0 || actor.ExplorationDecisionType is not DecisionType.All or DecisionType.Discard)
         {
             return decisionContext;
         }
@@ -145,7 +145,7 @@ public class ModelTrainerBot(
             opponentsWonTricks,
             validCardsToPlay);
 
-        if (decisionContext.DecisionPredictedPoints.Count == 0)
+        if (decisionContext.DecisionPredictedPoints.Count == 0 || actor.ExplorationDecisionType is not DecisionType.All or DecisionType.Play)
         {
             return decisionContext;
         }

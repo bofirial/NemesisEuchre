@@ -50,11 +50,6 @@ public class DefaultCommand(
     public ActorType? Team1 { get; set; }
 
     [CliOption(
-        Description = "ActorType for Team2",
-        Alias = "t2")]
-    public ActorType? Team2 { get; set; }
-
-    [CliOption(
         Description = "ModelName for Team1 ModelBots",
         Required = false,
         Alias = "t1m")]
@@ -66,15 +61,10 @@ public class DefaultCommand(
     public float Team1ExplorationTemperature { get; set; }
 
     [CliOption(
-        Description = "ModelName for Team2 ModelBots",
+        Description = "DecisionType for Team1 Exploration Temperature",
         Required = false,
-        Alias = "t2m")]
-    public string? Team2ModelName { get; set; }
-
-    [CliOption(
-        Description = "ExplorationTemperature for Team2 ModelTrainerBots",
-        Alias = "t2t")]
-    public float Team2ExplorationTemperature { get; set; }
+        Alias = "t1dt")]
+    public DecisionType Team1ExplorationDecisionType { get; set; } = DecisionType.All;
 
     [CliOption(
         Description = "ModelName for Team1 PlayCard decision (overrides --t1m)",
@@ -93,6 +83,28 @@ public class DefaultCommand(
         Required = false,
         Alias = "t1m-discard")]
     public string? Team1DiscardCardModelName { get; set; }
+
+    [CliOption(
+        Description = "ActorType for Team2",
+        Alias = "t2")]
+    public ActorType? Team2 { get; set; }
+
+    [CliOption(
+        Description = "ModelName for Team2 ModelBots",
+        Required = false,
+        Alias = "t2m")]
+    public string? Team2ModelName { get; set; }
+
+    [CliOption(
+        Description = "ExplorationTemperature for Team2 ModelTrainerBots",
+        Alias = "t2t")]
+    public float Team2ExplorationTemperature { get; set; }
+
+    [CliOption(
+        Description = "DecisionType for Team2 Exploration Temperature",
+        Required = false,
+        Alias = "t2dt")]
+    public DecisionType Team2ExplorationDecisionType { get; set; } = DecisionType.All;
 
     [CliOption(
         Description = "ModelName for Team2 PlayCard decision (overrides --t2m)",
@@ -149,6 +161,7 @@ public class DefaultCommand(
         ActorType? teamActorType,
         string? teamModelName,
         float teamExplorationTemperature,
+        DecisionType teamExplorationDecisionType,
         string? teamPlayCardModelName,
         string? teamCallTrumpModelName,
         string? teamDiscardCardModelName)
@@ -184,7 +197,8 @@ public class DefaultCommand(
                 teamCallTrumpModelName,
                 teamDiscardCardModelName,
                 teamModelName,
-                teamExplorationTemperature);
+                teamExplorationTemperature,
+                teamExplorationDecisionType);
         }
 
         if (!string.IsNullOrEmpty(teamModelName))
@@ -252,6 +266,7 @@ public class DefaultCommand(
                 Team1,
                 Team1ModelName,
                 Team1ExplorationTemperature,
+                Team1ExplorationDecisionType,
                 Team1PlayCardModelName,
                 Team1CallTrumpModelName,
                 Team1DiscardCardModelName),
@@ -259,6 +274,7 @@ public class DefaultCommand(
                 Team2,
                 Team2ModelName,
                 Team2ExplorationTemperature,
+                Team2ExplorationDecisionType,
                 Team2PlayCardModelName,
                 Team2CallTrumpModelName,
                 Team2DiscardCardModelName),

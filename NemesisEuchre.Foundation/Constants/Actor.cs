@@ -1,15 +1,16 @@
 ﻿namespace NemesisEuchre.Foundation.Constants;
 
-public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames = null, float ExplorationTemperature = default)
+public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames = null, float ExplorationTemperature = default, DecisionType ExplorationDecisionType = DecisionType.All)
 {
     public string? ModelName => ModelNames?.GetValueOrDefault("default");
 
-    public static Actor WithModel(ActorType actorType, string modelName, float explorationTemperature = default)
+    public static Actor WithModel(ActorType actorType, string modelName, float explorationTemperature = default, DecisionType explorationDecisionType = DecisionType.All)
     {
         return new Actor(
             actorType,
             new Dictionary<string, string> { ["default"] = modelName },
-            explorationTemperature);
+            explorationTemperature,
+            explorationDecisionType);
     }
 
     public static Actor WithModels(
@@ -18,7 +19,8 @@ public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames 
         string? callTrumpModel = null,
         string? discardCardModel = null,
         string? defaultModel = null,
-        float explorationTemperature = default)
+        float explorationTemperature = default,
+        DecisionType explorationDecisionType = DecisionType.All)
     {
         var modelNames = new Dictionary<string, string>();
 
@@ -42,7 +44,7 @@ public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames 
             modelNames["default"] = defaultModel;
         }
 
-        return new Actor(actorType, modelNames, explorationTemperature);
+        return new Actor(actorType, modelNames, explorationTemperature, explorationDecisionType);
     }
 
     public string? GetModelName(string decisionType)
