@@ -6,16 +6,20 @@ namespace NemesisEuchre.Console.Services.BehavioralTests;
 
 public interface ITestResultsRenderer
 {
-    void RenderResults(BehavioralTestSuiteResult suiteResult);
+    void RenderResults(BehavioralTestSuiteResult suiteResult, bool showDetails);
 }
 
 public class TestResultsRenderer(IAnsiConsole console) : ITestResultsRenderer
 {
-    public void RenderResults(BehavioralTestSuiteResult suiteResult)
+    public void RenderResults(BehavioralTestSuiteResult suiteResult, bool showDetails)
     {
-        console.WriteLine();
+        if (showDetails)
+        {
+            console.WriteLine();
 
-        RenderFailureDetails(suiteResult);
+            RenderFailureDetails(suiteResult);
+        }
+
         console.WriteLine();
 
         console.Write(new Rule($"[yellow]Behavioral Test Results - {suiteResult.ModelName}[/]"));

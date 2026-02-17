@@ -30,6 +30,12 @@ public class TestCommand(
         Alias = "json")]
     public string? OutputJson { get; set; }
 
+    [CliOption(
+        Description = "Show individual test details",
+        Required = false,
+        Alias = "sd")]
+    public bool ShowDetails { get; set; }
+
     public async Task<int> RunAsync()
     {
         ansiConsole.WriteLine();
@@ -37,7 +43,7 @@ public class TestCommand(
 
         var suiteResult = await Task.Run(() => testRunner.RunTests(ModelName));
 
-        resultsRenderer.RenderResults(suiteResult);
+        resultsRenderer.RenderResults(suiteResult, ShowDetails);
 
         if (!string.IsNullOrWhiteSpace(OutputJson))
         {
