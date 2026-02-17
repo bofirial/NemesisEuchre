@@ -75,7 +75,8 @@ public class StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer(
                         dealerPos,
                         TeamScore,
                         OpponentScore,
-                        decision);
+                        decision,
+                        1);
                     var prediction = engine.Predict(features);
 
                     if (prediction.PredictedPoints > bestScore)

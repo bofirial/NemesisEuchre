@@ -15,7 +15,8 @@ public class BetaBot(IRandomNumberGenerator random) : BotBase(random)
         short opponentScore,
         RelativePlayerPosition dealerPosition,
         Card upCard,
-        CallTrumpDecision[] validCallTrumpDecisions)
+        CallTrumpDecision[] validCallTrumpDecisions,
+        byte decisionNumber)
     {
         var chosenDecision = validCallTrumpDecisions.Contains(CallTrumpDecision.Pass)
             ? CallTrumpDecision.Pass

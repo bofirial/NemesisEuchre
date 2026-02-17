@@ -39,7 +39,8 @@ public class ModelTrainerBot(
         short opponentScore,
         RelativePlayerPosition dealerPosition,
         Card upCard,
-        CallTrumpDecision[] validCallTrumpDecisions)
+        CallTrumpDecision[] validCallTrumpDecisions,
+        byte decisionNumber)
     {
         var decisionContext = await base.CallTrumpAsync(
             cardsInHand,
@@ -47,7 +48,8 @@ public class ModelTrainerBot(
             opponentScore,
             dealerPosition,
             upCard,
-            validCallTrumpDecisions);
+            validCallTrumpDecisions,
+            decisionNumber);
 
         if (decisionContext.DecisionPredictedPoints.Count == 0 || Actor.ExplorationDecisionType is not DecisionType.All or DecisionType.CallTrump)
         {

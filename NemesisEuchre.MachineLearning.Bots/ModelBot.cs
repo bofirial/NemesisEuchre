@@ -40,7 +40,8 @@ public class ModelBot(
         short opponentScore,
         RelativePlayerPosition dealerPosition,
         Card upCard,
-        CallTrumpDecision[] validCallTrumpDecisions)
+        CallTrumpDecision[] validCallTrumpDecisions,
+        byte decisionNumber)
     {
         var (bestOption, scores) = PredictBestOption(
             _callTrumpEngine,
@@ -51,7 +52,8 @@ public class ModelBot(
                 dealerPosition,
                 teamScore,
                 opponentScore,
-                decision),
+                decision,
+                decisionNumber),
             prediction => prediction.PredictedPoints,
             LoggerMessages.LogCallTrumpEngineNotAvailable,
             LoggerMessages.LogCallTrumpPredictionError);

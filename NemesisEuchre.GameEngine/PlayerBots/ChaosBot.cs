@@ -15,7 +15,8 @@ public class ChaosBot(IRandomNumberGenerator random) : BotBase(random)
         short opponentScore,
         RelativePlayerPosition dealerPosition,
         Card upCard,
-        CallTrumpDecision[] validCallTrumpDecisions)
+        CallTrumpDecision[] validCallTrumpDecisions,
+        byte decisionNumber)
     {
         return CreateCallTrumpDecisionAsync(SelectRandom(validCallTrumpDecisions), validCallTrumpDecisions);
     }

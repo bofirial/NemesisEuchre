@@ -75,7 +75,8 @@ public class Gen1TrainerBotTests
             0,
             RelativePlayerPosition.Partner,
             GenerateCard(),
-            decisions);
+            decisions,
+            1);
 
         result.ChosenCallTrumpDecision.Should().BeOneOf(decisions);
         result.DecisionPredictedPoints.Should().HaveCount(2);

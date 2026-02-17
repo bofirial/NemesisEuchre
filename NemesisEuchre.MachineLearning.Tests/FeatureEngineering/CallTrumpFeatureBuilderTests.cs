@@ -27,7 +27,7 @@ public class CallTrumpFeatureBuilderTests
             dealerPosition: RelativePlayerPosition.Partner,
             teamScore: 3,
             opponentScore: 5,
-            decisionOrder: 2.0f,
+            decisionNumber: 2,
             chosenDecision: CallTrumpDecision.Pass);
 
         result.Card1Rank.Should().Be((float)Rank.Ace);
@@ -64,7 +64,7 @@ public class CallTrumpFeatureBuilderTests
             dealerPosition: RelativePlayerPosition.Self,
             teamScore: 0,
             opponentScore: 0,
-            decisionOrder: 1.0f,
+            decisionNumber: 1,
             chosenDecision: decision);
 
         result.ChosenDecision.Should().Be(expectedValue);
@@ -81,7 +81,7 @@ public class CallTrumpFeatureBuilderTests
             dealerPosition: RelativePlayerPosition.RightHandOpponent,
             teamScore: 7,
             opponentScore: 9,
-            decisionOrder: 3.0f,
+            decisionNumber: 3,
             chosenDecision: CallTrumpDecision.Pass);
 
         result.UpCardRank.Should().Be((float)Rank.Queen);
@@ -89,7 +89,7 @@ public class CallTrumpFeatureBuilderTests
         result.DealerPosition.Should().Be((float)RelativePlayerPosition.RightHandOpponent);
         result.TeamScore.Should().Be(7);
         result.OpponentScore.Should().Be(9);
-        result.DecisionOrder.Should().Be(3.0f);
+        result.DecisionNumber.Should().Be(3.0f);
     }
 
     private static Card[] CreateDefaultHand()

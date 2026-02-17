@@ -22,7 +22,8 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
             context.OpponentScore,
             context.DealerPosition.ToRelativePosition(context.PlayerPosition),
             context.UpCard,
-            context.ValidCallTrumpDecisions);
+            context.ValidCallTrumpDecisions,
+            context.DecisionNumber);
     }
 
     public abstract Task<CallTrumpDecisionContext> CallTrumpAsync(
@@ -31,7 +32,8 @@ public abstract class BotBase(IRandomNumberGenerator random) : IPlayerActor
         short opponentScore,
         RelativePlayerPosition dealerPosition,
         Card upCard,
-        CallTrumpDecision[] validCallTrumpDecisions);
+        CallTrumpDecision[] validCallTrumpDecisions,
+        byte decisionNumber);
 
     public abstract Task<RelativeCardDecisionContext> DiscardCardAsync(
         RelativeCard[] cardsInHand,

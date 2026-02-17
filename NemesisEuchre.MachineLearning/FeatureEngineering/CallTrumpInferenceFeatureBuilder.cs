@@ -13,7 +13,8 @@ public interface ICallTrumpInferenceFeatureBuilder
         RelativePlayerPosition dealerPosition,
         short teamScore,
         short opponentScore,
-        CallTrumpDecision chosenDecision);
+        CallTrumpDecision chosenDecision,
+        byte decisionNumber);
 }
 
 public class CallTrumpInferenceFeatureBuilder : ICallTrumpInferenceFeatureBuilder
@@ -24,7 +25,8 @@ public class CallTrumpInferenceFeatureBuilder : ICallTrumpInferenceFeatureBuilde
         RelativePlayerPosition dealerPosition,
         short teamScore,
         short opponentScore,
-        CallTrumpDecision chosenDecision)
+        CallTrumpDecision chosenDecision,
+        byte decisionNumber)
     {
         return CallTrumpFeatureBuilder.BuildFeatures(
             cardsInHand,
@@ -32,7 +34,7 @@ public class CallTrumpInferenceFeatureBuilder : ICallTrumpInferenceFeatureBuilde
             dealerPosition,
             teamScore,
             opponentScore,
-            0f,
+            decisionNumber,
             chosenDecision);
     }
 }

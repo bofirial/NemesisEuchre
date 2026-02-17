@@ -18,4 +18,6 @@ public sealed class CallTrumpContext
     public required Card UpCard { get; init; }
 
     public required CallTrumpDecision[] ValidCallTrumpDecisions { get; init; }
+
+    public required byte DecisionNumber { get; init; }
 }

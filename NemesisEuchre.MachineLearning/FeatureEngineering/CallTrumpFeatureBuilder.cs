@@ -14,7 +14,7 @@ public sealed class CallTrumpFeatureBuilder : FeatureBuilderBase<CallTrumpDecisi
         RelativePlayerPosition dealerPosition,
         short teamScore,
         short opponentScore,
-        float decisionOrder,
+        byte decisionNumber,
         CallTrumpDecision chosenDecision)
     {
         return BuildFeaturesFromContext(
@@ -23,7 +23,7 @@ public sealed class CallTrumpFeatureBuilder : FeatureBuilderBase<CallTrumpDecisi
             dealerPosition,
             teamScore,
             opponentScore,
-            decisionOrder,
+            decisionNumber,
             chosenDecision);
     }
 
@@ -60,7 +60,7 @@ public sealed class CallTrumpFeatureBuilder : FeatureBuilderBase<CallTrumpDecisi
         RelativePlayerPosition dealerPosition,
         short teamScore,
         short opponentScore,
-        float decisionOrder,
+        byte decisionNumber,
         CallTrumpDecision chosenDecision)
     {
         return new CallTrumpTrainingData
@@ -80,7 +80,7 @@ public sealed class CallTrumpFeatureBuilder : FeatureBuilderBase<CallTrumpDecisi
             DealerPosition = (float)dealerPosition,
             TeamScore = teamScore,
             OpponentScore = opponentScore,
-            DecisionOrder = decisionOrder,
+            DecisionNumber = decisionNumber,
             ChosenDecision = (float)chosenDecision,
         };
     }

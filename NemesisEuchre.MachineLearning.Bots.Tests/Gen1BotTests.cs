@@ -123,7 +123,8 @@ public class Gen1BotTests
             0,
             RelativePlayerPosition.Self,
             upCard,
-            validDecisions);
+            validDecisions,
+            1);
 
         result.ChosenCallTrumpDecision.Should().BeOneOf(validDecisions);
     }

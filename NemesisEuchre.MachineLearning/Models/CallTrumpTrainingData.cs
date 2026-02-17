@@ -50,7 +50,7 @@ public class CallTrumpTrainingData
     public float OpponentScore { get; set; }
 
     [LoadColumn(15)]
-    public float DecisionOrder { get; set; }
+    public float DecisionNumber { get; set; }
 
     [LoadColumn(16)]
     public float ChosenDecision { get; set; }

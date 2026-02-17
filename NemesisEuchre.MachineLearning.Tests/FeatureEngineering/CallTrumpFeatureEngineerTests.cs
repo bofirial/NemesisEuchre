@@ -69,7 +69,7 @@ public class CallTrumpFeatureEngineerTests
         result.DealerPosition.Should().Be((float)RelativePlayerPosition.Partner);
         result.TeamScore.Should().Be(5);
         result.OpponentScore.Should().Be(3);
-        result.DecisionOrder.Should().Be(2);
+        result.DecisionNumber.Should().Be(2);
     }
 
     [Theory]

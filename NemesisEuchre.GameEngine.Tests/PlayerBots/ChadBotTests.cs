@@ -31,7 +31,7 @@ public class ChadBotTests
     {
         var validDecisions = new[] { CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp, CallTrumpDecision.OrderItUpAndGoAlone };
 
-        var result = await _bot.CallTrumpAsync([], 0, 0, RelativePlayerPosition.Self, new Card(Suit.Hearts, Rank.Nine), validDecisions);
+        var result = await _bot.CallTrumpAsync([], 0, 0, RelativePlayerPosition.Self, new Card(Suit.Hearts, Rank.Nine), validDecisions, 1);
 
         result.ChosenCallTrumpDecision.Should().Be(CallTrumpDecision.OrderItUpAndGoAlone);
     }
@@ -42,7 +42,7 @@ public class ChadBotTests
         var validDecisions = new[] { CallTrumpDecision.CallHearts, CallTrumpDecision.CallSpades };
         _mockRandom.Setup(x => x.NextInt(2)).Returns(0);
 
-        var result = await _bot.CallTrumpAsync([], 0, 0, RelativePlayerPosition.Self, new Card(Suit.Hearts, Rank.Nine), validDecisions);
+        var result = await _bot.CallTrumpAsync([], 0, 0, RelativePlayerPosition.Self, new Card(Suit.Hearts, Rank.Nine), validDecisions, 1);
 
         result.ChosenCallTrumpDecision.Should().Be(CallTrumpDecision.CallHearts);
     }

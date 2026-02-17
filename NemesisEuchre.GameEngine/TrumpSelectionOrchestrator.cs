@@ -143,6 +143,7 @@ public class TrumpSelectionOrchestrator(
             DealerPosition = deal.DealerPosition!.Value,
             UpCard = deal.UpCard!,
             ValidCallTrumpDecisions = [.. validDecisions],
+            DecisionNumber = (byte)(_decisionOrder + 1),
         };
 
         return playerActor.CallTrumpAsync(context);
