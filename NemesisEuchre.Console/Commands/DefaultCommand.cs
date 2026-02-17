@@ -203,10 +203,10 @@ public class DefaultCommand(
 
         if (!string.IsNullOrEmpty(teamModelName))
         {
-            return Actor.WithModel(teamActorType.Value, teamModelName, teamExplorationTemperature);
+            return Actor.WithModel(teamActorType.Value, teamModelName, teamExplorationTemperature, teamExplorationDecisionType);
         }
 
-        return new Actor(teamActorType.Value, null, teamExplorationTemperature);
+        return new Actor(teamActorType.Value, null, teamExplorationTemperature, teamExplorationDecisionType);
     }
 
     private static string GetModelDisplay(Actor? actor)
