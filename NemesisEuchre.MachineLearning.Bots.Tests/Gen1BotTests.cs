@@ -319,15 +319,15 @@ public class Gen1BotTests
 
     private RelativeCard[] GenerateRelativeCards(int count)
     {
-        var cards = new RelativeCard[count];
-        for (int i = 0; i < count; i++)
+        var cards = new HashSet<RelativeCard>();
+        while (cards.Count < count)
         {
-            cards[i] = new RelativeCard(_faker.PickRandom<Rank>(), _faker.PickRandom<RelativeSuit>())
+            cards.Add(new RelativeCard(_faker.PickRandom<Rank>(), _faker.PickRandom<RelativeSuit>())
             {
                 Card = GenerateCard(),
-            };
+            });
         }
 
-        return cards;
+        return [.. cards];
     }
 }
