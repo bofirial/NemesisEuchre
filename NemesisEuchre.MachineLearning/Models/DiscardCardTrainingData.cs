@@ -53,24 +53,12 @@ public class DiscardCardTrainingData
     public float OpponentScore { get; set; }
 
     [LoadColumn(16)]
-    public float Card1Chosen { get; set; }
+    public float ChosenCardRank { get; set; }
 
     [LoadColumn(17)]
-    public float Card2Chosen { get; set; }
+    public float ChosenCardRelativeSuit { get; set; }
 
     [LoadColumn(18)]
-    public float Card3Chosen { get; set; }
-
-    [LoadColumn(19)]
-    public float Card4Chosen { get; set; }
-
-    [LoadColumn(20)]
-    public float Card5Chosen { get; set; }
-
-    [LoadColumn(21)]
-    public float Card6Chosen { get; set; }
-
-    [LoadColumn(22)]
     [ColumnName("Label")]
     public float ExpectedDealPoints { get; set; }
 }

@@ -22,7 +22,6 @@ public class PlayCardFeatureBuilderTests
 
         var context = new PlayCardFeatureBuilderContext(
             CardsInHand: cards,
-            ValidCards: cards,
             PlayedCards: [],
             TeamScore: 3,
             OpponentScore: 5,
@@ -65,7 +64,6 @@ public class PlayCardFeatureBuilderTests
 
         var context = new PlayCardFeatureBuilderContext(
             CardsInHand: cards,
-            ValidCards: cards,
             PlayedCards: [],
             TeamScore: 0,
             OpponentScore: 0,
@@ -94,47 +92,6 @@ public class PlayCardFeatureBuilderTests
     }
 
     [Fact]
-    public void BuildFeatures_SetsValidityFlagsCorrectly()
-    {
-        var cards = new RelativeCard[]
-        {
-            new(Rank.Ace, RelativeSuit.Trump),
-            new(Rank.King, RelativeSuit.NonTrumpSameColor),
-            new(Rank.Queen, RelativeSuit.NonTrumpOppositeColor1),
-            new(Rank.Ten, RelativeSuit.NonTrumpOppositeColor2),
-            new(Rank.Nine, RelativeSuit.Trump),
-        };
-        var validCards = new[] { cards[0], cards[2], cards[4] };
-
-        var context = new PlayCardFeatureBuilderContext(
-            CardsInHand: cards,
-            ValidCards: validCards,
-            PlayedCards: [],
-            TeamScore: 0,
-            OpponentScore: 0,
-            LeadPlayer: RelativePlayerPosition.Self,
-            LeadSuit: RelativeSuit.Trump,
-            CallingPlayer: RelativePlayerPosition.Self,
-            CallingPlayerGoingAlone: false,
-            Dealer: RelativePlayerPosition.Self,
-            DealerPickedUpCard: null,
-            KnownPlayerSuitVoids: [],
-            CardsAccountedFor: [],
-            WinningTrickPlayer: null,
-            TrickNumber: 1,
-            WonTricks: 0,
-            OpponentsWonTricks: 0,
-            ChosenCard: cards[0]);
-        var result = PlayCardFeatureBuilder.BuildFeatures(context);
-
-        result.Card1IsValid.Should().Be(1.0f);
-        result.Card2IsValid.Should().Be(0.0f);
-        result.Card3IsValid.Should().Be(1.0f);
-        result.Card4IsValid.Should().Be(0.0f);
-        result.Card5IsValid.Should().Be(1.0f);
-    }
-
-    [Fact]
     public void BuildFeatures_MapsPlayedCardsForEachPosition()
     {
         var cards = CreateDefaultHand();
@@ -151,7 +108,6 @@ public class PlayCardFeatureBuilderTests
 
         var context = new PlayCardFeatureBuilderContext(
             CardsInHand: cards,
-            ValidCards: cards,
             PlayedCards: playedCards,
             TeamScore: 0,
             OpponentScore: 0,
@@ -185,7 +141,6 @@ public class PlayCardFeatureBuilderTests
 
         var context = new PlayCardFeatureBuilderContext(
             CardsInHand: cards,
-            ValidCards: cards,
             PlayedCards: [],
             TeamScore: 0,
             OpponentScore: 0,
@@ -225,7 +180,6 @@ public class PlayCardFeatureBuilderTests
 
         var context = new PlayCardFeatureBuilderContext(
             CardsInHand: cards,
-            ValidCards: cards,
             PlayedCards: [],
             TeamScore: 0,
             OpponentScore: 0,
@@ -265,7 +219,6 @@ public class PlayCardFeatureBuilderTests
 
         var context = new PlayCardFeatureBuilderContext(
             CardsInHand: cards,
-            ValidCards: cards,
             PlayedCards: [],
             TeamScore: 0,
             OpponentScore: 0,
@@ -298,13 +251,12 @@ public class PlayCardFeatureBuilderTests
     [InlineData(2)]
     [InlineData(3)]
     [InlineData(4)]
-    public void BuildFeatures_SetsChosenCardIndex(int chosenIndex)
+    public void BuildFeatures_SetsChosenCardProperties(int chosenIndex)
     {
         var cards = CreateDefaultHand();
 
         var context = new PlayCardFeatureBuilderContext(
             CardsInHand: cards,
-            ValidCards: cards,
             PlayedCards: [],
             TeamScore: 0,
             OpponentScore: 0,
@@ -323,11 +275,8 @@ public class PlayCardFeatureBuilderTests
             ChosenCard: cards[chosenIndex]);
         var result = PlayCardFeatureBuilder.BuildFeatures(context);
 
-        result.Card1Chosen.Should().Be(chosenIndex == 0 ? 1.0f : 0.0f);
-        result.Card2Chosen.Should().Be(chosenIndex == 1 ? 1.0f : 0.0f);
-        result.Card3Chosen.Should().Be(chosenIndex == 2 ? 1.0f : 0.0f);
-        result.Card4Chosen.Should().Be(chosenIndex == 3 ? 1.0f : 0.0f);
-        result.Card5Chosen.Should().Be(chosenIndex == 4 ? 1.0f : 0.0f);
+        result.ChosenCardRank.Should().Be((float)cards[chosenIndex].Rank);
+        result.ChosenCardRelativeSuit.Should().Be((float)cards[chosenIndex].Suit);
     }
 
     [Fact]
@@ -338,7 +287,6 @@ public class PlayCardFeatureBuilderTests
 
         var context = new PlayCardFeatureBuilderContext(
             CardsInHand: cards,
-            ValidCards: cards,
             PlayedCards: [],
             TeamScore: 4,
             OpponentScore: 7,
@@ -377,7 +325,6 @@ public class PlayCardFeatureBuilderTests
 
         var context = new PlayCardFeatureBuilderContext(
             CardsInHand: cards,
-            ValidCards: cards,
             PlayedCards: [],
             TeamScore: 0,
             OpponentScore: 0,

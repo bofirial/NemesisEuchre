@@ -61,7 +61,6 @@ public abstract class CallTrumpBehavioralTest(
                     testCase.DealerPosition ?? DealerPosition,
                     TeamScore,
                     OpponentScore,
-                    testCase.ValidDecisions,
                     decision);
                 var prediction = engine.Predict(features);
                 var score = prediction.PredictedPoints;

@@ -23,7 +23,6 @@ public interface IPlayCardInferenceFeatureBuilder
         short trickNumber,
         short wonTricks,
         short opponentsWonTricks,
-        RelativeCard[] validCardsToPlay,
         RelativeCard chosenCard);
 }
 
@@ -46,12 +45,10 @@ public class PlayCardInferenceFeatureBuilder : IPlayCardInferenceFeatureBuilder
         short trickNumber,
         short wonTricks,
         short opponentsWonTricks,
-        RelativeCard[] validCardsToPlay,
         RelativeCard chosenCard)
     {
         var context = new PlayCardFeatureBuilderContext(
             cardsInHand,
-            validCardsToPlay,
             playedCards,
             teamScore,
             opponentScore,

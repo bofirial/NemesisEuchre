@@ -73,50 +73,18 @@ public class CallTrumpFeatureEngineerTests
     }
 
     [Theory]
-    [InlineData(new[] { CallTrumpDecision.Pass, CallTrumpDecision.CallSpades })]
-    [InlineData(new[] { CallTrumpDecision.OrderItUp, CallTrumpDecision.OrderItUpAndGoAlone })]
-    [InlineData(new[] { CallTrumpDecision.Pass, CallTrumpDecision.CallSpades, CallTrumpDecision.CallHearts, CallTrumpDecision.CallClubs, CallTrumpDecision.CallDiamonds })]
-    public void Transform_WithValidDecisions_SetsCorrectValidityFlags(CallTrumpDecision[] validDecisions)
-    {
-        var chosenDecision = validDecisions[0];
-        var entity = CreateCallTrumpDecisionEntity(
-            validDecisions: validDecisions,
-            chosenDecision: chosenDecision);
-
-        var result = _engineer.Transform(entity);
-
-        var validityFlags = new[]
-        {
-            result.Decision0IsValid,
-            result.Decision1IsValid,
-            result.Decision2IsValid,
-            result.Decision3IsValid,
-            result.Decision4IsValid,
-            result.Decision5IsValid,
-            result.Decision6IsValid,
-            result.Decision7IsValid,
-            result.Decision8IsValid,
-            result.Decision9IsValid,
-            result.Decision10IsValid,
-        };
-
-        for (int i = 0; i < 11; i++)
-        {
-            var expectedFlag = validDecisions.Contains((CallTrumpDecision)i) ? 1.0f : 0.0f;
-            validityFlags[i].Should().Be(expectedFlag, $"Decision{i}IsValid should be {expectedFlag}");
-        }
-    }
-
-    [Theory]
-    [InlineData(CallTrumpDecision.Pass)]
-    [InlineData(CallTrumpDecision.CallSpades)]
-    [InlineData(CallTrumpDecision.CallHearts)]
-    [InlineData(CallTrumpDecision.CallClubs)]
-    [InlineData(CallTrumpDecision.CallDiamonds)]
-    [InlineData(CallTrumpDecision.CallSpadesAndGoAlone)]
-    [InlineData(CallTrumpDecision.OrderItUp)]
-    [InlineData(CallTrumpDecision.OrderItUpAndGoAlone)]
-    public void Transform_WithChosenDecision_SetsCorrectDecisionFlag(CallTrumpDecision chosenDecision)
+    [InlineData(CallTrumpDecision.Pass, 0)]
+    [InlineData(CallTrumpDecision.CallSpades, 1)]
+    [InlineData(CallTrumpDecision.CallHearts, 2)]
+    [InlineData(CallTrumpDecision.CallClubs, 3)]
+    [InlineData(CallTrumpDecision.CallDiamonds, 4)]
+    [InlineData(CallTrumpDecision.CallSpadesAndGoAlone, 5)]
+    [InlineData(CallTrumpDecision.CallHeartsAndGoAlone, 6)]
+    [InlineData(CallTrumpDecision.CallClubsAndGoAlone, 7)]
+    [InlineData(CallTrumpDecision.CallDiamondsAndGoAlone, 8)]
+    [InlineData(CallTrumpDecision.OrderItUp, 9)]
+    [InlineData(CallTrumpDecision.OrderItUpAndGoAlone, 10)]
+    public void Transform_WithChosenDecision_SetsChosenDecisionValue(CallTrumpDecision chosenDecision, int expectedValue)
     {
         var entity = CreateCallTrumpDecisionEntity(
             validDecisions: [chosenDecision],
@@ -124,30 +92,7 @@ public class CallTrumpFeatureEngineerTests
 
         var result = _engineer.Transform(entity);
 
-        result.Decision0Chosen.Should().Be(chosenDecision == CallTrumpDecision.Pass ? 1.0f : 0.0f);
-        result.Decision1Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallSpades ? 1.0f : 0.0f);
-        result.Decision2Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallHearts ? 1.0f : 0.0f);
-        result.Decision3Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallClubs ? 1.0f : 0.0f);
-        result.Decision4Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallDiamonds ? 1.0f : 0.0f);
-        result.Decision5Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallSpadesAndGoAlone ? 1.0f : 0.0f);
-        result.Decision6Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallHeartsAndGoAlone ? 1.0f : 0.0f);
-        result.Decision7Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallClubsAndGoAlone ? 1.0f : 0.0f);
-        result.Decision8Chosen.Should().Be(chosenDecision == CallTrumpDecision.CallDiamondsAndGoAlone ? 1.0f : 0.0f);
-        result.Decision9Chosen.Should().Be(chosenDecision == CallTrumpDecision.OrderItUp ? 1.0f : 0.0f);
-        result.Decision10Chosen.Should().Be(chosenDecision == CallTrumpDecision.OrderItUpAndGoAlone ? 1.0f : 0.0f);
-    }
-
-    [Fact]
-    public void Transform_WithChosenDecisionNotInValidSet_ThrowsInvalidOperationException()
-    {
-        var entity = CreateCallTrumpDecisionEntity(
-            validDecisions: [CallTrumpDecision.Pass, CallTrumpDecision.CallSpades],
-            chosenDecision: CallTrumpDecision.OrderItUp);
-
-        var act = () => _engineer.Transform(entity);
-
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("*not in the valid decisions array*");
+        result.ChosenDecision.Should().Be(expectedValue);
     }
 
     [Fact]

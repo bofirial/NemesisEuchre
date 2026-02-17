@@ -13,7 +13,6 @@ public interface ICallTrumpInferenceFeatureBuilder
         RelativePlayerPosition dealerPosition,
         short teamScore,
         short opponentScore,
-        CallTrumpDecision[] validDecisions,
         CallTrumpDecision chosenDecision);
 }
 
@@ -25,7 +24,6 @@ public class CallTrumpInferenceFeatureBuilder : ICallTrumpInferenceFeatureBuilde
         RelativePlayerPosition dealerPosition,
         short teamScore,
         short opponentScore,
-        CallTrumpDecision[] validDecisions,
         CallTrumpDecision chosenDecision)
     {
         return CallTrumpFeatureBuilder.BuildFeatures(
@@ -35,7 +33,6 @@ public class CallTrumpInferenceFeatureBuilder : ICallTrumpInferenceFeatureBuilde
             teamScore,
             opponentScore,
             0f,
-            validDecisions,
             chosenDecision);
     }
 }

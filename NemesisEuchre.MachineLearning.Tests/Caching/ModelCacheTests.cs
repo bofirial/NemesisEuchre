@@ -64,17 +64,7 @@ public class ModelCacheTestFixture : IDisposable
                 TeamScore = i % 11,
                 OpponentScore = (i + 1) % 11,
                 DecisionOrder = i % 8,
-                Decision0IsValid = 1,
-                Decision1IsValid = 1,
-                Decision2IsValid = 1,
-                Decision3IsValid = 1,
-                Decision4IsValid = 1,
-                Decision5IsValid = 1,
-                Decision6IsValid = 1,
-                Decision7IsValid = 1,
-                Decision8IsValid = 1,
-                Decision9IsValid = 1,
-                Decision10IsValid = 1,
+                ChosenDecision = i % 11,
                 ExpectedDealPoints = (short)((i % 5) - 2),
             });
         }
@@ -99,7 +89,8 @@ public class ModelCacheTestFixture : IDisposable
                 nameof(CallTrumpTrainingData.DealerPosition),
                 nameof(CallTrumpTrainingData.TeamScore),
                 nameof(CallTrumpTrainingData.OpponentScore),
-                nameof(CallTrumpTrainingData.DecisionOrder)))
+                nameof(CallTrumpTrainingData.DecisionOrder),
+                nameof(CallTrumpTrainingData.ChosenDecision)))
             .Append(MlContext.MulticlassClassification.Trainers.LightGbm())
             .Append(MlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
 

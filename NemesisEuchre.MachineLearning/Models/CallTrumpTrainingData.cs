@@ -53,72 +53,9 @@ public class CallTrumpTrainingData
     public float DecisionOrder { get; set; }
 
     [LoadColumn(16)]
-    public float Decision0IsValid { get; set; }
+    public float ChosenDecision { get; set; }
 
     [LoadColumn(17)]
-    public float Decision1IsValid { get; set; }
-
-    [LoadColumn(18)]
-    public float Decision2IsValid { get; set; }
-
-    [LoadColumn(19)]
-    public float Decision3IsValid { get; set; }
-
-    [LoadColumn(20)]
-    public float Decision4IsValid { get; set; }
-
-    [LoadColumn(21)]
-    public float Decision5IsValid { get; set; }
-
-    [LoadColumn(22)]
-    public float Decision6IsValid { get; set; }
-
-    [LoadColumn(23)]
-    public float Decision7IsValid { get; set; }
-
-    [LoadColumn(24)]
-    public float Decision8IsValid { get; set; }
-
-    [LoadColumn(25)]
-    public float Decision9IsValid { get; set; }
-
-    [LoadColumn(26)]
-    public float Decision10IsValid { get; set; }
-
-    [LoadColumn(27)]
-    public float Decision0Chosen { get; set; }
-
-    [LoadColumn(28)]
-    public float Decision1Chosen { get; set; }
-
-    [LoadColumn(29)]
-    public float Decision2Chosen { get; set; }
-
-    [LoadColumn(30)]
-    public float Decision3Chosen { get; set; }
-
-    [LoadColumn(31)]
-    public float Decision4Chosen { get; set; }
-
-    [LoadColumn(32)]
-    public float Decision5Chosen { get; set; }
-
-    [LoadColumn(33)]
-    public float Decision6Chosen { get; set; }
-
-    [LoadColumn(34)]
-    public float Decision7Chosen { get; set; }
-
-    [LoadColumn(35)]
-    public float Decision8Chosen { get; set; }
-
-    [LoadColumn(36)]
-    public float Decision9Chosen { get; set; }
-
-    [LoadColumn(37)]
-    public float Decision10Chosen { get; set; }
-
-    [LoadColumn(38)]
     [ColumnName("Label")]
     public float ExpectedDealPoints { get; set; }
 }

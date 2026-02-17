@@ -5,7 +5,6 @@ namespace NemesisEuchre.MachineLearning.FeatureEngineering;
 
 public sealed record PlayCardFeatureBuilderContext(
     RelativeCard[] CardsInHand,
-    RelativeCard[] ValidCards,
     Dictionary<RelativePlayerPosition, RelativeCard> PlayedCards,
     short TeamScore,
     short OpponentScore,

@@ -74,165 +74,141 @@ public class PlayCardTrainingData
     public float WinningTrickPlayer { get; set; }
 
     [LoadColumn(23)]
-    public float Card1IsValid { get; set; }
+    public float ChosenCardRank { get; set; }
 
     [LoadColumn(24)]
-    public float Card2IsValid { get; set; }
+    public float ChosenCardRelativeSuit { get; set; }
 
     [LoadColumn(25)]
-    public float Card3IsValid { get; set; }
-
-    [LoadColumn(26)]
-    public float Card4IsValid { get; set; }
-
-    [LoadColumn(27)]
-    public float Card5IsValid { get; set; }
-
-    [LoadColumn(28)]
     public float CallingPlayerPosition { get; set; }
 
-    [LoadColumn(29)]
+    [LoadColumn(26)]
     public float CallingPlayerGoingAlone { get; set; }
 
-    [LoadColumn(30)]
+    [LoadColumn(27)]
     public float DealerPlayerPosition { get; set; }
 
-    [LoadColumn(31)]
+    [LoadColumn(28)]
     public float DealerPickedUpCardRank { get; set; }
 
-    [LoadColumn(32)]
+    [LoadColumn(29)]
     public float DealerPickedUpCardSuit { get; set; }
 
-    [LoadColumn(33)]
+    [LoadColumn(30)]
     public float LeftHandOpponentMayHaveTrump { get; set; }
 
-    [LoadColumn(34)]
+    [LoadColumn(31)]
     public float LeftHandOpponentMayHaveNonTrumpSameColor { get; set; }
 
-    [LoadColumn(35)]
+    [LoadColumn(32)]
     public float LeftHandOpponentMayHaveNonTrumpOppositeColor1 { get; set; }
 
-    [LoadColumn(36)]
+    [LoadColumn(33)]
     public float LeftHandOpponentMayHaveNonTrumpOppositeColor2 { get; set; }
 
-    [LoadColumn(37)]
+    [LoadColumn(34)]
     public float PartnerMayHaveTrump { get; set; }
 
-    [LoadColumn(38)]
+    [LoadColumn(35)]
     public float PartnerMayHaveNonTrumpSameColor { get; set; }
 
-    [LoadColumn(39)]
+    [LoadColumn(36)]
     public float PartnerMayHaveNonTrumpOppositeColor1 { get; set; }
 
-    [LoadColumn(40)]
+    [LoadColumn(37)]
     public float PartnerMayHaveNonTrumpOppositeColor2 { get; set; }
 
-    [LoadColumn(41)]
+    [LoadColumn(38)]
     public float RightHandOpponentMayHaveTrump { get; set; }
 
-    [LoadColumn(42)]
+    [LoadColumn(39)]
     public float RightHandOpponentMayHaveNonTrumpSameColor { get; set; }
 
-    [LoadColumn(43)]
+    [LoadColumn(40)]
     public float RightHandOpponentMayHaveNonTrumpOppositeColor1 { get; set; }
 
-    [LoadColumn(44)]
+    [LoadColumn(41)]
     public float RightHandOpponentMayHaveNonTrumpOppositeColor2 { get; set; }
 
-    [LoadColumn(45)]
+    [LoadColumn(42)]
     public float RightBowerOfTrumpHasBeenAccountedFor { get; set; }
 
-    [LoadColumn(46)]
+    [LoadColumn(43)]
     public float LeftBowerOfTrumpHasBeenAccountedFor { get; set; }
 
-    [LoadColumn(47)]
+    [LoadColumn(44)]
     public float AceOfTrumpHasBeenAccountedFor { get; set; }
 
-    [LoadColumn(48)]
+    [LoadColumn(45)]
     public float KingOfTrumpHasBeenAccountedFor { get; set; }
 
-    [LoadColumn(49)]
+    [LoadColumn(46)]
     public float QueenOfTrumpHasBeenAccountedFor { get; set; }
 
-    [LoadColumn(50)]
+    [LoadColumn(47)]
     public float TenOfTrumpHasBeenAccountedFor { get; set; }
 
-    [LoadColumn(51)]
+    [LoadColumn(48)]
     public float NineOfTrumpHasBeenAccountedFor { get; set; }
 
-    [LoadColumn(52)]
+    [LoadColumn(49)]
     public float AceOfNonTrumpSameColorHasBeenAccountedFor { get; set; }
 
-    [LoadColumn(53)]
+    [LoadColumn(50)]
     public float KingOfNonTrumpSameColorHasBeenAccountedFor { get; set; }
 
-    [LoadColumn(54)]
+    [LoadColumn(51)]
     public float QueenOfNonTrumpSameColorHasBeenAccountedFor { get; set; }
 
-    [LoadColumn(55)]
+    [LoadColumn(52)]
     public float TenOfNonTrumpSameColorHasBeenAccountedFor { get; set; }
 
-    [LoadColumn(56)]
+    [LoadColumn(53)]
     public float NineOfNonTrumpSameColorHasBeenAccountedFor { get; set; }
 
-    [LoadColumn(57)]
+    [LoadColumn(54)]
     public float AceOfNonTrumpOppositeColor1HasBeenAccountedFor { get; set; }
 
-    [LoadColumn(58)]
+    [LoadColumn(55)]
     public float KingOfNonTrumpOppositeColor1HasBeenAccountedFor { get; set; }
 
-    [LoadColumn(59)]
+    [LoadColumn(56)]
     public float QueenOfNonTrumpOppositeColor1HasBeenAccountedFor { get; set; }
 
-    [LoadColumn(60)]
+    [LoadColumn(57)]
     public float JackOfNonTrumpOppositeColor1HasBeenAccountedFor { get; set; }
 
-    [LoadColumn(61)]
+    [LoadColumn(58)]
     public float TenOfNonTrumpOppositeColor1HasBeenAccountedFor { get; set; }
 
-    [LoadColumn(62)]
+    [LoadColumn(59)]
     public float NineOfNonTrumpOppositeColor1HasBeenAccountedFor { get; set; }
 
-    [LoadColumn(63)]
+    [LoadColumn(60)]
     public float AceOfNonTrumpOppositeColor2HasBeenAccountedFor { get; set; }
 
-    [LoadColumn(64)]
+    [LoadColumn(61)]
     public float KingOfNonTrumpOppositeColor2HasBeenAccountedFor { get; set; }
 
-    [LoadColumn(65)]
+    [LoadColumn(62)]
     public float QueenOfNonTrumpOppositeColor2HasBeenAccountedFor { get; set; }
 
-    [LoadColumn(66)]
+    [LoadColumn(63)]
     public float JackOfNonTrumpOppositeColor2HasBeenAccountedFor { get; set; }
 
-    [LoadColumn(67)]
+    [LoadColumn(64)]
     public float TenOfNonTrumpOppositeColor2HasBeenAccountedFor { get; set; }
 
-    [LoadColumn(68)]
+    [LoadColumn(65)]
     public float NineOfNonTrumpOppositeColor2HasBeenAccountedFor { get; set; }
 
-    [LoadColumn(69)]
-    public float Card1Chosen { get; set; }
-
-    [LoadColumn(70)]
-    public float Card2Chosen { get; set; }
-
-    [LoadColumn(71)]
-    public float Card3Chosen { get; set; }
-
-    [LoadColumn(72)]
-    public float Card4Chosen { get; set; }
-
-    [LoadColumn(73)]
-    public float Card5Chosen { get; set; }
-
-    [LoadColumn(74)]
+    [LoadColumn(66)]
     public float WonTricks { get; set; }
 
-    [LoadColumn(75)]
+    [LoadColumn(67)]
     public float OpponentsWonTricks { get; set; }
 
-    [LoadColumn(76)]
+    [LoadColumn(68)]
     [ColumnName("Label")]
     public float ExpectedDealPoints { get; set; }
 }

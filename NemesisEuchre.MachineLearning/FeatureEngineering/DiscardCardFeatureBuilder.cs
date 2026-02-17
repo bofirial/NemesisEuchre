@@ -74,8 +74,6 @@ public sealed class DiscardCardFeatureBuilder : FeatureBuilderBase<DiscardCardDe
         short opponentScore,
         RelativeCard chosenCard)
     {
-        var chosenCardIndex = Array.FindIndex(cards, c => c == chosenCard);
-
         return new DiscardCardTrainingData
         {
             Card1Rank = (float)cards[0].Rank,
@@ -94,12 +92,8 @@ public sealed class DiscardCardFeatureBuilder : FeatureBuilderBase<DiscardCardDe
             CallingPlayerGoingAlone = callingPlayerGoingAlone ? 1.0f : 0.0f,
             TeamScore = teamScore,
             OpponentScore = opponentScore,
-            Card1Chosen = chosenCardIndex == 0 ? 1.0f : 0.0f,
-            Card2Chosen = chosenCardIndex == 1 ? 1.0f : 0.0f,
-            Card3Chosen = chosenCardIndex == 2 ? 1.0f : 0.0f,
-            Card4Chosen = chosenCardIndex == 3 ? 1.0f : 0.0f,
-            Card5Chosen = chosenCardIndex == 4 ? 1.0f : 0.0f,
-            Card6Chosen = chosenCardIndex == 5 ? 1.0f : 0.0f,
+            ChosenCardRank = (float)chosenCard.Rank,
+            ChosenCardRelativeSuit = (float)chosenCard.Suit,
         };
     }
 }

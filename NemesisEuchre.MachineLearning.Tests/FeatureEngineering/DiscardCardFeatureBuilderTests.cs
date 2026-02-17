@@ -50,7 +50,7 @@ public class DiscardCardFeatureBuilderTests
     [InlineData(3)]
     [InlineData(4)]
     [InlineData(5)]
-    public void BuildFeatures_SetsChosenCardOneHot(int chosenIndex)
+    public void BuildFeatures_SetsChosenCardProperties(int chosenIndex)
     {
         var cards = CreateDefaultHand();
 
@@ -62,12 +62,8 @@ public class DiscardCardFeatureBuilderTests
             opponentScore: 0,
             chosenCard: cards[chosenIndex]);
 
-        result.Card1Chosen.Should().Be(chosenIndex == 0 ? 1.0f : 0.0f);
-        result.Card2Chosen.Should().Be(chosenIndex == 1 ? 1.0f : 0.0f);
-        result.Card3Chosen.Should().Be(chosenIndex == 2 ? 1.0f : 0.0f);
-        result.Card4Chosen.Should().Be(chosenIndex == 3 ? 1.0f : 0.0f);
-        result.Card5Chosen.Should().Be(chosenIndex == 4 ? 1.0f : 0.0f);
-        result.Card6Chosen.Should().Be(chosenIndex == 5 ? 1.0f : 0.0f);
+        result.ChosenCardRank.Should().Be((float)cards[chosenIndex].Rank);
+        result.ChosenCardRelativeSuit.Should().Be((float)cards[chosenIndex].Suit);
     }
 
     [Fact]

@@ -78,7 +78,7 @@ public class DiscardCardFeatureEngineerTests
     [InlineData(3)]
     [InlineData(4)]
     [InlineData(5)]
-    public void Transform_WithChosenCard_SetsCorrectDecisionFlag(int chosenCardIndex)
+    public void Transform_WithChosenCard_SetsChosenCardProperties(int chosenCardIndex)
     {
         var cards = CreateRelativeCards(6);
         var chosenCard = cards[chosenCardIndex];
@@ -86,12 +86,8 @@ public class DiscardCardFeatureEngineerTests
 
         var result = _engineer.Transform(entity);
 
-        result.Card1Chosen.Should().Be(chosenCardIndex == 0 ? 1.0f : 0.0f);
-        result.Card2Chosen.Should().Be(chosenCardIndex == 1 ? 1.0f : 0.0f);
-        result.Card3Chosen.Should().Be(chosenCardIndex == 2 ? 1.0f : 0.0f);
-        result.Card4Chosen.Should().Be(chosenCardIndex == 3 ? 1.0f : 0.0f);
-        result.Card5Chosen.Should().Be(chosenCardIndex == 4 ? 1.0f : 0.0f);
-        result.Card6Chosen.Should().Be(chosenCardIndex == 5 ? 1.0f : 0.0f);
+        result.ChosenCardRank.Should().Be((float)chosenCard.Rank);
+        result.ChosenCardRelativeSuit.Should().Be((float)chosenCard.Suit);
     }
 
     [Fact]

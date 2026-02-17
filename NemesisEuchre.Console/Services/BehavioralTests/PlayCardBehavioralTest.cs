@@ -99,7 +99,6 @@ public abstract class PlayCardBehavioralTest(
                     TrickNumber,
                     WonTricks,
                     OpponentsWonTricks,
-                    testCase.ValidCardsToPlay,
                     card);
                 var prediction = engine.Predict(features);
                 var score = prediction.PredictedPoints;

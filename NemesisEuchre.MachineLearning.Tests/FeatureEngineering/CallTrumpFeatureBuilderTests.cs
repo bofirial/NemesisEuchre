@@ -28,7 +28,6 @@ public class CallTrumpFeatureBuilderTests
             teamScore: 3,
             opponentScore: 5,
             decisionOrder: 2.0f,
-            validDecisions: [CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp],
             chosenDecision: CallTrumpDecision.Pass);
 
         result.Card1Rank.Should().Be((float)Rank.Ace);
@@ -43,49 +42,21 @@ public class CallTrumpFeatureBuilderTests
         result.Card5Suit.Should().Be((float)Suit.Spades);
     }
 
-    [Fact]
-    public void BuildFeatures_SetsValidityArrayForValidDecisions()
-    {
-        var cards = CreateDefaultHand();
-        var validDecisions = new[]
-        {
-            CallTrumpDecision.Pass,
-            CallTrumpDecision.CallSpades,
-            CallTrumpDecision.CallSpadesAndGoAlone,
-        };
-
-        var result = CallTrumpFeatureBuilder.BuildFeatures(
-            cards,
-            upCard: new Card(Suit.Hearts, Rank.Ace),
-            dealerPosition: RelativePlayerPosition.Self,
-            teamScore: 0,
-            opponentScore: 0,
-            decisionOrder: 1.0f,
-            validDecisions: validDecisions,
-            chosenDecision: CallTrumpDecision.Pass);
-
-        result.Decision0IsValid.Should().Be(1.0f);
-        result.Decision1IsValid.Should().Be(1.0f);
-        result.Decision2IsValid.Should().Be(0.0f);
-        result.Decision3IsValid.Should().Be(0.0f);
-        result.Decision4IsValid.Should().Be(0.0f);
-        result.Decision5IsValid.Should().Be(1.0f);
-        result.Decision6IsValid.Should().Be(0.0f);
-        result.Decision7IsValid.Should().Be(0.0f);
-        result.Decision8IsValid.Should().Be(0.0f);
-        result.Decision9IsValid.Should().Be(0.0f);
-        result.Decision10IsValid.Should().Be(0.0f);
-    }
-
     [Theory]
     [InlineData(CallTrumpDecision.Pass, 0)]
+    [InlineData(CallTrumpDecision.CallSpades, 1)]
     [InlineData(CallTrumpDecision.CallHearts, 2)]
+    [InlineData(CallTrumpDecision.CallClubs, 3)]
+    [InlineData(CallTrumpDecision.CallDiamonds, 4)]
+    [InlineData(CallTrumpDecision.CallSpadesAndGoAlone, 5)]
+    [InlineData(CallTrumpDecision.CallHeartsAndGoAlone, 6)]
+    [InlineData(CallTrumpDecision.CallClubsAndGoAlone, 7)]
+    [InlineData(CallTrumpDecision.CallDiamondsAndGoAlone, 8)]
     [InlineData(CallTrumpDecision.OrderItUp, 9)]
     [InlineData(CallTrumpDecision.OrderItUpAndGoAlone, 10)]
-    public void BuildFeatures_SetsChosenDecisionOneHot(CallTrumpDecision decision, int expectedIndex)
+    public void BuildFeatures_SetsChosenDecision(CallTrumpDecision decision, int expectedValue)
     {
         var cards = CreateDefaultHand();
-        var allDecisions = Enum.GetValues<CallTrumpDecision>();
 
         var result = CallTrumpFeatureBuilder.BuildFeatures(
             cards,
@@ -94,20 +65,9 @@ public class CallTrumpFeatureBuilderTests
             teamScore: 0,
             opponentScore: 0,
             decisionOrder: 1.0f,
-            validDecisions: allDecisions,
             chosenDecision: decision);
 
-        result.Decision0Chosen.Should().Be(expectedIndex == 0 ? 1.0f : 0.0f);
-        result.Decision1Chosen.Should().Be(expectedIndex == 1 ? 1.0f : 0.0f);
-        result.Decision2Chosen.Should().Be(expectedIndex == 2 ? 1.0f : 0.0f);
-        result.Decision3Chosen.Should().Be(expectedIndex == 3 ? 1.0f : 0.0f);
-        result.Decision4Chosen.Should().Be(expectedIndex == 4 ? 1.0f : 0.0f);
-        result.Decision5Chosen.Should().Be(expectedIndex == 5 ? 1.0f : 0.0f);
-        result.Decision6Chosen.Should().Be(expectedIndex == 6 ? 1.0f : 0.0f);
-        result.Decision7Chosen.Should().Be(expectedIndex == 7 ? 1.0f : 0.0f);
-        result.Decision8Chosen.Should().Be(expectedIndex == 8 ? 1.0f : 0.0f);
-        result.Decision9Chosen.Should().Be(expectedIndex == 9 ? 1.0f : 0.0f);
-        result.Decision10Chosen.Should().Be(expectedIndex == 10 ? 1.0f : 0.0f);
+        result.ChosenDecision.Should().Be(expectedValue);
     }
 
     [Fact]
@@ -122,7 +82,6 @@ public class CallTrumpFeatureBuilderTests
             teamScore: 7,
             opponentScore: 9,
             decisionOrder: 3.0f,
-            validDecisions: [CallTrumpDecision.Pass],
             chosenDecision: CallTrumpDecision.Pass);
 
         result.UpCardRank.Should().Be((float)Rank.Queen);

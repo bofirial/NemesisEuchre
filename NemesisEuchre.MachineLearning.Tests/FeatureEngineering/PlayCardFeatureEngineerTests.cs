@@ -138,29 +138,13 @@ public class PlayCardFeatureEngineerTests
         result.WinningTrickPlayer.Should().Be((float)RelativePlayerPosition.Partner);
     }
 
-    [Fact]
-    public void Transform_WithValidCards_SetsCorrectValidityFlags()
-    {
-        var cards = CreateRelativeCards(5);
-        var validCards = new[] { cards[0], cards[2], cards[4] };
-        var entity = CreatePlayCardDecisionEntity(cards, validCards: validCards);
-
-        var result = _engineer.Transform(entity);
-
-        result.Card1IsValid.Should().Be(1.0f);
-        result.Card2IsValid.Should().Be(0.0f);
-        result.Card3IsValid.Should().Be(1.0f);
-        result.Card4IsValid.Should().Be(0.0f);
-        result.Card5IsValid.Should().Be(1.0f);
-    }
-
     [Theory]
     [InlineData(0)]
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(3)]
     [InlineData(4)]
-    public void Transform_WithChosenCard_SetsCorrectDecisionFlag(int chosenCardIndex)
+    public void Transform_WithChosenCard_SetsChosenCardProperties(int chosenCardIndex)
     {
         var cards = CreateRelativeCards(5);
         var chosenCard = cards[chosenCardIndex];
@@ -168,30 +152,8 @@ public class PlayCardFeatureEngineerTests
 
         var result = _engineer.Transform(entity);
 
-        result.Card1Chosen.Should().Be(chosenCardIndex == 0 ? 1.0f : 0.0f);
-        result.Card2Chosen.Should().Be(chosenCardIndex == 1 ? 1.0f : 0.0f);
-        result.Card3Chosen.Should().Be(chosenCardIndex == 2 ? 1.0f : 0.0f);
-        result.Card4Chosen.Should().Be(chosenCardIndex == 3 ? 1.0f : 0.0f);
-        result.Card5Chosen.Should().Be(chosenCardIndex == 4 ? 1.0f : 0.0f);
-    }
-
-    [Fact]
-    public void Transform_WithChosenCardNotInHand_ThrowsInvalidOperationException()
-    {
-        var cards = CreateRelativeCards(5);
-        var chosenCard = new RelativeCard(Rank.Ace, RelativeSuit.Trump);
-
-        while (cards.Any(c => c == chosenCard))
-        {
-            chosenCard = new RelativeCard(_faker.PickRandom<Rank>(), _faker.PickRandom<RelativeSuit>());
-        }
-
-        var entity = CreatePlayCardDecisionEntity(cards, chosenCard: chosenCard);
-
-        var act = () => _engineer.Transform(entity);
-
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("*not found in hand*");
+        result.ChosenCardRank.Should().Be((float)chosenCard.Rank);
+        result.ChosenCardRelativeSuit.Should().Be((float)chosenCard.Suit);
     }
 
     [Fact]
