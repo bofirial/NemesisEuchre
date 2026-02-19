@@ -95,7 +95,7 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Add_ShouldAccumulateTrainingData_FromMultipleBatches()
+    public async Task Add_ShouldAccumulateTrainingData_FromMultipleBatches()
     {
         var batch1 = CreateBatch(playCardCount: 2, callTrumpCount: 1, discardCardCount: 1);
         var batch2 = CreateBatch(playCardCount: 3, callTrumpCount: 2, discardCardCount: 0);
@@ -103,7 +103,7 @@ public class TrainingDataAccumulatorTests : IDisposable
         _accumulator.Add(batch1);
         _accumulator.Add(batch2);
         _accumulator.SaveChunk("test-generation");
-        _accumulator.Finalize("test-generation");
+        await _accumulator.FinalizeAsync("test-generation", cancellationToken: TestContext.Current.CancellationToken);
 
         _savedPlayCardCalls.Should().ContainSingle(c => c.count == 5);
         _savedCallTrumpCalls.Should().ContainSingle(c => c.count == 3);
@@ -121,13 +121,13 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Finalize_ShouldProduceFinalFiles_WithCorrectPaths()
+    public async Task Finalize_ShouldProduceFinalFiles_WithCorrectPaths()
     {
         var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
         _accumulator.Add(batch);
 
         _accumulator.SaveChunk("generation-42");
-        _accumulator.Finalize("generation-42");
+        await _accumulator.FinalizeAsync("generation-42", cancellationToken: TestContext.Current.CancellationToken);
 
         var chunkDir = Path.Combine(_tempDirectory, "_chunks", "generation-42");
         _mockIdvFileService.Verify(
@@ -154,13 +154,13 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Finalize_ShouldSaveMetadata_ForEachIdvFile()
+    public async Task Finalize_ShouldSaveMetadata_ForEachIdvFile()
     {
         var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
         _accumulator.Add(batch);
 
         _accumulator.SaveChunk("gen-1");
-        _accumulator.Finalize("gen-1");
+        await _accumulator.FinalizeAsync("gen-1", cancellationToken: TestContext.Current.CancellationToken);
 
         _mockIdvFileService.Verify(
             x => x.SaveMetadata(It.IsAny<IdvFileMetadata>(), It.IsAny<string>()),
@@ -168,13 +168,13 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Finalize_ShouldSaveMetadata_WithCorrectRowCounts()
+    public async Task Finalize_ShouldSaveMetadata_WithCorrectRowCounts()
     {
         var batch = CreateBatch(playCardCount: 5, callTrumpCount: 3, discardCardCount: 2);
         _accumulator.Add(batch);
 
         _accumulator.SaveChunk("gen-1");
-        _accumulator.Finalize("gen-1");
+        await _accumulator.FinalizeAsync("gen-1", cancellationToken: TestContext.Current.CancellationToken);
 
         _mockIdvFileService.Verify(
             x => x.SaveMetadata(
@@ -194,7 +194,7 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Finalize_ShouldSaveMetadata_WithAccumulatedGameCount()
+    public async Task Finalize_ShouldSaveMetadata_WithAccumulatedGameCount()
     {
         var stats1 = new TrainingDataBatchStats(10, 50, 200, []);
         var batch1 = new TrainingDataBatch([], [], [], stats1);
@@ -205,7 +205,7 @@ public class TrainingDataAccumulatorTests : IDisposable
         _accumulator.SaveChunk("gen-1");
         _accumulator.Add(batch2);
         _accumulator.SaveChunk("gen-1");
-        _accumulator.Finalize("gen-1");
+        await _accumulator.FinalizeAsync("gen-1", cancellationToken: TestContext.Current.CancellationToken);
 
         _mockIdvFileService.Verify(
             x => x.SaveMetadata(
@@ -215,13 +215,13 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Finalize_ShouldSaveMetadata_WithCorrectFilePaths()
+    public async Task Finalize_ShouldSaveMetadata_WithCorrectFilePaths()
     {
         var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
         _accumulator.Add(batch);
 
         _accumulator.SaveChunk("gen-1");
-        _accumulator.Finalize("gen-1");
+        await _accumulator.FinalizeAsync("gen-1", cancellationToken: TestContext.Current.CancellationToken);
 
         _mockIdvFileService.Verify(
             x => x.SaveMetadata(
@@ -241,7 +241,7 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Add_ShouldAccumulateStats_AcrossMultipleBatches()
+    public async Task Add_ShouldAccumulateStats_AcrossMultipleBatches()
     {
         var actor1 = new Actor(ActorType.Chaos);
         var actor2 = Actor.WithModel(ActorType.Model, "gen1", 0.1f);
@@ -254,7 +254,7 @@ public class TrainingDataAccumulatorTests : IDisposable
         _accumulator.Add(batch1);
         _accumulator.Add(batch2);
         _accumulator.SaveChunk("gen-1");
-        _accumulator.Finalize("gen-1");
+        await _accumulator.FinalizeAsync("gen-1", cancellationToken: TestContext.Current.CancellationToken);
 
         _mockIdvFileService.Verify(
             x => x.SaveMetadata(
@@ -414,13 +414,13 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Finalize_SingleChunk_RenamesInsteadOfMerging()
+    public async Task Finalize_SingleChunk_RenamesInsteadOfMerging()
     {
         var batch = CreateBatch(playCardCount: 2, callTrumpCount: 1, discardCardCount: 1);
         _accumulator.Add(batch);
 
         _accumulator.SaveChunk("gen1");
-        _accumulator.Finalize("gen1");
+        await _accumulator.FinalizeAsync("gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         _mockIdvFileService.Verify(
             x => x.StreamFromBinary<PlayCardTrainingData>(It.IsAny<string>()),
@@ -434,7 +434,7 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Finalize_MultipleChunks_MergesViaStreaming()
+    public async Task Finalize_MultipleChunks_MergesViaStreaming()
     {
         _mockIdvFileService
             .Setup(x => x.StreamFromBinary<PlayCardTrainingData>(It.IsAny<string>()))
@@ -450,7 +450,7 @@ public class TrainingDataAccumulatorTests : IDisposable
         _accumulator.SaveChunk("gen1");
         _accumulator.Add(CreateBatch(playCardCount: 3, callTrumpCount: 2, discardCardCount: 0));
         _accumulator.SaveChunk("gen1");
-        _accumulator.Finalize("gen1");
+        await _accumulator.FinalizeAsync("gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         _mockIdvFileService.Verify(
             x => x.StreamFromBinary<PlayCardTrainingData>(It.IsAny<string>()),
@@ -464,7 +464,7 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Finalize_WritesCorrectCumulativeMetadata()
+    public async Task Finalize_WritesCorrectCumulativeMetadata()
     {
         var batch1 = CreateBatch(playCardCount: 5, callTrumpCount: 3, discardCardCount: 2);
         var batch2 = CreateBatch(playCardCount: 10, callTrumpCount: 4, discardCardCount: 1);
@@ -483,7 +483,7 @@ public class TrainingDataAccumulatorTests : IDisposable
         _accumulator.SaveChunk("gen1");
         _accumulator.Add(batch2);
         _accumulator.SaveChunk("gen1");
-        _accumulator.Finalize("gen1");
+        await _accumulator.FinalizeAsync("gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         _mockIdvFileService.Verify(
             x => x.SaveMetadata(
@@ -503,7 +503,7 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Finalize_DeletesChunkDirectory()
+    public async Task Finalize_DeletesChunkDirectory()
     {
         var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
         _accumulator.Add(batch);
@@ -513,28 +513,28 @@ public class TrainingDataAccumulatorTests : IDisposable
         var chunkDir = Path.Combine(_tempDirectory, "_chunks", "gen1");
         Directory.Exists(chunkDir).Should().BeTrue();
 
-        _accumulator.Finalize("gen1");
+        await _accumulator.FinalizeAsync("gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         Directory.Exists(chunkDir).Should().BeFalse();
     }
 
     [Fact]
-    public void Finalize_FlushesRemainingData_IfListsNotEmpty()
+    public async Task Finalize_FlushesRemainingData_IfListsNotEmpty()
     {
         var batch = CreateBatch(playCardCount: 2, callTrumpCount: 1, discardCardCount: 1);
         _accumulator.Add(batch);
 
-        _accumulator.Finalize("gen1");
+        await _accumulator.FinalizeAsync("gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         _savedPlayCardCalls.Should().ContainSingle(c => c.count == 2);
     }
 
     [Fact]
-    public void Finalize_IsNoOp_WhenNoDataAdded()
+    public async Task Finalize_IsNoOp_WhenNoDataAdded()
     {
-        var act = () => _accumulator.Finalize("gen1");
+        var act = async () => await _accumulator.FinalizeAsync("gen1", cancellationToken: TestContext.Current.CancellationToken);
 
-        act.Should().NotThrow();
+        await act.Should().NotThrowAsync();
         _savedPlayCardCalls.Should().BeEmpty();
         _savedCallTrumpCalls.Should().BeEmpty();
         _savedDiscardCardCalls.Should().BeEmpty();
@@ -544,7 +544,7 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Finalize_InvokesStatusCallback_AtKeyPoints()
+    public async Task Finalize_InvokesStatusCallback_AtKeyPoints()
     {
         _mockIdvFileService
             .Setup(x => x.StreamFromBinary<PlayCardTrainingData>(It.IsAny<string>()))
@@ -563,7 +563,7 @@ public class TrainingDataAccumulatorTests : IDisposable
 
         var statusMessages = new List<string>();
 
-        _accumulator.Finalize("gen1", statusMessages.Add);
+        await _accumulator.FinalizeAsync("gen1", statusMessages.Add, TestContext.Current.CancellationToken);
 
         statusMessages.Should().HaveCountGreaterThanOrEqualTo(2);
         statusMessages.Should().Contain(msg => msg.Contains("Merging"));
@@ -571,7 +571,7 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Finalize_InvokesStatusCallback_ForSingleChunkRename()
+    public async Task Finalize_InvokesStatusCallback_ForSingleChunkRename()
     {
         var batch = CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1);
         _accumulator.Add(batch);
@@ -579,7 +579,7 @@ public class TrainingDataAccumulatorTests : IDisposable
 
         var statusMessages = new List<string>();
 
-        _accumulator.Finalize("gen1", statusMessages.Add);
+        await _accumulator.FinalizeAsync("gen1", statusMessages.Add, TestContext.Current.CancellationToken);
 
         statusMessages.Should().HaveCountGreaterThanOrEqualTo(2);
         statusMessages.Should().Contain(msg => msg.Contains("Finalizing"));
@@ -587,20 +587,20 @@ public class TrainingDataAccumulatorTests : IDisposable
     }
 
     [Fact]
-    public void Finalize_InvokesStatusCallback_WhenFlushingRemainingData()
+    public async Task Finalize_InvokesStatusCallback_WhenFlushingRemainingData()
     {
         var batch = CreateBatch(playCardCount: 2, callTrumpCount: 1, discardCardCount: 1);
         _accumulator.Add(batch);
 
         var statusMessages = new List<string>();
 
-        _accumulator.Finalize("gen1", statusMessages.Add);
+        await _accumulator.FinalizeAsync("gen1", statusMessages.Add, TestContext.Current.CancellationToken);
 
         statusMessages.Should().Contain(msg => msg.Contains("Saving remaining"));
     }
 
     [Fact]
-    public void Add_ShouldAccumulateDataAcrossBatches_WithDifferentCounts()
+    public async Task Add_ShouldAccumulateDataAcrossBatches_WithDifferentCounts()
     {
         var batch1 = CreateBatch(playCardCount: 5, callTrumpCount: 0, discardCardCount: 2);
         var batch2 = CreateBatch(playCardCount: 0, callTrumpCount: 3, discardCardCount: 0);
@@ -610,7 +610,7 @@ public class TrainingDataAccumulatorTests : IDisposable
         _accumulator.Add(batch2);
         _accumulator.Add(batch3);
         _accumulator.SaveChunk("test-generation");
-        _accumulator.Finalize("test-generation");
+        await _accumulator.FinalizeAsync("test-generation", cancellationToken: TestContext.Current.CancellationToken);
 
         _savedPlayCardCalls.Should().ContainSingle(c => c.count == 6);
         _savedCallTrumpCalls.Should().ContainSingle(c => c.count == 4);

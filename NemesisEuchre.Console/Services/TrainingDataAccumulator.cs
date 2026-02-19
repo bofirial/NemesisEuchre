@@ -15,7 +15,7 @@ public interface ITrainingDataAccumulator
 
     void SaveChunk(string generationName, bool allowOverwrite = false);
 
-    void Finalize(string generationName, Action<string>? onStatusUpdate = null);
+    Task FinalizeAsync(string generationName, Action<string>? onStatusUpdate = null, CancellationToken cancellationToken = default);
 }
 
 public class TrainingDataAccumulator(
@@ -68,7 +68,7 @@ public class TrainingDataAccumulator(
         _chunkIndex++;
     }
 
-    public void Finalize(string generationName, Action<string>? onStatusUpdate = null)
+    public async Task FinalizeAsync(string generationName, Action<string>? onStatusUpdate = null, CancellationToken cancellationToken = default)
     {
         if (buffer.HasData())
         {
@@ -89,19 +89,23 @@ public class TrainingDataAccumulator(
         if (_chunkIndex == 1)
         {
             onStatusUpdate?.Invoke("Finalizing IDV files...");
-            Parallel.Invoke(
-                () => RenameChunkToFinal(playCardPaths, outputPath, generationName, "PlayCard", DecisionType.Play, playCardRows, actorInfos),
-                () => RenameChunkToFinal(callTrumpPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, callTrumpRows, actorInfos),
-                () => RenameChunkToFinal(discardCardPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, discardCardRows, actorInfos));
+            await Task.Run(
+                () => Parallel.Invoke(
+                    () => RenameChunkToFinal(playCardPaths, outputPath, generationName, "PlayCard", DecisionType.Play, playCardRows, actorInfos),
+                    () => RenameChunkToFinal(callTrumpPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, callTrumpRows, actorInfos),
+                    () => RenameChunkToFinal(discardCardPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, discardCardRows, actorInfos)),
+                cancellationToken).ConfigureAwait(false);
         }
         else
         {
             var totalRows = playCardRows + callTrumpRows + discardCardRows;
             onStatusUpdate?.Invoke($"Merging {_chunkIndex} chunks ({totalRows:N0} rows)...");
-            Parallel.Invoke(
-                () => MergeChunksToFinal<PlayCardTrainingData>(playCardPaths, outputPath, generationName, "PlayCard", DecisionType.Play, playCardRows, actorInfos),
-                () => MergeChunksToFinal<CallTrumpTrainingData>(callTrumpPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, callTrumpRows, actorInfos),
-                () => MergeChunksToFinal<DiscardCardTrainingData>(discardCardPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, discardCardRows, actorInfos));
+            await Task.Run(
+                () => Parallel.Invoke(
+                    () => MergeChunksToFinal<PlayCardTrainingData>(playCardPaths, outputPath, generationName, "PlayCard", DecisionType.Play, playCardRows, actorInfos),
+                    () => MergeChunksToFinal<CallTrumpTrainingData>(callTrumpPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, callTrumpRows, actorInfos),
+                    () => MergeChunksToFinal<DiscardCardTrainingData>(discardCardPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, discardCardRows, actorInfos)),
+                cancellationToken).ConfigureAwait(false);
         }
 
         onStatusUpdate?.Invoke("Cleaning up temporary files...");

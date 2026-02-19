@@ -55,7 +55,7 @@ public class BatchGameOrchestrator(
         var stopwatch = Stopwatch.StartNew();
         var (_, state) = await ExecuteSingleBatchAsync(numberOfGames, progressReporter, persistenceOptions, team1Actors, team2Actors, cancellationToken).ConfigureAwait(false);
 
-        FinalizeIdv(persistenceOptions, state, progressReporter);
+        await FinalizeIdvAsync(persistenceOptions, state, progressReporter, cancellationToken).ConfigureAwait(false);
 
         stopwatch.Stop();
 
@@ -105,7 +105,11 @@ public class BatchGameOrchestrator(
         state.TotalPlayCardDecisions);
     }
 
-    private void FinalizeIdv(GamePersistenceOptions? persistenceOptions, BatchExecutionState state, IBatchProgressReporter? progressReporter = null)
+    private async Task FinalizeIdvAsync(
+        GamePersistenceOptions? persistenceOptions,
+        BatchExecutionState state,
+        IBatchProgressReporter? progressReporter = null,
+        CancellationToken cancellationToken = default)
     {
         if (persistenceOptions?.IdvGenerationName != null)
         {
@@ -114,7 +118,7 @@ public class BatchGameOrchestrator(
                 : null;
 
             var idvStopwatch = Stopwatch.StartNew();
-            trainingDataAccumulator.Finalize(persistenceOptions.IdvGenerationName, statusCallback);
+            await trainingDataAccumulator.FinalizeAsync(persistenceOptions.IdvGenerationName, statusCallback, cancellationToken).ConfigureAwait(false);
             idvStopwatch.Stop();
             state.IdvSaveDuration = idvStopwatch.Elapsed;
         }
@@ -222,7 +226,7 @@ public class BatchGameOrchestrator(
                 : null;
 
             var idvStopwatch = Stopwatch.StartNew();
-            trainingDataAccumulator.Finalize(persistenceOptions.IdvGenerationName, statusCallback);
+            await trainingDataAccumulator.FinalizeAsync(persistenceOptions.IdvGenerationName, statusCallback, cancellationToken).ConfigureAwait(false);
             idvStopwatch.Stop();
             totalIdvSaveDuration += idvStopwatch.Elapsed;
         }
