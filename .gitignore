@@ -426,3 +426,6 @@ FodyWeavers.xsd
 
 # ML data files
 /data/
+
+# Client build output
+nemesiseuchre.client/dist/
