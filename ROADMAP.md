@@ -507,7 +507,7 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 
 ## Interactive Play 0.9
 
-1. Create a Web Project using ASP.NET and React
+1. ~~Create a Web Project using ASP.NET and React~~
 2. Create a CI/CD Build and Deploy to Azure
 3. Create a Data Store (Cosmos?  SQL?)
 6. GitHub JWT Sign-In
