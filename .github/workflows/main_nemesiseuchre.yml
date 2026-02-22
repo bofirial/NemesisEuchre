@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+      - feature/0.9-interactive-play
   workflow_dispatch:
 
 jobs:
@@ -17,6 +18,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
@@ -27,7 +30,7 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish ./NemesisEuchre.Server/NemesisEuchre.Server.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -62,4 +65,5 @@ jobs:
           app-name: 'NemesisEuchre'
           slot-name: 'Production'
           package: .
+
           
