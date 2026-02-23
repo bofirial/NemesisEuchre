@@ -33,7 +33,7 @@ jobs:
         run: dotnet test --no-build --configuration Release --verbosity normal
 
       - name: dotnet publish
-        run: dotnet publish ./NemesisEuchre.Server/NemesisEuchre.Server.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish NemesisEuchre.Server -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -44,7 +44,7 @@ jobs:
   deploy:
     runs-on: windows-latest
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/feature/0.9-interactive-play'
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
@@ -58,9 +58,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_34C5C15DA3AC4879B2365463F21ED3B0 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6804C1381BE446CABDC177CF14EEF52F }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3EE44B303F8149E491044B6F1D6AAE6F }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_19F7E618A50B474FB1BBF349EFD2C20D }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B846A9B6BB6A4C6A927D419B1398D65B }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B26F918D5C3A4E8CA5A79D5B31BAD483 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -69,5 +69,4 @@ jobs:
           app-name: 'NemesisEuchre'
           slot-name: 'Production'
           package: .
-
           
