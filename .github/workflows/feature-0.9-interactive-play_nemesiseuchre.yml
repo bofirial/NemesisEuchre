@@ -36,11 +36,32 @@ jobs:
         uses: codecov/codecov-action@v4
         if: success()
         with:
-          files: '**/coverage.cobertura.xml'
-          fail_ci_if_error: false
+          files: 'NemesisEuchre.DataAccess.Tests/TestResults/**/coverage.cobertura.xml'
+          flags: NemesisEuchre.DataAccess.Tests
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          files: 'NemesisEuchre.GameEngine.Tests/TestResults/**/coverage.cobertura.xml'
+          flags: NemesisEuchre.GameEngine.Tests
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          files: 'NemesisEuchre.MachineLearning.Bots.Tests/TestResults/**/coverage.cobertura.xml'
+          flags: NemesisEuchre.MachineLearning.Bots.Tests
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          files: 'NemesisEuchre.MachineLearning.Tests/TestResults/**/coverage.cobertura.xml'
+          flags: NemesisEuchre.MachineLearning.Tests
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish NemesisEuchre.Server -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
