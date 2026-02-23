@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <!--
+      gradientUnits="userSpaceOnUse" in local coords — y1/y2 are interpreted in
+      each referencing group's own coordinate system after translate(), so one
+      definition serves all four suits correctly.
+    -->
+    <linearGradient id="blueGrad" gradientUnits="userSpaceOnUse" x1="0" y1="-18" x2="0" y2="20">
+      <stop offset="0%"   stop-color="#c8cbff"/>
+      <stop offset="40%"  stop-color="#646cff"/>
+      <stop offset="100%" stop-color="#1e2cb0"/>
+    </linearGradient>
+    <linearGradient id="redGrad" gradientUnits="userSpaceOnUse" x1="0" y1="-18" x2="0" y2="20">
+      <stop offset="0%"   stop-color="#ffaaaa"/>
+      <stop offset="40%"  stop-color="#e05252"/>
+      <stop offset="100%" stop-color="#820e0e"/>
+    </linearGradient>
+
+    <filter id="sh" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0.5" dy="1.5" stdDeviation="1.5"
+                    flood-color="#000000" flood-opacity="0.48"/>
+    </filter>
+  </defs>
+
+  <!-- ♠ Spade (top-left, blue) -->
+  <g transform="translate(27, 27)">
+    <!--
+      Body: pure-bezier path avoids arc sweep ambiguity.
+      C 0,-17 -19,-5 -19,4  → curves from the top point out to the left extent
+      C -19,14 -10,14 0,8   → left lobe curves downward (cp at y=14) to center bottom
+      Mirror on right. Single closed subpath = no winding issues.
+
+      Stem: separate element inside the same filter group so both shapes
+      composite before the shadow is computed. Starting stem at y=7 (slightly
+      inside the body end at y=8) prevents any gap at the junction.
+    -->
+    <g filter="url(#sh)">
+      <path fill="url(#blueGrad)"
+            d="M 0,-17 C 0,-17 -19,-5 -19,4
+               C -19,14 -10,14 0,8
+               C 10,14 19,14 19,4
+               C 19,-5 0,-17 0,-17 Z"/>
+      <path fill="url(#blueGrad)"
+            d="M -5,7 L 5,7 L 5,15 L 8,15 L 6,18 L -6,18 L -8,15 L -5,15 Z"/>
+    </g>
+    <ellipse cx="-5" cy="-9" rx="5" ry="3" fill="white" opacity="0.28"
+             transform="rotate(-25,-5,-9)"/>
+  </g>
+
+  <!-- ♥ Heart (top-right, red) -->
+  <g transform="translate(73, 27)">
+    <path fill="url(#redGrad)" filter="url(#sh)"
+          d="M 0,17 C 0,17 -19,5 -19,-4
+             A 10.5,10.5 0 0,1 0,-8
+             A 10.5,10.5 0 0,1 19,-4
+             C 19,5 0,17 0,17 Z"/>
+    <ellipse cx="-6" cy="-5" rx="4.5" ry="3" fill="white" opacity="0.28"
+             transform="rotate(20,-6,-5)"/>
+  </g>
+
+  <!-- ♦ Diamond (bottom-left, red) — swapped from bottom-right -->
+  <g transform="translate(27, 73)">
+    <path fill="url(#redGrad)" filter="url(#sh)"
+          d="M 0,-19 L 19,0 L 0,19 L -19,0 Z"/>
+    <ellipse cx="0" cy="-8" rx="5.5" ry="3" fill="white" opacity="0.28"
+             transform="rotate(-45)"/>
+  </g>
+
+  <!-- ♣ Club (bottom-right, blue) — swapped from bottom-left -->
+  <g transform="translate(73, 73)">
+    <!--
+      Gap fix: circles at (0,-9), (±10,4) r=9 leave a triangular hole at the
+      centroid (~(0,-1)) because the bottom circles are √118≈10.9 away — beyond
+      r=9. A filled ellipse drawn first patches the gap; the three circles and
+      stem then paint on top with the same gradient, so no seam is visible.
+    -->
+    <g filter="url(#sh)">
+      <ellipse cx="0" cy="-2" rx="6" ry="7" fill="url(#blueGrad)"/>
+      <circle cx="0"   cy="-9" r="9" fill="url(#blueGrad)"/>
+      <circle cx="-10" cy="4"  r="9" fill="url(#blueGrad)"/>
+      <circle cx="10"  cy="4"  r="9" fill="url(#blueGrad)"/>
+      <path fill="url(#blueGrad)"
+            d="M -5,4 L 5,4 L 5,16 L 9,16 L 7,19 L -7,19 L -9,16 L -5,16 Z"/>
+    </g>
+    <circle cx="-3" cy="-14" r="3.5" fill="white" opacity="0.28"/>
+  </g>
+</svg>
