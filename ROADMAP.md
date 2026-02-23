@@ -508,22 +508,22 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 ## Interactive Play 0.9
 
 1. ~~Create a Web Project using ASP.NET and React~~
-2. Create a CI/CD Build and Deploy to Azure
-3. Create a Data Store (Cosmos?  SQL?)
-6. GitHub JWT Sign-In
-7. Role-Based Authentication
-9. Add SignalR to the Server and Client
-4. Create a Home Page
-5. Create a Game Lobby
+2. ~~Create a CI/CD Build and Deploy to Azure~~
+3. ~~GitHub JWT Sign-In~~
+4. ~~Role-Based Authentication~~
+5. Add SignalR to the Server and Client
+6. Create a Home Page
+7. Create a Game Lobby
 8. Create an Upload Model page
-10. Create an Active Game Page
-11. Create a Card Component
-12. Create a Score Component
-13. Create a Hand Component
-14. Create a Current Trick Component
-15. Create an UpCard Component
-16. Process Call Trump Decision using SignalR
+9. Create an Active Game Page
+10. Create a Card Component
+11. Create a Score Component
+12. Create a Hand Component
+13. Create a Current Trick Component
+14. Create an UpCard Component
+15. Process Call Trump Decision using SignalR
 16. Process Discard Card Decision using SignalR
-16. Process Play Card Decision using SignalR
-17. Add animations? to simulate bot actions and allow for human reactions
+17. Process Play Card Decision using SignalR
+18. Add animations? to simulate bot actions and allow for human reactions
+19. Create a Data Store (Cosmos?  SQL?)
 

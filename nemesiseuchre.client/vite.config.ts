@@ -51,7 +51,11 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            '^/weatherforecast': {
+            '^/api': {
+                target,
+                secure: false
+            },
+            '^/signin-github': {
                 target,
                 secure: false
             }
