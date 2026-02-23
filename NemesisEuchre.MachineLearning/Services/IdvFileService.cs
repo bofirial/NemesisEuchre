@@ -74,13 +74,16 @@ public class IdvFileService(MLContext mlContext) : IIdvFileService
             ?? throw new InvalidOperationException($"Failed to deserialize IDV metadata from: {metadataPath}");
     }
 
-    private List<T> StreamFromBinaryCore<T>(string filePath)
+    private IEnumerable<T> StreamFromBinaryCore<T>(string filePath)
         where T : class, new()
     {
         var dataView = mlContext.Data.LoadFromBinary(filePath);
         try
         {
-            return [.. mlContext.Data.CreateEnumerable<T>(dataView, reuseRowObject: false)];
+            foreach (var row in mlContext.Data.CreateEnumerable<T>(dataView, reuseRowObject: false))
+            {
+                yield return row;
+            }
         }
         finally
         {

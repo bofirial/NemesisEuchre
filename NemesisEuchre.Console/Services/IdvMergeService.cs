@@ -52,8 +52,9 @@ public sealed class IdvMergeService(
         var discardCardPaths = GetSourcePaths(basePath, sourceGenerationNames, "DiscardCard");
 
         await Task.Run(
-            () => Parallel.Invoke(
-                () => MergeDecisionType<PlayCardTrainingData>(
+            () =>
+            {
+                MergeDecisionType<PlayCardTrainingData>(
                     playCardPaths,
                     basePath,
                     outputGenerationName,
@@ -63,8 +64,8 @@ public sealed class IdvMergeService(
                     gameCount,
                     dealCount,
                     trickCount,
-                    actors),
-                () => MergeDecisionType<CallTrumpTrainingData>(
+                    actors);
+                MergeDecisionType<CallTrumpTrainingData>(
                     callTrumpPaths,
                     basePath,
                     outputGenerationName,
@@ -74,8 +75,8 @@ public sealed class IdvMergeService(
                     gameCount,
                     dealCount,
                     trickCount,
-                    actors),
-                () => MergeDecisionType<DiscardCardTrainingData>(
+                    actors);
+                MergeDecisionType<DiscardCardTrainingData>(
                     discardCardPaths,
                     basePath,
                     outputGenerationName,
@@ -85,7 +86,8 @@ public sealed class IdvMergeService(
                     gameCount,
                     dealCount,
                     trickCount,
-                    actors)),
+                    actors);
+            },
             cancellationToken).ConfigureAwait(false);
 
         onStatusUpdate?.Invoke($"Merge complete. Output: '{outputGenerationName}'");
