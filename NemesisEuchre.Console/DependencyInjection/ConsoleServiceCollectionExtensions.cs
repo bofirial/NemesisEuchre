@@ -39,6 +39,7 @@ public static class ConsoleServiceCollectionExtensions
         services.AddScoped<ITrainingDataBuffer, TrainingDataBuffer>();
         services.AddScoped<IIdvChunkMerger, IdvChunkMerger>();
         services.AddScoped<IIdvMetadataService, IdvMetadataService>();
+        services.AddScoped<IIdvMergeService, IdvMergeService>();
         services.AddScoped<ITrainingDataAccumulator, TrainingDataAccumulator>();
         services.AddScoped<IPersistenceCoordinator, BatchPersistenceCoordinator>();
         services.AddScoped<IBatchGameOrchestrator, BatchGameOrchestrator>();

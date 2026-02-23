@@ -461,6 +461,19 @@ public static partial class LoggerMessages
         Message = "Results exported to JSON file: {FileName}")]
     public static partial void LogResultsExported(ILogger logger, string fileName);
 
+    // EventID 72-73: IDV multi-source merge operation
+    [LoggerMessage(
+        EventId = 72,
+        Level = LogLevel.Information,
+        Message = "Merging {SourceCount} IDV generation source(s) into '{OutputName}'")]
+    public static partial void LogIdvMergeSourcesStarting(ILogger logger, int sourceCount, string outputName);
+
+    [LoggerMessage(
+        EventId = 73,
+        Level = LogLevel.Error,
+        Message = "Merge command failed unexpectedly")]
+    public static partial void LogMergeCommandFailed(ILogger logger, Exception exception);
+
     [LoggerMessage(
         EventId = 71,
         Level = LogLevel.Error,
