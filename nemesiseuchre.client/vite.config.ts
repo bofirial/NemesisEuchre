@@ -58,6 +58,11 @@ export default defineConfig({
             '^/signin-github': {
                 target,
                 secure: false
+            },
+            '^/hub': {
+                target,
+                secure: false,
+                ws: true,
             }
         },
         port: parseInt(env.DEV_SERVER_PORT || '17650'),

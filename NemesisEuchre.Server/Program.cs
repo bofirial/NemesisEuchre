@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.IdentityModel.Tokens;
 
 using NemesisEuchre.Server.Auth;
+using NemesisEuchre.Server.Hubs;
 
 namespace NemesisEuchre.Server;
 
@@ -31,15 +32,32 @@ public static class Program
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
+            .AddJwtBearer(options =>
             {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-                ValidateIssuer = true,
-                ValidIssuer = issuer,
-                ValidateAudience = true,
-                ValidAudience = audience,
-                ValidateLifetime = true,
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+                    ValidateIssuer = true,
+                    ValidIssuer = issuer,
+                    ValidateAudience = true,
+                    ValidAudience = audience,
+                    ValidateLifetime = true,
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hub"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    },
+                };
             })
             .AddOAuth("GitHub", options =>
             {
@@ -77,6 +95,7 @@ public static class Program
                 };
             });
 
+        builder.Services.AddSignalR();
         builder.Services.AddAuthorization();
 
         var app = builder.Build();
@@ -88,6 +107,7 @@ public static class Program
         app.UseAuthorization();
 
         app.MapAuthEndpoints();
+        app.MapHub<GameHub>("/hub/game");
 
         app.MapFallbackToFile("/index.html");
 
