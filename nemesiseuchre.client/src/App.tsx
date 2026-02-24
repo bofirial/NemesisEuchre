@@ -3,7 +3,7 @@ import { AppFooter } from '@/components/AppFooter';
 import { NavLoginButton } from '@/components/LoginButton';
 import { AdminPage } from '@/pages/AdminPage';
 import { EditBotPage } from '@/pages/EditBotPage';
-import { GameLobbyPage } from '@/pages/GameLobbyPage';
+import { GamePage } from '@/pages/GamePage';
 import { HomePage } from '@/pages/HomePage';
 import { UploadBotPage } from '@/pages/UploadBotPage';
 
@@ -26,7 +26,7 @@ function App() {
             <main className="mx-auto max-w-5xl flex-1 px-4 py-24 text-center">
                 <Routes>
                     <Route path="/" element={<HomePage />} />
-                    <Route path="/game/:gameName" element={<GameLobbyPage />} />
+                    <Route path="/game/:gameName" element={<GamePage />} />
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/admin/upload-bot" element={<UploadBotPage />} />
                     <Route path="/admin/bots/:botName" element={<EditBotPage />} />
