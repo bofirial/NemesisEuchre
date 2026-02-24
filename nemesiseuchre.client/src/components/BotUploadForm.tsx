@@ -48,7 +48,7 @@ function assignFiles(fileList: FileList): { assigned: Record<string, File | null
 export interface BotUploadFormProps {
     mode: 'create' | 'edit';
     initialBotName?: string;
-    onSuccess: (resultBotName: string) => void;
+    onSuccess: (_botName: string) => void;
 }
 
 export function BotUploadForm({ mode, initialBotName, onSuccess }: BotUploadFormProps) {

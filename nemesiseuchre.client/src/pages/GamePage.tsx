@@ -8,15 +8,15 @@ import type { PlayerGameState } from '@/types/game';
 
 export function GamePage() {
     const { gameName } = useParams<{ gameName: string }>();
-    const { connection, connectionState } = useGameHub();
+    const { connectionRef, connectionState } = useGameHub();
     const [gameState, setGameState] = useState<PlayerGameState | null>(null);
 
     useEffect(() => {
-        if (connectionState !== HubConnectionState.Connected || !connection || !gameName) return;
-        connection.invoke<PlayerGameState>('JoinGameAsync', gameName)
+        if (connectionState !== HubConnectionState.Connected || !connectionRef.current || !gameName) return;
+        connectionRef.current.invoke<PlayerGameState>('JoinGameAsync', gameName)
             .then(setGameState)
             .catch(err => console.error('JoinGame failed:', err));
-    }, [connection, connectionState, gameName]);
+    }, [connectionRef, connectionState, gameName]);
 
     if (!gameState) return null;
 

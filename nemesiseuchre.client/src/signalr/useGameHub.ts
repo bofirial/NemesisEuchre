@@ -1,8 +1,8 @@
 import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function useGameHub() {
-    const [connection, setConnection] = useState<HubConnection | null>(null);
+    const connectionRef = useRef<HubConnection | null>(null);
     const [connectionState, setConnectionState] = useState<HubConnectionState>(HubConnectionState.Disconnected);
 
     useEffect(() => {
@@ -18,7 +18,7 @@ export function useGameHub() {
         conn.onreconnected(() => setConnectionState(HubConnectionState.Connected));
         conn.onclose(() => setConnectionState(HubConnectionState.Disconnected));
 
-        setConnection(conn);
+        connectionRef.current = conn;
 
         let cancelled = false;
         conn.start()
@@ -27,10 +27,10 @@ export function useGameHub() {
 
         return () => {
             cancelled = true;
-            setConnection(null);
+            connectionRef.current = null;
             conn.stop();
         };
     }, []);
 
-    return { connection, connectionState };
+    return { connectionRef, connectionState };
 }
