@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.IdentityModel.Tokens;
 
 using NemesisEuchre.Server.Auth;
+using NemesisEuchre.Server.Endpoints;
 using NemesisEuchre.Server.Hubs;
 
 namespace NemesisEuchre.Server;
@@ -107,6 +108,7 @@ public static class Program
         app.UseAuthorization();
 
         app.MapAuthEndpoints();
+        app.MapInfoEndpoints();
         app.MapHub<GameHub>("/hub/game");
 
         app.MapFallbackToFile("/index.html");

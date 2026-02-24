@@ -1,11 +1,12 @@
 import { useAuth } from '@/auth/useAuth';
+import { AppFooter } from '@/components/AppFooter';
 import { LoginCta, NavLoginButton } from '@/components/LoginButton';
 
 function App() {
     const { user } = useAuth();
 
     return (
-        <div className="min-h-svh bg-background text-foreground">
+        <div className="flex min-h-svh flex-col bg-background text-foreground">
             <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
                 <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
                     <div className="flex items-center gap-2">
@@ -19,7 +20,7 @@ function App() {
                 </div>
             </header>
 
-            <main className="mx-auto max-w-5xl px-4 py-24 text-center">
+            <main className="mx-auto max-w-5xl flex-1 px-4 py-24 text-center">
                 {user ? (
                     <div className="flex flex-col items-center gap-6">
                         <img
@@ -46,6 +47,7 @@ function App() {
                     </div>
                 )}
             </main>
+            <AppFooter />
         </div>
     );
 }
