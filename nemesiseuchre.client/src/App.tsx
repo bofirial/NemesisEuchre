@@ -2,8 +2,10 @@ import { Link, Route, Routes } from 'react-router-dom';
 import { AppFooter } from '@/components/AppFooter';
 import { NavLoginButton } from '@/components/LoginButton';
 import { AdminPage } from '@/pages/AdminPage';
+import { EditBotPage } from '@/pages/EditBotPage';
 import { GameLobbyPage } from '@/pages/GameLobbyPage';
 import { HomePage } from '@/pages/HomePage';
+import { UploadBotPage } from '@/pages/UploadBotPage';
 
 function App() {
     return (
@@ -26,6 +28,8 @@ function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/game/:gameName" element={<GameLobbyPage />} />
                     <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/admin/upload-bot" element={<UploadBotPage />} />
+                    <Route path="/admin/bots/:botName" element={<EditBotPage />} />
                 </Routes>
             </main>
             <AppFooter />
