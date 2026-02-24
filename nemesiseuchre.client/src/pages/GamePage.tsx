@@ -12,7 +12,7 @@ export function GamePage() {
     const [gameState, setGameState] = useState<PlayerGameState | null>(null);
 
     useEffect(() => {
-        if (connectionState !== HubConnectionState.Connected || !gameName) return;
+        if (connectionState !== HubConnectionState.Connected || !connection || !gameName) return;
         connection.invoke<PlayerGameState>('JoinGameAsync', gameName)
             .then(setGameState)
             .catch(err => console.error('JoinGame failed:', err));

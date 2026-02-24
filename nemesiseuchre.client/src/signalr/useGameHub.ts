@@ -2,28 +2,35 @@ import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } fro
 import { useEffect, useState } from 'react';
 
 export function useGameHub() {
-    const [connection] = useState<HubConnection>(() =>
-        new HubConnectionBuilder()
+    const [connection, setConnection] = useState<HubConnection | null>(null);
+    const [connectionState, setConnectionState] = useState<HubConnectionState>(HubConnectionState.Disconnected);
+
+    useEffect(() => {
+        const conn = new HubConnectionBuilder()
             .withUrl('/hub/game', {
                 accessTokenFactory: () => sessionStorage.getItem('auth_token') ?? '',
             })
             .withAutomaticReconnect()
             .configureLogging(LogLevel.Information)
-            .build()
-    );
-    const [connectionState, setConnectionState] = useState<HubConnectionState>(HubConnectionState.Disconnected);
+            .build();
 
-    useEffect(() => {
-        connection.onreconnecting(() => setConnectionState(HubConnectionState.Reconnecting));
-        connection.onreconnected(() => setConnectionState(HubConnectionState.Connected));
-        connection.onclose(() => setConnectionState(HubConnectionState.Disconnected));
+        conn.onreconnecting(() => setConnectionState(HubConnectionState.Reconnecting));
+        conn.onreconnected(() => setConnectionState(HubConnectionState.Connected));
+        conn.onclose(() => setConnectionState(HubConnectionState.Disconnected));
 
-        connection.start()
-            .then(() => setConnectionState(HubConnectionState.Connected))
-            .catch(err => console.error('SignalR connection error:', err));
+        setConnection(conn);
 
-        return () => { connection.stop(); };
-    }, [connection]);
+        let cancelled = false;
+        conn.start()
+            .then(() => { if (!cancelled) setConnectionState(HubConnectionState.Connected); })
+            .catch(err => { if (!cancelled) console.error('SignalR connection error:', err); });
+
+        return () => {
+            cancelled = true;
+            setConnection(null);
+            conn.stop();
+        };
+    }, []);
 
     return { connection, connectionState };
 }
