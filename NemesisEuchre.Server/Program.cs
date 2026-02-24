@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using NemesisEuchre.Server.Auth;
 using NemesisEuchre.Server.Endpoints;
 using NemesisEuchre.Server.Hubs;
+using NemesisEuchre.Server.Services;
 
 namespace NemesisEuchre.Server;
 
@@ -26,6 +27,7 @@ public static class Program
         var audience = builder.Configuration["Jwt:Audience"] ?? "NemesisEuchre";
 
         builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+        builder.Services.AddScoped<IModelStorageService, ModelStorageService>();
 
         builder.Services
             .AddAuthentication(options =>
@@ -109,6 +111,7 @@ public static class Program
 
         app.MapAuthEndpoints();
         app.MapInfoEndpoints();
+        app.MapAdminEndpoints();
         app.MapHub<GameHub>("/hub/game");
 
         app.MapFallbackToFile("/index.html");
