@@ -1,6 +1,7 @@
 import { Link, Route, Routes } from 'react-router-dom';
 import { AppFooter } from '@/components/AppFooter';
 import { NavLoginButton } from '@/components/LoginButton';
+import { AdminPage } from '@/pages/AdminPage';
 import { GameLobbyPage } from '@/pages/GameLobbyPage';
 import { HomePage } from '@/pages/HomePage';
 
@@ -24,6 +25,7 @@ function App() {
                 <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/game/:gameName" element={<GameLobbyPage />} />
+                    <Route path="/admin" element={<AdminPage />} />
                 </Routes>
             </main>
             <AppFooter />

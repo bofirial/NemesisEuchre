@@ -5,7 +5,7 @@ import { LoginCta } from '@/components/LoginButton';
 import { Button } from '@/components/ui/button';
 
 export function HomePage() {
-    const { user } = useAuth();
+    const { user, isAdmin } = useAuth();
     const navigate = useNavigate();
     const [gameName, setGameName] = useState('');
 
@@ -42,6 +42,11 @@ export function HomePage() {
                         Join Game
                     </Button>
                 </div>
+                {isAdmin && (
+                    <Button variant="outline" onClick={() => navigate('/admin')}>
+                        Admin
+                    </Button>
+                )}
             </div>
         );
     }
