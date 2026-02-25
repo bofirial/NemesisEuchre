@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 export function HomePage() {
     const { user, isAdmin } = useAuth();
     const navigate = useNavigate();
-    const [gameName, setGameName] = useState('');
+    const [sessionName, setSessionName] = useState('');
 
     if (user) {
         return (
@@ -25,19 +25,19 @@ export function HomePage() {
                 <div className="flex items-center gap-2">
                     <input
                         type="text"
-                        placeholder="Game name"
-                        value={gameName}
-                        onChange={(e) => setGameName(e.target.value)}
+                        placeholder="Session name"
+                        value={sessionName}
+                        onChange={(e) => setSessionName(e.target.value)}
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter' && gameName.trim()) {
-                                navigate(`/game/${encodeURIComponent(gameName.trim())}`);
+                            if (e.key === 'Enter' && sessionName.trim()) {
+                                navigate(`/game/${encodeURIComponent(sessionName.trim())}`);
                             }
                         }}
                         className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
                     />
                     <Button
-                        disabled={!gameName.trim()}
-                        onClick={() => navigate(`/game/${encodeURIComponent(gameName.trim())}`)}
+                        disabled={!sessionName.trim()}
+                        onClick={() => navigate(`/game/${encodeURIComponent(sessionName.trim())}`)}
                     >
                         Join Game
                     </Button>

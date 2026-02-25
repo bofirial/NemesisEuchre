@@ -35,7 +35,7 @@ export interface DealState {
 }
 
 export interface PlayerGameState {
-    gameName: string;
+    sessionName: string;
     gameStatus: GameStatusViewModel;
     myPosition: PlayerPosition;
     players: Partial<Record<PlayerPosition, PlayerInfo>>;

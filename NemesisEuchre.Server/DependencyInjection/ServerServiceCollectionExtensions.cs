@@ -7,8 +7,10 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
+using NemesisEuchre.DataAccess;
 using NemesisEuchre.Server.Auth;
 using NemesisEuchre.Server.Services;
 
@@ -27,6 +29,18 @@ public static class ServerServiceCollectionExtensions
 
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IBotStorageService, BotStorageService>();
+        services.AddScoped<IGameSessionService, GameSessionService>();
+
+        var connectionString = configuration.GetConnectionString("NemesisEuchreDb");
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new InvalidOperationException(
+                "Connection string 'NemesisEuchreDb' is missing. Run: dotnet user-secrets set \"ConnectionStrings:NemesisEuchreDb\" \"<connection-string>\"");
+        }
+
+        services.AddDbContext<NemesisEuchreDbContext>(options => options.UseSqlServer(
+            connectionString,
+            sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null)));
 
         services
             .AddAuthentication(options =>

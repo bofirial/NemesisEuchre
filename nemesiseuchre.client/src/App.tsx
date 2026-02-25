@@ -26,7 +26,7 @@ function App() {
             <main className="mx-auto max-w-5xl flex-1 px-4 py-24 text-center">
                 <Routes>
                     <Route path="/" element={<HomePage />} />
-                    <Route path="/game/:gameName" element={<GamePage />} />
+                    <Route path="/game/:sessionName" element={<GamePage />} />
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/admin/upload-bot" element={<UploadBotPage />} />
                     <Route path="/admin/bots/:botName" element={<EditBotPage />} />

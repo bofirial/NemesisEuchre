@@ -33,6 +33,12 @@ public class NemesisEuchreDbContext(DbContextOptions<NemesisEuchreDbContext> opt
 
     public DbSet<ActorTypeMetadata>? ActorTypes { get; set; }
 
+    public DbSet<UserEntity>? Users { get; set; }
+
+    public DbSet<GameSessionEntity>? GameSessions { get; set; }
+
+    public DbSet<GameSessionUserEntity>? GameSessionUsers { get; set; }
+
     public DbSet<GameEntity>? Games { get; set; }
 
     public DbSet<GamePlayer>? GamePlayers { get; set; }

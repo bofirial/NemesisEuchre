@@ -4,7 +4,7 @@ namespace NemesisEuchre.Server.Models;
 
 public record PlayerGameState
 {
-    public required string GameName { get; init; }
+    public required string SessionName { get; init; }
 
     public required GameStatusViewModel GameStatus { get; init; }
 

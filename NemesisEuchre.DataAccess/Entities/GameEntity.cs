@@ -23,9 +23,13 @@ public class GameEntity
 
     public TeamMetadata? WinningTeam { get; set; }
 
+    public int? GameSessionId { get; set; }
+
     public ICollection<GamePlayer> GamePlayers { get; set; } = [];
 
     public ICollection<DealEntity> Deals { get; set; } = [];
+
+    public GameSessionEntity? GameSession { get; set; }
 }
 
 public class GameEntityConfiguration : IEntityTypeConfiguration<GameEntity>
@@ -72,5 +76,13 @@ public class GameEntityConfiguration : IEntityTypeConfiguration<GameEntity>
 
         builder.HasIndex(e => e.WinningTeamId)
             .HasDatabaseName("IX_Games_WinningTeamId");
+
+        builder.HasOne(e => e.GameSession)
+            .WithMany(s => s.Games)
+            .HasForeignKey(e => e.GameSessionId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasIndex(e => e.GameSessionId)
+            .HasDatabaseName("IX_Games_GameSessionId");
     }
 }
