@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace NemesisEuchre.DataAccess.Entities.Metadata;
 
-public class TeamMetadata
+public class TeamMetadata : EntityBase
 {
     public int TeamId { get; set; }
 

@@ -5,7 +5,7 @@ using NemesisEuchre.DataAccess.Entities.Metadata;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class GameEntity
+public class GameEntity : EntityBase
 {
     public int GameId { get; set; }
 
@@ -16,8 +16,6 @@ public class GameEntity
     public short Team2Score { get; set; }
 
     public int? WinningTeamId { get; set; }
-
-    public DateTime CreatedAt { get; set; }
 
     public GameStatusMetadata? GameStatus { get; set; }
 
@@ -52,10 +50,6 @@ public class GameEntityConfiguration : IEntityTypeConfiguration<GameEntity>
         builder.Property(e => e.Team2Score)
             .IsRequired();
 
-        builder.Property(e => e.CreatedAt)
-            .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
-
         builder.HasOne(e => e.GameStatus)
             .WithMany()
             .HasForeignKey(e => e.GameStatusId)
@@ -71,8 +65,8 @@ public class GameEntityConfiguration : IEntityTypeConfiguration<GameEntity>
             .HasForeignKey(d => d.GameId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(e => e.CreatedAt)
-            .HasDatabaseName("IX_Games_CreatedAt");
+        builder.HasIndex(e => e.CreateDate)
+            .HasDatabaseName("IX_Games_CreateDate");
 
         builder.HasIndex(e => e.WinningTeamId)
             .HasDatabaseName("IX_Games_WinningTeamId");

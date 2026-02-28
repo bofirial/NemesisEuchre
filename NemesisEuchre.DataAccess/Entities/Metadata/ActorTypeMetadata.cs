@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace NemesisEuchre.DataAccess.Entities.Metadata;
 
-public class ActorTypeMetadata
+public class ActorTypeMetadata : EntityBase
 {
     public int ActorTypeId { get; set; }
 

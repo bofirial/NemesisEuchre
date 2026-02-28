@@ -87,10 +87,48 @@ public class NemesisEuchreDbContext(DbContextOptions<NemesisEuchreDbContext> opt
 
     public DbSet<PlayCardDecisionPredictedPoints>? PlayCardPredictedPoints { get; set; }
 
+    public override Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries<EntityBase>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreateDate = now;
+                entry.Entity.ModifyDate = now;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.ModifyDate = now;
+            }
+        }
+
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(NemesisEuchreDbContext).Assembly);
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(EntityBase).IsAssignableFrom(entityType.ClrType))
+            {
+                modelBuilder.Entity(entityType.ClrType)
+                    .Property(nameof(EntityBase.CreateDate))
+                    .IsRequired()
+                    .HasDefaultValueSql("GETUTCDATE()");
+
+                modelBuilder.Entity(entityType.ClrType)
+                    .Property(nameof(EntityBase.ModifyDate))
+                    .IsRequired()
+                    .HasDefaultValueSql("GETUTCDATE()");
+            }
+        }
     }
 }

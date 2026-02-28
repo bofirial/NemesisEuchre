@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace NemesisEuchre.DataAccess.Entities.Metadata;
 
-public class RelativePlayerPositionMetadata
+public class RelativePlayerPositionMetadata : EntityBase
 {
     public int RelativePlayerPositionId { get; set; }
 

@@ -3,13 +3,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class GameSessionUserEntity
+public class GameSessionUserEntity : EntityBase
 {
     public int GameSessionId { get; set; }
 
     public int UserId { get; set; }
 
-    public DateTime JoinedAt { get; set; }
+    public DateTime JoinedDate { get; set; }
 
     public bool IsSessionLeader { get; set; }
 
@@ -26,7 +26,7 @@ public class GameSessionUserEntityConfiguration : IEntityTypeConfiguration<GameS
 
         builder.HasKey(e => new { e.GameSessionId, e.UserId });
 
-        builder.Property(e => e.JoinedAt)
+        builder.Property(e => e.JoinedDate)
             .IsRequired()
             .HasDefaultValueSql("GETUTCDATE()");
 

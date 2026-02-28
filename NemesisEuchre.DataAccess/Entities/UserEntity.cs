@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class UserEntity
+public class UserEntity : EntityBase
 {
     public int UserId { get; set; }
 
@@ -13,9 +13,7 @@ public class UserEntity
 
     public string? Email { get; set; }
 
-    public DateTime CreatedAt { get; set; }
-
-    public DateTime LastSeenAt { get; set; }
+    public DateTime LastSeenDate { get; set; }
 
     public ICollection<GameSessionUserEntity> GameSessionUsers { get; set; } = [];
 }
@@ -42,11 +40,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
         builder.Property(e => e.Email)
             .HasMaxLength(256);
 
-        builder.Property(e => e.CreatedAt)
-            .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
-
-        builder.Property(e => e.LastSeenAt)
+        builder.Property(e => e.LastSeenDate)
             .IsRequired()
             .HasDefaultValueSql("GETUTCDATE()");
 

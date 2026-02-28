@@ -34,6 +34,6 @@ public class GameToEntityMapperTests
         entity.WinningTeamId.Should().Be((int)Team.Team1);
         entity.GamePlayers.Should().HaveCount(1);
         entity.GamePlayers.First().PlayerPositionId.Should().Be((int)PlayerPosition.North);
-        entity.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+        entity.CreateDate.Should().Be(default);
     }
 }

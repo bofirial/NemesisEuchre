@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace NemesisEuchre.DataAccess.Entities.Metadata;
 
-public class DealStatusMetadata
+public class DealStatusMetadata : EntityBase
 {
     public int DealStatusId { get; set; }
 

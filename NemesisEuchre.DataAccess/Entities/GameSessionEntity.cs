@@ -3,15 +3,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class GameSessionEntity
+public class GameSessionEntity : EntityBase
 {
     public int GameSessionId { get; set; }
 
     public required string SessionName { get; set; }
 
-    public DateTime? AllUsersDisconnectedAt { get; set; }
-
-    public DateTime CreatedAt { get; set; }
+    public DateTime? AllUsersDisconnectedDate { get; set; }
 
     public ICollection<GameSessionUserEntity> GameSessionUsers { get; set; } = [];
 
@@ -32,10 +30,6 @@ public class GameSessionEntityConfiguration : IEntityTypeConfiguration<GameSessi
         builder.Property(e => e.SessionName)
             .IsRequired()
             .HasMaxLength(100);
-
-        builder.Property(e => e.CreatedAt)
-            .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
 
         builder.HasIndex(e => e.SessionName)
             .HasDatabaseName("IX_GameSessions_SessionName");

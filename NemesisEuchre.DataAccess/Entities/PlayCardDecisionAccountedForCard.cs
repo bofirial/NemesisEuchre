@@ -5,7 +5,7 @@ using NemesisEuchre.DataAccess.Entities.Metadata;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class PlayCardDecisionAccountedForCard
+public class PlayCardDecisionAccountedForCard : EntityBase
 {
     public int PlayCardDecisionId { get; set; }
 

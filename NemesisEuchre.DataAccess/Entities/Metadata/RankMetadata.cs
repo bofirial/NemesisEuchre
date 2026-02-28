@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace NemesisEuchre.DataAccess.Entities.Metadata;
 
-public class RankMetadata
+public class RankMetadata : EntityBase
 {
     public int RankId { get; set; }
 

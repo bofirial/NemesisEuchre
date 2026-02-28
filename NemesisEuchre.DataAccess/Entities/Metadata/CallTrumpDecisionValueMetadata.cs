@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace NemesisEuchre.DataAccess.Entities.Metadata;
 
-public class CallTrumpDecisionValueMetadata
+public class CallTrumpDecisionValueMetadata : EntityBase
 {
     public int CallTrumpDecisionValueId { get; set; }
 

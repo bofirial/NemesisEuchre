@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class GameSessionConnectionEntity
+public class GameSessionConnectionEntity : EntityBase
 {
     public string ConnectionId { get; set; } = string.Empty;
 
@@ -11,9 +11,9 @@ public class GameSessionConnectionEntity
 
     public int UserId { get; set; }
 
-    public DateTime ConnectedAt { get; set; }
+    public DateTime ConnectedDate { get; set; }
 
-    public DateTime? DisconnectedAt { get; set; }
+    public DateTime? DisconnectedDate { get; set; }
 
     public GameSessionEntity? GameSession { get; set; }
 
@@ -30,7 +30,7 @@ public class GameSessionConnectionEntityConfiguration : IEntityTypeConfiguration
 
         builder.Property(e => e.ConnectionId).HasMaxLength(128);
 
-        builder.Property(e => e.ConnectedAt)
+        builder.Property(e => e.ConnectedDate)
             .IsRequired()
             .HasDefaultValueSql("GETUTCDATE()");
 

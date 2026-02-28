@@ -5,7 +5,7 @@ using NemesisEuchre.DataAccess.Entities.Metadata;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class CallTrumpDecisionValidDecision
+public class CallTrumpDecisionValidDecision : EntityBase
 {
     public int CallTrumpDecisionId { get; set; }
 

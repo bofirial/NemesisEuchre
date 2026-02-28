@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace NemesisEuchre.DataAccess.Entities.Metadata;
 
-public class RelativeSuitMetadata
+public class RelativeSuitMetadata : EntityBase
 {
     public int RelativeSuitId { get; set; }
 

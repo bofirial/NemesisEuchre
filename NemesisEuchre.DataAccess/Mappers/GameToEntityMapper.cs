@@ -21,7 +21,6 @@ public class GameToEntityMapper(IDealToEntityMapper dealMapper) : IGameToEntityM
             Team1Score = game.Team1Score,
             Team2Score = game.Team2Score,
             WinningTeamId = game.WinningTeam.HasValue ? (int)game.WinningTeam.Value : null,
-            CreatedAt = DateTime.UtcNow,
             GamePlayers = [.. game.Players.Select(kvp => new GamePlayer
             {
                 PlayerPositionId = (int)kvp.Key,

@@ -142,7 +142,7 @@ public class EntityToGameMapperTests
             Team1Score = 10,
             Team2Score = 7,
             WinningTeamId = (int)Team.Team1,
-            CreatedAt = DateTime.UtcNow,
+            CreateDate = DateTime.UtcNow,
             GamePlayers =
             [
                 new GamePlayer { PlayerPositionId = (int)PlayerPosition.North, ActorTypeId = (int)ActorType.Chaos },

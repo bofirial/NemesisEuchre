@@ -25,7 +25,7 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
         var existing = await db.Users!.FirstOrDefaultAsync(u => u.GitHubId == githubId, ct);
         if (existing is not null)
         {
-            existing.LastSeenAt = DateTime.UtcNow;
+            existing.LastSeenDate = DateTime.UtcNow;
             existing.Email = email;
             await db.SaveChangesAsync(ct);
             return existing;
@@ -50,7 +50,7 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
     public async Task<GameSessionEntity> GetOrCreateSessionAsync(string sessionName, CancellationToken ct = default)
     {
         var active = await db.GameSessions!.FirstOrDefaultAsync(
-            s => s.SessionName == sessionName && s.AllUsersDisconnectedAt == null,
+            s => s.SessionName == sessionName && s.AllUsersDisconnectedDate == null,
             ct);
 
         if (active is not null)
@@ -96,11 +96,11 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
                 && db.GameSessionConnections!.Any(
                     gsc => gsc.GameSessionId == sessionId
                         && gsc.UserId == gsu.UserId
-                        && gsc.DisconnectedAt == null))
+                        && gsc.DisconnectedDate == null))
             .ToListAsync(ct);
 
         var activeConnections = await db.GameSessionConnections!
-            .Where(gsc => gsc.GameSessionId == sessionId && gsc.DisconnectedAt == null)
+            .Where(gsc => gsc.GameSessionId == sessionId && gsc.DisconnectedDate == null)
             .ToListAsync(ct);
 
         return memberships.ConvertAll(m => new ActiveSessionMember

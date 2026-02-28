@@ -5,7 +5,7 @@ using NemesisEuchre.DataAccess.Entities.Metadata;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class DealEntity
+public class DealEntity : EntityBase
 {
     public int DealId { get; set; }
 
