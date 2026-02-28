@@ -18,9 +18,16 @@ export function GamePage() {
             .catch(err => console.error('JoinGame failed:', err));
     }, [connectionRef, connectionState, sessionName]);
 
+    useEffect(() => {
+        const conn = connectionRef.current;
+        if (!conn) return;
+        conn.on('ReceiveGameState', (updated: PlayerGameState) => setGameState(updated));
+        return () => { conn.off('ReceiveGameState'); };
+    }, [connectionRef]);
+
     if (!gameState) return null;
 
     return gameState.gameStatus === 'Playing'
         ? <GameActive />
-        : <GameLobby />;
+        : <GameLobby gameState={gameState} />;
 }

@@ -34,6 +34,11 @@ export interface DealState {
     completedTricks: CompletedTrickInfo[];
 }
 
+export interface ConnectedUserInfo {
+    gitHubLogin: string;
+    isSessionLeader: boolean;
+}
+
 export interface PlayerGameState {
     sessionName: string;
     gameStatus: GameStatusViewModel;
@@ -41,5 +46,6 @@ export interface PlayerGameState {
     players: Partial<Record<PlayerPosition, PlayerInfo>>;
     team1Score: number;
     team2Score: number;
+    connectedUsers: ConnectedUserInfo[];
     currentDeal: DealState | null;
 }
