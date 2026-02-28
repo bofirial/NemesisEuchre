@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace NemesisEuchre.DataAccess.Migrations;
 
 /// <inheritdoc />
-public partial class AddUsersAndGameSessions : Migration
+public partial class AddUsersGameSessionsAndConnections : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -43,13 +43,40 @@ public partial class AddUsersAndGameSessions : Migration
             constraints: table => table.PrimaryKey("PK_Users", x => x.UserId));
 
         migrationBuilder.CreateTable(
+            name: "GameSessionConnections",
+            columns: table => new
+            {
+                ConnectionId = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                GameSessionId = table.Column<int>(type: "int", nullable: false),
+                UserId = table.Column<int>(type: "int", nullable: false),
+                ConnectedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                DisconnectedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_GameSessionConnections", x => x.ConnectionId);
+                table.ForeignKey(
+                    name: "FK_GameSessionConnections_GameSessions_GameSessionId",
+                    column: x => x.GameSessionId,
+                    principalTable: "GameSessions",
+                    principalColumn: "GameSessionId",
+                    onDelete: ReferentialAction.Cascade);
+                table.ForeignKey(
+                    name: "FK_GameSessionConnections_Users_UserId",
+                    column: x => x.UserId,
+                    principalTable: "Users",
+                    principalColumn: "UserId",
+                    onDelete: ReferentialAction.Restrict);
+            });
+
+        migrationBuilder.CreateTable(
             name: "GameSessionUsers",
             columns: table => new
             {
                 GameSessionId = table.Column<int>(type: "int", nullable: false),
                 UserId = table.Column<int>(type: "int", nullable: false),
                 JoinedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                DisconnectedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                IsSessionLeader = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
             },
             constraints: table =>
             {
@@ -74,10 +101,19 @@ public partial class AddUsersAndGameSessions : Migration
             column: "GameSessionId");
 
         migrationBuilder.CreateIndex(
+            name: "IX_GameSessionConnections_GameSessionId",
+            table: "GameSessionConnections",
+            column: "GameSessionId");
+
+        migrationBuilder.CreateIndex(
+            name: "IX_GameSessionConnections_UserId",
+            table: "GameSessionConnections",
+            column: "UserId");
+
+        migrationBuilder.CreateIndex(
             name: "IX_GameSessions_SessionName",
             table: "GameSessions",
-            column: "SessionName",
-            unique: true);
+            column: "SessionName");
 
         migrationBuilder.CreateIndex(
             name: "IX_GameSessionUsers_UserId",
@@ -105,6 +141,9 @@ public partial class AddUsersAndGameSessions : Migration
         migrationBuilder.DropForeignKey(
             name: "FK_Games_GameSessions_GameSessionId",
             table: "Games");
+
+        migrationBuilder.DropTable(
+            name: "GameSessionConnections");
 
         migrationBuilder.DropTable(
             name: "GameSessionUsers");

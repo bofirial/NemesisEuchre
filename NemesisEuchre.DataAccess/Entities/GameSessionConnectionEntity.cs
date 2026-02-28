@@ -3,42 +3,44 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class GameSessionUserEntity
+public class GameSessionConnectionEntity
 {
+    public string ConnectionId { get; set; } = string.Empty;
+
     public int GameSessionId { get; set; }
 
     public int UserId { get; set; }
 
-    public DateTime JoinedAt { get; set; }
+    public DateTime ConnectedAt { get; set; }
 
-    public bool IsSessionLeader { get; set; }
+    public DateTime? DisconnectedAt { get; set; }
 
     public GameSessionEntity? GameSession { get; set; }
 
     public UserEntity? User { get; set; }
 }
 
-public class GameSessionUserEntityConfiguration : IEntityTypeConfiguration<GameSessionUserEntity>
+public class GameSessionConnectionEntityConfiguration : IEntityTypeConfiguration<GameSessionConnectionEntity>
 {
-    public void Configure(EntityTypeBuilder<GameSessionUserEntity> builder)
+    public void Configure(EntityTypeBuilder<GameSessionConnectionEntity> builder)
     {
-        builder.ToTable("GameSessionUsers");
+        builder.ToTable("GameSessionConnections");
 
-        builder.HasKey(e => new { e.GameSessionId, e.UserId });
+        builder.HasKey(e => e.ConnectionId);
 
-        builder.Property(e => e.JoinedAt)
+        builder.Property(e => e.ConnectionId).HasMaxLength(128);
+
+        builder.Property(e => e.ConnectedAt)
             .IsRequired()
             .HasDefaultValueSql("GETUTCDATE()");
 
-        builder.Property(e => e.IsSessionLeader).IsRequired().HasDefaultValue(false);
-
         builder.HasOne(e => e.GameSession)
-            .WithMany(s => s.GameSessionUsers)
+            .WithMany()
             .HasForeignKey(e => e.GameSessionId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(e => e.User)
-            .WithMany(u => u.GameSessionUsers)
+            .WithMany()
             .HasForeignKey(e => e.UserId)
             .OnDelete(DeleteBehavior.Restrict);
     }

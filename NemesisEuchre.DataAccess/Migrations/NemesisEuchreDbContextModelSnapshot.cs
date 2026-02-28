@@ -446,6 +446,35 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.ToTable("GamePlayers", (string)null);
                 });
 
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.GameSessionConnectionEntity", b =>
+                {
+                    b.Property<string>("ConnectionId")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime>("ConnectedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<DateTime?>("DisconnectedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("GameSessionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ConnectionId");
+
+                    b.HasIndex("GameSessionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("GameSessionConnections", (string)null);
+                });
+
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.GameSessionEntity", b =>
                 {
                     b.Property<int>("GameSessionId")
@@ -470,7 +499,6 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.HasKey("GameSessionId");
 
                     b.HasIndex("SessionName")
-                        .IsUnique()
                         .HasDatabaseName("IX_GameSessions_SessionName");
 
                     b.ToTable("GameSessions", (string)null);
@@ -484,8 +512,10 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("DisconnectedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<bool>("IsSessionLeader")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTime>("JoinedAt")
                         .ValueGeneratedOnAdd()
@@ -2042,6 +2072,25 @@ namespace NemesisEuchre.DataAccess.Migrations
                     b.Navigation("Game");
 
                     b.Navigation("PlayerPosition");
+                });
+
+            modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.GameSessionConnectionEntity", b =>
+                {
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.GameSessionEntity", "GameSession")
+                        .WithMany()
+                        .HasForeignKey("GameSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NemesisEuchre.DataAccess.Entities.UserEntity", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("GameSession");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("NemesisEuchre.DataAccess.Entities.GameSessionUserEntity", b =>

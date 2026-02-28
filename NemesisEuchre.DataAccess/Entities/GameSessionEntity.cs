@@ -38,7 +38,6 @@ public class GameSessionEntityConfiguration : IEntityTypeConfiguration<GameSessi
             .HasDefaultValueSql("GETUTCDATE()");
 
         builder.HasIndex(e => e.SessionName)
-            .IsUnique()
             .HasDatabaseName("IX_GameSessions_SessionName");
     }
 }
