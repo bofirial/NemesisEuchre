@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 using NemesisEuchre.DataAccess;
 using NemesisEuchre.DataAccess.Entities;
+using NemesisEuchre.Server.Models;
 
 namespace NemesisEuchre.Server.Services;
 
@@ -13,7 +14,8 @@ public interface IGameSessionService
 
     Task<GameSessionEntity> GetOrCreateSessionAsync(string sessionName, CancellationToken ct = default);
 
-    Task AddUserToSessionAsync(int sessionId, int userId, CancellationToken ct = default);
+    Task<IReadOnlyList<ActiveSessionMember>> JoinSessionAsync(
+        int sessionId, int userId, string connectionId, CancellationToken ct = default);
 }
 
 public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
@@ -47,10 +49,13 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
 
     public async Task<GameSessionEntity> GetOrCreateSessionAsync(string sessionName, CancellationToken ct = default)
     {
-        var existing = await db.GameSessions!.FirstOrDefaultAsync(s => s.SessionName == sessionName, ct);
-        if (existing is not null)
+        var active = await db.GameSessions!.FirstOrDefaultAsync(
+            s => s.SessionName == sessionName && s.AllUsersDisconnectedAt == null,
+            ct);
+
+        if (active is not null)
         {
-            return existing;
+            return active;
         }
 
         var session = new GameSessionEntity { SessionName = sessionName };
@@ -59,21 +64,51 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
         return session;
     }
 
-    public async Task AddUserToSessionAsync(int sessionId, int userId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<ActiveSessionMember>> JoinSessionAsync(
+        int sessionId, int userId, string connectionId, CancellationToken ct = default)
     {
-        var alreadyJoined = await db.GameSessionUsers!.AnyAsync(
+        var membership = await db.GameSessionUsers!.FirstOrDefaultAsync(
             gsu => gsu.GameSessionId == sessionId && gsu.UserId == userId, ct);
 
-        if (alreadyJoined)
+        if (membership is null)
         {
-            return;
+            var isFirst = !await db.GameSessionUsers!.AnyAsync(gsu => gsu.GameSessionId == sessionId, ct);
+            db.GameSessionUsers!.Add(new GameSessionUserEntity
+            {
+                GameSessionId = sessionId,
+                UserId = userId,
+                IsSessionLeader = isFirst,
+            });
         }
 
-        db.GameSessionUsers!.Add(new GameSessionUserEntity
+        db.GameSessionConnections!.Add(new GameSessionConnectionEntity
         {
+            ConnectionId = connectionId,
             GameSessionId = sessionId,
             UserId = userId,
         });
+
         await db.SaveChangesAsync(ct);
+
+        var memberships = await db.GameSessionUsers!
+            .Include(gsu => gsu.User)
+            .Where(gsu => gsu.GameSessionId == sessionId
+                && db.GameSessionConnections!.Any(
+                    gsc => gsc.GameSessionId == sessionId
+                        && gsc.UserId == gsu.UserId
+                        && gsc.DisconnectedAt == null))
+            .ToListAsync(ct);
+
+        var activeConnections = await db.GameSessionConnections!
+            .Where(gsc => gsc.GameSessionId == sessionId && gsc.DisconnectedAt == null)
+            .ToListAsync(ct);
+
+        return memberships.ConvertAll(m => new ActiveSessionMember
+        {
+            Membership = m,
+            ConnectionIds = [.. activeConnections
+                .Where(c => c.UserId == m.UserId)
+                .Select(c => c.ConnectionId)],
+        });
     }
 }

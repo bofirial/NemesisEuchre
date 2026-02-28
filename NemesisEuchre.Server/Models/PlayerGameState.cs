@@ -16,5 +16,7 @@ public record PlayerGameState
 
     public required short Team2Score { get; init; }
 
+    public required IReadOnlyList<ConnectedUserInfo> ConnectedUsers { get; init; }
+
     public DealState? CurrentDeal { get; init; }
 }

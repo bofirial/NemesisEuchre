@@ -3,33 +3,46 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
-using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.Server.Models;
 using NemesisEuchre.Server.Services;
 
 namespace NemesisEuchre.Server.Hubs;
 
 [Authorize]
-public class GameHub(IGameSessionService sessionService) : Hub
+public class GameHub(IGameSessionService sessionService, IPlayerStateProjector stateProjector) : Hub
 {
-    public async Task<PlayerGameState> JoinGameAsync(string gameName)
+    public async Task<PlayerGameState> JoinGameAsync(string sessionName)
     {
         var githubId = Context.User!.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var user = await sessionService.FindUserByGitHubIdAsync(githubId);
-        var session = await sessionService.GetOrCreateSessionAsync(gameName);
+        var session = await sessionService.GetOrCreateSessionAsync(sessionName);
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, session.SessionName);
+
+        IReadOnlyList<ActiveSessionMember> members = [];
         if (user is not null)
         {
-            await sessionService.AddUserToSessionAsync(session.GameSessionId, user.UserId);
+            members = await sessionService.JoinSessionAsync(
+                session.GameSessionId, user.UserId, Context.ConnectionId);
         }
 
-        return new PlayerGameState
+        var context = new GameContext { SessionName = session.SessionName, Members = members };
+
+        foreach (var member in members)
         {
-            SessionName = session.SessionName,
-            GameStatus = GameStatusViewModel.Lobby,
-            MyPosition = PlayerPosition.South,
-            Players = new Dictionary<PlayerPosition, PlayerInfo>(),
-            Team1Score = 0,
-            Team2Score = 0,
-        };
+            foreach (var connId in member.ConnectionIds.Where(id => id != Context.ConnectionId))
+            {
+                await Clients.Client(connId).SendAsync("ReceiveGameState", stateProjector.Project(context, member));
+            }
+        }
+
+        var currentMember = members.FirstOrDefault(m => m.Membership.UserId == user?.UserId);
+        return currentMember is not null
+            ? stateProjector.Project(context, currentMember)
+            : stateProjector.Project(context, new ActiveSessionMember
+            {
+                Membership = new() { GameSessionId = session.GameSessionId, UserId = 0 },
+                ConnectionIds = [],
+            });
     }
 }
