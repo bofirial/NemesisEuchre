@@ -1,6 +1,8 @@
 using FluentAssertions;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.ML;
 
 using Moq;
 
@@ -8,6 +10,7 @@ using NemesisEuchre.Console.Models;
 using NemesisEuchre.Console.Services.TrainerExecutors;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Models;
+using NemesisEuchre.MachineLearning.Options;
 using NemesisEuchre.MachineLearning.Services;
 using NemesisEuchre.MachineLearning.Trainers;
 
@@ -15,6 +18,11 @@ namespace NemesisEuchre.Console.Tests.Services;
 
 public class TrainerExecutorTests
 {
+    private static readonly IOptions<MachineLearningOptions> DefaultOptions =
+        Microsoft.Extensions.Options.Options.Create(new MachineLearningOptions { MaxTrainingRows = 0 });
+
+    private static readonly MLContext SharedMlContext = new();
+
     [Fact]
     public void ModelType_ReturnsCorrectValue()
     {
@@ -25,7 +33,9 @@ public class TrainerExecutorTests
             mockTrainer.Object,
             Mock.Of<IIdvFileService>(),
             Mock.Of<IServiceProvider>(),
-            mockLogger);
+            mockLogger,
+            DefaultOptions,
+            SharedMlContext);
 
         executor.ModelType.Should().Be("CallTrump");
         executor.DecisionType.Should().Be(DecisionType.CallTrump);
@@ -39,7 +49,7 @@ public class TrainerExecutorTests
         {
             var mockTrainer = new Mock<IModelTrainer<CallTrumpTrainingData>>();
             var mockIdvFileService = new Mock<IIdvFileService>();
-            var mockDataView = new Mock<Microsoft.ML.IDataView>();
+            var mockDataView = new Mock<IDataView>();
 
             mockDataView.Setup(d => d.GetRowCount()).Returns(100L);
 
@@ -48,7 +58,7 @@ public class TrainerExecutorTests
                 .Returns(new IdvFileMetadata("test", DecisionType.CallTrump, 100, 10, 50, 200, [], DateTime.UtcNow));
 
             mockTrainer.Setup(t => t.TrainAsync(
-                It.IsAny<Microsoft.ML.IDataView>(),
+                It.IsAny<IDataView>(),
                 It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TrainingResult(null!, new RegressionEvaluationMetrics(0, 0, 0, 0, 0), 100, 70, 30));
@@ -57,7 +67,9 @@ public class TrainerExecutorTests
                 mockTrainer.Object,
                 mockIdvFileService.Object,
                 Mock.Of<IServiceProvider>(),
-                Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
+                Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>(),
+                DefaultOptions,
+                SharedMlContext);
 
             await executor.ExecuteAsync(
                 "models",
@@ -98,7 +110,9 @@ public class TrainerExecutorTests
             mockTrainer.Object,
             mockIdvFileService.Object,
             Mock.Of<IServiceProvider>(),
-            Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
+            Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>(),
+            DefaultOptions,
+            SharedMlContext);
 
         var result = await executor.ExecuteAsync(
             "models",
@@ -121,7 +135,9 @@ public class TrainerExecutorTests
             mockTrainer.Object,
             mockIdvFileService.Object,
             Mock.Of<IServiceProvider>(),
-            Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
+            Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>(),
+            DefaultOptions,
+            SharedMlContext);
 
         var result = await executor.ExecuteAsync(
             "models",
@@ -141,7 +157,7 @@ public class TrainerExecutorTests
         {
             var mockTrainer = new Mock<IModelTrainer<CallTrumpTrainingData>>();
             var mockIdvFileService = new Mock<IIdvFileService>();
-            var mockDataView = new Mock<Microsoft.ML.IDataView>();
+            var mockDataView = new Mock<IDataView>();
 
             mockDataView.Setup(d => d.GetRowCount()).Returns(50L);
 
@@ -150,7 +166,7 @@ public class TrainerExecutorTests
                 .Returns(new IdvFileMetadata("gen1", DecisionType.CallTrump, 50, 5, 25, 100, [], DateTime.UtcNow));
 
             mockTrainer.Setup(t => t.TrainAsync(
-                It.IsAny<Microsoft.ML.IDataView>(),
+                It.IsAny<IDataView>(),
                 It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TrainingResult(null!, new RegressionEvaluationMetrics(0, 0, 0, 0, 0), 50, 35, 15));
@@ -159,7 +175,9 @@ public class TrainerExecutorTests
                 mockTrainer.Object,
                 mockIdvFileService.Object,
                 Mock.Of<IServiceProvider>(),
-                Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
+                Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>(),
+                DefaultOptions,
+                SharedMlContext);
 
             var result = await executor.ExecuteAsync(
                 "models",
@@ -193,7 +211,9 @@ public class TrainerExecutorTests
                 mockTrainer.Object,
                 mockIdvFileService.Object,
                 Mock.Of<IServiceProvider>(),
-                Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
+                Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>(),
+                DefaultOptions,
+                SharedMlContext);
 
             var result = await executor.ExecuteAsync(
                 "models",
@@ -219,7 +239,7 @@ public class TrainerExecutorTests
         {
             var mockTrainer = new Mock<IModelTrainer<CallTrumpTrainingData>>();
             var mockIdvFileService = new Mock<IIdvFileService>();
-            var mockDataView = new Mock<Microsoft.ML.IDataView>();
+            var mockDataView = new Mock<IDataView>();
 
             mockDataView.Setup(d => d.GetRowCount()).Returns(100L);
 
@@ -231,7 +251,9 @@ public class TrainerExecutorTests
                 mockTrainer.Object,
                 mockIdvFileService.Object,
                 Mock.Of<IServiceProvider>(),
-                Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>());
+                Mock.Of<ILogger<CallTrumpRegressionTrainerExecutor>>(),
+                DefaultOptions,
+                SharedMlContext);
 
             var result = await executor.ExecuteAsync(
                 "models",

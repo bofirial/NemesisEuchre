@@ -41,4 +41,13 @@ public class MachineLearningOptions
 
     [Range(0, int.MaxValue)]
     public int RandomSeed { get; set; } = 42;
+
+    /// <summary>
+    /// Gets or sets the maximum number of training rows to use. Set to 0 for unlimited.
+    /// Reduces memory usage when training from very large IDV files.
+    /// Default of 700M targets ~45-50 GB RAM on a 64 GB machine
+    /// (70% train split × 700M × ~75 bytes/row ≈ 37 GB LightGBM dataset + ~12 GB overhead).
+    /// </summary>
+    [Range(0, long.MaxValue)]
+    public long MaxTrainingRows { get; set; } = 700_000_000;
 }

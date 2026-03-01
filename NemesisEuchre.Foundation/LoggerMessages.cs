@@ -442,4 +442,11 @@ public static partial class LoggerMessages
         Level = LogLevel.Error,
         Message = "Failed to export results to JSON file: {FileName}")]
     public static partial void LogResultsExportFailed(ILogger logger, string fileName, Exception exception);
+
+    // EventID 74: Training row sampling
+    [LoggerMessage(
+        EventId = 74,
+        Level = LogLevel.Information,
+        Message = "Sampling {MaxRows:N0} of {TotalRows:N0} training rows for memory efficiency")]
+    public static partial void LogSamplingTrainingRows(ILogger logger, long totalRows, long maxRows);
 }

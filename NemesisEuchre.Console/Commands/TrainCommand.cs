@@ -57,6 +57,9 @@ public class TrainCommand(
     [CliOption(Description = "Minimum samples per leaf node (1-1000)", Alias = "msl")]
     public int? MinimumExampleCountPerLeaf { get; set; }
 
+    [CliOption(Description = "Maximum rows for training (0 = unlimited)", Alias = "mtr")]
+    public long? MaxTrainingRows { get; set; }
+
     public async Task<int> RunAsync()
     {
         LoggerMessages.LogTrainingStarting(logger, DecisionType);
@@ -78,7 +81,8 @@ public class TrainCommand(
             numberOfIterations: NumberOfIterations,
             learningRate: LearningRate,
             numberOfLeaves: NumberOfLeaves,
-            minimumExampleCountPerLeaf: MinimumExampleCountPerLeaf);
+            minimumExampleCountPerLeaf: MinimumExampleCountPerLeaf,
+            maxTrainingRows: MaxTrainingRows);
 
         DisplayTrainingConfiguration(outputPath, mergedOptions.Value);
 
@@ -139,6 +143,11 @@ public class TrainCommand(
             errors.Add($"--minleaf value {MinimumExampleCountPerLeaf} is out of range. Valid range: 1-1000");
         }
 
+        if (MaxTrainingRows.HasValue && MaxTrainingRows < 0)
+        {
+            errors.Add($"--mtr value {MaxTrainingRows} is invalid. Must be ≥ 0");
+        }
+
         if (errors.Count > 0)
         {
             foreach (var error in errors)
@@ -173,6 +182,10 @@ public class TrainCommand(
 
         var minLeafSource = MinimumExampleCountPerLeaf.HasValue ? "[yellow](CLI)[/]" : "[dim](Config)[/]";
         ansiConsole.MarkupLine($"  Min Examples Per Leaf: [cyan]{effectiveOptions.MinimumExampleCountPerLeaf}[/] {minLeafSource}");
+
+        var mtrSource = MaxTrainingRows.HasValue ? "[yellow](CLI)[/]" : "[dim](Config)[/]";
+        var mtrDisplay = effectiveOptions.MaxTrainingRows == 0 ? "unlimited" : $"{effectiveOptions.MaxTrainingRows:N0}";
+        ansiConsole.MarkupLine($"  Max Training Rows: [cyan]{mtrDisplay}[/] {mtrSource}");
 
         ansiConsole.WriteLine();
     }

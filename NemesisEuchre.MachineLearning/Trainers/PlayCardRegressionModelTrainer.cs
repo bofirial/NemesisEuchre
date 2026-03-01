@@ -25,7 +25,6 @@ public class PlayCardRegressionModelTrainer(
 
         return MlContext.Transforms
             .Concatenate("Features", featureColumns)
-            .AppendCacheCheckpoint(MlContext)
             .Append(MlContext.Regression.Trainers.LightGbm(
                 new LightGbmRegressionTrainer.Options
                 {

@@ -13,7 +13,8 @@ public class MergedMachineLearningOptions : IOptions<MachineLearningOptions>
         int? numberOfIterations = null,
         double? learningRate = null,
         int? numberOfLeaves = null,
-        int? minimumExampleCountPerLeaf = null)
+        int? minimumExampleCountPerLeaf = null,
+        long? maxTrainingRows = null)
     {
         Value = new MachineLearningOptions
         {
@@ -24,6 +25,7 @@ public class MergedMachineLearningOptions : IOptions<MachineLearningOptions>
             MinimumExampleCountPerLeaf = minimumExampleCountPerLeaf ?? baseOptions.MinimumExampleCountPerLeaf,
             ExplorationTemperature = baseOptions.ExplorationTemperature,
             RandomSeed = baseOptions.RandomSeed,
+            MaxTrainingRows = maxTrainingRows ?? baseOptions.MaxTrainingRows,
         };
 
         var validationContext = new ValidationContext(Value);

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.ML;
 
 using NemesisEuchre.Console.Models;
 using NemesisEuchre.Foundation;
@@ -33,13 +34,17 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
     IModelTrainer<TTrainingData> trainer,
     IIdvFileService idvFileService,
     IServiceProvider serviceProvider,
-    ILogger logger) : ITrainerExecutor
+    ILogger logger,
+    IOptions<MachineLearningOptions> options,
+    MLContext mlContext) : ITrainerExecutor
     where TTrainingData : class, new()
 {
     private readonly IModelTrainer<TTrainingData> _trainer = trainer ?? throw new ArgumentNullException(nameof(trainer));
     private readonly IIdvFileService _idvFileService = idvFileService ?? throw new ArgumentNullException(nameof(idvFileService));
     private readonly IServiceProvider _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IOptions<MachineLearningOptions> _options = options ?? throw new ArgumentNullException(nameof(options));
+    private readonly MLContext _mlContext = mlContext ?? throw new ArgumentNullException(nameof(mlContext));
 
     public abstract string ModelType { get; }
 
@@ -79,6 +84,19 @@ public abstract class RegressionTrainerExecutorBase<TTrainingData>(
             }
 
             LoggerMessages.LogIdvMetadataValidated(_logger, idvFilePath, metadata.RowCount, metadata.GameCount);
+
+            var effectiveOptions = optionsOverride?.Value ?? _options.Value;
+            var maxRows = effectiveOptions.MaxTrainingRows;
+            if (maxRows > 0 && metadata.RowCount > maxRows)
+            {
+                LoggerMessages.LogSamplingTrainingRows(_logger, metadata.RowCount, maxRows);
+                dataView = _mlContext.Data.TakeRows(dataView, maxRows);
+                progress.Report(new TrainingProgress(
+                    ModelType,
+                    TrainingPhase.LoadingData,
+                    10,
+                    $"Sampling {maxRows:N0} of {metadata.RowCount:N0} rows..."));
+            }
 
             var trainerToUse = _trainer;
             if (optionsOverride != null)

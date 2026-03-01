@@ -1,7 +1,10 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.ML;
 
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.MachineLearning.Models;
+using NemesisEuchre.MachineLearning.Options;
 using NemesisEuchre.MachineLearning.Services;
 using NemesisEuchre.MachineLearning.Trainers;
 
@@ -11,8 +14,10 @@ public class PlayCardRegressionTrainerExecutor(
     IModelTrainer<PlayCardTrainingData> trainer,
     IIdvFileService idvFileService,
     IServiceProvider serviceProvider,
-    ILogger<PlayCardRegressionTrainerExecutor> logger) :
-    RegressionTrainerExecutorBase<PlayCardTrainingData>(trainer, idvFileService, serviceProvider, logger)
+    ILogger<PlayCardRegressionTrainerExecutor> logger,
+    IOptions<MachineLearningOptions> options,
+    MLContext mlContext) :
+    RegressionTrainerExecutorBase<PlayCardTrainingData>(trainer, idvFileService, serviceProvider, logger, options, mlContext)
 {
     public override string ModelType => "PlayCard";
 
