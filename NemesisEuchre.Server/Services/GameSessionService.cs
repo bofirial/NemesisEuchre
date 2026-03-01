@@ -16,6 +16,8 @@ public interface IGameSessionService
 
     Task<IReadOnlyList<ActiveSessionMember>> JoinSessionAsync(
         int sessionId, int userId, string connectionId, CancellationToken ct = default);
+
+    Task<GameContext?> DisconnectAsync(string connectionId, CancellationToken ct = default);
 }
 
 public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
@@ -110,5 +112,59 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
                 .Where(c => c.UserId == m.UserId)
                 .Select(c => c.ConnectionId)],
         });
+    }
+
+    public async Task<GameContext?> DisconnectAsync(string connectionId, CancellationToken ct = default)
+    {
+        var connection = await db.GameSessionConnections!
+            .Include(gsc => gsc.GameSession)
+            .FirstOrDefaultAsync(gsc => gsc.ConnectionId == connectionId, ct);
+
+        if (connection is null)
+        {
+            return null;
+        }
+
+        connection.DisconnectedDate = DateTime.UtcNow;
+
+        var hasActiveConnections = await db.GameSessionConnections!.AnyAsync(
+            gsc => gsc.GameSessionId == connection.GameSessionId
+                && gsc.ConnectionId != connectionId
+                && gsc.DisconnectedDate == null,
+            ct);
+
+        if (!hasActiveConnections)
+        {
+            connection.GameSession!.AllUsersDisconnectedDate = DateTime.UtcNow;
+        }
+
+        await db.SaveChangesAsync(ct);
+
+        var memberships = await db.GameSessionUsers!
+            .Include(gsu => gsu.User)
+            .Where(gsu => gsu.GameSessionId == connection.GameSessionId
+                && db.GameSessionConnections!.Any(
+                    gsc => gsc.GameSessionId == connection.GameSessionId
+                        && gsc.UserId == gsu.UserId
+                        && gsc.DisconnectedDate == null))
+            .ToListAsync(ct);
+
+        var activeConnections = await db.GameSessionConnections!
+            .Where(gsc => gsc.GameSessionId == connection.GameSessionId && gsc.DisconnectedDate == null)
+            .ToListAsync(ct);
+
+        var members = memberships.ConvertAll(m => new ActiveSessionMember
+        {
+            Membership = m,
+            ConnectionIds = [.. activeConnections
+                .Where(c => c.UserId == m.UserId)
+                .Select(c => c.ConnectionId)],
+        });
+
+        return new GameContext
+        {
+            SessionName = connection.GameSession!.SessionName,
+            Members = members,
+        };
     }
 }

@@ -45,4 +45,22 @@ public class GameHub(IGameSessionService sessionService, IPlayerStateProjector s
                 ConnectionIds = [],
             });
     }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var context = await sessionService.DisconnectAsync(Context.ConnectionId);
+
+        if (context is not null)
+        {
+            foreach (var member in context.Members)
+            {
+                foreach (var connId in member.ConnectionIds)
+                {
+                    await Clients.Client(connId).SendAsync("ReceiveGameState", stateProjector.Project(context, member));
+                }
+            }
+        }
+
+        await base.OnDisconnectedAsync(exception);
+    }
 }
