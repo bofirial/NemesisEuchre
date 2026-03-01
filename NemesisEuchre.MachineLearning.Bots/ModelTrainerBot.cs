@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Foundation.Constants;
@@ -19,14 +18,12 @@ public class ModelTrainerBot(
     IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
     IRandomNumberGenerator random,
     IOptions<MachineLearningOptions> machineLearningOptions,
-    ILogger<ModelTrainerBot> logger,
     Actor actor) : ModelBot(
         engineProvider,
         callTrumpFeatureBuilder,
         discardCardFeatureBuilder,
         playCardFeatureBuilder,
         random,
-        logger,
         actor)
 {
     public override ActorType ActorType => ActorType.ModelTrainer;

@@ -1,7 +1,5 @@
-using Microsoft.Extensions.Logging;
 using Microsoft.ML;
 
-using NemesisEuchre.Foundation;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerBots;
@@ -19,10 +17,8 @@ public class ModelBot(
     IDiscardCardInferenceFeatureBuilder discardCardFeatureBuilder,
     IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
     IRandomNumberGenerator random,
-    ILogger<ModelBot> logger,
     Actor actor) : BotBase(random)
 {
-    private readonly ILogger<ModelBot> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ICallTrumpInferenceFeatureBuilder _callTrumpFeatureBuilder = callTrumpFeatureBuilder ?? throw new ArgumentNullException(nameof(callTrumpFeatureBuilder));
     private readonly IDiscardCardInferenceFeatureBuilder _discardCardFeatureBuilder = discardCardFeatureBuilder ?? throw new ArgumentNullException(nameof(discardCardFeatureBuilder));
     private readonly IPlayCardInferenceFeatureBuilder _playCardFeatureBuilder = playCardFeatureBuilder ?? throw new ArgumentNullException(nameof(playCardFeatureBuilder));
@@ -55,8 +51,7 @@ public class ModelBot(
                 decision,
                 decisionNumber),
             prediction => prediction.PredictedPoints,
-            LoggerMessages.LogCallTrumpEngineNotAvailable,
-            LoggerMessages.LogCallTrumpPredictionError);
+            "CallTrump");
 
         return new CallTrumpDecisionContext
         {
@@ -89,8 +84,7 @@ public class ModelBot(
                 opponentScore,
                 card),
             prediction => prediction.PredictedPoints,
-            LoggerMessages.LogDiscardCardEngineNotAvailable,
-            LoggerMessages.LogDiscardCardPredictionError);
+            "DiscardCard");
 
         return new RelativeCardDecisionContext
         {
@@ -140,8 +134,7 @@ public class ModelBot(
                 opponentsWonTricks,
                 card),
             prediction => prediction.PredictedPoints,
-            LoggerMessages.LogPlayCardEngineNotAvailable,
-            LoggerMessages.LogPlayCardPredictionError);
+            "PlayCard");
 
         return new RelativeCardDecisionContext
         {
@@ -155,45 +148,36 @@ public class ModelBot(
         TOption[] options,
         Func<TOption, TData> buildFeatures,
         Func<TPrediction, float> getScore,
-        Action<ILogger> logEngineNotAvailable,
-        Action<ILogger, Exception> logPredictionError)
+        string engineName)
         where TOption : notnull
         where TData : class, new()
         where TPrediction : class, new()
     {
         if (engine == null)
         {
-            logEngineNotAvailable(_logger);
-            return (SelectRandom(options), options.ToDictionary(o => o, _ => 0f));
+            throw new InvalidOperationException(
+                $"The '{engineName}' prediction engine for model '{Actor.GetModelName(engineName)}' could not be loaded.");
         }
 
-        try
-        {
-            var bestOption = options[0];
-            var bestScore = float.MinValue;
-            var scores = new Dictionary<TOption, float>();
+        var bestOption = options[0];
+        var bestScore = float.MinValue;
+        var scores = new Dictionary<TOption, float>();
 
-            foreach (var option in options)
+        foreach (var option in options)
+        {
+            var trainingData = buildFeatures(option);
+            var prediction = engine.Predict(trainingData);
+            var score = getScore(prediction);
+
+            scores.Add(option, score);
+
+            if (score > bestScore)
             {
-                var trainingData = buildFeatures(option);
-                var prediction = engine.Predict(trainingData);
-                var score = getScore(prediction);
-
-                scores.Add(option, score);
-
-                if (score > bestScore)
-                {
-                    bestScore = score;
-                    bestOption = option;
-                }
+                bestScore = score;
+                bestOption = option;
             }
+        }
 
-            return (bestOption, scores);
-        }
-        catch (Exception ex)
-        {
-            logPredictionError(_logger, ex);
-            return (SelectRandom(options), options.ToDictionary(o => o, _ => 0f));
-        }
+        return (bestOption, scores);
     }
 }

@@ -223,24 +223,6 @@ public static partial class LoggerMessages
         Message = "Failed to load model for {DecisionType}, will fall back to random selection")]
     public static partial void LogModelLoadFailed(ILogger logger, string decisionType, Exception exception);
 
-    [LoggerMessage(
-        EventId = 37,
-        Level = LogLevel.Error,
-        Message = "Error predicting CallTrump decision, falling back to random")]
-    public static partial void LogCallTrumpPredictionError(ILogger logger, Exception exception);
-
-    [LoggerMessage(
-        EventId = 38,
-        Level = LogLevel.Error,
-        Message = "Error predicting DiscardCard decision, falling back to random")]
-    public static partial void LogDiscardCardPredictionError(ILogger logger, Exception exception);
-
-    [LoggerMessage(
-        EventId = 39,
-        Level = LogLevel.Error,
-        Message = "Error predicting PlayCard decision, falling back to random")]
-    public static partial void LogPlayCardPredictionError(ILogger logger, Exception exception);
-
     // EventID 40-50: Console/Training orchestration
     [LoggerMessage(
         EventId = 40,
@@ -347,25 +329,6 @@ public static partial class LoggerMessages
         Level = LogLevel.Information,
         Message = "Batch of {BatchSize} games persistence skipped")]
     public static partial void LogBatchGamePersistenceSkipped(ILogger logger, int batchSize);
-
-    // EventID 53-55: ML Bot engine availability
-    [LoggerMessage(
-        EventId = 53,
-        Level = LogLevel.Warning,
-        Message = "CallTrump engine not available, selecting random decision.")]
-    public static partial void LogCallTrumpEngineNotAvailable(ILogger logger);
-
-    [LoggerMessage(
-        EventId = 54,
-        Level = LogLevel.Warning,
-        Message = "DiscardCard engine not available, selecting random card to discard.")]
-    public static partial void LogDiscardCardEngineNotAvailable(ILogger logger);
-
-    [LoggerMessage(
-        EventId = 55,
-        Level = LogLevel.Warning,
-        Message = "PlayCard engine not available, selecting random card to play.")]
-    public static partial void LogPlayCardEngineNotAvailable(ILogger logger);
 
     [LoggerMessage(
         EventId = 56,

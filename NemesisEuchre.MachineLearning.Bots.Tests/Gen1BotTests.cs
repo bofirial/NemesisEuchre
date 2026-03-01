@@ -2,7 +2,6 @@ using Bogus;
 
 using FluentAssertions;
 
-using Microsoft.Extensions.Logging;
 using Microsoft.ML;
 
 using Moq;
@@ -27,7 +26,6 @@ public class Gen1BotTests
     private readonly Mock<IDiscardCardInferenceFeatureBuilder> _mockDiscardCardFeatureBuilder = new();
     private readonly Mock<IPlayCardInferenceFeatureBuilder> _mockPlayCardFeatureBuilder = new();
     private readonly Mock<IRandomNumberGenerator> _mockRandom = new();
-    private readonly Mock<ILogger<ModelBot>> _mockLogger = new();
     private readonly Actor _actor = Actor.WithModel(ActorType.Model, "Gen1");
 
     [Fact]
@@ -49,7 +47,6 @@ public class Gen1BotTests
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object,
             _actor);
 
         _mockEngineProvider.Verify(
@@ -76,7 +73,6 @@ public class Gen1BotTests
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object,
             _actor);
 
         bot.Should().NotBeNull();
@@ -92,14 +88,13 @@ public class Gen1BotTests
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object,
             _actor);
 
         bot.ActorType.Should().Be(ActorType.Model);
     }
 
     [Fact]
-    public async Task CallTrumpAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
+    public Task CallTrumpAsync_ShouldThrowInvalidOperationException_WhenEngineNotAvailable()
     {
         _mockEngineProvider
             .Setup(x => x.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", "Gen1"))
@@ -111,22 +106,19 @@ public class Gen1BotTests
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object,
             _actor);
-        var cardsInHand = GenerateCards(5);
-        var upCard = GenerateCard();
-        var validDecisions = new[] { CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp };
 
-        var result = await bot.CallTrumpAsync(
-            cardsInHand,
+        var act = async () => await bot.CallTrumpAsync(
+            GenerateCards(5),
             0,
             0,
             RelativePlayerPosition.Self,
-            upCard,
-            validDecisions,
+            GenerateCard(),
+            [CallTrumpDecision.Pass, CallTrumpDecision.OrderItUp],
             1);
 
-        result.ChosenCallTrumpDecision.Should().BeOneOf(validDecisions);
+        return act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*'CallTrump'*");
     }
 
     [Fact]
@@ -138,7 +130,6 @@ public class Gen1BotTests
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object,
             _actor);
         var cardsInHand = GenerateRelativeCards(5);
         var validCardsToDiscard = new[] { cardsInHand[0] };
@@ -156,7 +147,7 @@ public class Gen1BotTests
     }
 
     [Fact]
-    public async Task DiscardCardAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
+    public Task DiscardCardAsync_ShouldThrowInvalidOperationException_WhenEngineNotAvailable()
     {
         _mockEngineProvider
             .Setup(x => x.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", "Gen1"))
@@ -168,24 +159,23 @@ public class Gen1BotTests
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object,
             _actor);
         var cardsInHand = GenerateRelativeCards(6);
-        var validCardsToDiscard = new[] { cardsInHand[0], cardsInHand[1] };
 
-        var result = await bot.DiscardCardAsync(
+        var act = async () => await bot.DiscardCardAsync(
             cardsInHand,
             0,
             0,
             RelativePlayerPosition.Partner,
             false,
-            validCardsToDiscard);
+            [cardsInHand[0], cardsInHand[1]]);
 
-        result.ChosenCard.Should().BeOneOf(validCardsToDiscard);
+        return act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*'DiscardCard'*");
     }
 
     [Fact]
-    public async Task PlayCardAsync_ShouldFallbackToRandom_WhenEngineNotAvailable()
+    public Task PlayCardAsync_ShouldThrowInvalidOperationException_WhenEngineNotAvailable()
     {
         _mockEngineProvider
             .Setup(x => x.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", "Gen1"))
@@ -197,13 +187,10 @@ public class Gen1BotTests
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object,
             _actor);
         var cardsInHand = GenerateRelativeCards(5);
-        var validCardsToPlay = new[] { cardsInHand[0], cardsInHand[1] };
-        var playedCards = new Dictionary<RelativePlayerPosition, RelativeCard>();
 
-        var result = await bot.PlayCardAsync(
+        var act = async () => await bot.PlayCardAsync(
             cardsInHand,
             0,
             0,
@@ -215,14 +202,15 @@ public class Gen1BotTests
             RelativeSuit.Trump,
             [],
             [],
-            playedCards,
+            [],
             null,
             1,
             0,
             0,
-            validCardsToPlay);
+            [cardsInHand[0], cardsInHand[1]]);
 
-        result.ChosenCard.Should().BeOneOf(validCardsToPlay);
+        return act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*'PlayCard'*");
     }
 
     [Fact]
@@ -250,7 +238,6 @@ public class Gen1BotTests
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object,
             actor);
 
         _mockEngineProvider.Verify(
@@ -288,7 +275,6 @@ public class Gen1BotTests
             _mockDiscardCardFeatureBuilder.Object,
             _mockPlayCardFeatureBuilder.Object,
             _mockRandom.Object,
-            _mockLogger.Object,
             actor);
 
         _mockEngineProvider.Verify(

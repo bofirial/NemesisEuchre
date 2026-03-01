@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
@@ -16,8 +15,7 @@ public class ModelTrainerBotFactory(
     IDiscardCardInferenceFeatureBuilder discardCardFeatureBuilder,
     IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
     IRandomNumberGenerator random,
-    IOptions<MachineLearningOptions> machineLearningOptions,
-    ILogger<ModelTrainerBot> logger) : IPlayerActorFactory
+    IOptions<MachineLearningOptions> machineLearningOptions) : IPlayerActorFactory
 {
     public ActorType ActorType => ActorType.ModelTrainer;
 
@@ -28,6 +26,6 @@ public class ModelTrainerBotFactory(
             throw new ArgumentException("Model name must be provided for ModelBot.");
         }
 
-        return new ModelTrainerBot(engineProvider, callTrumpFeatureBuilder, discardCardFeatureBuilder, playCardFeatureBuilder, random, machineLearningOptions, logger, actor);
+        return new ModelTrainerBot(engineProvider, callTrumpFeatureBuilder, discardCardFeatureBuilder, playCardFeatureBuilder, random, machineLearningOptions, actor);
     }
 }

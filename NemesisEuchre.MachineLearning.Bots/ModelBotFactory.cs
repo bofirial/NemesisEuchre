@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
-using NemesisEuchre.Foundation.Constants;
+﻿using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.GameEngine.Utilities;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
@@ -13,8 +11,7 @@ public class ModelBotFactory(
     ICallTrumpInferenceFeatureBuilder callTrumpFeatureBuilder,
     IDiscardCardInferenceFeatureBuilder discardCardFeatureBuilder,
     IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
-    IRandomNumberGenerator random,
-    ILogger<ModelBot> logger) : IPlayerActorFactory
+    IRandomNumberGenerator random) : IPlayerActorFactory
 {
     public ActorType ActorType => ActorType.Model;
 
@@ -28,6 +25,6 @@ public class ModelBotFactory(
                 "--t1m-play, --t1m-call, --t1m-discard for specific types.");
         }
 
-        return new ModelBot(engineProvider, callTrumpFeatureBuilder, discardCardFeatureBuilder, playCardFeatureBuilder, random, logger, actor);
+        return new ModelBot(engineProvider, callTrumpFeatureBuilder, discardCardFeatureBuilder, playCardFeatureBuilder, random, actor);
     }
 }
