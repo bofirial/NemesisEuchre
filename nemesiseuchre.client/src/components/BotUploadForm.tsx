@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { authFetch } from '@/api/fetchUtils';
 import { Button } from '@/components/ui/button';
 
 interface FileSpec {
@@ -70,10 +71,7 @@ export function BotUploadForm({ mode, initialBotName, onSuccess }: BotUploadForm
         if (mode !== 'edit' || !initialBotName) return;
 
         async function fetchExistingFiles() {
-            const token = sessionStorage.getItem('auth_token');
-            const response = await fetch(`/api/admin/bots/${encodeURIComponent(initialBotName!)}`, {
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-            });
+            const response = await authFetch(`/api/admin/bots/${encodeURIComponent(initialBotName!)}`);
             if (!response.ok) return;
             const data = await response.json() as { files: string[] };
             const mapped: Record<string, string | null> = Object.fromEntries(FILE_SPECS.map(s => [s.field, null]));
@@ -114,7 +112,6 @@ export function BotUploadForm({ mode, initialBotName, onSuccess }: BotUploadForm
         setStatus(null);
 
         const formData = new FormData();
-        const token = sessionStorage.getItem('auth_token');
         let url: string;
         let method: string;
 
@@ -139,11 +136,7 @@ export function BotUploadForm({ mode, initialBotName, onSuccess }: BotUploadForm
         }
 
         try {
-            const response = await fetch(url, {
-                method,
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-                body: formData,
-            });
+            const response = await authFetch(url, { method, body: formData });
 
             if (response.ok) {
                 onSuccess(botName);

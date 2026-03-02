@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 
+import { authFetch } from '@/api/fetchUtils';
+
 export function AppFooter() {
     const [version, setVersion] = useState<string | null>(null);
 
     useEffect(() => {
-        fetch('/api/version')
+        authFetch('/api/version')
             .then(r => r.json())
             .then(data => setVersion(data.version))
             .catch(() => { /* silently ignore */ });

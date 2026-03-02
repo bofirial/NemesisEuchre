@@ -1,5 +1,6 @@
 import { type ReactNode, useState, useEffect } from 'react';
 import { User, AuthContext } from './AuthContext';
+import { getAuthToken, setAuthToken, removeAuthToken, authFetch } from '@/api/fetchUtils';
 
 
 export function AuthProvider({ children }: { children: ReactNode; }) {
@@ -11,25 +12,25 @@ export function AuthProvider({ children }: { children: ReactNode; }) {
         const token = params.get('token');
 
         if (token) {
-            sessionStorage.setItem('auth_token', token);
+            setAuthToken(token);
             window.history.replaceState(null, '', window.location.pathname + window.location.search);
         }
 
-        const storedToken = sessionStorage.getItem('auth_token');
+        const storedToken = getAuthToken();
         if (!storedToken) {
             return;
         }
 
-        fetch('/api/auth/user', { headers: { Authorization: `Bearer ${storedToken}` } })
+        authFetch('/api/auth/user')
             .then(async (response) => {
                 if (response.ok) {
                     const data = await response.json() as User;
                     setUser(data);
                 } else {
-                    sessionStorage.removeItem('auth_token');
+                    removeAuthToken();
                 }
             })
-            .catch(() => sessionStorage.removeItem('auth_token'));
+            .catch(() => removeAuthToken());
     }, []);
 
     function login() {
@@ -37,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode; }) {
     }
 
     function logout() {
-        sessionStorage.removeItem('auth_token');
+        removeAuthToken();
         setUser(null);
     }
 

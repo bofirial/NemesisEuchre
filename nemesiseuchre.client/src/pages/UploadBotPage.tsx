@@ -1,16 +1,11 @@
-import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '@/auth/useAuth';
+import { useAdminGuard } from '@/auth/useAdminGuard';
 import { BotUploadForm } from '@/components/BotUploadForm';
 
 export function UploadBotPage() {
-    const { isAdmin } = useAuth();
+    const isAdmin = useAdminGuard();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        if (!isAdmin) navigate('/');
-    }, [isAdmin, navigate]);
 
     if (!isAdmin) return null;
 

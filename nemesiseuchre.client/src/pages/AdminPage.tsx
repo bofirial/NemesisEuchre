@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAuth } from '@/auth/useAuth';
+import { authFetch } from '@/api/fetchUtils';
+import { useAdminGuard } from '@/auth/useAdminGuard';
 import { Button } from '@/components/ui/button';
 
 export function AdminPage() {
-    const { isAdmin } = useAuth();
+    const isAdmin = useAdminGuard();
     const navigate = useNavigate();
 
     const [bots, setBots] = useState<string[]>([]);
@@ -13,20 +14,11 @@ export function AdminPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!isAdmin) {
-            navigate('/');
-        }
-    }, [isAdmin, navigate]);
-
-    useEffect(() => {
         if (!isAdmin) return;
 
         async function fetchBots() {
-            const token = sessionStorage.getItem('auth_token');
             try {
-                const response = await fetch('/api/admin/bots', {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {},
-                });
+                const response = await authFetch('/api/admin/bots');
                 if (response.ok) {
                     const data = await response.json() as { bots: string[] };
                     setBots(data.bots);

@@ -1,18 +1,14 @@
-import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import { useAuth } from '@/auth/useAuth';
+import { authFetch } from '@/api/fetchUtils';
+import { useAdminGuard } from '@/auth/useAdminGuard';
 import { BotUploadForm } from '@/components/BotUploadForm';
 import { Button } from '@/components/ui/button';
 
 export function EditBotPage() {
     const { botName } = useParams<{ botName: string }>();
-    const { isAdmin } = useAuth();
+    const isAdmin = useAdminGuard();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        if (!isAdmin) navigate('/');
-    }, [isAdmin, navigate]);
 
     if (!isAdmin || !botName) return null;
 
@@ -27,11 +23,9 @@ export function EditBotPage() {
     async function handleDelete() {
         if (!confirm(`Delete bot "${botName}"? This cannot be undone.`)) return;
 
-        const token = sessionStorage.getItem('auth_token');
         try {
-            const response = await fetch(`/api/admin/bots/${encodeURIComponent(botName!)}`, {
+            const response = await authFetch(`/api/admin/bots/${encodeURIComponent(botName!)}`, {
                 method: 'DELETE',
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
             });
             if (response.ok) {
                 navigate('/admin');
