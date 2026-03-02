@@ -112,6 +112,7 @@ public static class ServerServiceCollectionExtensions
                 };
             });
 
+        services.AddControllers();
         services.AddSignalR()
             .AddJsonProtocol(options => options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
         services.AddAuthorization();

@@ -1,6 +1,4 @@
-using NemesisEuchre.Server.Auth;
 using NemesisEuchre.Server.DependencyInjection;
-using NemesisEuchre.Server.Endpoints;
 using NemesisEuchre.Server.Hubs;
 
 namespace NemesisEuchre.Server;
@@ -21,9 +19,7 @@ public static class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.MapAuthEndpoints();
-        app.MapInfoEndpoints();
-        app.MapAdminEndpoints();
+        app.MapControllers();
         app.MapHub<GameHub>("/hub/game");
 
         app.MapFallbackToFile("/index.html");
