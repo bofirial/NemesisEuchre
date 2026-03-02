@@ -62,17 +62,7 @@ public partial class AdminController(IBotStorageService storageService) : Contro
             errors.Add("botName must be 1–50 characters: letters, digits, hyphens, underscores.");
         }
 
-        var files = CollectAndValidateFiles(
-            [
-                (field: "callTrumpZip", file: request.CallTrumpZip),
-                (field: "callTrumpJson", file: request.CallTrumpJson),
-                (field: "discardCardZip", file: request.DiscardCardZip),
-                (field: "discardCardJson", file: request.DiscardCardJson),
-                (field: "playCardZip", file: request.PlayCardZip),
-                (field: "playCardJson", file: request.PlayCardJson),
-            ],
-            requireAll: true,
-            errors);
+        var files = CollectAndValidateFiles(GetFileProviders(request), requireAll: true, errors);
 
         if (errors.Count > 0)
         {
@@ -109,17 +99,7 @@ public partial class AdminController(IBotStorageService storageService) : Contro
             }
         }
 
-        var files = CollectAndValidateFiles(
-            [
-                (field: "callTrumpZip", file: request.CallTrumpZip),
-                (field: "callTrumpJson", file: request.CallTrumpJson),
-                (field: "discardCardZip", file: request.DiscardCardZip),
-                (field: "discardCardJson", file: request.DiscardCardJson),
-                (field: "playCardZip", file: request.PlayCardZip),
-                (field: "playCardJson", file: request.PlayCardJson),
-            ],
-            requireAll: false,
-            errors);
+        var files = CollectAndValidateFiles(GetFileProviders(request), requireAll: false, errors);
 
         if (errors.Count > 0)
         {
@@ -149,6 +129,19 @@ public partial class AdminController(IBotStorageService storageService) : Contro
         {
             return StatusCode(StatusCodes.Status503ServiceUnavailable);
         }
+    }
+
+    private static (string field, IFormFile? file)[] GetFileProviders(IBotFileRequest request)
+    {
+        return
+        [
+            (field: "callTrumpZip", file: request.CallTrumpZip),
+            (field: "callTrumpJson", file: request.CallTrumpJson),
+            (field: "discardCardZip", file: request.DiscardCardZip),
+            (field: "discardCardJson", file: request.DiscardCardJson),
+            (field: "playCardZip", file: request.PlayCardZip),
+            (field: "playCardJson", file: request.PlayCardJson),
+        ];
     }
 
     private static List<IFormFile> CollectAndValidateFiles(

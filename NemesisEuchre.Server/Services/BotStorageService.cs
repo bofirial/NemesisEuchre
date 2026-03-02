@@ -41,26 +41,14 @@ public class BotStorageService(IConfiguration configuration) : IBotStorageServic
     {
         var container = GetContainerClient();
         await container.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
-
-        foreach (var file in files)
-        {
-            var blobClient = container.GetBlobClient($"{botName}/{file.FileName}");
-            await using var stream = file.OpenReadStream();
-            await blobClient.UploadAsync(stream, overwrite: true, cancellationToken: cancellationToken);
-        }
+        await UploadFilesAsync(container, botName, files, cancellationToken);
     }
 
     public async Task UpdateBotAsync(string botName, string? newBotName, IReadOnlyList<IFormFile> files, CancellationToken cancellationToken)
     {
         var container = GetContainerClient();
         await container.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
-
-        foreach (var file in files)
-        {
-            var blobClient = container.GetBlobClient($"{botName}/{file.FileName}");
-            await using var stream = file.OpenReadStream();
-            await blobClient.UploadAsync(stream, overwrite: true, cancellationToken: cancellationToken);
-        }
+        await UploadFilesAsync(container, botName, files, cancellationToken);
 
         if (newBotName is not null && !string.Equals(newBotName, botName, StringComparison.Ordinal))
         {
@@ -89,6 +77,20 @@ public class BotStorageService(IConfiguration configuration) : IBotStorageServic
         await foreach (var blob in container.GetBlobsAsync(prefix: $"{botName}/", cancellationToken: cancellationToken))
         {
             await container.GetBlobClient(blob.Name).DeleteIfExistsAsync(cancellationToken: cancellationToken);
+        }
+    }
+
+    private static async Task UploadFilesAsync(
+        BlobContainerClient container,
+        string botName,
+        IReadOnlyList<IFormFile> files,
+        CancellationToken cancellationToken)
+    {
+        foreach (var file in files)
+        {
+            var blobClient = container.GetBlobClient($"{botName}/{file.FileName}");
+            await using var stream = file.OpenReadStream();
+            await blobClient.UploadAsync(stream, overwrite: true, cancellationToken: cancellationToken);
         }
     }
 

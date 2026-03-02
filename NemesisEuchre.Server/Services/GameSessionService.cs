@@ -92,26 +92,7 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
 
         await db.SaveChangesAsync(ct);
 
-        var memberships = await db.GameSessionUsers!
-            .Include(gsu => gsu.User)
-            .Where(gsu => gsu.GameSessionId == sessionId
-                && db.GameSessionConnections!.Any(
-                    gsc => gsc.GameSessionId == sessionId
-                        && gsc.UserId == gsu.UserId
-                        && gsc.DisconnectedDate == null))
-            .ToListAsync(ct);
-
-        var activeConnections = await db.GameSessionConnections!
-            .Where(gsc => gsc.GameSessionId == sessionId && gsc.DisconnectedDate == null)
-            .ToListAsync(ct);
-
-        return memberships.ConvertAll(m => new ActiveSessionMember
-        {
-            Membership = m,
-            ConnectionIds = [.. activeConnections
-                .Where(c => c.UserId == m.UserId)
-                .Select(c => c.ConnectionId)],
-        });
+        return await GetActiveSessionMembersAsync(sessionId, ct);
     }
 
     public async Task<GameContext?> DisconnectAsync(string connectionId, CancellationToken ct = default)
@@ -140,31 +121,37 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
 
         await db.SaveChangesAsync(ct);
 
-        var memberships = await db.GameSessionUsers!
-            .Include(gsu => gsu.User)
-            .Where(gsu => gsu.GameSessionId == connection.GameSessionId
-                && db.GameSessionConnections!.Any(
-                    gsc => gsc.GameSessionId == connection.GameSessionId
-                        && gsc.UserId == gsu.UserId
-                        && gsc.DisconnectedDate == null))
-            .ToListAsync(ct);
-
-        var activeConnections = await db.GameSessionConnections!
-            .Where(gsc => gsc.GameSessionId == connection.GameSessionId && gsc.DisconnectedDate == null)
-            .ToListAsync(ct);
-
-        var members = memberships.ConvertAll(m => new ActiveSessionMember
-        {
-            Membership = m,
-            ConnectionIds = [.. activeConnections
-                .Where(c => c.UserId == m.UserId)
-                .Select(c => c.ConnectionId)],
-        });
+        var members = await GetActiveSessionMembersAsync(connection.GameSessionId, ct);
 
         return new GameContext
         {
             SessionName = connection.GameSession!.SessionName,
             Members = members,
         };
+    }
+
+    private async Task<IReadOnlyList<ActiveSessionMember>> GetActiveSessionMembersAsync(
+        int sessionId, CancellationToken ct)
+    {
+        var memberships = await db.GameSessionUsers!
+            .Include(gsu => gsu.User)
+            .Where(gsu => gsu.GameSessionId == sessionId
+                && db.GameSessionConnections!.Any(
+                    gsc => gsc.GameSessionId == sessionId
+                        && gsc.UserId == gsu.UserId
+                        && gsc.DisconnectedDate == null))
+            .ToListAsync(ct);
+
+        var activeConnections = await db.GameSessionConnections!
+            .Where(gsc => gsc.GameSessionId == sessionId && gsc.DisconnectedDate == null)
+            .ToListAsync(ct);
+
+        return memberships.ConvertAll(m => new ActiveSessionMember
+        {
+            Membership = m,
+            ConnectionIds = [.. activeConnections
+                .Where(c => c.UserId == m.UserId)
+                .Select(c => c.ConnectionId)],
+        });
     }
 }

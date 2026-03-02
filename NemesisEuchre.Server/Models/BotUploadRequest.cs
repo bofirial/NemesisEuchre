@@ -1,6 +1,6 @@
 namespace NemesisEuchre.Server.Models;
 
-public sealed class BotUploadRequest
+public class BotUploadRequest : IBotFileRequest
 {
     public string BotName { get; init; } = string.Empty;
 

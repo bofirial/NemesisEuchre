@@ -28,13 +28,7 @@ public class GameHub(IGameSessionService sessionService, IPlayerStateProjector s
 
         var context = new GameContext { SessionName = session.SessionName, Members = members };
 
-        foreach (var member in members)
-        {
-            foreach (var connId in member.ConnectionIds.Where(id => id != Context.ConnectionId))
-            {
-                await Clients.Client(connId).SendAsync("ReceiveGameState", stateProjector.Project(context, member));
-            }
-        }
+        await BroadcastGameStateAsync(context, Context.ConnectionId);
 
         var currentMember = members.FirstOrDefault(m => m.Membership.UserId == user?.UserId);
         return currentMember is not null
@@ -52,15 +46,20 @@ public class GameHub(IGameSessionService sessionService, IPlayerStateProjector s
 
         if (context is not null)
         {
-            foreach (var member in context.Members)
-            {
-                foreach (var connId in member.ConnectionIds)
-                {
-                    await Clients.Client(connId).SendAsync("ReceiveGameState", stateProjector.Project(context, member));
-                }
-            }
+            await BroadcastGameStateAsync(context);
         }
 
         await base.OnDisconnectedAsync(exception);
+    }
+
+    private async Task BroadcastGameStateAsync(GameContext context, string? excludeConnectionId = null)
+    {
+        foreach (var member in context.Members)
+        {
+            foreach (var connId in member.ConnectionIds.Where(id => id != excludeConnectionId))
+            {
+                await Clients.Client(connId).SendAsync("ReceiveGameState", stateProjector.Project(context, member));
+            }
+        }
     }
 }
