@@ -18,6 +18,12 @@ public interface IGameSessionService
         int sessionId, int userId, string connectionId, CancellationToken ct = default);
 
     Task<GameContext?> DisconnectAsync(string connectionId, CancellationToken ct = default);
+
+    Task<(GameContext context, IReadOnlyList<string> removedConnectionIds)?> RemoveUserFromSessionAsync(
+        string callerConnectionId, string targetLogin, CancellationToken ct = default);
+
+    Task<GameContext?> PromoteToLeaderAsync(
+        string callerConnectionId, string targetLogin, CancellationToken ct = default);
 }
 
 public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
@@ -127,6 +133,89 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
         {
             SessionName = connection.GameSession!.SessionName,
             Members = members,
+        };
+    }
+
+    public async Task<(GameContext context, IReadOnlyList<string> removedConnectionIds)?> RemoveUserFromSessionAsync(
+        string callerConnectionId, string targetLogin, CancellationToken ct = default)
+    {
+        var callerConn = await db.GameSessionConnections!
+            .Include(c => c.GameSession)
+            .FirstOrDefaultAsync(c => c.ConnectionId == callerConnectionId && c.DisconnectedDate == null, ct);
+        if (callerConn is null)
+        {
+            return null;
+        }
+
+        var callerMembership = await db.GameSessionUsers!
+            .FirstOrDefaultAsync(m => m.GameSessionId == callerConn.GameSessionId && m.UserId == callerConn.UserId, ct);
+        if (callerMembership?.IsSessionLeader != true)
+        {
+            return null;
+        }
+
+        var targetUser = await db.Users!.FirstOrDefaultAsync(u => u.GitHubLogin == targetLogin, ct);
+        if (targetUser is null)
+        {
+            return null;
+        }
+
+        var targetConnections = await db.GameSessionConnections!
+            .Where(c => c.GameSessionId == callerConn.GameSessionId
+                && c.UserId == targetUser.UserId
+                && c.DisconnectedDate == null)
+            .ToListAsync(ct);
+
+        var removedConnectionIds = targetConnections.ConvertAll(c => c.ConnectionId);
+        foreach (var conn in targetConnections)
+        {
+            conn.DisconnectedDate = DateTime.UtcNow;
+        }
+
+        await db.SaveChangesAsync(ct);
+
+        var members = await GetActiveSessionMembersAsync(callerConn.GameSessionId, ct);
+        return (context: new GameContext { SessionName = callerConn.GameSession!.SessionName, Members = members }, removedConnectionIds);
+    }
+
+    public async Task<GameContext?> PromoteToLeaderAsync(
+        string callerConnectionId, string targetLogin, CancellationToken ct = default)
+    {
+        var callerConn = await db.GameSessionConnections!
+            .Include(c => c.GameSession)
+            .FirstOrDefaultAsync(c => c.ConnectionId == callerConnectionId && c.DisconnectedDate == null, ct);
+        if (callerConn is null)
+        {
+            return null;
+        }
+
+        var callerMembership = await db.GameSessionUsers!
+            .FirstOrDefaultAsync(m => m.GameSessionId == callerConn.GameSessionId && m.UserId == callerConn.UserId, ct);
+        if (callerMembership?.IsSessionLeader != true)
+        {
+            return null;
+        }
+
+        var targetUser = await db.Users!.FirstOrDefaultAsync(u => u.GitHubLogin == targetLogin, ct);
+        if (targetUser is null)
+        {
+            return null;
+        }
+
+        var targetMembership = await db.GameSessionUsers!
+            .FirstOrDefaultAsync(m => m.GameSessionId == callerConn.GameSessionId && m.UserId == targetUser.UserId, ct);
+        if (targetMembership is null)
+        {
+            return null;
+        }
+
+        targetMembership.IsSessionLeader = true;
+        await db.SaveChangesAsync(ct);
+
+        return new GameContext
+        {
+            SessionName = callerConn.GameSession!.SessionName,
+            Members = await GetActiveSessionMembersAsync(callerConn.GameSessionId, ct),
         };
     }
 

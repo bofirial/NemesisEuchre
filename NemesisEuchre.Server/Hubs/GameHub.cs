@@ -52,6 +52,35 @@ public class GameHub(IGameSessionService sessionService, IPlayerStateProjector s
         await base.OnDisconnectedAsync(exception);
     }
 
+    public async Task RemoveUserFromSessionAsync(string targetLogin)
+    {
+        var result = await sessionService.RemoveUserFromSessionAsync(Context.ConnectionId, targetLogin);
+        if (result is null)
+        {
+            return;
+        }
+
+        var (context, removedConnectionIds) = result.Value;
+        foreach (var connId in removedConnectionIds)
+        {
+            await Groups.RemoveFromGroupAsync(connId, context.SessionName);
+            await Clients.Client(connId).SendAsync("KickedFromSession");
+        }
+
+        await BroadcastGameStateAsync(context);
+    }
+
+    public async Task PromoteToLeaderAsync(string targetLogin)
+    {
+        var context = await sessionService.PromoteToLeaderAsync(Context.ConnectionId, targetLogin);
+        if (context is null)
+        {
+            return;
+        }
+
+        await BroadcastGameStateAsync(context);
+    }
+
     private async Task BroadcastGameStateAsync(GameContext context, string? excludeConnectionId = null)
     {
         foreach (var member in context.Members)

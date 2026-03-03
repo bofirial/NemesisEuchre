@@ -1,6 +1,6 @@
 import { HubConnectionState } from '@microsoft/signalr';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { GameActive } from '@/components/GameActive';
 import { GameLobby } from '@/components/GameLobby';
 import { useGameHub } from '@/signalr/useGameHub';
@@ -9,6 +9,7 @@ import type { PlayerGameState } from '@/types/game';
 export function GamePage() {
     const { sessionName } = useParams<{ sessionName: string }>();
     const { connectionRef, connectionState } = useGameHub();
+    const navigate = useNavigate();
     const [gameState, setGameState] = useState<PlayerGameState | null>(null);
 
     useEffect(() => {
@@ -22,12 +23,16 @@ export function GamePage() {
         const conn = connectionRef.current;
         if (!conn) return;
         conn.on('ReceiveGameState', (updated: PlayerGameState) => setGameState(updated));
-        return () => { conn.off('ReceiveGameState'); };
-    }, [connectionRef]);
+        conn.on('KickedFromSession', () => navigate('/'));
+        return () => {
+            conn.off('ReceiveGameState');
+            conn.off('KickedFromSession');
+        };
+    }, [connectionRef, navigate]);
 
     if (!gameState) return null;
 
     return gameState.gameStatus === 'Playing'
         ? <GameActive />
-        : <GameLobby gameState={gameState} />;
+        : <GameLobby gameState={gameState} connectionRef={connectionRef} />;
 }
