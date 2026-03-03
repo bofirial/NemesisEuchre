@@ -39,6 +39,10 @@ export interface ConnectedUserInfo {
     isSessionLeader: boolean;
 }
 
+export interface SeatOccupant {
+    gitHubLogin: string;
+}
+
 export interface PlayerGameState {
     sessionName: string;
     gameStatus: GameStatusViewModel;
@@ -47,5 +51,6 @@ export interface PlayerGameState {
     team1Score: number;
     team2Score: number;
     connectedUsers: ConnectedUserInfo[];
+    seats: Partial<Record<PlayerPosition, SeatOccupant>>;
     currentDeal: DealState | null;
 }

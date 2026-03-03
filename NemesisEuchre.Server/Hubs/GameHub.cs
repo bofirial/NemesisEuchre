@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.Server.Models;
 using NemesisEuchre.Server.Services;
 
@@ -19,18 +20,16 @@ public class GameHub(IGameSessionService sessionService, IPlayerStateProjector s
 
         await Groups.AddToGroupAsync(Context.ConnectionId, session.SessionName);
 
-        IReadOnlyList<ActiveSessionMember> members = [];
         if (user is not null)
         {
-            members = await sessionService.JoinSessionAsync(
-                session.GameSessionId, user.UserId, Context.ConnectionId);
+            await sessionService.JoinSessionAsync(session.GameSessionId, user.UserId, Context.ConnectionId);
         }
 
-        var context = new GameContext { SessionName = session.SessionName, Members = members };
+        var context = await sessionService.GetSessionContextAsync(session.GameSessionId, session.SessionName);
 
         await BroadcastGameStateAsync(context, Context.ConnectionId);
 
-        var currentMember = members.FirstOrDefault(m => m.Membership.UserId == user?.UserId);
+        var currentMember = context.Members.FirstOrDefault(m => m.Membership.UserId == user?.UserId);
         return currentMember is not null
             ? stateProjector.Project(context, currentMember)
             : stateProjector.Project(context, new ActiveSessionMember
@@ -73,6 +72,17 @@ public class GameHub(IGameSessionService sessionService, IPlayerStateProjector s
     public async Task PromoteToLeaderAsync(string targetLogin)
     {
         var context = await sessionService.PromoteToLeaderAsync(Context.ConnectionId, targetLogin);
+        if (context is null)
+        {
+            return;
+        }
+
+        await BroadcastGameStateAsync(context);
+    }
+
+    public async Task ClaimSeatAsync(PlayerPosition position)
+    {
+        var context = await sessionService.ClaimSeatAsync(Context.ConnectionId, position);
         if (context is null)
         {
             return;

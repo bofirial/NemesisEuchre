@@ -13,6 +13,8 @@ public class GameSessionEntity : EntityBase
 
     public ICollection<GameSessionUserEntity> GameSessionUsers { get; set; } = [];
 
+    public ICollection<GameSessionSeatEntity> GameSessionSeats { get; set; } = [];
+
     public ICollection<GameEntity> Games { get; set; } = [];
 }
 

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 using NemesisEuchre.DataAccess;
 using NemesisEuchre.DataAccess.Entities;
+using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.Server.Models;
 
 namespace NemesisEuchre.Server.Services;
@@ -16,6 +17,10 @@ public interface IGameSessionService
 
     Task<IReadOnlyList<ActiveSessionMember>> JoinSessionAsync(
         int sessionId, int userId, string connectionId, CancellationToken ct = default);
+
+    Task<GameContext> GetSessionContextAsync(int sessionId, string sessionName, CancellationToken ct = default);
+
+    Task<GameContext?> ClaimSeatAsync(string connectionId, PlayerPosition position, CancellationToken ct = default);
 
     Task<GameContext?> DisconnectAsync(string connectionId, CancellationToken ct = default);
 
@@ -101,6 +106,52 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
         return await GetActiveSessionMembersAsync(sessionId, ct);
     }
 
+    public Task<GameContext> GetSessionContextAsync(int sessionId, string sessionName, CancellationToken ct = default)
+    {
+        return BuildGameContextAsync(sessionId, sessionName, ct);
+    }
+
+    public async Task<GameContext?> ClaimSeatAsync(string connectionId, PlayerPosition position, CancellationToken ct = default)
+    {
+        var connection = await db.GameSessionConnections!
+            .Include(c => c.GameSession)
+            .FirstOrDefaultAsync(c => c.ConnectionId == connectionId && c.DisconnectedDate == null, ct);
+        if (connection is null)
+        {
+            return null;
+        }
+
+        var sessionId = connection.GameSessionId;
+        var userId = connection.UserId;
+
+        var existingSeat = await db.GameSessionSeats!
+            .FirstOrDefaultAsync(s => s.GameSessionId == sessionId && s.UserId == userId, ct);
+        if (existingSeat is not null)
+        {
+            db.GameSessionSeats!.Remove(existingSeat);
+        }
+
+        var targetSeat = await db.GameSessionSeats!
+            .FirstOrDefaultAsync(s => s.GameSessionId == sessionId && s.Position == position, ct);
+        if (targetSeat is not null)
+        {
+            targetSeat.UserId = userId;
+        }
+        else
+        {
+            db.GameSessionSeats!.Add(new GameSessionSeatEntity
+            {
+                GameSessionId = sessionId,
+                Position = position,
+                UserId = userId,
+            });
+        }
+
+        await db.SaveChangesAsync(ct);
+
+        return await BuildGameContextAsync(sessionId, connection.GameSession!.SessionName, ct);
+    }
+
     public async Task<GameContext?> DisconnectAsync(string connectionId, CancellationToken ct = default)
     {
         var connection = await db.GameSessionConnections!
@@ -127,13 +178,7 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
 
         await db.SaveChangesAsync(ct);
 
-        var members = await GetActiveSessionMembersAsync(connection.GameSessionId, ct);
-
-        return new GameContext
-        {
-            SessionName = connection.GameSession!.SessionName,
-            Members = members,
-        };
+        return await BuildGameContextAsync(connection.GameSessionId, connection.GameSession!.SessionName, ct);
     }
 
     public async Task<(GameContext context, IReadOnlyList<string> removedConnectionIds)?> RemoveUserFromSessionAsync(
@@ -174,8 +219,8 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
 
         await db.SaveChangesAsync(ct);
 
-        var members = await GetActiveSessionMembersAsync(callerConn.GameSessionId, ct);
-        return (context: new GameContext { SessionName = callerConn.GameSession!.SessionName, Members = members }, removedConnectionIds);
+        var context = await BuildGameContextAsync(callerConn.GameSessionId, callerConn.GameSession!.SessionName, ct);
+        return (context, removedConnectionIds);
     }
 
     public async Task<GameContext?> PromoteToLeaderAsync(
@@ -212,10 +257,29 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
         targetMembership.IsSessionLeader = true;
         await db.SaveChangesAsync(ct);
 
+        return await BuildGameContextAsync(callerConn.GameSessionId, callerConn.GameSession!.SessionName, ct);
+    }
+
+    private async Task<GameContext> BuildGameContextAsync(int sessionId, string sessionName, CancellationToken ct)
+    {
+        var members = await GetActiveSessionMembersAsync(sessionId, ct);
+
+        var seats = await db.GameSessionSeats!
+            .Include(s => s.User)
+            .Where(s => s.GameSessionId == sessionId)
+            .ToListAsync(ct);
+
+        var seatInfos = seats.ConvertAll(s => new SeatInfo
+        {
+            Position = s.Position,
+            GitHubLogin = s.User?.GitHubLogin,
+        });
+
         return new GameContext
         {
-            SessionName = callerConn.GameSession!.SessionName,
-            Members = await GetActiveSessionMembersAsync(callerConn.GameSessionId, ct),
+            SessionName = sessionName,
+            Members = members,
+            Seats = seatInfos,
         };
     }
 

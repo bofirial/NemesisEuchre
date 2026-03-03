@@ -18,5 +18,7 @@ public record PlayerGameState
 
     public required IReadOnlyList<ConnectedUserInfo> ConnectedUsers { get; init; }
 
+    public required IReadOnlyDictionary<PlayerPosition, SeatInfo> Seats { get; init; }
+
     public DealState? CurrentDeal { get; init; }
 }
