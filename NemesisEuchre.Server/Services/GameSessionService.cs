@@ -29,6 +29,8 @@ public interface IGameSessionService
 
     Task<GameContext?> PromoteToLeaderAsync(
         string callerConnectionId, string targetLogin, CancellationToken ct = default);
+
+    Task<GameContext?> VacateSeatAsync(string connectionId, CancellationToken ct = default);
 }
 
 public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
@@ -258,6 +260,29 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
         await db.SaveChangesAsync(ct);
 
         return await BuildGameContextAsync(callerConn.GameSessionId, callerConn.GameSession!.SessionName, ct);
+    }
+
+    public async Task<GameContext?> VacateSeatAsync(string connectionId, CancellationToken ct = default)
+    {
+        var connection = await db.GameSessionConnections!
+            .Include(c => c.GameSession)
+            .FirstOrDefaultAsync(c => c.ConnectionId == connectionId && c.DisconnectedDate == null, ct);
+        if (connection is null)
+        {
+            return null;
+        }
+
+        var seat = await db.GameSessionSeats!
+            .FirstOrDefaultAsync(s => s.GameSessionId == connection.GameSessionId && s.UserId == connection.UserId, ct);
+        if (seat is null)
+        {
+            return null;
+        }
+
+        db.GameSessionSeats!.Remove(seat);
+        await db.SaveChangesAsync(ct);
+
+        return await BuildGameContextAsync(connection.GameSessionId, connection.GameSession!.SessionName, ct);
     }
 
     private async Task<GameContext> BuildGameContextAsync(int sessionId, string sessionName, CancellationToken ct)

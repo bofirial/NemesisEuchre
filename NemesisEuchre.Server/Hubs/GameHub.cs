@@ -91,6 +91,17 @@ public class GameHub(IGameSessionService sessionService, IPlayerStateProjector s
         await BroadcastGameStateAsync(context);
     }
 
+    public async Task VacateSeatAsync()
+    {
+        var context = await sessionService.VacateSeatAsync(Context.ConnectionId);
+        if (context is null)
+        {
+            return;
+        }
+
+        await BroadcastGameStateAsync(context);
+    }
+
     private async Task BroadcastGameStateAsync(GameContext context, string? excludeConnectionId = null)
     {
         foreach (var member in context.Members)

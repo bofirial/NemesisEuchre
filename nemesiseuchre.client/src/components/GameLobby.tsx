@@ -93,6 +93,15 @@ export function GameLobby({ gameState, connectionRef }: Props) {
                     </li>
                 ))}
             </ul>
+
+            {amSeated && (
+                <button
+                    onClick={() => connectionRef.current?.invoke('VacateSeatAsync')}
+                    className="cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+                >
+                    Spectate
+                </button>
+            )}
         </div>
     );
 }
