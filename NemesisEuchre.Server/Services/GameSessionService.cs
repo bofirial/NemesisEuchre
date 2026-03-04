@@ -31,6 +31,18 @@ public interface IGameSessionService
         string callerConnectionId, string targetLogin, CancellationToken ct = default);
 
     Task<GameContext?> VacateSeatAsync(string connectionId, CancellationToken ct = default);
+
+    Task<GameContext?> AddBotToSeatAsync(
+        string connectionId,
+        PlayerPosition position,
+        ActorType botActorType,
+        string? modelName = null,
+        CancellationToken ct = default);
+
+    Task<GameContext?> RemoveBotFromSeatAsync(
+        string connectionId,
+        PlayerPosition position,
+        CancellationToken ct = default);
 }
 
 public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
@@ -285,6 +297,81 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
         return await BuildGameContextAsync(connection.GameSessionId, connection.GameSession!.SessionName, ct);
     }
 
+    public async Task<GameContext?> AddBotToSeatAsync(
+        string connectionId,
+        PlayerPosition position,
+        ActorType botActorType,
+        string? modelName = null,
+        CancellationToken ct = default)
+    {
+        var connection = await db.GameSessionConnections!
+            .Include(c => c.GameSession)
+            .FirstOrDefaultAsync(c => c.ConnectionId == connectionId && c.DisconnectedDate == null, ct);
+        if (connection is null)
+        {
+            return null;
+        }
+
+        var membership = await db.GameSessionUsers!
+            .FirstOrDefaultAsync(m => m.GameSessionId == connection.GameSessionId && m.UserId == connection.UserId, ct);
+        if (membership?.IsSessionLeader != true)
+        {
+            return null;
+        }
+
+        var targetSeat = await db.GameSessionSeats!
+            .FirstOrDefaultAsync(s => s.GameSessionId == connection.GameSessionId && s.Position == position, ct);
+        if (targetSeat is not null)
+        {
+            return null;
+        }
+
+        db.GameSessionSeats!.Add(new GameSessionSeatEntity
+        {
+            GameSessionId = connection.GameSessionId,
+            Position = position,
+            UserId = null,
+            BotActorType = botActorType,
+            BotModelName = modelName,
+        });
+        await db.SaveChangesAsync(ct);
+
+        return await BuildGameContextAsync(connection.GameSessionId, connection.GameSession!.SessionName, ct);
+    }
+
+    public async Task<GameContext?> RemoveBotFromSeatAsync(
+        string connectionId,
+        PlayerPosition position,
+        CancellationToken ct = default)
+    {
+        var connection = await db.GameSessionConnections!
+            .Include(c => c.GameSession)
+            .FirstOrDefaultAsync(c => c.ConnectionId == connectionId && c.DisconnectedDate == null, ct);
+        if (connection is null)
+        {
+            return null;
+        }
+
+        var membership = await db.GameSessionUsers!
+            .FirstOrDefaultAsync(m => m.GameSessionId == connection.GameSessionId && m.UserId == connection.UserId, ct);
+        if (membership?.IsSessionLeader != true)
+        {
+            return null;
+        }
+
+        var seat = await db.GameSessionSeats!
+            .FirstOrDefaultAsync(s => s.GameSessionId == connection.GameSessionId && s.Position == position && s.UserId == null, ct);
+        if (seat is null)
+        {
+            return null;
+        }
+
+        db.GameSessionSeats!.Remove(seat);
+        await db.SaveChangesAsync(ct);
+
+        return await BuildGameContextAsync(connection.GameSessionId, connection.GameSession!.SessionName, ct);
+    }
+
     private async Task<GameContext> BuildGameContextAsync(int sessionId, string sessionName, CancellationToken ct)
     {
         var members = await GetActiveSessionMembersAsync(sessionId, ct);
@@ -298,6 +385,8 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
         {
             Position = s.Position,
             GitHubLogin = s.User?.GitHubLogin,
+            BotActorType = s.BotActorType,
+            BotModelName = s.BotModelName,
         });
 
         return new GameContext

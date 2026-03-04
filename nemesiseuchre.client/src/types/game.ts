@@ -39,8 +39,12 @@ export interface ConnectedUserInfo {
     isSessionLeader: boolean;
 }
 
+export type ActorType = 'Chaos' | 'Beta' | 'Chad' | 'Model';
+
 export interface SeatOccupant {
-    gitHubLogin: string;
+    gitHubLogin: string | null;
+    botActorType: ActorType | null;
+    botModelName: string | null;
 }
 
 export interface PlayerGameState {

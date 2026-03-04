@@ -1,8 +1,10 @@
 import { Crown, Star, UserX } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import type { RefObject } from 'react';
 import type { HubConnection } from '@microsoft/signalr';
 import { useAuth } from '@/auth/useAuth';
-import type { PlayerGameState, PlayerPosition } from '@/types/game';
+import { authFetch } from '@/api/fetchUtils';
+import type { ActorType, PlayerGameState, PlayerPosition, SeatOccupant } from '@/types/game';
 
 interface Props {
     gameState: PlayerGameState;
@@ -16,6 +18,14 @@ const SEAT_POSITIONS: { position: PlayerPosition; gridClass: string }[] = [
     { position: 'South', gridClass: 'col-start-2 row-start-3' },
 ];
 
+function botDisplayName(seat: SeatOccupant): string {
+    if (seat.botModelName) return seat.botModelName;
+    if (seat.botActorType === 'Chaos') return 'ChaosBot';
+    if (seat.botActorType === 'Beta') return 'BetaBot';
+    if (seat.botActorType === 'Chad') return 'ChadBot';
+    return 'Bot';
+}
+
 export function GameLobby({ gameState, connectionRef }: Props) {
     const { user } = useAuth();
     const myLogin = user?.login;
@@ -24,8 +34,32 @@ export function GameLobby({ gameState, connectionRef }: Props) {
     );
     const amSeated = Object.values(gameState.seats).some(s => s?.gitHubLogin === myLogin);
 
+    const [addBotSeat, setAddBotSeat] = useState<PlayerPosition | null>(null);
+    const [azureBots, setAzureBots] = useState<string[] | null>(null);
+
+    useEffect(() => {
+        if (addBotSeat === null) return;
+        if (azureBots !== null) return;
+
+        authFetch('/api/bots')
+            .then(r => r.ok ? r.json() : { azureBots: [] })
+            .then((data: { builtinBots?: string[]; azureBots?: string[] }) => {
+                setAzureBots(data.azureBots ?? []);
+            })
+            .catch(() => setAzureBots([]));
+    }, [addBotSeat, azureBots]);
+
     function claimSeat(position: PlayerPosition) {
         connectionRef.current?.invoke('ClaimSeatAsync', position);
+    }
+
+    function addBot(position: PlayerPosition, actorType: ActorType, modelName?: string) {
+        connectionRef.current?.invoke('AddBotToSeatAsync', position, actorType, modelName ?? null);
+        setAddBotSeat(null);
+    }
+
+    function removeBot(position: PlayerPosition) {
+        connectionRef.current?.invoke('RemoveBotFromSeatAsync', position);
     }
 
     return (
@@ -36,6 +70,7 @@ export function GameLobby({ gameState, connectionRef }: Props) {
                 {SEAT_POSITIONS.map(({ position, gridClass }) => {
                     const occupant = gameState.seats[position];
                     const isMe = occupant?.gitHubLogin === myLogin;
+                    const isBot = occupant !== undefined && occupant.gitHubLogin === null;
 
                     return (
                         <div
@@ -45,16 +80,65 @@ export function GameLobby({ gameState, connectionRef }: Props) {
                             }`}
                         >
                             {occupant ? (
-                                <span className={`font-medium text-center break-all ${isMe ? 'text-primary' : ''}`}>
-                                    {occupant.gitHubLogin}
-                                </span>
+                                <div className="flex flex-col items-center gap-1 w-full">
+                                    <span className={`font-medium text-center break-all ${isMe ? 'text-primary' : ''}`}>
+                                        {isBot ? botDisplayName(occupant) : occupant.gitHubLogin}
+                                    </span>
+                                    {amLeader && isBot && (
+                                        <button
+                                            title="Remove bot"
+                                            onClick={() => removeBot(position)}
+                                            className="cursor-pointer text-xs text-muted-foreground hover:text-destructive transition-colors"
+                                        >
+                                            ×
+                                        </button>
+                                    )}
+                                </div>
                             ) : (
-                                <button
-                                    onClick={() => claimSeat(position)}
-                                    className="cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors underline"
-                                >
-                                    {amSeated ? 'Move here' : 'Join'}
-                                </button>
+                                <div className="flex flex-col items-center gap-1 w-full">
+                                    <button
+                                        onClick={() => claimSeat(position)}
+                                        className="cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+                                    >
+                                        {amSeated ? 'Move here' : 'Join'}
+                                    </button>
+                                    {amLeader && (
+                                        <button
+                                            onClick={() => setAddBotSeat(addBotSeat === position ? null : position)}
+                                            className="cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+                                        >
+                                            Add Bot
+                                        </button>
+                                    )}
+                                    {addBotSeat === position && (
+                                        <div className="flex flex-col items-center gap-0.5 mt-1 w-full">
+                                            {(['Chaos', 'Beta', 'Chad'] as ActorType[]).map(type => (
+                                                <button
+                                                    key={type}
+                                                    onClick={() => addBot(position, type)}
+                                                    className="cursor-pointer text-xs text-foreground hover:text-primary transition-colors"
+                                                >
+                                                    {type}Bot
+                                                </button>
+                                            ))}
+                                            {(azureBots ?? []).map(name => (
+                                                <button
+                                                    key={name}
+                                                    onClick={() => addBot(position, 'Model', name)}
+                                                    className="cursor-pointer text-xs text-foreground hover:text-primary transition-colors"
+                                                >
+                                                    {name}
+                                                </button>
+                                            ))}
+                                            <button
+                                                onClick={() => setAddBotSeat(null)}
+                                                className="cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors underline mt-0.5"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </div>
                     );

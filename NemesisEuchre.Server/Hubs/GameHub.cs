@@ -102,6 +102,28 @@ public class GameHub(IGameSessionService sessionService, IPlayerStateProjector s
         await BroadcastGameStateAsync(context);
     }
 
+    public async Task AddBotToSeatAsync(PlayerPosition position, ActorType actorType, string? modelName)
+    {
+        var context = await sessionService.AddBotToSeatAsync(Context.ConnectionId, position, actorType, modelName);
+        if (context is null)
+        {
+            return;
+        }
+
+        await BroadcastGameStateAsync(context);
+    }
+
+    public async Task RemoveBotFromSeatAsync(PlayerPosition position)
+    {
+        var context = await sessionService.RemoveBotFromSeatAsync(Context.ConnectionId, position);
+        if (context is null)
+        {
+            return;
+        }
+
+        await BroadcastGameStateAsync(context);
+    }
+
     private async Task BroadcastGameStateAsync(GameContext context, string? excludeConnectionId = null)
     {
         foreach (var member in context.Members)

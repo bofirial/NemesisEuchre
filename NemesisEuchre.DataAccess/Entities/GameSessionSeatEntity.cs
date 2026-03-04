@@ -13,6 +13,10 @@ public class GameSessionSeatEntity : EntityBase
 
     public int? UserId { get; set; }
 
+    public ActorType? BotActorType { get; set; }
+
+    public string? BotModelName { get; set; }
+
     public GameSessionEntity? GameSession { get; set; }
 
     public UserEntity? User { get; set; }
@@ -27,6 +31,8 @@ public class GameSessionSeatEntityConfiguration : IEntityTypeConfiguration<GameS
         builder.HasKey(e => new { e.GameSessionId, e.Position });
 
         builder.Property(e => e.Position).IsRequired();
+
+        builder.Property(e => e.BotModelName).HasMaxLength(100);
 
         builder.HasOne(e => e.GameSession)
             .WithMany(s => s.GameSessionSeats)
