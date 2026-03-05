@@ -22,7 +22,7 @@ public class PlayerStateProjector : IPlayerStateProjector
         return new PlayerGameState
         {
             SessionName = context.SessionName,
-            GameStatus = GameStatusViewModel.Lobby,
+            GameStatus = context.Status,
             MyPosition = myPosition,
             Players = new Dictionary<PlayerPosition, PlayerInfo>(),
             Team1Score = 0,

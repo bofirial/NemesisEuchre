@@ -43,6 +43,8 @@ public interface IGameSessionService
         string connectionId,
         PlayerPosition position,
         CancellationToken ct = default);
+
+    Task<GameContext?> StartGameAsync(string connectionId, CancellationToken ct = default);
 }
 
 public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
@@ -370,6 +372,34 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
         await db.SaveChangesAsync(ct);
 
         return await BuildGameContextAsync(connection.GameSessionId, connection.GameSession!.SessionName, ct);
+    }
+
+    public async Task<GameContext?> StartGameAsync(string connectionId, CancellationToken ct = default)
+    {
+        var connection = await db.GameSessionConnections!
+            .Include(c => c.GameSession)
+            .FirstOrDefaultAsync(c => c.ConnectionId == connectionId && c.DisconnectedDate == null, ct);
+        if (connection is null)
+        {
+            return null;
+        }
+
+        var membership = await db.GameSessionUsers!
+            .FirstOrDefaultAsync(m => m.GameSessionId == connection.GameSessionId && m.UserId == connection.UserId, ct);
+        if (membership?.IsSessionLeader != true)
+        {
+            return null;
+        }
+
+        var seatCount = await db.GameSessionSeats!
+            .CountAsync(s => s.GameSessionId == connection.GameSessionId, ct);
+        if (seatCount < 4)
+        {
+            return null;
+        }
+
+        var context = await BuildGameContextAsync(connection.GameSessionId, connection.GameSession!.SessionName, ct);
+        return context with { Status = GameStatusViewModel.Playing };
     }
 
     private async Task<GameContext> BuildGameContextAsync(int sessionId, string sessionName, CancellationToken ct)
