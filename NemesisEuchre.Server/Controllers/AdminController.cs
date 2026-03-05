@@ -57,9 +57,10 @@ public partial class AdminController(IBotStorageService storageService) : Contro
     {
         var errors = new List<string>();
 
-        if (!BotNameRegex().IsMatch(request.BotName))
+        var trimmedBotName = request.BotName.Trim();
+        if (!BotNameRegex().IsMatch(trimmedBotName))
         {
-            errors.Add("botName must be 1–50 characters: letters, digits, hyphens, underscores.");
+            errors.Add("botName must be 1–50 characters: letters, digits, spaces, hyphens, underscores.");
         }
 
         var files = CollectAndValidateFiles(GetFileProviders(request), requireAll: true, errors);
@@ -71,7 +72,7 @@ public partial class AdminController(IBotStorageService storageService) : Contro
 
         try
         {
-            await storageService.UploadBotAsync(request.BotName, files, cancellationToken);
+            await storageService.UploadBotAsync(trimmedBotName, files, cancellationToken);
             return Ok();
         }
         catch (InvalidOperationException)
@@ -89,13 +90,14 @@ public partial class AdminController(IBotStorageService storageService) : Contro
         string? newBotName = null;
         if (request.NewBotName is not null)
         {
-            if (!BotNameRegex().IsMatch(request.NewBotName))
+            var trimmedNewBotName = request.NewBotName.Trim();
+            if (!BotNameRegex().IsMatch(trimmedNewBotName))
             {
-                errors.Add("newBotName must be 1–50 characters: letters, digits, hyphens, underscores.");
+                errors.Add("newBotName must be 1–50 characters: letters, digits, spaces, hyphens, underscores.");
             }
             else
             {
-                newBotName = request.NewBotName;
+                newBotName = trimmedNewBotName;
             }
         }
 
@@ -174,6 +176,6 @@ public partial class AdminController(IBotStorageService storageService) : Contro
         return files;
     }
 
-    [GeneratedRegex(@"^[a-zA-Z0-9_-]{1,50}$")]
+    [GeneratedRegex(@"^[a-zA-Z0-9 _-]{1,50}$")]
     private static partial Regex BotNameRegex();
 }

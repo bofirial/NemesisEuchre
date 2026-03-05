@@ -24,11 +24,11 @@ const GROUPS = [
     { label: 'Play Card', specs: FILE_SPECS.slice(4, 6) },
 ];
 
-const BOT_NAME_REGEX = /^[a-zA-Z0-9_-]{1,50}$/;
+const BOT_NAME_REGEX = /^[a-zA-Z0-9 _-]{1,50}$/;
 
 function validateBotName(name: string): string | null {
     if (!name) return 'Bot name is required.';
-    if (!BOT_NAME_REGEX.test(name)) return 'Must be 1–50 characters: letters, digits, hyphens, underscores.';
+    if (!BOT_NAME_REGEX.test(name)) return 'Must be 1–50 characters: letters, digits, spaces, hyphens, underscores.';
     return null;
 }
 
@@ -85,7 +85,7 @@ export function BotUploadForm({ mode, initialBotName, onSuccess }: BotUploadForm
         void fetchExistingFiles();
     }, [mode, initialBotName]);
 
-    const nameError = validateBotName(botName);
+    const nameError = validateBotName(botName.trim());
     const missingFiles = mode === 'create' ? FILE_SPECS.filter(s => !files[s.field]) : [];
 
     const allErrors: string[] = [
@@ -118,15 +118,15 @@ export function BotUploadForm({ mode, initialBotName, onSuccess }: BotUploadForm
         if (mode === 'create') {
             url = '/api/admin/bots';
             method = 'POST';
-            formData.append('botName', botName);
+            formData.append('botName', botName.trim());
             for (const spec of FILE_SPECS) {
                 formData.append(spec.field, files[spec.field]!);
             }
         } else {
             url = `/api/admin/bots/${encodeURIComponent(initialBotName!)}`;
             method = 'PUT';
-            if (botName !== initialBotName) {
-                formData.append('newBotName', botName);
+            if (botName.trim() !== initialBotName) {
+                formData.append('newBotName', botName.trim());
             }
             for (const spec of FILE_SPECS) {
                 if (files[spec.field]) {
@@ -139,7 +139,7 @@ export function BotUploadForm({ mode, initialBotName, onSuccess }: BotUploadForm
             const response = await authFetch(url, { method, body: formData });
 
             if (response.ok) {
-                onSuccess(botName);
+                onSuccess(botName.trim());
             } else if (response.status === 503) {
                 setStatus({ type: 'error', message: 'Azure Storage is not configured on the server.' });
             } else if (response.status === 401 || response.status === 403) {
@@ -165,7 +165,7 @@ export function BotUploadForm({ mode, initialBotName, onSuccess }: BotUploadForm
                     type="text"
                     value={botName}
                     onChange={e => { setBotName(e.target.value); setTouched(prev => ({ ...prev, botName: true })); setStatus(null); }}
-                    placeholder="e.g. my-bot-v1"
+                    placeholder="e.g. My Bot V1"
                     className="border rounded px-3 py-2 text-sm bg-background"
                 />
                 {touched['botName'] && nameError && (
