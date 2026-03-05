@@ -81,7 +81,7 @@ function SeatCard({
 
             {occupant ? (
                 <>
-                    <span className={`font-semibold text-center break-all leading-tight ${isMe ? 'text-primary' : ''}`}>
+                    <span className={`font-semibold text-center break-words leading-tight ${isMe ? 'text-primary' : ''}`}>
                         {isBot ? botDisplayName(occupant) : occupant.gitHubLogin}
                     </span>
                     {isMe && (
@@ -274,25 +274,25 @@ export function GameLobby({ gameState, connectionRef }: Props) {
                     </div>
 
                     {/* North seat — TEAM B */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
+                    <div className={`absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 ${addBotSeat === 'North' ? 'z-30' : 'z-10'}`}>
                         <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium">Team B</span>
                         <SeatCard position="North" {...makeSeatProps('North')} />
                     </div>
 
                     {/* South seat — TEAM B */}
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
+                    <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 ${addBotSeat === 'South' ? 'z-30' : 'z-10'}`}>
                         <SeatCard position="South" {...makeSeatProps('South')} />
                         <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium">Team B</span>
                     </div>
 
                     {/* West seat — TEAM A */}
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
+                    <div className={`absolute left-0 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 ${addBotSeat === 'West' ? 'z-30' : 'z-10'}`}>
                         <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium [writing-mode:vertical-rl] rotate-180">Team A</span>
                         <SeatCard position="West" {...makeSeatProps('West')} />
                     </div>
 
                     {/* East seat — TEAM A */}
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1">
+                    <div className={`absolute right-0 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 ${addBotSeat === 'East' ? 'z-30' : 'z-10'}`}>
                         <SeatCard position="East" {...makeSeatProps('East')} />
                         <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium [writing-mode:vertical-rl]">Team A</span>
                     </div>
