@@ -10,6 +10,7 @@ using NemesisEuchre.Console.Services.Orchestration;
 using NemesisEuchre.DataAccess.Options;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine;
+using NemesisEuchre.MachineLearning.Bots.Exceptions;
 
 namespace NemesisEuchre.Console.Services;
 
@@ -33,6 +34,7 @@ public class BatchGameOrchestrator(
     ILogger<BatchGameOrchestrator> logger) : IBatchGameOrchestrator
 {
     private readonly PersistenceOptions _persistenceOptions = persistenceOptions.Value;
+    private int _modelUnavailableDetected;
 
     public async Task<BatchGameResults> RunBatchAsync(
         int numberOfGames,
@@ -138,16 +140,24 @@ public class BatchGameOrchestrator(
         var consumerTask = persistenceCoordinator.ConsumeAndPersistAsync(state, persistenceOptions, cancellationToken);
 
         var effectiveParallelism = executionFacade.CalculateEffectiveParallelism();
+        using var failFastCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var parallelOptions = new ParallelOptions
         {
             MaxDegreeOfParallelism = effectiveParallelism,
-            CancellationToken = cancellationToken,
+            CancellationToken = failFastCts.Token,
         };
 
-        await Parallel.ForEachAsync(
-            Enumerable.Range(0, numberOfGames),
-            parallelOptions,
-            async (gameNumber, ct) => await RunSingleGameAsync(gameNumber, state, progressReporter, team1Actors, team2Actors, ct).ConfigureAwait(false)).ConfigureAwait(false);
+        try
+        {
+            await Parallel.ForEachAsync(
+                Enumerable.Range(0, numberOfGames),
+                parallelOptions,
+                async (gameNumber, ct) => await RunSingleGameAsync(gameNumber, state, progressReporter, team1Actors, team2Actors, failFastCts, ct).ConfigureAwait(false)).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (failFastCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        {
+            // Fail-fast triggered by ModelUnavailableException — already logged once
+        }
 
         state.CompleteWriting();
         await consumerTask.ConfigureAwait(false);
@@ -217,6 +227,11 @@ public class BatchGameOrchestrator(
             completedSoFar += gamesInThisBatch;
 
             batchState.Dispose();
+
+            if (_modelUnavailableDetected == 1)
+            {
+                break;
+            }
         }
 
         if (persistenceOptions?.IdvGenerationName != null)
@@ -257,8 +272,9 @@ public class BatchGameOrchestrator(
         int gameNumber,
         BatchExecutionState state,
         IBatchProgressReporter? progressReporter,
-        Actor[]? team1Actors = null,
-        Actor[]? team2Actors = null,
+        Actor[]? team1Actors,
+        Actor[]? team2Actors,
+        CancellationTokenSource failFastCts,
         CancellationToken cancellationToken = default)
     {
         try
@@ -278,6 +294,24 @@ public class BatchGameOrchestrator(
                 cancellationToken).ConfigureAwait(false);
 
             await state.WriteGameAsync(game, cancellationToken).ConfigureAwait(false);
+        }
+        catch (ModelUnavailableException ex)
+        {
+            if (Interlocked.CompareExchange(ref _modelUnavailableDetected, 1, 0) == 0)
+            {
+                Foundation.LoggerMessages.LogBatchAbortedModelUnavailable(logger, ex.Message);
+            }
+
+            await failFastCts.CancelAsync().ConfigureAwait(false);
+
+            Action<BatchProgressSnapshot>? reportProgress = progressReporter is not null
+                ? progressReporter.ReportProgress
+                : null;
+
+            await state.RecordGameFailureAsync(
+                () => CreateSnapshot(state),
+                reportProgress,
+                cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

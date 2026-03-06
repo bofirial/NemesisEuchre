@@ -449,4 +449,11 @@ public static partial class LoggerMessages
         Level = LogLevel.Information,
         Message = "Sampling {MaxRows:N0} of {TotalRows:N0} training rows for memory efficiency")]
     public static partial void LogSamplingTrainingRows(ILogger logger, long totalRows, long maxRows);
+
+    // EventID 75: Batch abort — model unavailable
+    [LoggerMessage(
+        EventId = 75,
+        Level = LogLevel.Error,
+        Message = "Batch aborted: {Message}")]
+    public static partial void LogBatchAbortedModelUnavailable(ILogger logger, string message);
 }

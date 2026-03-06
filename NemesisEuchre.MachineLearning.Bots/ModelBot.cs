@@ -5,6 +5,7 @@ using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerBots;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.GameEngine.Utilities;
+using NemesisEuchre.MachineLearning.Bots.Exceptions;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Loading;
 using NemesisEuchre.MachineLearning.Models;
@@ -155,7 +156,7 @@ public class ModelBot(
     {
         if (engine == null)
         {
-            throw new InvalidOperationException(
+            throw new ModelUnavailableException(
                 $"The '{engineName}' prediction engine for model '{Actor.GetModelName(engineName)}' could not be loaded.");
         }
 
