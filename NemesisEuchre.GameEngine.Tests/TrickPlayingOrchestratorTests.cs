@@ -856,7 +856,9 @@ public class TrickPlayingOrchestratorTests
             deal.CompletedTricks.Add(trick);
         }
 
-        deal.CompletedTricks.SelectMany(t => t.PlayCardDecisions).Should().HaveCount(20);
+        var allDecisions = deal.CompletedTricks.SelectMany(t => t.PlayCardDecisions).ToList();
+        allDecisions.Should().NotBeEmpty();
+        allDecisions.Should().OnlyContain(d => d.ValidCardsToPlay.Length > 1);
     }
 
     [Fact]
@@ -906,16 +908,37 @@ public class TrickPlayingOrchestratorTests
             new Card(Suit.Diamonds, Rank.Ten),
             new Card(Suit.Diamonds, Rank.Nine)
         ];
+        deal.Players[PlayerPosition.South].CurrentHand = [
+            new Card(Suit.Spades, Rank.King),
+            new Card(Suit.Spades, Rank.Ten),
+            new Card(Suit.Hearts, Rank.King),
+            new Card(Suit.Clubs, Rank.King),
+            new Card(Suit.Diamonds, Rank.King)
+        ];
+        deal.Players[PlayerPosition.West].CurrentHand = [
+            new Card(Suit.Spades, Rank.Queen),
+            new Card(Suit.Spades, Rank.Nine),
+            new Card(Suit.Hearts, Rank.Queen),
+            new Card(Suit.Clubs, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.Queen)
+        ];
 
         _playerActorMock.Setup(b => b.PlayCardAsync(It.IsAny<PlayCardContext>()))
             .ReturnsFirstValidCard();
 
         var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
-        trick.PlayCardDecisions[0].KnownPlayerSuitVoids.Should().BeEmpty();
-        trick.PlayCardDecisions[1].KnownPlayerSuitVoids.Should().BeEmpty();
-        trick.PlayCardDecisions[2].KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
-        trick.PlayCardDecisions[3].KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
+        // North leads Spades Ace; East is void in Spades (5 valid, plays Hearts Nine → void detected).
+        // South and West each have 2 Spades, so their decisions are recorded and see East's void.
+        trick.PlayCardDecisions.Should().HaveCount(4);
+        trick.PlayCardDecisions.First(d => d.PlayerPosition == PlayerPosition.North)
+            .KnownPlayerSuitVoids.Should().BeEmpty();
+        trick.PlayCardDecisions.First(d => d.PlayerPosition == PlayerPosition.East)
+            .KnownPlayerSuitVoids.Should().BeEmpty();
+        trick.PlayCardDecisions.First(d => d.PlayerPosition == PlayerPosition.South)
+            .KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
+        trick.PlayCardDecisions.First(d => d.PlayerPosition == PlayerPosition.West)
+            .KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Spades));
     }
 
     [Fact]
@@ -1012,6 +1035,64 @@ public class TrickPlayingOrchestratorTests
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
         deal.KnownPlayerSuitVoids.Should().Contain(new PlayerSuitVoid(PlayerPosition.East, Suit.Hearts));
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_WhenOnlyOneValidCard_DecisionIsNotRecorded()
+    {
+        var deal = CreateTestDeal();
+        deal.Trump = Suit.Hearts;
+        deal.Players[PlayerPosition.North].CurrentHand = [
+            new Card(Suit.Hearts, Rank.Nine),
+            new Card(Suit.Spades, Rank.King),
+            new Card(Suit.Clubs, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.King)
+        ];
+        deal.Players[PlayerPosition.East].CurrentHand = [
+            new Card(Suit.Hearts, Rank.Jack),
+            new Card(Suit.Spades, Rank.Ten),
+            new Card(Suit.Clubs, Rank.Ten),
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Clubs, Rank.Ace)
+        ];
+
+        _playerActorMock.Setup(b => b.PlayCardAsync(It.IsAny<PlayCardContext>()))
+            .ReturnsFirstValidCard();
+
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        // North leads Hearts Nine; East has only Hearts Jack (right bower) as a valid card.
+        trick.PlayCardDecisions.Should().NotContain(d => d.PlayerPosition == PlayerPosition.East);
+    }
+
+    [Fact]
+    public async Task PlayTrickAsync_WhenMultipleValidCards_DecisionIsRecorded()
+    {
+        var deal = CreateTestDeal();
+        deal.Trump = Suit.Hearts;
+        deal.Players[PlayerPosition.North].CurrentHand = [
+            new Card(Suit.Spades, Rank.Ace),
+            new Card(Suit.Hearts, Rank.Ten),
+            new Card(Suit.Clubs, Rank.Nine),
+            new Card(Suit.Diamonds, Rank.Queen),
+            new Card(Suit.Diamonds, Rank.King)
+        ];
+        deal.Players[PlayerPosition.East].CurrentHand = [
+            new Card(Suit.Spades, Rank.Nine),
+            new Card(Suit.Spades, Rank.Ten),
+            new Card(Suit.Hearts, Rank.Jack),
+            new Card(Suit.Clubs, Rank.Ace),
+            new Card(Suit.Diamonds, Rank.Ace)
+        ];
+
+        _playerActorMock.Setup(b => b.PlayCardAsync(It.IsAny<PlayCardContext>()))
+            .ReturnsFirstValidCard();
+
+        var trick = await _sut.PlayTrickAsync(deal, PlayerPosition.North);
+
+        // North leads Spades Ace; East has two valid Spades cards (Spades Nine and Spades Ten).
+        trick.PlayCardDecisions.Should().Contain(d => d.PlayerPosition == PlayerPosition.East);
     }
 
     private static Deal CreateTestDeal()

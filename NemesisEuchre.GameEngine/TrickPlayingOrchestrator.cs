@@ -121,7 +121,11 @@ public class TrickPlayingOrchestrator(
                 ValidCards: validCards,
                 CardDecisionContext: cardDecisionContext,
                 TrickWinnerCalculator: trickWinnerCalculator);
-            decisionRecorder.RecordPlayCardDecision(recordingContext);
+            if (validCards.Length > 1)
+            {
+                decisionRecorder.RecordPlayCardDecision(recordingContext);
+            }
+
             validator.ValidateCardChoice(cardDecisionContext.ChosenCard, validCards);
 
             if (voidDetector.TryDetectVoid(deal, cardDecisionContext.ChosenCard, trick.LeadSuit, deal.Trump!.Value, position, out var voidSuit))
