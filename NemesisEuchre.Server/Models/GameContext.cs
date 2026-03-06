@@ -1,3 +1,5 @@
+using NemesisEuchre.GameEngine.Models;
+
 namespace NemesisEuchre.Server.Models;
 
 public record GameContext
@@ -9,4 +11,6 @@ public record GameContext
     public IReadOnlyList<SeatInfo> Seats { get; init; } = [];
 
     public GameStatusViewModel Status { get; init; } = GameStatusViewModel.Lobby;
+
+    public Game? ActiveGame { get; init; }
 }

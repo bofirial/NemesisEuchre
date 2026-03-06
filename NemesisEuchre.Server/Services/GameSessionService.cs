@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NemesisEuchre.DataAccess;
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.Server.Models;
 
@@ -48,7 +49,7 @@ public interface IGameSessionService
     Task<GameContext?> StartGameAsync(string connectionId, CancellationToken ct = default);
 }
 
-public class GameSessionService(NemesisEuchreDbContext db, IActiveGameService activeGameService) : IGameSessionService
+public class GameSessionService(NemesisEuchreDbContext db, IActiveGameService activeGameService, IDealFactory dealFactory) : IGameSessionService
 {
     public async Task<UserEntity> UpsertUserAsync(string githubId, string login, string? email, CancellationToken ct = default)
     {
@@ -423,6 +424,8 @@ public class GameSessionService(NemesisEuchreDbContext db, IActiveGameService ac
 
         activeGameService.StoreGame(connection.GameSessionId, game);
 
+        game.CurrentDeal = await dealFactory.CreateDealAsync(game);
+
         var context = await BuildGameContextAsync(connection.GameSessionId, connection.GameSession!.SessionName, ct);
         return context with { Status = GameStatusViewModel.Playing };
     }
@@ -449,6 +452,7 @@ public class GameSessionService(NemesisEuchreDbContext db, IActiveGameService ac
             SessionName = sessionName,
             Members = members,
             Seats = seatInfos,
+            ActiveGame = activeGameService.GetGame(sessionId),
         };
     }
 

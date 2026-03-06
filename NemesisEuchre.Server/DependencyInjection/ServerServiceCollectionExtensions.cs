@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 using NemesisEuchre.DataAccess;
+using NemesisEuchre.GameEngine.DependencyInjection;
 using NemesisEuchre.Server.Auth;
 using NemesisEuchre.Server.Services;
 
@@ -27,6 +28,7 @@ public static class ServerServiceCollectionExtensions
         var issuer = configuration["Jwt:Issuer"] ?? "NemesisEuchre";
         var audience = configuration["Jwt:Audience"] ?? "NemesisEuchre";
 
+        services.AddNemesisEuchreGameEngine();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IBotStorageService, BotStorageService>();
         services.AddSingleton<IActiveGameService, ActiveGameService>();
