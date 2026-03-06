@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NemesisEuchre.DataAccess;
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.Server.Models;
 
 namespace NemesisEuchre.Server.Services;
@@ -47,7 +48,7 @@ public interface IGameSessionService
     Task<GameContext?> StartGameAsync(string connectionId, CancellationToken ct = default);
 }
 
-public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
+public class GameSessionService(NemesisEuchreDbContext db, IActiveGameService activeGameService) : IGameSessionService
 {
     public async Task<UserEntity> UpsertUserAsync(string githubId, string login, string? email, CancellationToken ct = default)
     {
@@ -391,12 +392,36 @@ public class GameSessionService(NemesisEuchreDbContext db) : IGameSessionService
             return null;
         }
 
-        var seatCount = await db.GameSessionSeats!
-            .CountAsync(s => s.GameSessionId == connection.GameSessionId, ct);
-        if (seatCount < 4)
+        var seats = await db.GameSessionSeats!
+            .Include(s => s.User)
+            .Where(s => s.GameSessionId == connection.GameSessionId)
+            .ToListAsync(ct);
+
+        if (seats.Count < 4)
         {
             return null;
         }
+
+        var actorByPosition = seats.ToDictionary(
+            s => s.Position,
+            s => s.UserId is not null
+                ? new Actor(ActorType.User)
+                : new Actor(
+                    s.BotActorType!.Value,
+                    s.BotModelName is not null ? new Dictionary<string, string> { ["default"] = s.BotModelName } : null));
+
+        var game = new Game
+        {
+            Players =
+            {
+                [PlayerPosition.North] = new Player { Position = PlayerPosition.North, Actor = actorByPosition[PlayerPosition.North] },
+                [PlayerPosition.East] = new Player { Position = PlayerPosition.East,  Actor = actorByPosition[PlayerPosition.East] },
+                [PlayerPosition.South] = new Player { Position = PlayerPosition.South, Actor = actorByPosition[PlayerPosition.South] },
+                [PlayerPosition.West] = new Player { Position = PlayerPosition.West,  Actor = actorByPosition[PlayerPosition.West] },
+            },
+        };
+
+        activeGameService.StoreGame(connection.GameSessionId, game);
 
         var context = await BuildGameContextAsync(connection.GameSessionId, connection.GameSession!.SessionName, ct);
         return context with { Status = GameStatusViewModel.Playing };

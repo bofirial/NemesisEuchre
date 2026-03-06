@@ -29,6 +29,7 @@ public static class ServerServiceCollectionExtensions
 
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IBotStorageService, BotStorageService>();
+        services.AddSingleton<IActiveGameService, ActiveGameService>();
         services.AddScoped<IGameSessionService, GameSessionService>();
         services.AddScoped<IPlayerStateProjector, PlayerStateProjector>();
 
