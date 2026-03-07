@@ -33,21 +33,21 @@ public class MachineLearningOptions
     /// <summary>
     /// Gets or sets the minimum number of samples required in a leaf node. Prevents overfitting on small sample counts.
     /// </summary>
-    [Range(1, 1000)]
+    [Range(1, 100000)]
     public int MinimumExampleCountPerLeaf { get; set; } = 400;
 
     /// <summary>
     /// Gets or sets the L1 regularization term. Promotes sparsity by driving unimportant feature contributions toward zero.
     /// Set to 0 to disable.
     /// </summary>
-    [Range(0.0f, 5.0f)]
+    [Range(0.0f, 100.0f)]
     public float L1Regularization { get; set; } = 0.3f;
 
     /// <summary>
     /// Gets or sets the L2 regularization term. Penalizes large leaf weights to stabilize the model.
     /// Matches the LightGBM default of 0.01.
     /// </summary>
-    [Range(0.0f, 5.0f)]
+    [Range(0.0f, 100.0f)]
     public float L2Regularization { get; set; } = 0.01f;
 
     /// <summary>
