@@ -14,6 +14,7 @@ public class ModelTrainerBotFactory(
     ICallTrumpInferenceFeatureBuilder callTrumpFeatureBuilder,
     IDiscardCardInferenceFeatureBuilder discardCardFeatureBuilder,
     IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
+    ISimplePlayCardInferenceFeatureBuilder simplePlayCardFeatureBuilder,
     IRandomNumberGenerator random,
     IOptions<MachineLearningOptions> machineLearningOptions) : IPlayerActorFactory
 {
@@ -26,6 +27,6 @@ public class ModelTrainerBotFactory(
             throw new ArgumentException("Model name must be provided for ModelBot.");
         }
 
-        return new ModelTrainerBot(engineProvider, callTrumpFeatureBuilder, discardCardFeatureBuilder, playCardFeatureBuilder, random, machineLearningOptions, actor);
+        return new ModelTrainerBot(engineProvider, callTrumpFeatureBuilder, discardCardFeatureBuilder, playCardFeatureBuilder, random, machineLearningOptions, actor, simplePlayCardFeatureBuilder);
     }
 }

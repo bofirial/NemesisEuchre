@@ -18,14 +18,17 @@ public class ModelBot(
     IDiscardCardInferenceFeatureBuilder discardCardFeatureBuilder,
     IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
     IRandomNumberGenerator random,
-    Actor actor) : BotBase(random)
+    Actor actor,
+    ISimplePlayCardInferenceFeatureBuilder? simplePlayCardFeatureBuilder = null) : BotBase(random)
 {
     private readonly ICallTrumpInferenceFeatureBuilder _callTrumpFeatureBuilder = callTrumpFeatureBuilder ?? throw new ArgumentNullException(nameof(callTrumpFeatureBuilder));
     private readonly IDiscardCardInferenceFeatureBuilder _discardCardFeatureBuilder = discardCardFeatureBuilder ?? throw new ArgumentNullException(nameof(discardCardFeatureBuilder));
     private readonly IPlayCardInferenceFeatureBuilder _playCardFeatureBuilder = playCardFeatureBuilder ?? throw new ArgumentNullException(nameof(playCardFeatureBuilder));
+    private readonly ISimplePlayCardInferenceFeatureBuilder? _simplePlayCardFeatureBuilder = simplePlayCardFeatureBuilder;
     private readonly PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>? _callTrumpEngine = engineProvider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", actor.GetModelName("CallTrump") ?? string.Empty);
     private readonly PredictionEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>? _discardCardEngine = engineProvider.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", actor.GetModelName("DiscardCard") ?? string.Empty);
     private readonly PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>? _playCardEngine = engineProvider.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", actor.GetModelName("PlayCard") ?? string.Empty);
+    private readonly PredictionEngine<SimplePlayCardTrainingData, PlayCardRegressionPrediction>? _simplePlayCardEngine = engineProvider.TryGetEngine<SimplePlayCardTrainingData, PlayCardRegressionPrediction>("SimplePlayCard", actor.GetModelName("SimplePlayCard") ?? string.Empty);
 
     public override ActorType ActorType => ActorType.Model;
 
@@ -113,6 +116,39 @@ public class ModelBot(
         short opponentsWonTricks,
         RelativeCard[] validCardsToPlay)
     {
+        if (_simplePlayCardEngine != null && _simplePlayCardFeatureBuilder != null)
+        {
+            var (bestSimpleOption, simpleScores) = PredictBestOption(
+                _simplePlayCardEngine,
+                validCardsToPlay,
+                card => _simplePlayCardFeatureBuilder.BuildFeatures(
+                    cardsInHand,
+                    leadPlayer,
+                    leadSuit,
+                    playedCardsInTrick,
+                    teamScore,
+                    opponentScore,
+                    callingPlayer,
+                    callingPlayerGoingAlone,
+                    dealer,
+                    dealerPickedUpCard,
+                    knownPlayerSuitVoids,
+                    cardsAccountedFor,
+                    currentlyWinningTrickPlayer,
+                    trickNumber,
+                    wonTricks,
+                    opponentsWonTricks,
+                    card),
+                prediction => prediction.PredictedPoints,
+                "SimplePlayCard");
+
+            return new RelativeCardDecisionContext
+            {
+                ChosenCard = bestSimpleOption,
+                DecisionPredictedPoints = simpleScores,
+            };
+        }
+
         var (bestOption, scores) = PredictBestOption(
             _playCardEngine,
             validCardsToPlay,

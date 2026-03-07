@@ -85,6 +85,12 @@ public class DefaultCommand(
     public string? Team1DiscardCardModelName { get; set; }
 
     [CliOption(
+        Description = "ModelName for Team1 SimplePlayCard decision (overrides --t1m)",
+        Required = false,
+        Alias = "t1m-simple-play")]
+    public string? Team1SimplePlayCardModelName { get; set; }
+
+    [CliOption(
         Description = "ActorType for Team2",
         Alias = "t2")]
     public ActorType? Team2 { get; set; }
@@ -123,6 +129,12 @@ public class DefaultCommand(
         Required = false,
         Alias = "t2m-discard")]
     public string? Team2DiscardCardModelName { get; set; }
+
+    [CliOption(
+        Description = "ModelName for Team2 SimplePlayCard decision (overrides --t2m)",
+        Required = false,
+        Alias = "t2m-simple-play")]
+    public string? Team2SimplePlayCardModelName { get; set; }
 
     [CliOption(
         Description = "Allow overwriting existing IDV files",
@@ -164,12 +176,14 @@ public class DefaultCommand(
         DecisionType teamExplorationDecisionType,
         string? teamPlayCardModelName,
         string? teamCallTrumpModelName,
-        string? teamDiscardCardModelName)
+        string? teamDiscardCardModelName,
+        string? teamSimplePlayCardModelName)
     {
         bool hasAnyModel = !string.IsNullOrEmpty(teamModelName)
             || !string.IsNullOrEmpty(teamPlayCardModelName)
             || !string.IsNullOrEmpty(teamCallTrumpModelName)
-            || !string.IsNullOrEmpty(teamDiscardCardModelName);
+            || !string.IsNullOrEmpty(teamDiscardCardModelName)
+            || !string.IsNullOrEmpty(teamSimplePlayCardModelName);
 
         if (teamExplorationTemperature != default)
         {
@@ -187,7 +201,8 @@ public class DefaultCommand(
 
         bool hasPerDecisionTypeModel = !string.IsNullOrEmpty(teamPlayCardModelName)
             || !string.IsNullOrEmpty(teamCallTrumpModelName)
-            || !string.IsNullOrEmpty(teamDiscardCardModelName);
+            || !string.IsNullOrEmpty(teamDiscardCardModelName)
+            || !string.IsNullOrEmpty(teamSimplePlayCardModelName);
 
         if (hasPerDecisionTypeModel)
         {
@@ -196,6 +211,7 @@ public class DefaultCommand(
                 teamPlayCardModelName,
                 teamCallTrumpModelName,
                 teamDiscardCardModelName,
+                teamSimplePlayCardModelName,
                 teamModelName,
                 teamExplorationTemperature,
                 teamExplorationDecisionType);
@@ -238,6 +254,11 @@ public class DefaultCommand(
             parts.Add($"discard:{discardModel}");
         }
 
+        if (actor.ModelNames.TryGetValue("SimplePlayCard", out var simplePlayModel))
+        {
+            parts.Add($"simple-play:{simplePlayModel}");
+        }
+
         if (actor.ModelNames.TryGetValue("default", out var defaultModel))
         {
             parts.Add($"default:{defaultModel}");
@@ -269,7 +290,8 @@ public class DefaultCommand(
                 Team1ExplorationDecisionType,
                 Team1PlayCardModelName,
                 Team1CallTrumpModelName,
-                Team1DiscardCardModelName),
+                Team1DiscardCardModelName,
+                Team1SimplePlayCardModelName),
             Team.Team2 => GetTeamActor(
                 Team2,
                 Team2ModelName,
@@ -277,7 +299,8 @@ public class DefaultCommand(
                 Team2ExplorationDecisionType,
                 Team2PlayCardModelName,
                 Team2CallTrumpModelName,
-                Team2DiscardCardModelName),
+                Team2DiscardCardModelName,
+                Team2SimplePlayCardModelName),
             _ => throw new ArgumentOutOfRangeException(nameof(team), team, $"Invalid Team: {team}"),
         };
         return teamActor != null ? [teamActor, teamActor] : null;

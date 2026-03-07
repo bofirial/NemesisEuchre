@@ -51,6 +51,7 @@ public static class ConsoleServiceCollectionExtensions
         services.AddScoped<ITrainerExecutor, CallTrumpRegressionTrainerExecutor>();
         services.AddScoped<ITrainerExecutor, DiscardCardRegressionTrainerExecutor>();
         services.AddScoped<ITrainerExecutor, PlayCardRegressionTrainerExecutor>();
+        services.AddScoped<ITrainerExecutor, SimplePlayCardRegressionTrainerExecutor>();
 
         services.AddScoped<IModelBehavioralTestRunner, ModelBehavioralTestRunner>();
         services.AddScoped<ITestResultsRenderer, TestResultsRenderer>();

@@ -18,13 +18,15 @@ public class ModelTrainerBot(
     IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
     IRandomNumberGenerator random,
     IOptions<MachineLearningOptions> machineLearningOptions,
-    Actor actor) : ModelBot(
+    Actor actor,
+    ISimplePlayCardInferenceFeatureBuilder? simplePlayCardFeatureBuilder = null) : ModelBot(
         engineProvider,
         callTrumpFeatureBuilder,
         discardCardFeatureBuilder,
         playCardFeatureBuilder,
         random,
-        actor)
+        actor,
+        simplePlayCardFeatureBuilder)
 {
     public override ActorType ActorType => ActorType.ModelTrainer;
 

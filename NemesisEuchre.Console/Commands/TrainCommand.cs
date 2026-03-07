@@ -26,7 +26,7 @@ public class TrainCommand(
     IOptions<MachineLearningOptions> options) : ICliRunAsyncWithReturn
 {
     [CliOption(
-        Description = "Decision type to train (CallTrump, Discard, Play, All)",
+        Description = "Decision type to train (CallTrump, Discard, Play, All, SimplePlay)",
         Alias = "d")]
     public DecisionType DecisionType { get; set; } = DecisionType.All;
 

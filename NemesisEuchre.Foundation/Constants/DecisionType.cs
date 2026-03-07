@@ -6,4 +6,5 @@ public enum DecisionType
     Discard = 1,
     Play = 2,
     All = 3,
+    SimplePlay = 4,
 }

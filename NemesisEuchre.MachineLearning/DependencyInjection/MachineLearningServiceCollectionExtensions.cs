@@ -31,6 +31,7 @@ public static class MachineLearningServiceCollectionExtensions
         services.AddScoped<IModelTrainer<CallTrumpTrainingData>, CallTrumpRegressionModelTrainer>();
         services.AddScoped<IModelTrainer<DiscardCardTrainingData>, DiscardCardRegressionModelTrainer>();
         services.AddScoped<IModelTrainer<PlayCardTrainingData>, PlayCardRegressionModelTrainer>();
+        services.AddScoped<IModelTrainer<SimplePlayCardTrainingData>, SimplePlayCardRegressionModelTrainer>();
 
         services.AddSingleton<PlayCardFeatureBuilder>();
         services.AddSingleton<CallTrumpFeatureBuilder>();
@@ -42,6 +43,7 @@ public static class MachineLearningServiceCollectionExtensions
         services.AddSingleton<ICallTrumpInferenceFeatureBuilder, CallTrumpInferenceFeatureBuilder>();
         services.AddSingleton<IDiscardCardInferenceFeatureBuilder, DiscardCardInferenceFeatureBuilder>();
         services.AddSingleton<IPlayCardInferenceFeatureBuilder, PlayCardInferenceFeatureBuilder>();
+        services.AddSingleton<ISimplePlayCardInferenceFeatureBuilder, SimplePlayCardInferenceFeatureBuilder>();
 
         services.AddOptions<MachineLearningOptions>()
             .Bind(configuration.GetSection("MachineLearning"))
