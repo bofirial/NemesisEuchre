@@ -3,18 +3,17 @@ using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Loading;
-using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests;
 
 public abstract class PlayCardBehavioralTest(
-    IPlayCardInferenceFeatureBuilder featureBuilder) : IModelBehavioralTest
+    IPlayCardBehavioralTestRunner runner) : IModelBehavioralTest
 {
     public abstract string Name { get; }
 
     public abstract string Description { get; }
 
-    public DecisionType DecisionType => DecisionType.Play;
+    public DecisionType DecisionType => runner.DecisionType;
 
     public abstract string AssertionDescription { get; }
 
@@ -50,21 +49,6 @@ public abstract class PlayCardBehavioralTest(
 
     public IReadOnlyList<BehavioralTestResult> Run(IPredictionEngineProvider engineProvider, string modelName)
     {
-        var engine = engineProvider.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>(
-            "PlayCard", modelName);
-
-        if (engine == null)
-        {
-            return [new BehavioralTestResult(
-                Name,
-                DecisionType,
-                false,
-                "-",
-                AssertionDescription,
-                [],
-                "Failed to load PlayCard model")];
-        }
-
         var testCases = GetTestCases();
         var results = new List<BehavioralTestResult>(testCases.Count);
 
@@ -82,13 +66,13 @@ public abstract class PlayCardBehavioralTest(
                     .. PlayedCardsInTrick.Values
                 ];
 
-                var features = featureBuilder.BuildFeatures(
+                var context = new PlayCardFeatureBuilderContext(
                     testCase.CardsInHand,
-                    LeadPlayer,
-                    LeadSuit,
                     PlayedCardsInTrick,
                     TeamScore,
                     OpponentScore,
+                    LeadPlayer,
+                    LeadSuit,
                     CallingPlayer,
                     CallingPlayerGoingAlone,
                     Dealer,
@@ -100,8 +84,21 @@ public abstract class PlayCardBehavioralTest(
                     WonTricks,
                     OpponentsWonTricks,
                     card);
-                var prediction = engine.Predict(features);
-                var score = prediction.PredictedPoints;
+
+                var scoreOrNull = runner.TryScore(engineProvider, modelName, context);
+                if (scoreOrNull == null)
+                {
+                    return [new BehavioralTestResult(
+                        Name,
+                        DecisionType,
+                        false,
+                        "-",
+                        AssertionDescription,
+                        [],
+                        $"Failed to load {DecisionType} model")];
+                }
+
+                var score = scoreOrNull.Value;
                 var display = FormatCard(card);
                 scores[display] = score;
 

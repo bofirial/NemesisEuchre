@@ -68,10 +68,26 @@ public static class ConsoleServiceCollectionExtensions
         services.AddScoped<IModelBehavioralTest, LoneSuitShouldBeDiscardedToReduceToTwoSuits>();
         services.AddScoped<IModelBehavioralTest, FiveTrumpInHandShouldNotPass>();
 
-        services.AddScoped<IModelBehavioralTest, PartnerWinningTrickShouldNotPlayTrump>();
-        services.AddScoped<IModelBehavioralTest, OpponentWinningTrickShouldPlayTrump>();
-        services.AddScoped<IModelBehavioralTest, OpponentWinningTrickShouldPlayLowestTrump>();
-        services.AddScoped<IModelBehavioralTest, OpponentVoidInSuitShouldLeadTheOtherAce>();
+        services.AddScoped<PlayCardBehavioralTestRunner>();
+        services.AddScoped<SimplePlayCardBehavioralTestRunner>();
+
+        services.AddScoped<IModelBehavioralTest>(sp =>
+            new PartnerWinningTrickShouldNotPlayTrump(sp.GetRequiredService<PlayCardBehavioralTestRunner>()));
+        services.AddScoped<IModelBehavioralTest>(sp =>
+            new OpponentWinningTrickShouldPlayTrump(sp.GetRequiredService<PlayCardBehavioralTestRunner>()));
+        services.AddScoped<IModelBehavioralTest>(sp =>
+            new OpponentWinningTrickShouldPlayLowestTrump(sp.GetRequiredService<PlayCardBehavioralTestRunner>()));
+        services.AddScoped<IModelBehavioralTest>(sp =>
+            new OpponentVoidInSuitShouldLeadTheOtherAce(sp.GetRequiredService<PlayCardBehavioralTestRunner>()));
+
+        services.AddScoped<IModelBehavioralTest>(sp =>
+            new PartnerWinningTrickShouldNotPlayTrump(sp.GetRequiredService<SimplePlayCardBehavioralTestRunner>()));
+        services.AddScoped<IModelBehavioralTest>(sp =>
+            new OpponentWinningTrickShouldPlayTrump(sp.GetRequiredService<SimplePlayCardBehavioralTestRunner>()));
+        services.AddScoped<IModelBehavioralTest>(sp =>
+            new OpponentWinningTrickShouldPlayLowestTrump(sp.GetRequiredService<SimplePlayCardBehavioralTestRunner>()));
+        services.AddScoped<IModelBehavioralTest>(sp =>
+            new OpponentVoidInSuitShouldLeadTheOtherAce(sp.GetRequiredService<SimplePlayCardBehavioralTestRunner>()));
 
         services.Configure<GameOptions>(_ => { });
         services.AddOptions<GameExecutionOptions>()

@@ -1,12 +1,11 @@
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
-using NemesisEuchre.MachineLearning.FeatureEngineering;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.PlayCard;
 
 public class OpponentWinningTrickShouldPlayLowestTrump(
-    IPlayCardInferenceFeatureBuilder featureBuilder)
-    : PlayCardBehavioralTest(featureBuilder)
+    IPlayCardBehavioralTestRunner runner)
+    : PlayCardBehavioralTest(runner)
 {
     public override string Name => "Opponent winning trick should play lowest trump";
 

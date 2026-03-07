@@ -1,12 +1,11 @@
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
-using NemesisEuchre.MachineLearning.FeatureEngineering;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.PlayCard;
 
 public class PartnerWinningTrickShouldNotPlayTrump(
-    IPlayCardInferenceFeatureBuilder featureBuilder)
-    : PlayCardBehavioralTest(featureBuilder)
+    IPlayCardBehavioralTestRunner runner)
+    : PlayCardBehavioralTest(runner)
 {
     public override string Name => "Partner winning trick don't play trump";
 
