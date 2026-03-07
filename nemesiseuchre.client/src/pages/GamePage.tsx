@@ -33,6 +33,6 @@ export function GamePage() {
     if (!gameState) return null;
 
     return gameState.gameStatus === 'Playing'
-        ? <GameActive />
+        ? <GameActive gameState={gameState} connectionRef={connectionRef} />
         : <GameLobby gameState={gameState} connectionRef={connectionRef} />;
 }
