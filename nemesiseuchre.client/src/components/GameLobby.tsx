@@ -104,7 +104,6 @@ function SeatCard({
                 </>
             ) : (
                 <>
-                    <span className="text-xs text-muted-foreground italic">{position}</span>
                     <button
                         onClick={onClaim}
                         className="cursor-pointer px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors border border-primary/30"
