@@ -54,16 +54,16 @@ public class TrainCommand(
     [CliOption(Description = "Maximum leaves per tree (2-4096)", Alias = "l")]
     public int? NumberOfLeaves { get; set; }
 
-    [CliOption(Description = "Minimum samples per leaf node (1-1000)", Alias = "msl")]
+    [CliOption(Description = "Minimum samples per leaf node (1-100000)", Alias = "msl")]
     public int? MinimumExampleCountPerLeaf { get; set; }
 
     [CliOption(Description = "Maximum rows for training (0 = unlimited)", Alias = "mtr")]
     public long? MaxTrainingRows { get; set; }
 
-    [CliOption(Description = "L1 regularization term (0.0-5.0); promotes sparsity", Alias = "l1")]
+    [CliOption(Description = "L1 regularization term (0.0-100.0); promotes sparsity", Alias = "l1")]
     public float? L1Regularization { get; set; }
 
-    [CliOption(Description = "L2 regularization term (0.0-5.0); stabilizes leaf weights", Alias = "l2")]
+    [CliOption(Description = "L2 regularization term (0.0-100.0); stabilizes leaf weights", Alias = "l2")]
     public float? L2Regularization { get; set; }
 
     [CliOption(Description = "Early stopping rounds (0 = disabled, 1-500)", Alias = "esr")]
@@ -150,9 +150,9 @@ public class TrainCommand(
             errors.Add($"--leaves value {NumberOfLeaves} is out of range. Valid range: 2-4096");
         }
 
-        if (MinimumExampleCountPerLeaf.HasValue && (MinimumExampleCountPerLeaf < 1 || MinimumExampleCountPerLeaf > 1000))
+        if (MinimumExampleCountPerLeaf.HasValue && (MinimumExampleCountPerLeaf < 1 || MinimumExampleCountPerLeaf > 100000))
         {
-            errors.Add($"--minleaf value {MinimumExampleCountPerLeaf} is out of range. Valid range: 1-1000");
+            errors.Add($"--minleaf value {MinimumExampleCountPerLeaf} is out of range. Valid range: 1-100000");
         }
 
         if (MaxTrainingRows.HasValue && MaxTrainingRows < 0)
@@ -160,14 +160,14 @@ public class TrainCommand(
             errors.Add($"--mtr value {MaxTrainingRows} is invalid. Must be ≥ 0");
         }
 
-        if (L1Regularization.HasValue && (L1Regularization < 0.0f || L1Regularization > 5.0f))
+        if (L1Regularization.HasValue && (L1Regularization < 0.0f || L1Regularization > 100.0f))
         {
-            errors.Add($"--l1 value {L1Regularization} is out of range. Valid range: 0.0-5.0");
+            errors.Add($"--l1 value {L1Regularization} is out of range. Valid range: 0.0-100.0");
         }
 
-        if (L2Regularization.HasValue && (L2Regularization < 0.0f || L2Regularization > 5.0f))
+        if (L2Regularization.HasValue && (L2Regularization < 0.0f || L2Regularization > 100.0f))
         {
-            errors.Add($"--l2 value {L2Regularization} is out of range. Valid range: 0.0-5.0");
+            errors.Add($"--l2 value {L2Regularization} is out of range. Valid range: 0.0-100.0");
         }
 
         if (EarlyStoppingRound.HasValue && (EarlyStoppingRound < 0 || EarlyStoppingRound > 500))
