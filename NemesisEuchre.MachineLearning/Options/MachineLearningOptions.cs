@@ -15,33 +15,33 @@ public class MachineLearningOptions
     /// Higher values increase accuracy but risk overfitting.
     /// </summary>
     [Range(2, 4096)]
-    public int NumberOfLeaves { get; set; } = 31;
+    public int NumberOfLeaves { get; set; } = 511;
 
     /// <summary>
     /// Gets or sets the number of boosting iterations. More iterations can improve accuracy but increase training time.
     /// </summary>
     [Range(10, 2500)]
-    public int NumberOfIterations { get; set; } = 200;
+    public int NumberOfIterations { get; set; } = 1000;
 
     /// <summary>
     /// Gets or sets the learning rate for gradient boosting. Controls step size during optimization.
     /// Lower values require more iterations but may achieve better accuracy.
     /// </summary>
     [Range(0.01, 2.0)]
-    public double LearningRate { get; set; } = 0.1;
+    public double LearningRate { get; set; } = 0.05;
 
     /// <summary>
     /// Gets or sets the minimum number of samples required in a leaf node. Prevents overfitting on small sample counts.
     /// </summary>
     [Range(1, 1000)]
-    public int MinimumExampleCountPerLeaf { get; set; } = 20;
+    public int MinimumExampleCountPerLeaf { get; set; } = 400;
 
     /// <summary>
     /// Gets or sets the L1 regularization term. Promotes sparsity by driving unimportant feature contributions toward zero.
     /// Set to 0 to disable.
     /// </summary>
     [Range(0.0f, 5.0f)]
-    public float L1Regularization { get; set; }
+    public float L1Regularization { get; set; } = 0.3f;
 
     /// <summary>
     /// Gets or sets the L2 regularization term. Penalizes large leaf weights to stabilize the model.
