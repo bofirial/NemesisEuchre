@@ -6,4 +6,7 @@ public record HyperparametersMetadata(
     int NumberOfIterations,
     double LearningRate,
     int MinimumExampleCountPerLeaf,
+    float L1Regularization,
+    float L2Regularization,
+    int EarlyStoppingRound,
     int RandomSeed);

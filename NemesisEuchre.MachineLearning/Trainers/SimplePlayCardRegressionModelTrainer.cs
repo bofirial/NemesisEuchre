@@ -34,6 +34,12 @@ public class SimplePlayCardRegressionModelTrainer(
                     MinimumExampleCountPerLeaf = Options.MinimumExampleCountPerLeaf,
                     LearningRate = Options.LearningRate,
                     NumberOfIterations = Options.NumberOfIterations,
+                    EarlyStoppingRound = Options.EarlyStoppingRound,
+                    Booster = new GradientBooster.Options
+                    {
+                        L1Regularization = Options.L1Regularization,
+                        L2Regularization = Options.L2Regularization,
+                    },
                 }));
     }
 

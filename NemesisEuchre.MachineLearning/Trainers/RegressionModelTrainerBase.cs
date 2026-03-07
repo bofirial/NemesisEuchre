@@ -192,6 +192,9 @@ public abstract class RegressionModelTrainerBase<TData>(
                 Options.NumberOfIterations,
                 Options.LearningRate,
                 Options.MinimumExampleCountPerLeaf,
+                Options.L1Regularization,
+                Options.L2Regularization,
+                Options.EarlyStoppingRound,
                 Options.RandomSeed),
             new RegressionMetricsMetadata(
                 regressionMetrics.RSquared,

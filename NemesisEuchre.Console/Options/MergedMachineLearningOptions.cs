@@ -14,7 +14,10 @@ public class MergedMachineLearningOptions : IOptions<MachineLearningOptions>
         double? learningRate = null,
         int? numberOfLeaves = null,
         int? minimumExampleCountPerLeaf = null,
-        long? maxTrainingRows = null)
+        long? maxTrainingRows = null,
+        float? l1Regularization = null,
+        float? l2Regularization = null,
+        int? earlyStoppingRound = null)
     {
         Value = new MachineLearningOptions
         {
@@ -26,6 +29,9 @@ public class MergedMachineLearningOptions : IOptions<MachineLearningOptions>
             ExplorationTemperature = baseOptions.ExplorationTemperature,
             RandomSeed = baseOptions.RandomSeed,
             MaxTrainingRows = maxTrainingRows ?? baseOptions.MaxTrainingRows,
+            L1Regularization = l1Regularization ?? baseOptions.L1Regularization,
+            L2Regularization = l2Regularization ?? baseOptions.L2Regularization,
+            EarlyStoppingRound = earlyStoppingRound ?? baseOptions.EarlyStoppingRound,
         };
 
         var validationContext = new ValidationContext(Value);

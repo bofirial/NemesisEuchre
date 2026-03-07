@@ -14,13 +14,13 @@ public class MachineLearningOptions
     /// Gets or sets the maximum number of leaves in one tree. Controls tree complexity and model capacity.
     /// Higher values increase accuracy but risk overfitting.
     /// </summary>
-    [Range(2, 1024)]
+    [Range(2, 4096)]
     public int NumberOfLeaves { get; set; } = 31;
 
     /// <summary>
     /// Gets or sets the number of boosting iterations. More iterations can improve accuracy but increase training time.
     /// </summary>
-    [Range(10, 500)]
+    [Range(10, 2500)]
     public int NumberOfIterations { get; set; } = 200;
 
     /// <summary>
@@ -35,6 +35,27 @@ public class MachineLearningOptions
     /// </summary>
     [Range(1, 1000)]
     public int MinimumExampleCountPerLeaf { get; set; } = 20;
+
+    /// <summary>
+    /// Gets or sets the L1 regularization term. Promotes sparsity by driving unimportant feature contributions toward zero.
+    /// Set to 0 to disable.
+    /// </summary>
+    [Range(0.0f, 5.0f)]
+    public float L1Regularization { get; set; }
+
+    /// <summary>
+    /// Gets or sets the L2 regularization term. Penalizes large leaf weights to stabilize the model.
+    /// Matches the LightGBM default of 0.01.
+    /// </summary>
+    [Range(0.0f, 5.0f)]
+    public float L2Regularization { get; set; } = 0.01f;
+
+    /// <summary>
+    /// Gets or sets the number of rounds with no improvement before early stopping triggers.
+    /// Set to 0 to disable early stopping.
+    /// </summary>
+    [Range(0, 500)]
+    public int EarlyStoppingRound { get; set; }
 
     [Range(0.001f, 5.0f)]
     public float ExplorationTemperature { get; set; } = 0.2f;

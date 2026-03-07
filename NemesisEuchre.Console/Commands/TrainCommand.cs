@@ -45,13 +45,13 @@ public class TrainCommand(
         Alias = "o")]
     public bool Overwrite { get; set; }
 
-    [CliOption(Description = "Number of boosting iterations (10-500)", Alias = "i")]
+    [CliOption(Description = "Number of boosting iterations (10-2500)", Alias = "i")]
     public int? NumberOfIterations { get; set; }
 
     [CliOption(Description = "Learning rate for gradient boosting (0.01-2.0)", Alias = "lr")]
     public double? LearningRate { get; set; }
 
-    [CliOption(Description = "Maximum leaves per tree (2-1024)", Alias = "l")]
+    [CliOption(Description = "Maximum leaves per tree (2-4096)", Alias = "l")]
     public int? NumberOfLeaves { get; set; }
 
     [CliOption(Description = "Minimum samples per leaf node (1-1000)", Alias = "msl")]
@@ -59,6 +59,15 @@ public class TrainCommand(
 
     [CliOption(Description = "Maximum rows for training (0 = unlimited)", Alias = "mtr")]
     public long? MaxTrainingRows { get; set; }
+
+    [CliOption(Description = "L1 regularization term (0.0-5.0); promotes sparsity", Alias = "l1")]
+    public float? L1Regularization { get; set; }
+
+    [CliOption(Description = "L2 regularization term (0.0-5.0); stabilizes leaf weights", Alias = "l2")]
+    public float? L2Regularization { get; set; }
+
+    [CliOption(Description = "Early stopping rounds (0 = disabled, 1-500)", Alias = "esr")]
+    public int? EarlyStoppingRound { get; set; }
 
     public async Task<int> RunAsync()
     {
@@ -82,7 +91,10 @@ public class TrainCommand(
             learningRate: LearningRate,
             numberOfLeaves: NumberOfLeaves,
             minimumExampleCountPerLeaf: MinimumExampleCountPerLeaf,
-            maxTrainingRows: MaxTrainingRows);
+            maxTrainingRows: MaxTrainingRows,
+            l1Regularization: L1Regularization,
+            l2Regularization: L2Regularization,
+            earlyStoppingRound: EarlyStoppingRound);
 
         DisplayTrainingConfiguration(outputPath, mergedOptions.Value);
 
@@ -123,9 +135,9 @@ public class TrainCommand(
     {
         var errors = new List<string>();
 
-        if (NumberOfIterations.HasValue && (NumberOfIterations < 10 || NumberOfIterations > 500))
+        if (NumberOfIterations.HasValue && (NumberOfIterations < 10 || NumberOfIterations > 2500))
         {
-            errors.Add($"--iter value {NumberOfIterations} is out of range. Valid range: 10-500");
+            errors.Add($"--iter value {NumberOfIterations} is out of range. Valid range: 10-2500");
         }
 
         if (LearningRate.HasValue && (LearningRate < 0.01 || LearningRate > 2.0))
@@ -133,9 +145,9 @@ public class TrainCommand(
             errors.Add($"--lr value {LearningRate} is out of range. Valid range: 0.01-2.0");
         }
 
-        if (NumberOfLeaves.HasValue && (NumberOfLeaves < 2 || NumberOfLeaves > 1024))
+        if (NumberOfLeaves.HasValue && (NumberOfLeaves < 2 || NumberOfLeaves > 4096))
         {
-            errors.Add($"--leaves value {NumberOfLeaves} is out of range. Valid range: 2-1024");
+            errors.Add($"--leaves value {NumberOfLeaves} is out of range. Valid range: 2-4096");
         }
 
         if (MinimumExampleCountPerLeaf.HasValue && (MinimumExampleCountPerLeaf < 1 || MinimumExampleCountPerLeaf > 1000))
@@ -146,6 +158,21 @@ public class TrainCommand(
         if (MaxTrainingRows.HasValue && MaxTrainingRows < 0)
         {
             errors.Add($"--mtr value {MaxTrainingRows} is invalid. Must be ≥ 0");
+        }
+
+        if (L1Regularization.HasValue && (L1Regularization < 0.0f || L1Regularization > 5.0f))
+        {
+            errors.Add($"--l1 value {L1Regularization} is out of range. Valid range: 0.0-5.0");
+        }
+
+        if (L2Regularization.HasValue && (L2Regularization < 0.0f || L2Regularization > 5.0f))
+        {
+            errors.Add($"--l2 value {L2Regularization} is out of range. Valid range: 0.0-5.0");
+        }
+
+        if (EarlyStoppingRound.HasValue && (EarlyStoppingRound < 0 || EarlyStoppingRound > 500))
+        {
+            errors.Add($"--esr value {EarlyStoppingRound} is out of range. Valid range: 0-500");
         }
 
         if (errors.Count > 0)
@@ -186,6 +213,16 @@ public class TrainCommand(
         var mtrSource = MaxTrainingRows.HasValue ? "[yellow](CLI)[/]" : "[dim](Config)[/]";
         var mtrDisplay = effectiveOptions.MaxTrainingRows == 0 ? "unlimited" : $"{effectiveOptions.MaxTrainingRows:N0}";
         ansiConsole.MarkupLine($"  Max Training Rows: [cyan]{mtrDisplay}[/] {mtrSource}");
+
+        var l1Source = L1Regularization.HasValue ? "[yellow](CLI)[/]" : "[dim](Config)[/]";
+        ansiConsole.MarkupLine($"  L1 Regularization: [cyan]{effectiveOptions.L1Regularization}[/] {l1Source}");
+
+        var l2Source = L2Regularization.HasValue ? "[yellow](CLI)[/]" : "[dim](Config)[/]";
+        ansiConsole.MarkupLine($"  L2 Regularization: [cyan]{effectiveOptions.L2Regularization}[/] {l2Source}");
+
+        var esrSource = EarlyStoppingRound.HasValue ? "[yellow](CLI)[/]" : "[dim](Config)[/]";
+        var esrDisplay = effectiveOptions.EarlyStoppingRound == 0 ? "disabled" : $"{effectiveOptions.EarlyStoppingRound}";
+        ansiConsole.MarkupLine($"  Early Stopping Round: [cyan]{esrDisplay}[/] {esrSource}");
 
         ansiConsole.WriteLine();
     }
