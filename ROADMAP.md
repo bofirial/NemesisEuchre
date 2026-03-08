@@ -515,12 +515,12 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 6. ~~Create a Home Page~~
 7. ~~Create a Game Lobby~~
 8. ~~Create an Upload Model page~~
-9. Create an Active Game Page
+9. ~~Create an Active Game Page~~
 10. ~~Create a Card Component~~
-11. Create a Score Component
-12. Create a Hand Component
-13. Create a Current Trick Component
-14. Create an UpCard Component
+11. ~~Create a Score Component~~
+12. ~~Create a Hand Component~~
+13. Create an UpCard Component
+14. Create a Current Trick Component
 15. Process Call Trump Decision using SignalR
 16. Process Discard Card Decision using SignalR
 17. Process Play Card Decision using SignalR

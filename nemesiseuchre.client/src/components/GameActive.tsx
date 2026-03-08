@@ -4,6 +4,7 @@ import type { HubConnection } from '@microsoft/signalr';
 import { useAuth } from '@/auth/useAuth';
 import type { Card, PlayerGameState, PlayerPosition, SeatOccupant } from '@/types/game';
 import { PlayerHand } from './PlayerHand';
+import { ScoreDisplay } from './ScoreDisplay';
 
 interface Props {
     gameState: PlayerGameState;
@@ -116,6 +117,13 @@ export function GameActive({ gameState }: Props) {
 
                     {/* Felt table */}
                     <div className="absolute inset-[140px] rounded-3xl bg-muted/40 border-4 border-border shadow-inner flex flex-col items-center justify-center gap-2 select-none">
+                        {/* Score — felt top corners */}
+                        <div className="absolute top-3 left-4">
+                            <ScoreDisplay teamName="Team 1" score={gameState.team1Score} />
+                        </div>
+                        <div className="absolute top-3 right-4">
+                            <ScoreDisplay teamName="Team 2" score={gameState.team2Score} />
+                        </div>
                         <img src="/nemesiseuchreLogo.svg" alt="NemesisEuchre" className="h-10 w-10 opacity-60" />
                         <span className="text-sm font-semibold tracking-tight opacity-60">
                             <span className="text-brand-blue">Nemesis</span>
@@ -123,28 +131,28 @@ export function GameActive({ gameState }: Props) {
                         </span>
                     </div>
 
-                    {/* North seat — TEAM B */}
+                    {/* North seat — TEAM 2 */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-10">
-                        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium">Team B</span>
+                        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium">Team 2</span>
                         {seatCard('North')}
                     </div>
 
-                    {/* South seat — TEAM B */}
+                    {/* South seat — TEAM 2 */}
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-10">
                         {seatCard('South')}
-                        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium">Team B</span>
+                        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium">Team 2</span>
                     </div>
 
-                    {/* West seat — TEAM A */}
+                    {/* West seat — TEAM 1 */}
                     <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 z-10">
-                        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium [writing-mode:vertical-rl] rotate-180">Team A</span>
+                        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium [writing-mode:vertical-rl] rotate-180">Team 1</span>
                         {seatCard('West')}
                     </div>
 
-                    {/* East seat — TEAM A */}
+                    {/* East seat — TEAM 1 */}
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 z-10">
                         {seatCard('East')}
-                        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium [writing-mode:vertical-rl]">Team A</span>
+                        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium [writing-mode:vertical-rl]">Team 1</span>
                     </div>
 
                     {/* Hands — positioned just inside the felt border (inset 140px → hands at 148px) */}
