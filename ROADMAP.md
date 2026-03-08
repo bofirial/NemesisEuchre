@@ -513,10 +513,10 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 4. ~~Role-Based Authentication~~
 5. ~~Add SignalR to the Server and Client~~
 6. ~~Create a Home Page~~
-7. Create a Game Lobby
+7. ~~Create a Game Lobby~~
 8. ~~Create an Upload Model page~~
 9. Create an Active Game Page
-10. Create a Card Component
+10. ~~Create a Card Component~~
 11. Create a Score Component
 12. Create a Hand Component
 13. Create a Current Trick Component

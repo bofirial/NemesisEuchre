@@ -23,7 +23,7 @@ function App() {
                 </div>
             </header>
 
-            <main className="mx-auto max-w-5xl flex-1 px-4 py-24 text-center">
+            <main className="mx-auto max-w-5xl flex-1 px-4 py-6 text-center">
                 <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/game/:sessionName" element={<GamePage />} />

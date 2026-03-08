@@ -2,7 +2,8 @@ import { Bot, Star } from 'lucide-react';
 import type { RefObject } from 'react';
 import type { HubConnection } from '@microsoft/signalr';
 import { useAuth } from '@/auth/useAuth';
-import type { PlayerGameState, PlayerPosition, SeatOccupant } from '@/types/game';
+import type { Card, PlayerGameState, PlayerPosition, SeatOccupant } from '@/types/game';
+import { PlayerHand } from './PlayerHand';
 
 interface Props {
     gameState: PlayerGameState;
@@ -67,6 +68,14 @@ export function GameActive({ gameState }: Props) {
     const { user } = useAuth();
     const myLogin = user?.login;
 
+    const deal = gameState.currentDeal;
+
+    function handForPosition(position: PlayerPosition): { cards: Card[] | null; count: number } {
+        if (!deal) return { cards: null, count: 0 };
+        if (position === gameState.myPosition) return { cards: deal.myHand, count: deal.myHand.length };
+        return { cards: null, count: deal.otherHandCounts[position] ?? 0 };
+    }
+
     function seatCard(position: PlayerPosition) {
         const occupant = gameState.seats[position];
         const isMe = occupant?.gitHubLogin === myLogin;
@@ -103,10 +112,10 @@ export function GameActive({ gameState }: Props) {
                 <h2 className="text-2xl font-semibold">{gameState.sessionName}</h2>
 
                 {/* Table area */}
-                <div className="relative w-[640px] h-[480px]">
+                <div className="relative w-[900px] h-[680px]">
 
                     {/* Felt table */}
-                    <div className="absolute inset-[108px] rounded-3xl bg-muted/40 border-4 border-border shadow-inner flex flex-col items-center justify-center gap-2 select-none">
+                    <div className="absolute inset-[140px] rounded-3xl bg-muted/40 border-4 border-border shadow-inner flex flex-col items-center justify-center gap-2 select-none">
                         <img src="/nemesiseuchreLogo.svg" alt="NemesisEuchre" className="h-10 w-10 opacity-60" />
                         <span className="text-sm font-semibold tracking-tight opacity-60">
                             <span className="text-brand-blue">Nemesis</span>
@@ -136,6 +145,20 @@ export function GameActive({ gameState }: Props) {
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 z-10">
                         {seatCard('East')}
                         <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium [writing-mode:vertical-rl]">Team A</span>
+                    </div>
+
+                    {/* Hands — positioned just inside the felt border (inset 140px → hands at 148px) */}
+                    <div className="absolute top-[148px] left-1/2 -translate-x-1/2 z-20">
+                        <PlayerHand {...handForPosition('North')} position="North" />
+                    </div>
+                    <div className="absolute bottom-[148px] left-1/2 -translate-x-1/2 z-20">
+                        <PlayerHand {...handForPosition('South')} position="South" />
+                    </div>
+                    <div className="absolute left-[148px] top-1/2 -translate-y-1/2 z-20">
+                        <PlayerHand {...handForPosition('West')} position="West" />
+                    </div>
+                    <div className="absolute right-[148px] top-1/2 -translate-y-1/2 z-20">
+                        <PlayerHand {...handForPosition('East')} position="East" />
                     </div>
                 </div>
             </div>
