@@ -3,7 +3,7 @@ export type GameStatusViewModel = 'Lobby' | 'Playing';
 export type Suit = 'Spades' | 'Clubs' | 'Hearts' | 'Diamonds';
 export type Rank = 'Nine' | 'Ten' | 'Jack' | 'Queen' | 'King' | 'Ace';
 export type Team = 'Team1' | 'Team2';
-export type DealStatus = 'NotStarted' | 'SelectingTrump' | 'Playing' | 'Scoring' | 'Complete';
+export type DealStatus = 'NotStarted' | 'SelectingTrumpPhase1' | 'SelectingTrumpPhase2' | 'Playing' | 'Scoring' | 'Complete';
 
 export interface Card { suit: Suit; rank: Rank; }
 export interface PlayedCard { card: Card; playerPosition: PlayerPosition; }

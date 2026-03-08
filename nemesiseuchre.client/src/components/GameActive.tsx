@@ -5,6 +5,7 @@ import { useAuth } from '@/auth/useAuth';
 import type { Card, PlayerGameState, PlayerPosition, SeatOccupant } from '@/types/game';
 import { PlayerHand } from './PlayerHand';
 import { ScoreDisplay } from './ScoreDisplay';
+import { UpCard } from './UpCard';
 
 interface Props {
     gameState: PlayerGameState;
@@ -43,18 +44,23 @@ function SmallAvatar({ occupant }: { occupant: SeatOccupant | undefined }) {
     );
 }
 
-function ActiveSeatCard({ occupant, isMe }: { occupant: SeatOccupant | undefined; isMe: boolean }) {
+function ActiveSeatCard({ occupant, isMe, isDealer }: { occupant: SeatOccupant | undefined; isMe: boolean; isDealer: boolean }) {
     const isBot = occupant !== undefined && occupant.gitHubLogin === null;
     const name = occupant ? (isBot ? botDisplayName(occupant) : occupant.gitHubLogin) : null;
 
     return (
-        <div className={`flex flex-col items-center gap-1 rounded-xl border-2 p-2 w-28 text-sm shadow-md ${
+        <div className={`relative flex flex-col items-center gap-1 rounded-xl border-2 p-2 w-28 text-sm shadow-md ${
             isMe
                 ? 'bg-background border-primary'
                 : occupant
                 ? 'bg-muted border-border'
                 : 'bg-background/60 border-dashed border-muted-foreground/40'
         }`}>
+            {isDealer && (
+                <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-yellow-400 text-black text-[10px] font-bold flex items-center justify-center shadow z-10">
+                    D
+                </div>
+            )}
             <SmallAvatar occupant={occupant} />
             {name && (
                 <span className={`font-semibold text-center break-words leading-tight text-xs ${isMe ? 'text-primary' : ''}`}>
@@ -80,7 +86,8 @@ export function GameActive({ gameState }: Props) {
     function seatCard(position: PlayerPosition) {
         const occupant = gameState.seats[position];
         const isMe = occupant?.gitHubLogin === myLogin;
-        return <ActiveSeatCard occupant={occupant} isMe={isMe} />;
+        const isDealer = deal?.dealerPosition === position;
+        return <ActiveSeatCard occupant={occupant} isMe={isMe} isDealer={isDealer ?? false} />;
     }
 
     return (
@@ -168,6 +175,13 @@ export function GameActive({ gameState }: Props) {
                     <div className="absolute right-[148px] top-1/2 -translate-y-1/2 z-20">
                         <PlayerHand {...handForPosition('East')} position="East" />
                     </div>
+
+                    {(deal?.dealStatus === 'SelectingTrumpPhase1' || deal?.dealStatus === 'SelectingTrumpPhase2') && deal.dealerPosition && (
+                        <UpCard
+                            card={deal.dealStatus === 'SelectingTrumpPhase1' ? deal.upCard : null}
+                            dealerPosition={deal.dealerPosition}
+                        />
+                    )}
                 </div>
             </div>
         </div>

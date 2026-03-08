@@ -425,6 +425,7 @@ public class GameSessionService(NemesisEuchreDbContext db, IActiveGameService ac
         activeGameService.StoreGame(connection.GameSessionId, game);
 
         game.CurrentDeal = await dealFactory.CreateDealAsync(game);
+        game.CurrentDeal.DealStatus = DealStatus.SelectingTrumpPhase1;
 
         var context = await BuildGameContextAsync(connection.GameSessionId, connection.GameSession!.SessionName, ct);
         return context with { Status = GameStatusViewModel.Playing };
