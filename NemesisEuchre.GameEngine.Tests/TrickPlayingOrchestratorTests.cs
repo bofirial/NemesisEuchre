@@ -50,7 +50,7 @@ public class TrickPlayingOrchestratorTests
 
     [Theory]
     [InlineData(DealStatus.NotStarted)]
-    [InlineData(DealStatus.SelectingTrump)]
+    [InlineData(DealStatus.SelectingTrumpPhase1)]
     [InlineData(DealStatus.Scoring)]
     [InlineData(DealStatus.Complete)]
     public Task PlayTrickAsync_WithWrongDealStatus_ThrowsInvalidOperationException(DealStatus status)

@@ -71,7 +71,7 @@ public class TrumpSelectionOrchestratorTests
         var act = async () => await _sut.SelectTrumpAsync(deal);
 
         return act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage($"Deal must be in SelectingTrump status, but was {status}");
+            .WithMessage($"Deal must be in SelectingTrumpPhase1 or SelectingTrumpPhase2 status, but was {status}");
     }
 
     [Fact]
@@ -808,7 +808,7 @@ public class TrumpSelectionOrchestratorTests
     {
         return new Deal
         {
-            DealStatus = DealStatus.SelectingTrump,
+            DealStatus = DealStatus.SelectingTrumpPhase1,
             DealerPosition = PlayerPosition.North,
             UpCard = new Card(Suit.Hearts, Rank.Nine),
             Team1Score = 0,

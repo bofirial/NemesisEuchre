@@ -56,4 +56,13 @@ public static class DealValidationHelpers
                 $"Deal must be in {expectedStatus} status, but was {deal.DealStatus}");
         }
     }
+
+    public static void ValidateSelectingTrumpStatus(Deal deal)
+    {
+        if (deal.DealStatus is not DealStatus.SelectingTrumpPhase1 and not DealStatus.SelectingTrumpPhase2)
+        {
+            throw new InvalidOperationException(
+                $"Deal must be in {DealStatus.SelectingTrumpPhase1} or {DealStatus.SelectingTrumpPhase2} status, but was {deal.DealStatus}");
+        }
+    }
 }

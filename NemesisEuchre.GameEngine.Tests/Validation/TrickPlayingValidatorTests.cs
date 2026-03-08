@@ -20,7 +20,7 @@ public class TrickPlayingValidatorTests
 
     [Theory]
     [InlineData(DealStatus.NotStarted)]
-    [InlineData(DealStatus.SelectingTrump)]
+    [InlineData(DealStatus.SelectingTrumpPhase1)]
     [InlineData(DealStatus.Scoring)]
     [InlineData(DealStatus.Complete)]
     public void ValidatePreconditions_WithIncorrectStatus_ThrowsInvalidOperationException(DealStatus status)

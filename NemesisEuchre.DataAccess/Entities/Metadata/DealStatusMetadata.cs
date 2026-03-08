@@ -27,9 +27,10 @@ public class DealStatusMetadataConfiguration : IEntityTypeConfiguration<DealStat
 
         builder.HasData(
             new DealStatusMetadata { DealStatusId = 0, Name = "NotStarted" },
-            new DealStatusMetadata { DealStatusId = 1, Name = "SelectingTrump" },
+            new DealStatusMetadata { DealStatusId = 1, Name = "SelectingTrumpPhase1" },
             new DealStatusMetadata { DealStatusId = 2, Name = "Playing" },
             new DealStatusMetadata { DealStatusId = 3, Name = "Scoring" },
-            new DealStatusMetadata { DealStatusId = 4, Name = "Complete" });
+            new DealStatusMetadata { DealStatusId = 4, Name = "Complete" },
+            new DealStatusMetadata { DealStatusId = 5, Name = "SelectingTrumpPhase2" });
     }
 }

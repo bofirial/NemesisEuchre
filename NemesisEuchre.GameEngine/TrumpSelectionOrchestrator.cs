@@ -39,6 +39,7 @@ public class TrumpSelectionOrchestrator(
 
         if (!trumpSelected)
         {
+            deal.DealStatus = DealStatus.SelectingTrumpPhase2;
             await ExecuteRound2Async(deal);
         }
     }

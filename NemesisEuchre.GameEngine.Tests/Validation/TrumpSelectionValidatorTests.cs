@@ -31,7 +31,7 @@ public class TrumpSelectionValidatorTests
         var act = () => _validator.ValidatePreconditions(deal);
 
         act.Should().Throw<InvalidOperationException>()
-            .WithMessage($"Deal must be in SelectingTrump status, but was {status}");
+            .WithMessage($"Deal must be in SelectingTrumpPhase1 or SelectingTrumpPhase2 status, but was {status}");
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class TrumpSelectionValidatorTests
     {
         var deal = new Deal
         {
-            DealStatus = DealStatus.SelectingTrump,
+            DealStatus = DealStatus.SelectingTrumpPhase1,
             DealerPosition = null,
         };
 
@@ -54,7 +54,7 @@ public class TrumpSelectionValidatorTests
     {
         var deal = new Deal
         {
-            DealStatus = DealStatus.SelectingTrump,
+            DealStatus = DealStatus.SelectingTrumpPhase1,
             DealerPosition = PlayerPosition.North,
             UpCard = null,
         };
@@ -75,7 +75,7 @@ public class TrumpSelectionValidatorTests
     {
         var deal = new Deal
         {
-            DealStatus = DealStatus.SelectingTrump,
+            DealStatus = DealStatus.SelectingTrumpPhase1,
             DealerPosition = PlayerPosition.North,
             UpCard = new Card(Suit.Hearts, Rank.Ace),
         };
@@ -91,10 +91,13 @@ public class TrumpSelectionValidatorTests
             .WithMessage($"Deal must have exactly 4 players, but had {playerCount}");
     }
 
-    [Fact]
-    public void ValidatePreconditions_WithValidDeal_DoesNotThrow()
+    [Theory]
+    [InlineData(DealStatus.SelectingTrumpPhase1)]
+    [InlineData(DealStatus.SelectingTrumpPhase2)]
+    public void ValidatePreconditions_WithValidDeal_DoesNotThrow(DealStatus status)
     {
         var deal = CreateValidDeal();
+        deal.DealStatus = status;
 
         var act = () => _validator.ValidatePreconditions(deal);
 
@@ -159,7 +162,7 @@ public class TrumpSelectionValidatorTests
     {
         var deal = new Deal
         {
-            DealStatus = DealStatus.SelectingTrump,
+            DealStatus = DealStatus.SelectingTrumpPhase1,
             DealerPosition = PlayerPosition.North,
             UpCard = new Card(Suit.Hearts, Rank.Ace),
         };

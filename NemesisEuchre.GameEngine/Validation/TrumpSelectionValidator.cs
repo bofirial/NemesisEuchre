@@ -1,4 +1,3 @@
-using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
@@ -19,7 +18,7 @@ public class TrumpSelectionValidator : ITrumpSelectionValidator
     {
         ArgumentNullException.ThrowIfNull(deal);
 
-        DealValidationHelpers.ValidateDealStatus(deal, DealStatus.SelectingTrump);
+        DealValidationHelpers.ValidateSelectingTrumpStatus(deal);
         DealValidationHelpers.ValidateDealerPosition(deal);
         DealValidationHelpers.ValidateUpCard(deal);
         DealValidationHelpers.ValidatePlayerCount(deal);

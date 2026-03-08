@@ -36,7 +36,7 @@ public class DealExtensionsTests
     {
         var deal = new Deal
         {
-            DealStatus = DealStatus.SelectingTrump,
+            DealStatus = DealStatus.SelectingTrumpPhase1,
             Trump = null,
         };
 

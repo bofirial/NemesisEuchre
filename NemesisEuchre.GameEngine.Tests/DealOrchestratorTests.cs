@@ -52,7 +52,7 @@ public class DealOrchestratorTests
     }
 
     [Theory]
-    [InlineData(DealStatus.SelectingTrump)]
+    [InlineData(DealStatus.SelectingTrumpPhase1)]
     [InlineData(DealStatus.Playing)]
     [InlineData(DealStatus.Scoring)]
     [InlineData(DealStatus.Complete)]
@@ -113,7 +113,7 @@ public class DealOrchestratorTests
     }
 
     [Fact]
-    public async Task OrchestrateDealAsync_SetsDealStatusToSelectingTrump_BeforeTrumpSelection()
+    public async Task OrchestrateDealAsync_SetsDealStatusToSelectingTrumpPhase1_BeforeTrumpSelection()
     {
         var deal = CreateTestDeal();
         DealStatus? capturedStatus = null;
@@ -129,7 +129,7 @@ public class DealOrchestratorTests
 
         await _sut.OrchestrateDealAsync(deal);
 
-        capturedStatus.Should().Be(DealStatus.SelectingTrump);
+        capturedStatus.Should().Be(DealStatus.SelectingTrumpPhase1);
     }
 
     [Fact]

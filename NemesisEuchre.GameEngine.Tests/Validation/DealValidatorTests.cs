@@ -19,7 +19,7 @@ public class DealValidatorTests
     }
 
     [Theory]
-    [InlineData(DealStatus.SelectingTrump)]
+    [InlineData(DealStatus.SelectingTrumpPhase1)]
     [InlineData(DealStatus.Playing)]
     [InlineData(DealStatus.Scoring)]
     [InlineData(DealStatus.Complete)]

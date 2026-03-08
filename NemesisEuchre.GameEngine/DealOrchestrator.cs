@@ -69,7 +69,7 @@ public class DealOrchestrator(
 
     private Task ExecuteTrumpSelectionPhaseAsync(Deal deal)
     {
-        deal.DealStatus = DealStatus.SelectingTrump;
+        deal.DealStatus = DealStatus.SelectingTrumpPhase1;
 
         return trumpSelectionOrchestrator.SelectTrumpAsync(deal);
     }
