@@ -429,3 +429,6 @@ FodyWeavers.xsd
 
 # Client build output
 nemesiseuchre.client/dist/
+
+# PowerShell script temp output
+output.json
