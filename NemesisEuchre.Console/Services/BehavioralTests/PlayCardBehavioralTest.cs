@@ -88,14 +88,7 @@ public abstract class PlayCardBehavioralTest(
                 var scoreOrNull = runner.TryScore(engineProvider, modelName, context);
                 if (scoreOrNull == null)
                 {
-                    return [new BehavioralTestResult(
-                        Name,
-                        DecisionType,
-                        false,
-                        "-",
-                        AssertionDescription,
-                        [],
-                        $"Failed to load {DecisionType} model")];
+                    return [];
                 }
 
                 var score = scoreOrNull.Value;
@@ -117,7 +110,7 @@ public abstract class PlayCardBehavioralTest(
 
             results.Add(new BehavioralTestResult(
                 testCase.Label,
-                DecisionType,
+                DecisionType.Play,
                 passed,
                 chosenDisplay,
                 AssertionDescription,

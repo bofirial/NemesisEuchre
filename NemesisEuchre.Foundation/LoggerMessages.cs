@@ -214,8 +214,8 @@ public static partial class LoggerMessages
     [LoggerMessage(
         EventId = 35,
         Level = LogLevel.Warning,
-        Message = "Model not found for {DecisionType}, will fall back to random selection")]
-    public static partial void LogModelNotFound(ILogger logger, string decisionType, Exception exception);
+        Message = "Model not found for {DecisionType}")]
+    public static partial void LogModelNotFound(ILogger logger, string decisionType);
 
     [LoggerMessage(
         EventId = 36,

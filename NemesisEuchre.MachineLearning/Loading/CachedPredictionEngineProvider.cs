@@ -61,9 +61,9 @@ public class CachedPredictionEngineProvider(
                 modelName,
                 decisionType);
         }
-        catch (FileNotFoundException ex)
+        catch (FileNotFoundException)
         {
-            LoggerMessages.LogModelNotFound(_logger, decisionType, ex);
+            LoggerMessages.LogModelNotFound(_logger, decisionType);
             return null;
         }
         catch (Exception ex)
