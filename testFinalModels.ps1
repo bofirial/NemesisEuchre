@@ -22,6 +22,7 @@ foreach ($model in $models) {
 
     $callTrumpSidecar = Get-Content -Path "models/$($model)_calltrump.json" -Raw | ConvertFrom-Json
     $discardSidecar = Get-Content -Path "models/$($model)_discardcard.json" -Raw | ConvertFrom-Json
+    $playSidecar = $null
 
     if (Test-Path -Path "models/$($model)_playcard.json") {
         $playSidecar = Get-Content -Path "models/$($model)_playcard.json" -Raw | ConvertFrom-Json

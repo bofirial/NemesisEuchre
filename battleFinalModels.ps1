@@ -32,7 +32,7 @@ foreach ($model in $models) {
             $t1Model = "-t1 $model";
         }
         if ($model2 -eq "Chaos") {
-            $t2Model = "-t2 $model";
+            $t2Model = "-t2 $model2";
         }
 
         $battleCommand = "dotnet run --project NemesisEuchre.Console -- $t1Model $t2Model -c 25000 -json $outputFile";
