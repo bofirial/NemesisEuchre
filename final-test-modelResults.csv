@@ -1,0 +1,7 @@
+"Model Name","CallTrump Passed Tests","Discard Passed Tests","Play Passed Tests","CallTrump Model","CallTrump Learn Rate","CallTrump Iterations","CallTrump Number Of Leaves","CallTrump Minimum Example Count Per Leaf","CallTrump TrainingSamples","Discard Model","Discard Learn Rate","Discard Iterations","Discard Number Of Leaves","Discard Minimum Example Count Per Leaf","Discard TrainingSamples","Play Model","Play Learn Rate","Play Iterations","Play Number Of Leaves","Play Minimum Example Count Per Leaf","Play TrainingSamples"
+"gen1b2","11","11","11","gen1.65","0.7","100","64","25","9914727","gen1.26","0.7","300","16","40","6545545","gen1.38","0.7","100","32","25","116010913"
+"gen1c","18","14","11","gen1.26","0.7","300","16","40","9914727","gen1.53","0.7","300","32","40","6545545","gen1.53","0.7","300","32","40","116010913"
+"gen2b","14","11","13","gen1c.104","0.7","300","64","40","34962266","gen1.26","0.7","300","16","40","6545545","gen1b2.14","0.7","100","32","25","132256370"
+"gen2t","20","14","15","gen1b2.43","0.7","200","32","25","37738488","gen1.53","0.7","300","32","40","6545545","gen1c.46","0.7","300","64","10","130874191"
+"gen3b","14","11","2","can3.148","0.5","200","256","400","232163676","can3d.10","0.25","200","64","400","37849032","can3sp.18","0.75","100","255","600","490005865"
+"gen3t","20","14","15","can3.186","0.5","300","512","200","232163676","gen1.53","0.7","300","32","40","6545545","can3p.51","0.75","200","1280","400","490005865"
