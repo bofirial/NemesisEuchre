@@ -14,7 +14,7 @@ if ($decisionType -eq "CallTrump") {
     $learnRates = @(0.375, 0.5, 0.625)
     $iterations = @(200, 300)
     $numbersOfLeaves = @(511, 640, 768)
-    $minimumExampleCountsPerLeaf = @(150, 200, 300)
+    $minimumExampleCountsPerLeaf = @(200, 300)
 }
 elseif ($decisionType -eq "Discard") {
     $modelParameterLabel = "-t2m-discard";
@@ -27,7 +27,7 @@ elseif ($decisionType -eq "Discard") {
     $learnRates = @(0.25, 0.5, 0.75)
     $iterations = @(200, 300)
     $numbersOfLeaves = @(63, 127, 255)
-    $minimumExampleCountsPerLeaf = @(100, 200, 300)
+    $minimumExampleCountsPerLeaf = @(200, 300)
 }
 elseif ($decisionType -eq "Play") {
     $modelParameterLabel = "-t2m-play";
@@ -37,10 +37,10 @@ elseif ($decisionType -eq "Play") {
 
     $l1Generalization = 0.0;
 
-    $learnRates = @(0.5, 0.75)
+    $learnRates = @(0.5, 0.675, 0.75)
     $iterations = @(200, 300)
     $numbersOfLeaves = @(255, 511, 640)
-    $minimumExampleCountsPerLeaf = @(200, 400)
+    $minimumExampleCountsPerLeaf = @(200, 300)
 }
 elseif ($decisionType -eq "SimplePlay") {
     $modelParameterLabel = "-t2m-simple-play";
@@ -51,9 +51,9 @@ elseif ($decisionType -eq "SimplePlay") {
     $l1Generalization = 0.0;
 
     $learnRates = @(0.5, 0.675, 0.75)
-    $iterations = @(200)
-    $numbersOfLeaves = @(63, 127)
-    $minimumExampleCountsPerLeaf = @(500, 600, 700)
+    $iterations = @(200, 300)
+    $numbersOfLeaves = @(31, 63, 127)
+    $minimumExampleCountsPerLeaf = @(200, 300)
 }
 
 foreach ($minimumExampleCountPerLeaf in $minimumExampleCountsPerLeaf) {
@@ -66,9 +66,9 @@ foreach ($minimumExampleCountPerLeaf in $minimumExampleCountsPerLeaf) {
 
                 Write-Host $trainCommand;
 
-                Invoke-Expression $trainCommand
+                # Invoke-Expression $trainCommand
                 
-                $battleCommand = "./battleModels -Model $model -ModelNumber $modelNumber -LearnRate $learnRate -Iterations $iteration -NumberOfLeaves $numberOfLeaves -MinimumExampleCountPerLeaf $minimumExampleCountPerLeaf -L1Generalization $l1Generalization -ModelParameterLabel $modelParameterLabel -CsvPath $csvPath";
+                $battleCommand = "./battleModels -Model $model -ModelNumber $modelNumber -LearnRate $learnRate -Iterations $iteration -NumberOfLeaves $numberOfLeaves -MinimumExampleCountPerLeaf $minimumExampleCountPerLeaf -L1Generalization $l1Generalization -ModelParameterLabel $modelParameterLabel -CsvPath ""$csvPath""";
 
                 Write-Host $battleCommand;
 
