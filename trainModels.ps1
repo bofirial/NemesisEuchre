@@ -9,8 +9,8 @@ if ($decisionType -eq "CallTrump") {
     
     $modelPrefix = "can3ct";
 
-    $l1Generalizations = @(0.0, 0.3);
-    $l2Generalizations = @(0.01, 0.1);
+    $l1Regularizations = @(0.0, 0.3);
+    $l2Regularizations = @(0.01, 0.1);
 
     $learnRates = @(0.5, 0.625)
     $iterations = @(200)
@@ -23,8 +23,8 @@ elseif ($decisionType -eq "Discard") {
     
     $modelPrefix = "can3d";
 
-    $l1Generalizations = @(0.0);
-    $l2Generalizations = @(0.01);
+    $l1Regularizations = @(0.0);
+    $l2Regularizations = @(0.01);
 
     $learnRates = @(0.25, 0.5, 0.75)
     $iterations = @(200, 300)
@@ -37,8 +37,8 @@ elseif ($decisionType -eq "Play") {
     
     $modelPrefix = "can3p";
 
-    $l1Generalizations = @(0.0);
-    $l2Generalizations = @(0.01);
+    $l1Regularizations = @(0.0);
+    $l2Regularizations = @(0.01);
 
     $learnRates = @(0.5, 0.675, 0.75)
     $iterations = @(200, 300)
@@ -51,8 +51,8 @@ elseif ($decisionType -eq "SimplePlay") {
     
     $modelPrefix = "can3sp";
 
-    $l1Generalizations = @(0.0);
-    $l2Generalizations = @(0.01);
+    $l1Regularizations = @(0.0);
+    $l2Regularizations = @(0.01);
 
     $learnRates = @(0.5, 0.675, 0.75)
     $iterations = @(200, 300)
@@ -60,21 +60,21 @@ elseif ($decisionType -eq "SimplePlay") {
     $minimumExampleCountsPerLeaf = @(200, 300)
 }
 
-foreach ($l2Generalization in $l2Generalizations) {
-    foreach ($l1Generalization in $l1Generalizations) {
+foreach ($l2Regularization in $l2Regularizations) {
+    foreach ($l1Regularization in $l1Regularizations) {
         foreach ($minimumExampleCountPerLeaf in $minimumExampleCountsPerLeaf) {
             foreach ($learnRate in $learnRates) {
                 foreach ($iteration in $iterations) {
                     foreach ($numberOfLeaves in $numbersOfLeaves) {
                         $model = "$modelPrefix.$modelNumber";
 
-                        $trainCommand = "dotnet run --project NemesisEuchre.Console -- train -s $source -m $model -d $decisionType -lr $learnRate -i $iteration -l $numberOfLeaves -msl $minimumExampleCountPerLeaf -l1 $l1Generalization -l2 $l2Generalization";
+                        $trainCommand = "dotnet run --project NemesisEuchre.Console -- train -s $source -m $model -d $decisionType -lr $learnRate -i $iteration -l $numberOfLeaves -msl $minimumExampleCountPerLeaf -l1 $l1Regularization -l2 $l2Regularization";
 
                         Write-Host $trainCommand;
 
                         Invoke-Expression $trainCommand
                         
-                        $battleCommand = "./battleModels -Model $model -ModelNumber $modelNumber -LearnRate $learnRate -Iterations $iteration -NumberOfLeaves $numberOfLeaves -MinimumExampleCountPerLeaf $minimumExampleCountPerLeaf -L1Generalization $l1Generalization -L2Generalization $l2Generalization -ModelParameterLabel $modelParameterLabel -CsvPath ""$csvPath""";
+                        $battleCommand = "./battleModels -Model $model -ModelNumber $modelNumber -LearnRate $learnRate -Iterations $iteration -NumberOfLeaves $numberOfLeaves -MinimumExampleCountPerLeaf $minimumExampleCountPerLeaf -L1Regularization $l1Regularization -L2Regularization $l2Regularization -ModelParameterLabel $modelParameterLabel -CsvPath ""$csvPath""";
 
                         Write-Host $battleCommand;
 
