@@ -41,16 +41,20 @@ public sealed class IdvChunkMerger(
             return;
         }
 
-        try
+        const int maxAttempts = 5;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
-            Directory.Delete(chunkDirectory, true);
-        }
-        catch (IOException)
-        {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            Thread.Sleep(100);
-            Directory.Delete(chunkDirectory, true);
+            try
+            {
+                Directory.Delete(chunkDirectory, true);
+                return;
+            }
+            catch (IOException) when (attempt < maxAttempts)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                Thread.Sleep(attempt * 100);
+            }
         }
     }
 
