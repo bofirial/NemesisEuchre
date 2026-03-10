@@ -1,4 +1,4 @@
-$modelNumber = 1;
+$modelNumber = 37;
 
 $source = "can3a";
 $decisionType = "CallTrump";
@@ -9,12 +9,13 @@ if ($decisionType -eq "CallTrump") {
     
     $modelPrefix = "can3ct";
 
-    $l1Generalization = 0.0;
+    $l1Generalizations = @(0.0, 0.3);
+    $l2Generalizations = @(0.01, 0.1);
 
-    $learnRates = @(0.375, 0.5, 0.625)
-    $iterations = @(200, 300)
-    $numbersOfLeaves = @(511, 640, 768)
-    $minimumExampleCountsPerLeaf = @(200, 300)
+    $learnRates = @(0.5, 0.625)
+    $iterations = @(200)
+    $numbersOfLeaves = @(127)
+    $minimumExampleCountsPerLeaf = @(300)
 }
 elseif ($decisionType -eq "Discard") {
     $modelParameterLabel = "-t2m-discard";
@@ -22,7 +23,8 @@ elseif ($decisionType -eq "Discard") {
     
     $modelPrefix = "can3d";
 
-    $l1Generalization = 0.0;
+    $l1Generalizations = @(0.0);
+    $l2Generalizations = @(0.01);
 
     $learnRates = @(0.25, 0.5, 0.75)
     $iterations = @(200, 300)
@@ -35,7 +37,8 @@ elseif ($decisionType -eq "Play") {
     
     $modelPrefix = "can3p";
 
-    $l1Generalization = 0.0;
+    $l1Generalizations = @(0.0);
+    $l2Generalizations = @(0.01);
 
     $learnRates = @(0.5, 0.675, 0.75)
     $iterations = @(200, 300)
@@ -48,7 +51,8 @@ elseif ($decisionType -eq "SimplePlay") {
     
     $modelPrefix = "can3sp";
 
-    $l1Generalization = 0.0;
+    $l1Generalizations = @(0.0);
+    $l2Generalizations = @(0.01);
 
     $learnRates = @(0.5, 0.675, 0.75)
     $iterations = @(200, 300)
@@ -56,26 +60,30 @@ elseif ($decisionType -eq "SimplePlay") {
     $minimumExampleCountsPerLeaf = @(200, 300)
 }
 
-foreach ($minimumExampleCountPerLeaf in $minimumExampleCountsPerLeaf) {
-    foreach ($learnRate in $learnRates) {
-        foreach ($iteration in $iterations) {
-            foreach ($numberOfLeaves in $numbersOfLeaves) {
-                $model = "$modelPrefix.$modelNumber";
+foreach ($l2Generalization in $l2Generalizations) {
+    foreach ($l1Generalization in $l1Generalizations) {
+        foreach ($minimumExampleCountPerLeaf in $minimumExampleCountsPerLeaf) {
+            foreach ($learnRate in $learnRates) {
+                foreach ($iteration in $iterations) {
+                    foreach ($numberOfLeaves in $numbersOfLeaves) {
+                        $model = "$modelPrefix.$modelNumber";
 
-                $trainCommand = "dotnet run --project NemesisEuchre.Console -- train -s $source -m $model -d $decisionType -lr $learnRate -i $iteration -l $numberOfLeaves -msl $minimumExampleCountPerLeaf -l1 $l1Generalization";
+                        $trainCommand = "dotnet run --project NemesisEuchre.Console -- train -s $source -m $model -d $decisionType -lr $learnRate -i $iteration -l $numberOfLeaves -msl $minimumExampleCountPerLeaf -l1 $l1Generalization -l2 $l2Generalization";
 
-                Write-Host $trainCommand;
+                        Write-Host $trainCommand;
 
-                # Invoke-Expression $trainCommand
-                
-                $battleCommand = "./battleModels -Model $model -ModelNumber $modelNumber -LearnRate $learnRate -Iterations $iteration -NumberOfLeaves $numberOfLeaves -MinimumExampleCountPerLeaf $minimumExampleCountPerLeaf -L1Generalization $l1Generalization -ModelParameterLabel $modelParameterLabel -CsvPath ""$csvPath""";
+                        Invoke-Expression $trainCommand
+                        
+                        $battleCommand = "./battleModels -Model $model -ModelNumber $modelNumber -LearnRate $learnRate -Iterations $iteration -NumberOfLeaves $numberOfLeaves -MinimumExampleCountPerLeaf $minimumExampleCountPerLeaf -L1Generalization $l1Generalization -L2Generalization $l2Generalization -ModelParameterLabel $modelParameterLabel -CsvPath ""$csvPath""";
 
-                Write-Host $battleCommand;
+                        Write-Host $battleCommand;
 
-                Invoke-Expression $battleCommand
+                        Invoke-Expression $battleCommand
 
-                $modelNumber = $modelNumber + 1;
-                Write-Host "Completed $model $(Get-Date)"
+                        $modelNumber = $modelNumber + 1;
+                        Write-Host "Completed $model $(Get-Date)"
+                    }
+                }
             }
         }
     }
