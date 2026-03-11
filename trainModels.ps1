@@ -1,4 +1,4 @@
-$modelNumber = 69;
+$modelNumber = 93;
 
 $source = "can3a";
 $decisionType = "CallTrump";
@@ -12,10 +12,10 @@ if ($decisionType -eq "CallTrump") {
     $l1Regularizations = @(0.0);
     $l2Regularizations = @(0.01);
 
-    $learnRates = @(0.5, 0.625, 0.75)
-    $iterations = @(75, 100, 125, 150)
+    $learnRates = @(0.75, 0.875, 1.0)
+    $iterations = @(25, 50, 75)
     $numbersOfLeaves = @(255)
-    $minimumExampleCountsPerLeaf = @(300, 500)
+    $minimumExampleCountsPerLeaf = @(500, 700)
 }
 elseif ($decisionType -eq "Discard") {
     $modelParameterLabel = "-t2m-discard";
