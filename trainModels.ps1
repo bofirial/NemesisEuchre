@@ -1,4 +1,4 @@
-$modelNumber = 37;
+$modelNumber = 45;
 
 $source = "can3a";
 $decisionType = "CallTrump";
@@ -6,16 +6,16 @@ $decisionType = "CallTrump";
 if ($decisionType -eq "CallTrump") {
     $modelParameterLabel = "-t2m-call";
     $csvPath = "reports/Gen4 Training/calltrump-modelResults.csv";
-    
+
     $modelPrefix = "can3ct";
 
-    $l1Regularizations = @(0.0, 0.3);
-    $l2Regularizations = @(0.01, 0.1);
+    $l1Regularizations = @(0.0);
+    $l2Regularizations = @(0.01);
 
     $learnRates = @(0.5, 0.625)
-    $iterations = @(200)
-    $numbersOfLeaves = @(127)
-    $minimumExampleCountsPerLeaf = @(300)
+    $iterations = @(150, 200)
+    $numbersOfLeaves = @(255)
+    $minimumExampleCountsPerLeaf = @(300, 500)
 }
 elseif ($decisionType -eq "Discard") {
     $modelParameterLabel = "-t2m-discard";
