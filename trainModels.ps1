@@ -1,4 +1,4 @@
-$modelNumber = 53;
+$modelNumber = 69;
 
 $source = "can3a";
 $decisionType = "CallTrump";
@@ -9,12 +9,12 @@ if ($decisionType -eq "CallTrump") {
 
     $modelPrefix = "can3ct";
 
-    $l1Regularizations = @(0.0, 0.3);
-    $l2Regularizations = @(0.01, 0.1);
+    $l1Regularizations = @(0.0);
+    $l2Regularizations = @(0.01);
 
-    $learnRates = @(0.5, 0.625)
-    $iterations = @(200)
-    $numbersOfLeaves = @(511)
+    $learnRates = @(0.5, 0.625, 0.75)
+    $iterations = @(75, 100, 125, 150)
+    $numbersOfLeaves = @(255)
     $minimumExampleCountsPerLeaf = @(300, 500)
 }
 elseif ($decisionType -eq "Discard") {
