@@ -1,4 +1,4 @@
-$modelNumber = 1;
+$modelNumber = 55;
 
 $source = "can3a";
 $decisionType = "Discard";
@@ -26,9 +26,9 @@ elseif ($decisionType -eq "Discard") {
     $l1Regularizations = @(0.0);
     $l2Regularizations = @(0.01);
 
-    $learnRates = @(0.25, 0.5, 0.75)
-    $iterations = @(75, 150, 200)
-    $numbersOfLeaves = @(63, 127, 255)
+    $learnRates = @(0.125, 0.25, 0.5)
+    $iterations = @(75, 150, 200, 300)
+    $numbersOfLeaves = @(31, 63)
     $minimumExampleCountsPerLeaf = @(200, 300)
 }
 elseif ($decisionType -eq "Play") {
