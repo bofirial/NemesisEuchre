@@ -1,7 +1,7 @@
-$modelNumber = 55;
+$modelNumber = 1;
 
 $source = "can3a";
-$decisionType = "Discard";
+$decisionType = "Play";
 
 if ($decisionType -eq "CallTrump") {
     $modelParameterLabel = "-t2m-call";
@@ -40,10 +40,10 @@ elseif ($decisionType -eq "Play") {
     $l1Regularizations = @(0.0);
     $l2Regularizations = @(0.01);
 
-    $learnRates = @(0.5, 0.675, 0.75)
-    $iterations = @(200, 300)
-    $numbersOfLeaves = @(255, 511, 640)
-    $minimumExampleCountsPerLeaf = @(200, 300)
+    $learnRates = @(0.5, 0.75)
+    $iterations = @(75, 150, 200)
+    $numbersOfLeaves = @(127, 255, 511)
+    $minimumExampleCountsPerLeaf = @(200, 400)
 }
 elseif ($decisionType -eq "SimplePlay") {
     $modelParameterLabel = "-t2m-simple-play";
