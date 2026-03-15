@@ -1,0 +1,51 @@
+{
+  "GenerationName": "can3a",
+  "DecisionType": "Discard",
+  "RowCount": 45505871,
+  "GameCount": 5000000,
+  "DealCount": 52722904,
+  "TrickCount": 263614520,
+  "Actors": [
+    {
+      "ActorType": "Model",
+      "ModelName": "gen3b",
+      "ExplorationTemperature": 0
+    },
+    {
+      "ActorType": "ModelTrainer",
+      "ModelName": "gen3b",
+      "ExplorationTemperature": 0.01
+    },
+    {
+      "ActorType": "ModelTrainer",
+      "ModelName": "gen3b",
+      "ExplorationTemperature": 0.1
+    },
+    {
+      "ActorType": "ModelTrainer",
+      "ModelName": "gen3b",
+      "ExplorationTemperature": 0.5
+    },
+    {
+      "ActorType": "Model",
+      "ModelName": "gen3t",
+      "ExplorationTemperature": 0
+    },
+    {
+      "ActorType": "ModelTrainer",
+      "ModelName": "gen3t",
+      "ExplorationTemperature": 0.01
+    },
+    {
+      "ActorType": "ModelTrainer",
+      "ModelName": "gen3t",
+      "ExplorationTemperature": 0.1
+    },
+    {
+      "ActorType": "ModelTrainer",
+      "ModelName": "gen3t",
+      "ExplorationTemperature": 0.5
+    }
+  ],
+  "CreatedAtUtc": "2026-03-10T04:26:03.7759312Z"
+}

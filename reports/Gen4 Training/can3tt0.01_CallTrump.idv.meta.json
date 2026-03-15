@@ -1,0 +1,21 @@
+{
+  "GenerationName": "can3tt0.01",
+  "DecisionType": "CallTrump",
+  "RowCount": 31998282,
+  "GameCount": 1000000,
+  "DealCount": 10719867,
+  "TrickCount": 53599335,
+  "Actors": [
+    {
+      "ActorType": "Model",
+      "ModelName": "gen3t",
+      "ExplorationTemperature": 0
+    },
+    {
+      "ActorType": "ModelTrainer",
+      "ModelName": "gen3t",
+      "ExplorationTemperature": 0.01
+    }
+  ],
+  "CreatedAtUtc": "2026-03-09T21:47:42.959246Z"
+}

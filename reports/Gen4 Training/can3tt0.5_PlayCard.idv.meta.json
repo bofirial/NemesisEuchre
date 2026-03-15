@@ -1,0 +1,21 @@
+{
+  "GenerationName": "can3tt0.5",
+  "DecisionType": "Play",
+  "RowCount": 53937023,
+  "GameCount": 500000,
+  "DealCount": 5119048,
+  "TrickCount": 25595240,
+  "Actors": [
+    {
+      "ActorType": "Model",
+      "ModelName": "gen3t",
+      "ExplorationTemperature": 0
+    },
+    {
+      "ActorType": "ModelTrainer",
+      "ModelName": "gen3t",
+      "ExplorationTemperature": 0.5
+    }
+  ],
+  "CreatedAtUtc": "2026-03-10T03:33:18.7543112Z"
+}
