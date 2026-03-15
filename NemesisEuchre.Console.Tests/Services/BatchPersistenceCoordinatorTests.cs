@@ -34,7 +34,7 @@ public class BatchPersistenceCoordinatorTests
         _coordinator = new BatchPersistenceCoordinator(
             _mockScopeFactory.Object,
             Mock.Of<IGameToTrainingDataConverter>(),
-            Mock.Of<ITrainingDataAccumulator>(),
+            Mock.Of<ITrainingDataAccumulatorFactory>(),
             MicrosoftOptions.Create(new PersistenceOptions { BatchSize = 2 }),
             Mock.Of<ILogger<BatchPersistenceCoordinator>>());
     }

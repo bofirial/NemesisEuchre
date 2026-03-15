@@ -42,6 +42,7 @@ public class TrickToEntityMapper : ITrickToEntityMapper
 
                 return new PlayCardDecisionEntity
                 {
+                    PlayerPosition = decision.PlayerPosition,
                     LeadRelativePlayerPositionId = (int)decision.LeadPlayer.ToRelativePosition(decision.PlayerPosition),
                     LeadRelativeSuitId = decision.LeadSuit.HasValue ? (int)decision.LeadSuit.Value.ToRelativeSuit(decision.TrumpSuit) : null,
                     WinningTrickRelativePlayerPositionId = decision.WinningTrickPlayer.HasValue ? (int)decision.WinningTrickPlayer.Value.ToRelativePosition(decision.PlayerPosition) : null,

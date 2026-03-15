@@ -42,7 +42,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_WithValidGames_ProducesCorrectTrainingData()
     {
-        var game = CreateGameWithPlayers();
+        var game = CreateGameWithPlayers(callTrumpCount: 1, discardCount: 1, playCardCount: 1);
         var games = new List<Game> { game };
 
         var callTrumpDecision = new CallTrumpDecisionEntity { RelativeDealPoints = 2 };
@@ -53,12 +53,10 @@ public class GameToTrainingDataConverterTests
         {
             Deals =
             [
-                new DealEntity
-                {
-                    CallTrumpDecisions = [callTrumpDecision],
-                    DiscardCardDecisions = [discardCardDecision],
-                    PlayCardDecisions = [playCardDecision],
-                },
+                CreateDealEntity(
+                    callTrumpDecisions: [callTrumpDecision],
+                    discardCardDecisions: [discardCardDecision],
+                    playCardDecisions: [playCardDecision]),
             ],
         };
 
@@ -82,7 +80,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_FiltersOutDecisionsWithNullRelativeDealPoints()
     {
-        var game = CreateGameWithPlayers();
+        var game = CreateGameWithPlayers(callTrumpCount: 2, discardCount: 2, playCardCount: 2);
         var games = new List<Game> { game };
 
         var validCallTrumpDecision = new CallTrumpDecisionEntity { RelativeDealPoints = 2 };
@@ -96,12 +94,10 @@ public class GameToTrainingDataConverterTests
         {
             Deals =
             [
-                new DealEntity
-                {
-                    CallTrumpDecisions = [validCallTrumpDecision, invalidCallTrumpDecision],
-                    DiscardCardDecisions = [validDiscardCardDecision, invalidDiscardCardDecision],
-                    PlayCardDecisions = [validPlayCardDecision, invalidPlayCardDecision],
-                },
+                CreateDealEntity(
+                    callTrumpDecisions: [validCallTrumpDecision, invalidCallTrumpDecision],
+                    discardCardDecisions: [validDiscardCardDecision, invalidDiscardCardDecision],
+                    playCardDecisions: [validPlayCardDecision, invalidPlayCardDecision]),
             ],
         };
 
@@ -150,7 +146,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_WhenFeatureEngineerThrows_ContinuesProcessing()
     {
-        var game = CreateGameWithPlayers();
+        var game = CreateGameWithPlayers(callTrumpCount: 2);
         var games = new List<Game> { game };
 
         var callTrumpDecision1 = new CallTrumpDecisionEntity { RelativeDealPoints = 2 };
@@ -160,10 +156,7 @@ public class GameToTrainingDataConverterTests
         {
             Deals =
             [
-                new DealEntity
-                {
-                    CallTrumpDecisions = [callTrumpDecision1, callTrumpDecision2],
-                },
+                CreateDealEntity(callTrumpDecisions: [callTrumpDecision1, callTrumpDecision2]),
             ],
         };
 
@@ -187,7 +180,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_WhenMultipleFeatureEngineersThrow_ReturnsEmptyLists()
     {
-        var game = CreateGameWithPlayers();
+        var game = CreateGameWithPlayers(callTrumpCount: 1, discardCount: 1, playCardCount: 1);
         var games = new List<Game> { game };
 
         var callTrumpDecision = new CallTrumpDecisionEntity { RelativeDealPoints = 2 };
@@ -198,12 +191,10 @@ public class GameToTrainingDataConverterTests
         {
             Deals =
             [
-                new DealEntity
-                {
-                    CallTrumpDecisions = [callTrumpDecision],
-                    DiscardCardDecisions = [discardCardDecision],
-                    PlayCardDecisions = [playCardDecision],
-                },
+                CreateDealEntity(
+                    callTrumpDecisions: [callTrumpDecision],
+                    discardCardDecisions: [discardCardDecision],
+                    playCardDecisions: [playCardDecision]),
             ],
         };
 
@@ -248,7 +239,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_CallsCorrectFeatureEngineerForEachDecisionType()
     {
-        var game = CreateGameWithPlayers();
+        var game = CreateGameWithPlayers(callTrumpCount: 1, discardCount: 1, playCardCount: 1);
         var games = new List<Game> { game };
 
         var callTrumpDecision = new CallTrumpDecisionEntity { RelativeDealPoints = 2 };
@@ -259,12 +250,10 @@ public class GameToTrainingDataConverterTests
         {
             Deals =
             [
-                new DealEntity
-                {
-                    CallTrumpDecisions = [callTrumpDecision],
-                    DiscardCardDecisions = [discardCardDecision],
-                    PlayCardDecisions = [playCardDecision],
-                },
+                CreateDealEntity(
+                    callTrumpDecisions: [callTrumpDecision],
+                    discardCardDecisions: [discardCardDecision],
+                    playCardDecisions: [playCardDecision]),
             ],
         };
 
@@ -284,7 +273,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_WithMultipleDealsAndDecisions_ProcessesAll()
     {
-        var game = CreateGameWithPlayers();
+        var game = CreateGameWithPlayers(dealCount: 2, callTrumpCount: 1, discardCount: 1, playCardCount: 1);
         var games = new List<Game> { game };
 
         var callTrumpDecision1 = new CallTrumpDecisionEntity { RelativeDealPoints = 2 };
@@ -298,18 +287,14 @@ public class GameToTrainingDataConverterTests
         {
             Deals =
             [
-                new DealEntity
-                {
-                    CallTrumpDecisions = [callTrumpDecision1],
-                    DiscardCardDecisions = [discardCardDecision1],
-                    PlayCardDecisions = [playCardDecision1],
-                },
-                new DealEntity
-                {
-                    CallTrumpDecisions = [callTrumpDecision2],
-                    DiscardCardDecisions = [discardCardDecision2],
-                    PlayCardDecisions = [playCardDecision2],
-                },
+                CreateDealEntity(
+                    callTrumpDecisions: [callTrumpDecision1],
+                    discardCardDecisions: [discardCardDecision1],
+                    playCardDecisions: [playCardDecision1]),
+                CreateDealEntity(
+                    callTrumpDecisions: [callTrumpDecision2],
+                    discardCardDecisions: [discardCardDecision2],
+                    playCardDecisions: [playCardDecision2]),
             ],
         };
 
@@ -329,17 +314,15 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_WithSuccessfulConversion_ReturnsTrainingData()
     {
-        var game = CreateGameWithPlayers();
+        var game = CreateGameWithPlayers(callTrumpCount: 1);
         var games = new List<Game> { game };
 
         var gameEntity = new GameEntity
         {
             Deals =
             [
-                new DealEntity
-                {
-                    CallTrumpDecisions = [new CallTrumpDecisionEntity { RelativeDealPoints = 2 }],
-                },
+                CreateDealEntity(
+                    callTrumpDecisions: [new CallTrumpDecisionEntity { RelativeDealPoints = 2 }]),
             ],
         };
 
@@ -368,7 +351,7 @@ public class GameToTrainingDataConverterTests
     [Fact]
     public void Convert_ReturnsStats_WithCorrectDealAndTrickCounts()
     {
-        var game = CreateGameWithPlayers();
+        var game = CreateGameWithPlayers(dealCount: 0);
         game.CompletedDeals.Add(new Deal
         {
             CompletedTricks = [new Trick(), new Trick(), new Trick()],
@@ -429,13 +412,143 @@ public class GameToTrainingDataConverterTests
         result.Stats.Actors.Should().BeEmpty();
     }
 
-    private static Game CreateGameWithPlayers()
+    [Fact]
+    public void ConvertByActor_SplitsDecisionsByActorType()
+    {
+        var chaosActor = new Actor(ActorType.Chaos);
+        var modelActor = Actor.WithModel(ActorType.Model, "Gen4c");
+
+        var game = new Game { GameStatus = GameStatus.Complete };
+        game.Players[PlayerPosition.North] = new Player { Actor = chaosActor };
+        game.Players[PlayerPosition.South] = new Player { Actor = chaosActor };
+        game.Players[PlayerPosition.East] = new Player { Actor = modelActor };
+        game.Players[PlayerPosition.West] = new Player { Actor = modelActor };
+
+        var chaosCallTrump = new CallTrumpDecisionRecord { PlayerPosition = PlayerPosition.North };
+        var modelCallTrump = new CallTrumpDecisionRecord { PlayerPosition = PlayerPosition.East };
+        game.CompletedDeals.Add(new Deal
+        {
+            CallTrumpDecisions = [chaosCallTrump, modelCallTrump],
+        });
+
+        var chaosEntity = new CallTrumpDecisionEntity { PlayerPosition = PlayerPosition.North, RelativeDealPoints = 1 };
+        var modelEntity = new CallTrumpDecisionEntity { PlayerPosition = PlayerPosition.East, RelativeDealPoints = 2 };
+
+        var gameEntity = new GameEntity
+        {
+            Deals =
+            [
+                CreateDealEntity(callTrumpDecisions: [chaosEntity, modelEntity]),
+            ],
+        };
+
+        _mockMapper.Setup(m => m.Map(game)).Returns(gameEntity);
+        _mockCallTrumpEngineer.Setup(e => e.Transform(It.IsAny<CallTrumpDecisionEntity>())).Returns(new CallTrumpTrainingData());
+
+        var result = _converter.ConvertByActor([game]);
+
+        result.Should().ContainKey("Chaos");
+        result.Should().ContainKey("Gen4c");
+        result["Chaos"].CallTrumpData.Should().ContainSingle();
+        result["Gen4c"].CallTrumpData.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void ConvertByActor_WithTemperature_UsesCorrectFileNameComponent()
+    {
+        var actor = Actor.WithModel(ActorType.ModelTrainer, "Gen4c", 0.1f);
+
+        var game = new Game { GameStatus = GameStatus.Complete };
+        game.Players[PlayerPosition.North] = new Player { Actor = actor };
+        game.Players[PlayerPosition.South] = new Player { Actor = actor };
+        game.Players[PlayerPosition.East] = new Player { Actor = actor };
+        game.Players[PlayerPosition.West] = new Player { Actor = actor };
+
+        game.CompletedDeals.Add(new Deal
+        {
+            CallTrumpDecisions = [new CallTrumpDecisionRecord { PlayerPosition = PlayerPosition.North }],
+        });
+
+        var gameEntity = new GameEntity
+        {
+            Deals = [CreateDealEntity(callTrumpDecisions: [new CallTrumpDecisionEntity { RelativeDealPoints = 1 }])],
+        };
+
+        _mockMapper.Setup(m => m.Map(game)).Returns(gameEntity);
+        _mockCallTrumpEngineer.Setup(e => e.Transform(It.IsAny<CallTrumpDecisionEntity>())).Returns(new CallTrumpTrainingData());
+
+        var result = _converter.ConvertByActor([game]);
+
+        result.Should().ContainKey("Gen4c_0.1t");
+    }
+
+    private static Game CreateGameWithPlayers(
+        int dealCount = 1,
+        int callTrumpCount = 0,
+        int discardCount = 0,
+        int playCardCount = 0)
     {
         var game = new Game { GameStatus = GameStatus.Complete };
         game.Players[PlayerPosition.South] = new Player { Actor = new Actor(ActorType.Chaos) };
         game.Players[PlayerPosition.North] = new Player { Actor = new Actor(ActorType.Chaos) };
         game.Players[PlayerPosition.East] = new Player { Actor = new Actor(ActorType.Chaos) };
         game.Players[PlayerPosition.West] = new Player { Actor = new Actor(ActorType.Chaos) };
+
+        for (int d = 0; d < dealCount; d++)
+        {
+            var deal = new Deal();
+
+            for (int i = 0; i < callTrumpCount; i++)
+            {
+                deal.CallTrumpDecisions.Add(new CallTrumpDecisionRecord { PlayerPosition = PlayerPosition.North });
+            }
+
+            for (int i = 0; i < discardCount; i++)
+            {
+                deal.DiscardCardDecisions.Add(new DiscardCardDecisionRecord
+                {
+                    PlayerPosition = PlayerPosition.North,
+                    ChosenCard = new Card(Suit.Hearts, Rank.Ace),
+                });
+            }
+
+            if (playCardCount > 0)
+            {
+                var trick = new Trick();
+                for (int i = 0; i < playCardCount; i++)
+                {
+                    trick.PlayCardDecisions.Add(new PlayCardDecisionRecord
+                    {
+                        PlayerPosition = PlayerPosition.North,
+                        ChosenCard = new Card(Suit.Hearts, Rank.Ace),
+                    });
+                }
+
+                deal.CompletedTricks.Add(trick);
+            }
+
+            game.CompletedDeals.Add(deal);
+        }
+
         return game;
+    }
+
+    private static DealEntity CreateDealEntity(
+        CallTrumpDecisionEntity[]? callTrumpDecisions = null,
+        DiscardCardDecisionEntity[]? discardCardDecisions = null,
+        PlayCardDecisionEntity[]? playCardDecisions = null)
+    {
+        var dealEntity = new DealEntity
+        {
+            CallTrumpDecisions = callTrumpDecisions ?? [],
+            DiscardCardDecisions = discardCardDecisions ?? [],
+        };
+
+        if (playCardDecisions is { Length: > 0 })
+        {
+            dealEntity.Tricks = [new TrickEntity { PlayCardDecisions = [.. playCardDecisions] }];
+        }
+
+        return dealEntity;
     }
 }

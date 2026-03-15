@@ -29,7 +29,6 @@ public class BatchGameOrchestrator(
     IServiceScopeFactory serviceScopeFactory,
     IBatchExecutionFacade executionFacade,
     IPersistenceCoordinator persistenceCoordinator,
-    ITrainingDataAccumulator trainingDataAccumulator,
     IOptions<PersistenceOptions> persistenceOptions,
     ILogger<BatchGameOrchestrator> logger) : IBatchGameOrchestrator
 {
@@ -120,7 +119,7 @@ public class BatchGameOrchestrator(
                 : null;
 
             var idvStopwatch = Stopwatch.StartNew();
-            await trainingDataAccumulator.FinalizeAsync(persistenceOptions.IdvGenerationName, statusCallback, cancellationToken).ConfigureAwait(false);
+            await persistenceCoordinator.FinalizeAllIdvAsync(persistenceOptions.IdvGenerationName, statusCallback, cancellationToken).ConfigureAwait(false);
             idvStopwatch.Stop();
             state.IdvSaveDuration = idvStopwatch.Elapsed;
         }
@@ -241,7 +240,7 @@ public class BatchGameOrchestrator(
                 : null;
 
             var idvStopwatch = Stopwatch.StartNew();
-            await trainingDataAccumulator.FinalizeAsync(persistenceOptions.IdvGenerationName, statusCallback, cancellationToken).ConfigureAwait(false);
+            await persistenceCoordinator.FinalizeAllIdvAsync(persistenceOptions.IdvGenerationName, statusCallback, cancellationToken).ConfigureAwait(false);
             idvStopwatch.Stop();
             totalIdvSaveDuration += idvStopwatch.Elapsed;
         }

@@ -33,7 +33,6 @@ public class BatchGameOrchestratorTests
     private readonly Mock<ISubBatchStrategy> _subBatchStrategyMock;
     private readonly Mock<IBatchExecutionFacade> _executionFacadeMock;
     private readonly Mock<IPersistenceCoordinator> _persistenceCoordinatorMock;
-    private readonly Mock<ITrainingDataAccumulator> _trainingDataAccumulatorMock;
     private readonly BatchGameOrchestrator _sut;
 
     public BatchGameOrchestratorTests()
@@ -48,7 +47,6 @@ public class BatchGameOrchestratorTests
         _parallelismCoordinatorMock = new Mock<IParallelismCoordinator>();
         _subBatchStrategyMock = new Mock<ISubBatchStrategy>();
         _persistenceCoordinatorMock = new Mock<IPersistenceCoordinator>();
-        _trainingDataAccumulatorMock = new Mock<ITrainingDataAccumulator>();
 
         _persistenceOptionsMock.Setup(x => x.Value).Returns(new PersistenceOptions
         {
@@ -119,7 +117,6 @@ public class BatchGameOrchestratorTests
             _serviceScopeFactoryMock.Object,
             _executionFacadeMock.Object,
             _persistenceCoordinatorMock.Object,
-            _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
     }
@@ -227,7 +224,6 @@ public class BatchGameOrchestratorTests
             _serviceScopeFactoryMock.Object,
             executionFacade,
             _persistenceCoordinatorMock.Object,
-            _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
 
@@ -333,7 +329,6 @@ public class BatchGameOrchestratorTests
             _serviceScopeFactoryMock.Object,
             executionFacade,
             _persistenceCoordinatorMock.Object,
-            _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
 
@@ -374,7 +369,6 @@ public class BatchGameOrchestratorTests
             _serviceScopeFactoryMock.Object,
             executionFacade,
             _persistenceCoordinatorMock.Object,
-            _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
 
@@ -500,7 +494,7 @@ public class BatchGameOrchestratorTests
         var realPersistenceCoordinator = new BatchPersistenceCoordinator(
             _serviceScopeFactoryMock.Object,
             Mock.Of<IGameToTrainingDataConverter>(),
-            Mock.Of<ITrainingDataAccumulator>(),
+            Mock.Of<ITrainingDataAccumulatorFactory>(),
             MicrosoftOptions.Create(new PersistenceOptions { BatchSize = 100 }),
             persistenceLogger.Object);
 
@@ -509,7 +503,6 @@ public class BatchGameOrchestratorTests
             _serviceScopeFactoryMock.Object,
             executionFacade,
             realPersistenceCoordinator,
-            _trainingDataAccumulatorMock.Object,
             _persistenceOptionsMock.Object,
             _loggerMock.Object);
 

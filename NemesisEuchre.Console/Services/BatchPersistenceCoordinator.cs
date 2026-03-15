@@ -18,16 +18,22 @@ public interface IPersistenceCoordinator
         BatchExecutionState state,
         GamePersistenceOptions? persistenceOptions,
         CancellationToken cancellationToken = default);
+
+    Task FinalizeAllIdvAsync(
+        string baseGenerationName,
+        Action<string>? onStatusUpdate = null,
+        CancellationToken cancellationToken = default);
 }
 
 public class BatchPersistenceCoordinator(
     IServiceScopeFactory serviceScopeFactory,
     IGameToTrainingDataConverter trainingDataConverter,
-    ITrainingDataAccumulator trainingDataAccumulator,
+    ITrainingDataAccumulatorFactory accumulatorFactory,
     IOptions<PersistenceOptions> persistenceOptions,
     ILogger<BatchPersistenceCoordinator> logger) : IPersistenceCoordinator
 {
     private readonly PersistenceOptions _persistenceOptions = persistenceOptions.Value;
+    private readonly Dictionary<string, ITrainingDataAccumulator> _actorAccumulators = [];
 
     public async Task ConsumeAndPersistAsync(
         BatchExecutionState state,
@@ -38,7 +44,7 @@ public class BatchPersistenceCoordinator(
 
         var persistenceStopwatch = Stopwatch.StartNew();
         var batch = new List<Game>(_persistenceOptions.BatchSize);
-        Task<TrainingDataBatch>? pendingConversion = null;
+        Task<Dictionary<string, TrainingDataBatch>>? pendingConversion = null;
 
         await foreach (var game in state.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
         {
@@ -48,7 +54,7 @@ public class BatchPersistenceCoordinator(
             {
                 if (pendingConversion != null)
                 {
-                    trainingDataAccumulator.Add(await pendingConversion.ConfigureAwait(false));
+                    AddActorBatches(await pendingConversion.ConfigureAwait(false));
                 }
 
                 pendingConversion = await FlushBatchAsync(batch, state, persistenceOptions, cancellationToken).ConfigureAwait(false);
@@ -58,7 +64,7 @@ public class BatchPersistenceCoordinator(
 
         if (pendingConversion != null)
         {
-            trainingDataAccumulator.Add(await pendingConversion.ConfigureAwait(false));
+            AddActorBatches(await pendingConversion.ConfigureAwait(false));
         }
 
         if (batch.Count > 0)
@@ -66,7 +72,7 @@ public class BatchPersistenceCoordinator(
             var finalConversion = await FlushBatchAsync(batch, state, persistenceOptions, cancellationToken).ConfigureAwait(false);
             if (finalConversion != null)
             {
-                trainingDataAccumulator.Add(await finalConversion.ConfigureAwait(false));
+                AddActorBatches(await finalConversion.ConfigureAwait(false));
             }
         }
 
@@ -75,11 +81,41 @@ public class BatchPersistenceCoordinator(
 
         if (persistenceOptions.IdvGenerationName != null)
         {
-            trainingDataAccumulator.SaveChunk(persistenceOptions.IdvGenerationName, persistenceOptions.AllowOverwrite);
+            foreach (var (actorKey, accumulator) in _actorAccumulators)
+            {
+                var generationName = $"{persistenceOptions.IdvGenerationName}_{actorKey}";
+                accumulator.SaveChunk(generationName, persistenceOptions.AllowOverwrite);
+            }
         }
     }
 
-    private async Task<Task<TrainingDataBatch>?> FlushBatchAsync(
+    public async Task FinalizeAllIdvAsync(
+        string baseGenerationName,
+        Action<string>? onStatusUpdate = null,
+        CancellationToken cancellationToken = default)
+    {
+        foreach (var (actorKey, accumulator) in _actorAccumulators)
+        {
+            var generationName = $"{baseGenerationName}_{actorKey}";
+            await accumulator.FinalizeAsync(generationName, onStatusUpdate, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    private void AddActorBatches(Dictionary<string, TrainingDataBatch> actorBatches)
+    {
+        foreach (var (actorKey, batch) in actorBatches)
+        {
+            if (!_actorAccumulators.TryGetValue(actorKey, out var accumulator))
+            {
+                accumulator = accumulatorFactory.Create();
+                _actorAccumulators[actorKey] = accumulator;
+            }
+
+            accumulator.Add(batch);
+        }
+    }
+
+    private async Task<Task<Dictionary<string, TrainingDataBatch>>?> FlushBatchAsync(
         List<Game> games,
         BatchExecutionState state,
         GamePersistenceOptions persistenceOptions,
@@ -105,11 +141,11 @@ public class BatchPersistenceCoordinator(
             }
         }
 
-        Task<TrainingDataBatch>? conversionTask = null;
+        Task<Dictionary<string, TrainingDataBatch>>? conversionTask = null;
         if (persistenceOptions.IdvGenerationName != null)
         {
             var snapshot = new List<Game>(games);
-            conversionTask = Task.Run(() => trainingDataConverter.Convert(snapshot), cancellationToken);
+            conversionTask = Task.Run(() => trainingDataConverter.ConvertByActor(snapshot), cancellationToken);
 
             if (!persisted)
             {

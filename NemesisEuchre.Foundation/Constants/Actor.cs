@@ -4,6 +4,15 @@ public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames 
 {
     public string? ModelName => ModelNames?.GetValueOrDefault("default");
 
+    public string ToFileNameComponent()
+    {
+        var baseName = ModelName ?? ActorType.ToString();
+
+        return ExplorationTemperature > 0
+            ? $"{baseName}_{ExplorationTemperature}t"
+            : baseName;
+    }
+
     public static Actor WithModel(ActorType actorType, string modelName, float explorationTemperature = default, DecisionType explorationDecisionType = DecisionType.All)
     {
         return new Actor(

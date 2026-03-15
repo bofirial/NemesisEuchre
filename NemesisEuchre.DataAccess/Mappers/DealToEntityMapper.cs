@@ -89,6 +89,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
 
             return new CallTrumpDecisionEntity
             {
+                PlayerPosition = decision.PlayerPosition,
                 DealerRelativePositionId = (int)decision.DealerPosition.ToRelativePosition(decision.PlayerPosition),
                 UpCardId = CardIdHelper.ToCardId(decision.UpCard!),
                 TeamScore = decision.TeamScore,
@@ -131,6 +132,7 @@ public class DealToEntityMapper(ITrickToEntityMapper trickMapper) : IDealToEntit
 
             return new DiscardCardDecisionEntity
             {
+                PlayerPosition = decision.PlayerPosition,
                 CallingRelativePlayerPositionId = (int)deal.CallingPlayer!.Value.ToRelativePosition(decision.PlayerPosition),
                 TeamScore = decision.TeamScore,
                 OpponentScore = decision.OpponentScore,

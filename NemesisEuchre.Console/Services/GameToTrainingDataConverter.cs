@@ -14,6 +14,8 @@ namespace NemesisEuchre.Console.Services;
 public interface IGameToTrainingDataConverter
 {
     TrainingDataBatch Convert(IReadOnlyList<Game> games);
+
+    Dictionary<string, TrainingDataBatch> ConvertByActor(IReadOnlyList<Game> games);
 }
 
 public partial class GameToTrainingDataConverter(
@@ -25,107 +27,143 @@ public partial class GameToTrainingDataConverter(
 {
     public TrainingDataBatch Convert(IReadOnlyList<Game> games)
     {
-        var results = new GameConversionResult[games.Count];
+        var byActor = ConvertByActor(games);
 
-        Parallel.For(0, games.Count, i => results[i] = ConvertSingle(games[i]));
-
-        var totalPlay = 0;
-        var totalCallTrump = 0;
-        var totalDiscard = 0;
-        var totalErrors = 0;
+        var playCardData = new List<PlayCardTrainingData>();
+        var callTrumpData = new List<CallTrumpTrainingData>();
+        var discardCardData = new List<DiscardCardTrainingData>();
+        var actors = new HashSet<Actor>();
+        var gameCount = 0;
         var dealCount = 0;
         var trickCount = 0;
 
-        foreach (var r in results)
+        foreach (var batch in byActor.Values)
         {
-            totalPlay += r.PlayCardData.Count;
-            totalCallTrump += r.CallTrumpData.Count;
-            totalDiscard += r.DiscardCardData.Count;
-            totalErrors += r.ErrorCount;
-            dealCount += r.DealCount;
-            trickCount += r.TrickCount;
+            playCardData.AddRange(batch.PlayCardData);
+            callTrumpData.AddRange(batch.CallTrumpData);
+            discardCardData.AddRange(batch.DiscardCardData);
+            actors.UnionWith(batch.Stats.Actors);
+            gameCount = batch.Stats.GameCount;
+            dealCount = batch.Stats.DealCount;
+            trickCount = batch.Stats.TrickCount;
         }
 
-        var playCardData = new List<PlayCardTrainingData>(totalPlay);
-        var callTrumpData = new List<CallTrumpTrainingData>(totalCallTrump);
-        var discardCardData = new List<DiscardCardTrainingData>(totalDiscard);
-        var actors = new HashSet<Actor>();
+        var stats = new TrainingDataBatchStats(gameCount, dealCount, trickCount, actors);
+        return new TrainingDataBatch(playCardData, callTrumpData, discardCardData, stats);
+    }
 
-        foreach (var r in results)
+    public Dictionary<string, TrainingDataBatch> ConvertByActor(IReadOnlyList<Game> games)
+    {
+        var results = new ActorGameConversionResult[games.Count];
+
+        Parallel.For(0, games.Count, i => results[i] = ConvertSingleByActor(games[i]));
+
+        var allActorKeys = new HashSet<string>();
+        var totalDealCount = 0;
+        var totalTrickCount = 0;
+        var totalErrors = 0;
+
+        foreach (var result in results)
         {
-            playCardData.AddRange(r.PlayCardData);
-            callTrumpData.AddRange(r.CallTrumpData);
-            discardCardData.AddRange(r.DiscardCardData);
-            actors.UnionWith(r.Actors);
+            allActorKeys.UnionWith(result.ActorData.Keys);
+            totalDealCount += result.DealCount;
+            totalTrickCount += result.TrickCount;
+            totalErrors += result.ErrorCount;
         }
 
         if (totalErrors > 0)
         {
-            LoggerMessages.LogTrainingDataLoadComplete(logger, playCardData.Count + callTrumpData.Count + discardCardData.Count, totalErrors);
+            var totalRows = results.Sum(r => r.ActorData.Values.Sum(
+                a => a.PlayCardData.Count + a.CallTrumpData.Count + a.DiscardCardData.Count));
+            LoggerMessages.LogTrainingDataLoadComplete(logger, totalRows, totalErrors);
         }
 
-        var stats = new TrainingDataBatchStats(games.Count, dealCount, trickCount, actors);
-        return new TrainingDataBatch(playCardData, callTrumpData, discardCardData, stats);
-    }
-
-    private static short? GetRelativeDealPoints(object entity)
-    {
-        return entity switch
+        var output = new Dictionary<string, TrainingDataBatch>(allActorKeys.Count);
+        foreach (var actorKey in allActorKeys)
         {
-            PlayCardDecisionEntity p => p.RelativeDealPoints,
-            CallTrumpDecisionEntity c => c.RelativeDealPoints,
-            DiscardCardDecisionEntity d => d.RelativeDealPoints,
-            _ => null,
-        };
+            var playCard = new List<PlayCardTrainingData>();
+            var callTrump = new List<CallTrumpTrainingData>();
+            var discard = new List<DiscardCardTrainingData>();
+            var actors = new HashSet<Actor>();
+
+            foreach (var result in results)
+            {
+                if (result.ActorData.TryGetValue(actorKey, out var data))
+                {
+                    playCard.AddRange(data.PlayCardData);
+                    callTrump.AddRange(data.CallTrumpData);
+                    discard.AddRange(data.DiscardCardData);
+                    actors.UnionWith(data.Actors);
+                }
+            }
+
+            var stats = new TrainingDataBatchStats(games.Count, totalDealCount, totalTrickCount, actors);
+            output[actorKey] = new TrainingDataBatch(playCard, callTrump, discard, stats);
+        }
+
+        return output;
     }
 
-    private GameConversionResult ConvertSingle(Game game)
+    private ActorGameConversionResult ConvertSingleByActor(Game game)
     {
-        var playCardData = new List<PlayCardTrainingData>();
-        var callTrumpData = new List<CallTrumpTrainingData>();
-        var discardCardData = new List<DiscardCardTrainingData>();
-        var errorCount = 0;
+        var actorKeyMap = new Dictionary<PlayerPosition, string>();
+        var actorData = new Dictionary<string, ActorDecisionLists>();
 
+        foreach (var (position, player) in game.Players)
+        {
+            var key = player.Actor.ToFileNameComponent();
+            actorKeyMap[position] = key;
+
+            if (!actorData.TryGetValue(key, out _))
+            {
+                actorData[key] = new ActorDecisionLists();
+            }
+
+            actorData[key].Actors.Add(player.Actor);
+        }
+
+        var errorCount = 0;
         var dealCount = game.CompletedDeals.Count;
         var trickCount = game.CompletedDeals.Sum(d => d.CompletedTricks.Count);
-
-        var actors = new HashSet<Actor>();
-        foreach (var player in game.Players.Values)
-        {
-            actors.Add(player.Actor);
-        }
 
         var gameEntity = gameToEntityMapper.Map(game);
 
         foreach (var deal in gameEntity.Deals)
         {
-            ProcessDecisions(deal.CallTrumpDecisions, callTrumpFeatureEngineer, callTrumpData, ref errorCount);
-            ProcessDecisions(deal.DiscardCardDecisions, discardCardFeatureEngineer, discardCardData, ref errorCount);
-            ProcessDecisions(deal.PlayCardDecisions, playCardFeatureEngineer, playCardData, ref errorCount);
+            ProcessDecisions(deal.CallTrumpDecisions, callTrumpFeatureEngineer, actorKeyMap, actorData, (l, td) => l.CallTrumpData.Add(td), ref errorCount);
+            ProcessDecisions(deal.DiscardCardDecisions, discardCardFeatureEngineer, actorKeyMap, actorData, (l, td) => l.DiscardCardData.Add(td), ref errorCount);
+
+            foreach (var trick in deal.Tricks)
+            {
+                ProcessDecisions(trick.PlayCardDecisions, playCardFeatureEngineer, actorKeyMap, actorData, (l, td) => l.PlayCardData.Add(td), ref errorCount);
+            }
         }
 
-        return new GameConversionResult(playCardData, callTrumpData, discardCardData, dealCount, trickCount, actors, errorCount);
+        return new ActorGameConversionResult(actorData, dealCount, trickCount, errorCount);
     }
 
     private void ProcessDecisions<TDecisionEntity, TTrainingData>(
         IEnumerable<TDecisionEntity> decisions,
         IFeatureEngineer<TDecisionEntity, TTrainingData> featureEngineer,
-        List<TTrainingData> dataList,
+        Dictionary<PlayerPosition, string> actorKeyMap,
+        Dictionary<string, ActorDecisionLists> actorData,
+        Action<ActorDecisionLists, TTrainingData> addItem,
         ref int errorCount)
-        where TDecisionEntity : class
+        where TDecisionEntity : class, IDecisionEntityWithPosition
         where TTrainingData : class, new()
     {
         foreach (var decision in decisions)
         {
-            var relativePoints = GetRelativeDealPoints(decision);
-            if (relativePoints == null)
+            if (decision.RelativeDealPoints == null)
             {
                 continue;
             }
 
+            var actorKey = actorKeyMap[decision.PlayerPosition];
+
             try
             {
-                dataList.Add(featureEngineer.Transform(decision));
+                addItem(actorData[actorKey], featureEngineer.Transform(decision));
             }
             catch (Exception ex)
             {

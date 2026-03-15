@@ -1,12 +1,18 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using NemesisEuchre.DataAccess.Entities.Metadata;
+using NemesisEuchre.Foundation.Constants;
 
 namespace NemesisEuchre.DataAccess.Entities;
 
-public class PlayCardDecisionEntity : EntityBase
+public class PlayCardDecisionEntity : EntityBase, IDecisionEntityWithPosition
 {
+    [NotMapped]
+    public PlayerPosition PlayerPosition { get; set; }
+
     public int PlayCardDecisionId { get; set; }
 
     public int DealId { get; set; }
