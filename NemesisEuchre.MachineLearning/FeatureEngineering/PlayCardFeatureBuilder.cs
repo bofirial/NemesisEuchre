@@ -167,13 +167,13 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
             Card3Threats = GetCardThreats(cardsInHand, 2, effectiveAccountedFor, knownPlayerSuitVoids),
             Card4Threats = GetCardThreats(cardsInHand, 3, effectiveAccountedFor, knownPlayerSuitVoids),
             Card5Threats = GetCardThreats(cardsInHand, 4, effectiveAccountedFor, knownPlayerSuitVoids),
-            Card1BeatsWinningTrickCard = -1f,
-            Card2BeatsWinningTrickCard = -1f,
-            Card3BeatsWinningTrickCard = -1f,
-            Card4BeatsWinningTrickCard = -1f,
-            Card5BeatsWinningTrickCard = -1f,
+            Card1ThreatsThisTrick = GetCardThreatsThisTrick(cardsInHand, 0, effectiveAccountedFor, knownPlayerSuitVoids, playedCards, leadPlayer, leadSuit, winningTrickPlayer, callingPlayer, callingPlayerGoingAlone),
+            Card2ThreatsThisTrick = GetCardThreatsThisTrick(cardsInHand, 1, effectiveAccountedFor, knownPlayerSuitVoids, playedCards, leadPlayer, leadSuit, winningTrickPlayer, callingPlayer, callingPlayerGoingAlone),
+            Card3ThreatsThisTrick = GetCardThreatsThisTrick(cardsInHand, 2, effectiveAccountedFor, knownPlayerSuitVoids, playedCards, leadPlayer, leadSuit, winningTrickPlayer, callingPlayer, callingPlayerGoingAlone),
+            Card4ThreatsThisTrick = GetCardThreatsThisTrick(cardsInHand, 3, effectiveAccountedFor, knownPlayerSuitVoids, playedCards, leadPlayer, leadSuit, winningTrickPlayer, callingPlayer, callingPlayerGoingAlone),
+            Card5ThreatsThisTrick = GetCardThreatsThisTrick(cardsInHand, 4, effectiveAccountedFor, knownPlayerSuitVoids, playedCards, leadPlayer, leadSuit, winningTrickPlayer, callingPlayer, callingPlayerGoingAlone),
             ChosenCardThreats = CalculateThreats(chosenCard, effectiveAccountedFor, knownPlayerSuitVoids),
-            ChosenCardBeatsWinningTrickCard = -1f,
+            ChosenCardThreatsThisTrick = CalculateThreatsThisTrick(chosenCard, effectiveAccountedFor, knownPlayerSuitVoids, playedCards, leadPlayer, leadSuit, winningTrickPlayer, callingPlayer, callingPlayerGoingAlone),
         };
     }
 
@@ -329,6 +329,267 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
         for (int i = 0; i < effectiveAccountedFor.Length; i++)
         {
             if (effectiveAccountedFor[i].Rank == rank && effectiveAccountedFor[i].Suit == suit)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static float GetCardThreatsThisTrick(
+        RelativeCard[] cardsInHand,
+        int index,
+        RelativeCard[] effectiveAccountedFor,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids,
+        Dictionary<RelativePlayerPosition, RelativeCard> playedCards,
+        RelativePlayerPosition leadPlayer,
+        RelativeSuit? leadSuit,
+        RelativePlayerPosition? winningTrickPlayer,
+        RelativePlayerPosition callingPlayer,
+        bool callingPlayerGoingAlone)
+    {
+        if (index >= cardsInHand.Length)
+        {
+            return -1f;
+        }
+
+        return CalculateThreatsThisTrick(
+            cardsInHand[index],
+            effectiveAccountedFor,
+            knownPlayerSuitVoids,
+            playedCards,
+            leadPlayer,
+            leadSuit,
+            winningTrickPlayer,
+            callingPlayer,
+            callingPlayerGoingAlone);
+    }
+
+    private static float CalculateThreatsThisTrick(
+        RelativeCard card,
+        RelativeCard[] effectiveAccountedFor,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids,
+        Dictionary<RelativePlayerPosition, RelativeCard> playedCards,
+        RelativePlayerPosition leadPlayer,
+        RelativeSuit? leadSuit,
+        RelativePlayerPosition? winningTrickPlayer,
+        RelativePlayerPosition callingPlayer,
+        bool callingPlayerGoingAlone)
+    {
+        if (playedCards.Count == 0 || !leadSuit.HasValue || !winningTrickPlayer.HasValue)
+        {
+            return CalculateThreats(card, effectiveAccountedFor, knownPlayerSuitVoids);
+        }
+
+        var resolvedLeadSuit = leadSuit.Value;
+        var resolvedWinner = winningTrickPlayer.Value;
+        var opponentsAfterMe = GetOpponentsAfterMe(leadPlayer, callingPlayer, callingPlayerGoingAlone);
+
+        if (opponentsAfterMe.Length == 0)
+        {
+            bool myTeamWinning = resolvedWinner is RelativePlayerPosition.Self or RelativePlayerPosition.Partner;
+            if (myTeamWinning)
+            {
+                return 0f;
+            }
+
+            if (!playedCards.TryGetValue(resolvedWinner, out var winningCardLast))
+            {
+                return CalculateThreats(card, effectiveAccountedFor, knownPlayerSuitVoids);
+            }
+
+            return CardBeatsInTrick(card, winningCardLast) ? 0f : 25f;
+        }
+
+        bool opponentWinning = resolvedWinner is RelativePlayerPosition.LeftHandOpponent or RelativePlayerPosition.RightHandOpponent;
+
+        if (opponentWinning)
+        {
+            if (!playedCards.TryGetValue(resolvedWinner, out var winningCardOpp))
+            {
+                return CalculateThreats(card, effectiveAccountedFor, knownPlayerSuitVoids);
+            }
+
+            if (!CardBeatsInTrick(card, winningCardOpp))
+            {
+                return 25f;
+            }
+
+            return CountThreatsFromOpponents(card, resolvedLeadSuit, opponentsAfterMe, effectiveAccountedFor, knownPlayerSuitVoids);
+        }
+
+        // Partner winning — count threats against the best card our team can field
+        if (!playedCards.TryGetValue(RelativePlayerPosition.Partner, out var partnerCard))
+        {
+            return CountThreatsFromOpponents(card, resolvedLeadSuit, opponentsAfterMe, effectiveAccountedFor, knownPlayerSuitVoids);
+        }
+
+        var teamBestCard = CardBeatsInTrick(card, partnerCard) ? card : partnerCard;
+        return CountThreatsFromOpponents(teamBestCard, resolvedLeadSuit, opponentsAfterMe, effectiveAccountedFor, knownPlayerSuitVoids);
+    }
+
+    private static RelativePlayerPosition[] GetOpponentsAfterMe(
+        RelativePlayerPosition leadPlayer,
+        RelativePlayerPosition callingPlayer,
+        bool callingPlayerGoingAlone)
+    {
+        RelativePlayerPosition[] opponents = leadPlayer switch
+        {
+            RelativePlayerPosition.Self => [RelativePlayerPosition.LeftHandOpponent, RelativePlayerPosition.RightHandOpponent],
+            RelativePlayerPosition.LeftHandOpponent => [],
+            RelativePlayerPosition.Partner => [RelativePlayerPosition.LeftHandOpponent],
+            RelativePlayerPosition.RightHandOpponent => [RelativePlayerPosition.LeftHandOpponent],
+            _ => [],
+        };
+
+        if (!callingPlayerGoingAlone || opponents.Length == 0)
+        {
+            return opponents;
+        }
+
+        var sittingOut = callingPlayer switch
+        {
+            RelativePlayerPosition.Self => RelativePlayerPosition.Partner,
+            RelativePlayerPosition.LeftHandOpponent => RelativePlayerPosition.RightHandOpponent,
+            RelativePlayerPosition.Partner => (RelativePlayerPosition?)null,
+            RelativePlayerPosition.RightHandOpponent => RelativePlayerPosition.LeftHandOpponent,
+            _ => null,
+        };
+
+        if (sittingOut == null)
+        {
+            return opponents;
+        }
+
+        return [.. opponents.Where(o => o != sittingOut.Value)];
+    }
+
+    private static bool CardBeatsInTrick(RelativeCard challenger, RelativeCard current)
+    {
+        if (challenger.Suit == RelativeSuit.Trump && current.Suit != RelativeSuit.Trump)
+        {
+            return true;
+        }
+
+        if (challenger.Suit != RelativeSuit.Trump && current.Suit == RelativeSuit.Trump)
+        {
+            return false;
+        }
+
+        if (challenger.Suit == current.Suit)
+        {
+            return challenger.Rank > current.Rank;
+        }
+
+        // Challenger is off-suit (not trump, not same suit as current winner)
+        return false;
+    }
+
+    private static float CountThreatsFromOpponents(
+        RelativeCard card,
+        RelativeSuit leadSuit,
+        RelativePlayerPosition[] opponentsAfterMe,
+        RelativeCard[] effectiveAccountedFor,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids)
+    {
+        float threats = 0f;
+
+        // Check trump cards that beat our card
+        if (card.Suit == RelativeSuit.Trump)
+        {
+            threats += CountTrickThreatsInSuit(card.Rank, RelativeSuit.Trump, TrumpRanks, true, leadSuit, opponentsAfterMe, effectiveAccountedFor, knownPlayerSuitVoids);
+        }
+        else
+        {
+            threats += CountTrickThreatsInSuit(Rank.Nine - 1, RelativeSuit.Trump, TrumpRanks, false, leadSuit, opponentsAfterMe, effectiveAccountedFor, knownPlayerSuitVoids);
+
+            if (card.Suit == leadSuit)
+            {
+                Rank[] ranksForSuit = leadSuit == RelativeSuit.NonTrumpSameColor
+                    ? NonTrumpSameColorRanks
+                    : NonTrumpOppositeColorRanks;
+                threats += CountTrickThreatsInSuit(card.Rank, leadSuit, ranksForSuit, true, leadSuit, opponentsAfterMe, effectiveAccountedFor, knownPlayerSuitVoids);
+            }
+        }
+
+        return threats;
+    }
+
+    private static float CountTrickThreatsInSuit(
+        Rank cardRank,
+        RelativeSuit threatSuit,
+        Rank[] validRanks,
+        bool isSameSuitAsLead,
+        RelativeSuit leadSuit,
+        RelativePlayerPosition[] opponentsAfterMe,
+        RelativeCard[] effectiveAccountedFor,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids)
+    {
+        float count = 0f;
+
+        for (int i = 0; i < validRanks.Length; i++)
+        {
+            if (validRanks[i] <= cardRank)
+            {
+                continue;
+            }
+
+            if (IsAccountedFor(validRanks[i], threatSuit, effectiveAccountedFor))
+            {
+                continue;
+            }
+
+            if (isSameSuitAsLead || threatSuit == RelativeSuit.Trump)
+            {
+                bool anyOpponentCanPlay = false;
+                for (int j = 0; j < opponentsAfterMe.Length; j++)
+                {
+                    if (CanOpponentPlaySuit(opponentsAfterMe[j], threatSuit, leadSuit, knownPlayerSuitVoids))
+                    {
+                        anyOpponentCanPlay = true;
+                        break;
+                    }
+                }
+
+                if (anyOpponentCanPlay)
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    private static bool CanOpponentPlaySuit(
+        RelativePlayerPosition opponent,
+        RelativeSuit cardSuit,
+        RelativeSuit leadSuit,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids)
+    {
+        if (cardSuit == leadSuit)
+        {
+            return !IsVoidIn(opponent, cardSuit, knownPlayerSuitVoids);
+        }
+
+        // Trump when led suit is not trump — opponent must be void in led suit and not void in trump
+        if (cardSuit == RelativeSuit.Trump)
+        {
+            return IsVoidIn(opponent, leadSuit, knownPlayerSuitVoids) && !IsVoidIn(opponent, RelativeSuit.Trump, knownPlayerSuitVoids);
+        }
+
+        return false;
+    }
+
+    private static bool IsVoidIn(
+        RelativePlayerPosition player,
+        RelativeSuit suit,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids)
+    {
+        for (int i = 0; i < knownPlayerSuitVoids.Length; i++)
+        {
+            if (knownPlayerSuitVoids[i].PlayerPosition == player && knownPlayerSuitVoids[i].Suit == suit)
             {
                 return true;
             }

@@ -107,13 +107,13 @@ public class AdvancedPlayCardInferenceFeatureBuilder : IAdvancedPlayCardInferenc
             Card3Threats = full.Card3Threats,
             Card4Threats = full.Card4Threats,
             Card5Threats = full.Card5Threats,
-            Card1BeatsWinningTrickCard = full.Card1BeatsWinningTrickCard,
-            Card2BeatsWinningTrickCard = full.Card2BeatsWinningTrickCard,
-            Card3BeatsWinningTrickCard = full.Card3BeatsWinningTrickCard,
-            Card4BeatsWinningTrickCard = full.Card4BeatsWinningTrickCard,
-            Card5BeatsWinningTrickCard = full.Card5BeatsWinningTrickCard,
+            Card1ThreatsThisTrick = full.Card1ThreatsThisTrick,
+            Card2ThreatsThisTrick = full.Card2ThreatsThisTrick,
+            Card3ThreatsThisTrick = full.Card3ThreatsThisTrick,
+            Card4ThreatsThisTrick = full.Card4ThreatsThisTrick,
+            Card5ThreatsThisTrick = full.Card5ThreatsThisTrick,
             ChosenCardThreats = full.ChosenCardThreats,
-            ChosenCardBeatsWinningTrickCard = full.ChosenCardBeatsWinningTrickCard,
+            ChosenCardThreatsThisTrick = full.ChosenCardThreatsThisTrick,
         };
     }
 }
