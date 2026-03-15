@@ -7,7 +7,7 @@ public partial class GameToTrainingDataConverter
 {
     public class ActorDecisionLists
     {
-        public List<PlayCardTrainingData> PlayCardData { get; } = [];
+        public List<AllPlayCardTrainingData> PlayCardData { get; } = [];
 
         public List<CallTrumpTrainingData> CallTrumpData { get; } = [];
 

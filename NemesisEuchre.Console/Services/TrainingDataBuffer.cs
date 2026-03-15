@@ -23,7 +23,7 @@ public sealed class TrainingDataBuffer(
     IIdvFileService idvFileService,
     ILogger<TrainingDataBuffer> logger) : ITrainingDataBuffer
 {
-    private readonly DecisionTypeAccumulator<PlayCardTrainingData> _playCardAccumulator
+    private readonly DecisionTypeAccumulator<AllPlayCardTrainingData> _playCardAccumulator
         = new("PlayCard", idvFileService, logger);
 
     private readonly DecisionTypeAccumulator<CallTrumpTrainingData> _callTrumpAccumulator

@@ -61,7 +61,7 @@ public sealed class IdvMergeService(
                 if (ShouldMerge(decisionTypeFilter, DecisionType.Play))
                 {
                     var playCardPaths = GetSourcePaths(basePath, sourceGenerationNames, "PlayCard");
-                    MergeDecisionType<PlayCardTrainingData>(
+                    MergeDecisionType<AllPlayCardTrainingData>(
                         playCardPaths,
                         basePath,
                         outputGenerationName,

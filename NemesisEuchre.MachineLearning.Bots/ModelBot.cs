@@ -19,16 +19,19 @@ public class ModelBot(
     IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
     IRandomNumberGenerator random,
     Actor actor,
-    ISimplePlayCardInferenceFeatureBuilder? simplePlayCardFeatureBuilder = null) : BotBase(random)
+    ISimplePlayCardInferenceFeatureBuilder? simplePlayCardFeatureBuilder = null,
+    IAdvancedPlayCardInferenceFeatureBuilder? advancedPlayCardFeatureBuilder = null) : BotBase(random)
 {
     private readonly ICallTrumpInferenceFeatureBuilder _callTrumpFeatureBuilder = callTrumpFeatureBuilder ?? throw new ArgumentNullException(nameof(callTrumpFeatureBuilder));
     private readonly IDiscardCardInferenceFeatureBuilder _discardCardFeatureBuilder = discardCardFeatureBuilder ?? throw new ArgumentNullException(nameof(discardCardFeatureBuilder));
     private readonly IPlayCardInferenceFeatureBuilder _playCardFeatureBuilder = playCardFeatureBuilder ?? throw new ArgumentNullException(nameof(playCardFeatureBuilder));
     private readonly ISimplePlayCardInferenceFeatureBuilder? _simplePlayCardFeatureBuilder = simplePlayCardFeatureBuilder;
+    private readonly IAdvancedPlayCardInferenceFeatureBuilder? _advancedPlayCardFeatureBuilder = advancedPlayCardFeatureBuilder;
     private readonly PredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>? _callTrumpEngine = engineProvider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>("CallTrump", actor.GetModelName("CallTrump") ?? string.Empty);
     private readonly PredictionEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>? _discardCardEngine = engineProvider.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>("DiscardCard", actor.GetModelName("DiscardCard") ?? string.Empty);
     private readonly PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>? _playCardEngine = engineProvider.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", actor.GetModelName("PlayCard") ?? string.Empty);
     private readonly PredictionEngine<SimplePlayCardTrainingData, PlayCardRegressionPrediction>? _simplePlayCardEngine = engineProvider.TryGetEngine<SimplePlayCardTrainingData, PlayCardRegressionPrediction>("SimplePlayCard", actor.GetModelName("SimplePlayCard") ?? string.Empty);
+    private readonly PredictionEngine<AdvancedPlayCardTrainingData, PlayCardRegressionPrediction>? _advancedPlayCardEngine = engineProvider.TryGetEngine<AdvancedPlayCardTrainingData, PlayCardRegressionPrediction>("AdvancedPlayCard", actor.GetModelName("AdvancedPlayCard") ?? string.Empty);
 
     public override ActorType ActorType => ActorType.Model;
 
@@ -116,6 +119,39 @@ public class ModelBot(
         short opponentsWonTricks,
         RelativeCard[] validCardsToPlay)
     {
+        if (_advancedPlayCardEngine != null && _advancedPlayCardFeatureBuilder != null)
+        {
+            var (bestAdvancedOption, advancedScores) = PredictBestOption(
+                _advancedPlayCardEngine,
+                validCardsToPlay,
+                card => _advancedPlayCardFeatureBuilder.BuildFeatures(
+                    cardsInHand,
+                    leadPlayer,
+                    leadSuit,
+                    playedCardsInTrick,
+                    teamScore,
+                    opponentScore,
+                    callingPlayer,
+                    callingPlayerGoingAlone,
+                    dealer,
+                    dealerPickedUpCard,
+                    knownPlayerSuitVoids,
+                    cardsAccountedFor,
+                    currentlyWinningTrickPlayer,
+                    trickNumber,
+                    wonTricks,
+                    opponentsWonTricks,
+                    card),
+                prediction => prediction.PredictedPoints,
+                "AdvancedPlayCard");
+
+            return new RelativeCardDecisionContext
+            {
+                ChosenCard = bestAdvancedOption,
+                DecisionPredictedPoints = advancedScores,
+            };
+        }
+
         if (_simplePlayCardEngine != null && _simplePlayCardFeatureBuilder != null)
         {
             var (bestSimpleOption, simpleScores) = PredictBestOption(

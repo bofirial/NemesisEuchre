@@ -57,8 +57,8 @@ public class IdvMergeServiceTests : IDisposable
             .Callback((IdvFileMetadata metadata, string path) => _lastSavedMetadata[path] = metadata);
 
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<PlayCardTrainingData>(It.IsAny<string>()))
-            .Returns([new PlayCardTrainingData()]);
+            .Setup(x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()))
+            .Returns([new AllPlayCardTrainingData()]);
         _mockIdvFileService
             .Setup(x => x.StreamFromBinary<CallTrumpTrainingData>(It.IsAny<string>()))
             .Returns([new CallTrumpTrainingData()]);
@@ -67,8 +67,8 @@ public class IdvMergeServiceTests : IDisposable
             .Returns([new DiscardCardTrainingData()]);
 
         _mockIdvFileService
-            .Setup(x => x.Save(It.IsAny<IEnumerable<PlayCardTrainingData>>(), It.IsAny<string>()))
-            .Callback((IEnumerable<PlayCardTrainingData> data, string path) =>
+            .Setup(x => x.Save(It.IsAny<IEnumerable<AllPlayCardTrainingData>>(), It.IsAny<string>()))
+            .Callback((IEnumerable<AllPlayCardTrainingData> data, string path) =>
             {
                 _ = data.ToList();
                 _savedPlayCardPaths.Add(path);

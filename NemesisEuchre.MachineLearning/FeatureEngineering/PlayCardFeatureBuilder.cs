@@ -5,14 +5,14 @@ using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.FeatureEngineering;
 
-public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecisionEntity, PlayCardTrainingData>
+public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecisionEntity, AllPlayCardTrainingData>
 {
-    public static PlayCardTrainingData BuildFeatures(PlayCardFeatureBuilderContext context)
+    public static AllPlayCardTrainingData BuildFeatures(PlayCardFeatureBuilderContext context)
     {
         return BuildFeaturesFromContext(context);
     }
 
-    protected override PlayCardTrainingData BuildFeaturesCore(PlayCardDecisionEntity entity)
+    protected override AllPlayCardTrainingData BuildFeaturesCore(PlayCardDecisionEntity entity)
     {
         var featureContext = PlayCardFeatureContextBuilder.Build(entity);
 
@@ -51,7 +51,7 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
         }
     }
 
-    private static PlayCardTrainingData BuildFeaturesFromContext(PlayCardFeatureBuilderContext context)
+    private static AllPlayCardTrainingData BuildFeaturesFromContext(PlayCardFeatureBuilderContext context)
     {
         var cardsInHand = context.CardsInHand;
         var playedCards = context.PlayedCards;
@@ -81,7 +81,7 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
         var (card4Rank, card4Suit) = GetCardFeatures(cardsInHand, 3);
         var (card5Rank, card5Suit) = GetCardFeatures(cardsInHand, 4);
 
-        return new PlayCardTrainingData
+        return new AllPlayCardTrainingData
         {
             Card1Rank = card1Rank,
             Card1Suit = card1Suit,
@@ -151,6 +151,18 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
             JackOfNonTrumpOppositeColor2HasBeenAccountedFor = IsCardAccountedFor(cardsAccountedFor, Rank.Jack, RelativeSuit.NonTrumpOppositeColor2),
             TenOfNonTrumpOppositeColor2HasBeenAccountedFor = IsCardAccountedFor(cardsAccountedFor, Rank.Ten, RelativeSuit.NonTrumpOppositeColor2),
             NineOfNonTrumpOppositeColor2HasBeenAccountedFor = IsCardAccountedFor(cardsAccountedFor, Rank.Nine, RelativeSuit.NonTrumpOppositeColor2),
+            Card1UnaccountedForThreats = -1f,
+            Card2UnaccountedForThreats = -1f,
+            Card3UnaccountedForThreats = -1f,
+            Card4UnaccountedForThreats = -1f,
+            Card5UnaccountedForThreats = -1f,
+            Card1BeatsWinningTrickCard = -1f,
+            Card2BeatsWinningTrickCard = -1f,
+            Card3BeatsWinningTrickCard = -1f,
+            Card4BeatsWinningTrickCard = -1f,
+            Card5BeatsWinningTrickCard = -1f,
+            ChosenCardUnaccountedForThreats = -1f,
+            ChosenCardBeatsWinningTrickCard = -1f,
         };
     }
 

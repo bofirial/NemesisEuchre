@@ -5,20 +5,13 @@ using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests;
 
-public interface IPlayCardBehavioralTestRunner
+public class AdvancedPlayCardBehavioralTestRunner(IAdvancedPlayCardInferenceFeatureBuilder featureBuilder) : IPlayCardBehavioralTestRunner
 {
-    DecisionType DecisionType { get; }
-
-    float? TryScore(IPredictionEngineProvider engineProvider, string modelName, PlayCardFeatureBuilderContext context);
-}
-
-public class PlayCardBehavioralTestRunner(IPlayCardInferenceFeatureBuilder featureBuilder) : IPlayCardBehavioralTestRunner
-{
-    public DecisionType DecisionType => DecisionType.Play;
+    public DecisionType DecisionType => DecisionType.AdvancedPlay;
 
     public float? TryScore(IPredictionEngineProvider engineProvider, string modelName, PlayCardFeatureBuilderContext context)
     {
-        var engine = engineProvider.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", modelName);
+        var engine = engineProvider.TryGetEngine<AdvancedPlayCardTrainingData, PlayCardRegressionPrediction>("AdvancedPlayCard", modelName);
         if (engine == null)
         {
             return null;

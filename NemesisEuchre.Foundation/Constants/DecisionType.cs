@@ -7,4 +7,5 @@ public enum DecisionType
     Play = 2,
     All = 3,
     SimplePlay = 4,
+    AdvancedPlay = 5,
 }

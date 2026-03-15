@@ -46,8 +46,8 @@ public class TrainingDataAccumulatorTests : IDisposable
             .Callback((IdvFileMetadata metadata, string path) => _lastSavedMetadata[path] = metadata);
 
         _mockIdvFileService
-            .Setup(x => x.Save(It.IsAny<IEnumerable<PlayCardTrainingData>>(), It.IsAny<string>()))
-            .Callback((IEnumerable<PlayCardTrainingData> data, string path) =>
+            .Setup(x => x.Save(It.IsAny<IEnumerable<AllPlayCardTrainingData>>(), It.IsAny<string>()))
+            .Callback((IEnumerable<AllPlayCardTrainingData> data, string path) =>
             {
                 var materialized = data.ToList();
                 _savedPlayCardCalls.Add((path, count: materialized.Count));
@@ -132,7 +132,7 @@ public class TrainingDataAccumulatorTests : IDisposable
         var chunkDir = Path.Combine(_tempDirectory, "_chunks", "generation-42");
         _mockIdvFileService.Verify(
             x => x.Save(
-                It.IsAny<List<PlayCardTrainingData>>(),
+                It.IsAny<List<AllPlayCardTrainingData>>(),
                 Path.Combine(chunkDir, "PlayCard_chunk0001.idv")),
             Times.Once);
     }
@@ -398,7 +398,7 @@ public class TrainingDataAccumulatorTests : IDisposable
         var expectedChunkDir = Path.Combine(_tempDirectory, "_chunks", "test-gen");
         _mockIdvFileService.Verify(
             x => x.Save(
-                It.IsAny<List<PlayCardTrainingData>>(),
+                It.IsAny<List<AllPlayCardTrainingData>>(),
                 Path.Combine(expectedChunkDir, "PlayCard_chunk0001.idv")),
             Times.Once);
         _mockIdvFileService.Verify(
@@ -423,7 +423,7 @@ public class TrainingDataAccumulatorTests : IDisposable
         await _accumulator.FinalizeAsync("gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         _mockIdvFileService.Verify(
-            x => x.StreamFromBinary<PlayCardTrainingData>(It.IsAny<string>()),
+            x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()),
             Times.Never);
         _mockIdvFileService.Verify(
             x => x.StreamFromBinary<CallTrumpTrainingData>(It.IsAny<string>()),
@@ -437,8 +437,8 @@ public class TrainingDataAccumulatorTests : IDisposable
     public async Task Finalize_MultipleChunks_MergesViaStreaming()
     {
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<PlayCardTrainingData>(It.IsAny<string>()))
-            .Returns([new PlayCardTrainingData()]);
+            .Setup(x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()))
+            .Returns([new AllPlayCardTrainingData()]);
         _mockIdvFileService
             .Setup(x => x.StreamFromBinary<CallTrumpTrainingData>(It.IsAny<string>()))
             .Returns([new CallTrumpTrainingData()]);
@@ -453,7 +453,7 @@ public class TrainingDataAccumulatorTests : IDisposable
         await _accumulator.FinalizeAsync("gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         _mockIdvFileService.Verify(
-            x => x.StreamFromBinary<PlayCardTrainingData>(It.IsAny<string>()),
+            x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()),
             Times.Exactly(2));
         _mockIdvFileService.Verify(
             x => x.StreamFromBinary<CallTrumpTrainingData>(It.IsAny<string>()),
@@ -470,8 +470,8 @@ public class TrainingDataAccumulatorTests : IDisposable
         var batch2 = CreateBatch(playCardCount: 10, callTrumpCount: 4, discardCardCount: 1);
 
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<PlayCardTrainingData>(It.IsAny<string>()))
-            .Returns([new PlayCardTrainingData()]);
+            .Setup(x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()))
+            .Returns([new AllPlayCardTrainingData()]);
         _mockIdvFileService
             .Setup(x => x.StreamFromBinary<CallTrumpTrainingData>(It.IsAny<string>()))
             .Returns([new CallTrumpTrainingData()]);
@@ -547,8 +547,8 @@ public class TrainingDataAccumulatorTests : IDisposable
     public async Task Finalize_InvokesStatusCallback_AtKeyPoints()
     {
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<PlayCardTrainingData>(It.IsAny<string>()))
-            .Returns([new PlayCardTrainingData()]);
+            .Setup(x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()))
+            .Returns([new AllPlayCardTrainingData()]);
         _mockIdvFileService
             .Setup(x => x.StreamFromBinary<CallTrumpTrainingData>(It.IsAny<string>()))
             .Returns([new CallTrumpTrainingData()]);
@@ -655,7 +655,7 @@ public class TrainingDataAccumulatorTests : IDisposable
         int discardCardCount)
     {
         var playCardData = Enumerable.Range(0, playCardCount)
-            .Select(_ => new PlayCardTrainingData { Card1Rank = 1.0f })
+            .Select(_ => new AllPlayCardTrainingData { Card1Rank = 1.0f })
             .ToList();
         var callTrumpData = Enumerable.Range(0, callTrumpCount)
             .Select(_ => new CallTrumpTrainingData { Card1Rank = 1.0f })

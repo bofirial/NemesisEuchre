@@ -51,6 +51,7 @@ public static class ConsoleServiceCollectionExtensions
         services.AddScoped<ITrainerExecutor, DiscardCardRegressionTrainerExecutor>();
         services.AddScoped<ITrainerExecutor, PlayCardRegressionTrainerExecutor>();
         services.AddScoped<ITrainerExecutor, SimplePlayCardRegressionTrainerExecutor>();
+        services.AddScoped<ITrainerExecutor, AdvancedPlayCardRegressionTrainerExecutor>();
 
         services.AddScoped<IModelBehavioralTestRunner, ModelBehavioralTestRunner>();
         services.AddScoped<ITestResultsRenderer, TestResultsRenderer>();
@@ -69,6 +70,7 @@ public static class ConsoleServiceCollectionExtensions
 
         services.AddScoped<PlayCardBehavioralTestRunner>();
         services.AddScoped<SimplePlayCardBehavioralTestRunner>();
+        services.AddScoped<AdvancedPlayCardBehavioralTestRunner>();
 
         services.AddScoped<IModelBehavioralTest>(sp =>
             new PartnerWinningTrickShouldNotPlayTrump(sp.GetRequiredService<PlayCardBehavioralTestRunner>()));
@@ -87,6 +89,15 @@ public static class ConsoleServiceCollectionExtensions
             new OpponentWinningTrickShouldPlayLowestTrump(sp.GetRequiredService<SimplePlayCardBehavioralTestRunner>()));
         services.AddScoped<IModelBehavioralTest>(sp =>
             new OpponentVoidInSuitShouldLeadTheOtherAce(sp.GetRequiredService<SimplePlayCardBehavioralTestRunner>()));
+
+        services.AddScoped<IModelBehavioralTest>(sp =>
+            new PartnerWinningTrickShouldNotPlayTrump(sp.GetRequiredService<AdvancedPlayCardBehavioralTestRunner>()));
+        services.AddScoped<IModelBehavioralTest>(sp =>
+            new OpponentWinningTrickShouldPlayTrump(sp.GetRequiredService<AdvancedPlayCardBehavioralTestRunner>()));
+        services.AddScoped<IModelBehavioralTest>(sp =>
+            new OpponentWinningTrickShouldPlayLowestTrump(sp.GetRequiredService<AdvancedPlayCardBehavioralTestRunner>()));
+        services.AddScoped<IModelBehavioralTest>(sp =>
+            new OpponentVoidInSuitShouldLeadTheOtherAce(sp.GetRequiredService<AdvancedPlayCardBehavioralTestRunner>()));
 
         services.Configure<GameOptions>(_ => { });
         services.AddOptions<GameExecutionOptions>()

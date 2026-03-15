@@ -18,7 +18,7 @@ public class TrainerFactory(IEnumerable<ITrainerExecutor> trainers) : ITrainerFa
         if (decisionType == DecisionType.All)
         {
             return _trainersByDecision
-                .Where(kvp => kvp.Key != DecisionType.SimplePlay)
+                .Where(kvp => kvp.Key is not DecisionType.SimplePlay and not DecisionType.AdvancedPlay)
                 .Select(kvp => kvp.Value);
         }
 

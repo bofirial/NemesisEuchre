@@ -32,18 +32,20 @@ public static class MachineLearningServiceCollectionExtensions
         services.AddScoped<IModelTrainer<DiscardCardTrainingData>, DiscardCardRegressionModelTrainer>();
         services.AddScoped<IModelTrainer<PlayCardTrainingData>, PlayCardRegressionModelTrainer>();
         services.AddScoped<IModelTrainer<SimplePlayCardTrainingData>, SimplePlayCardRegressionModelTrainer>();
+        services.AddScoped<IModelTrainer<AdvancedPlayCardTrainingData>, AdvancedPlayCardRegressionModelTrainer>();
 
         services.AddSingleton<PlayCardFeatureBuilder>();
         services.AddSingleton<CallTrumpFeatureBuilder>();
         services.AddSingleton<DiscardCardFeatureBuilder>();
         services.AddSingleton<IFeatureEngineer<CallTrumpDecisionEntity, CallTrumpTrainingData>, CallTrumpFeatureEngineer>();
         services.AddSingleton<IFeatureEngineer<DiscardCardDecisionEntity, DiscardCardTrainingData>, DiscardCardFeatureEngineer>();
-        services.AddSingleton<IFeatureEngineer<PlayCardDecisionEntity, PlayCardTrainingData>, PlayCardFeatureEngineer>();
+        services.AddSingleton<IFeatureEngineer<PlayCardDecisionEntity, AllPlayCardTrainingData>, PlayCardFeatureEngineer>();
 
         services.AddSingleton<ICallTrumpInferenceFeatureBuilder, CallTrumpInferenceFeatureBuilder>();
         services.AddSingleton<IDiscardCardInferenceFeatureBuilder, DiscardCardInferenceFeatureBuilder>();
         services.AddSingleton<IPlayCardInferenceFeatureBuilder, PlayCardInferenceFeatureBuilder>();
         services.AddSingleton<ISimplePlayCardInferenceFeatureBuilder, SimplePlayCardInferenceFeatureBuilder>();
+        services.AddSingleton<IAdvancedPlayCardInferenceFeatureBuilder, AdvancedPlayCardInferenceFeatureBuilder>();
 
         services.AddOptions<MachineLearningOptions>()
             .Bind(configuration.GetSection("MachineLearning"))

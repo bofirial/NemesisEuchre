@@ -20,7 +20,7 @@ public interface IGameToTrainingDataConverter
 
 public partial class GameToTrainingDataConverter(
     IGameToEntityMapper gameToEntityMapper,
-    IFeatureEngineer<PlayCardDecisionEntity, PlayCardTrainingData> playCardFeatureEngineer,
+    IFeatureEngineer<PlayCardDecisionEntity, AllPlayCardTrainingData> playCardFeatureEngineer,
     IFeatureEngineer<CallTrumpDecisionEntity, CallTrumpTrainingData> callTrumpFeatureEngineer,
     IFeatureEngineer<DiscardCardDecisionEntity, DiscardCardTrainingData> discardCardFeatureEngineer,
     ILogger<GameToTrainingDataConverter> logger) : IGameToTrainingDataConverter
@@ -29,7 +29,7 @@ public partial class GameToTrainingDataConverter(
     {
         var byActor = ConvertByActor(games);
 
-        var playCardData = new List<PlayCardTrainingData>();
+        var playCardData = new List<AllPlayCardTrainingData>();
         var callTrumpData = new List<CallTrumpTrainingData>();
         var discardCardData = new List<DiscardCardTrainingData>();
         var actors = new HashSet<Actor>();
@@ -81,7 +81,7 @@ public partial class GameToTrainingDataConverter(
         var output = new Dictionary<string, TrainingDataBatch>(allActorKeys.Count);
         foreach (var actorKey in allActorKeys)
         {
-            var playCard = new List<PlayCardTrainingData>();
+            var playCard = new List<AllPlayCardTrainingData>();
             var callTrump = new List<CallTrumpTrainingData>();
             var discard = new List<DiscardCardTrainingData>();
             var actors = new HashSet<Actor>();

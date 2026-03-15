@@ -17,7 +17,7 @@ namespace NemesisEuchre.Console.Tests.Services;
 public class GameToTrainingDataConverterTests
 {
     private readonly Mock<IGameToEntityMapper> _mockMapper;
-    private readonly Mock<IFeatureEngineer<PlayCardDecisionEntity, PlayCardTrainingData>> _mockPlayCardEngineer;
+    private readonly Mock<IFeatureEngineer<PlayCardDecisionEntity, AllPlayCardTrainingData>> _mockPlayCardEngineer;
     private readonly Mock<IFeatureEngineer<CallTrumpDecisionEntity, CallTrumpTrainingData>> _mockCallTrumpEngineer;
     private readonly Mock<IFeatureEngineer<DiscardCardDecisionEntity, DiscardCardTrainingData>> _mockDiscardCardEngineer;
     private readonly Mock<ILogger<GameToTrainingDataConverter>> _mockLogger;
@@ -26,7 +26,7 @@ public class GameToTrainingDataConverterTests
     public GameToTrainingDataConverterTests()
     {
         _mockMapper = new Mock<IGameToEntityMapper>();
-        _mockPlayCardEngineer = new Mock<IFeatureEngineer<PlayCardDecisionEntity, PlayCardTrainingData>>();
+        _mockPlayCardEngineer = new Mock<IFeatureEngineer<PlayCardDecisionEntity, AllPlayCardTrainingData>>();
         _mockCallTrumpEngineer = new Mock<IFeatureEngineer<CallTrumpDecisionEntity, CallTrumpTrainingData>>();
         _mockDiscardCardEngineer = new Mock<IFeatureEngineer<DiscardCardDecisionEntity, DiscardCardTrainingData>>();
         _mockLogger = new Mock<ILogger<GameToTrainingDataConverter>>();
@@ -64,7 +64,7 @@ public class GameToTrainingDataConverterTests
 
         var expectedCallTrumpData = new CallTrumpTrainingData();
         var expectedDiscardCardData = new DiscardCardTrainingData();
-        var expectedPlayCardData = new PlayCardTrainingData();
+        var expectedPlayCardData = new AllPlayCardTrainingData();
 
         _mockCallTrumpEngineer.Setup(e => e.Transform(callTrumpDecision)).Returns(expectedCallTrumpData);
         _mockDiscardCardEngineer.Setup(e => e.Transform(discardCardDecision)).Returns(expectedDiscardCardData);
@@ -105,7 +105,7 @@ public class GameToTrainingDataConverterTests
 
         var expectedCallTrumpData = new CallTrumpTrainingData();
         var expectedDiscardCardData = new DiscardCardTrainingData();
-        var expectedPlayCardData = new PlayCardTrainingData();
+        var expectedPlayCardData = new AllPlayCardTrainingData();
 
         _mockCallTrumpEngineer.Setup(e => e.Transform(validCallTrumpDecision)).Returns(expectedCallTrumpData);
         _mockDiscardCardEngineer.Setup(e => e.Transform(validDiscardCardDecision)).Returns(expectedDiscardCardData);
@@ -261,7 +261,7 @@ public class GameToTrainingDataConverterTests
 
         _mockCallTrumpEngineer.Setup(e => e.Transform(callTrumpDecision)).Returns(new CallTrumpTrainingData());
         _mockDiscardCardEngineer.Setup(e => e.Transform(discardCardDecision)).Returns(new DiscardCardTrainingData());
-        _mockPlayCardEngineer.Setup(e => e.Transform(playCardDecision)).Returns(new PlayCardTrainingData());
+        _mockPlayCardEngineer.Setup(e => e.Transform(playCardDecision)).Returns(new AllPlayCardTrainingData());
 
         _converter.Convert(games);
 
@@ -302,7 +302,7 @@ public class GameToTrainingDataConverterTests
 
         _mockCallTrumpEngineer.Setup(e => e.Transform(It.IsAny<CallTrumpDecisionEntity>())).Returns(new CallTrumpTrainingData());
         _mockDiscardCardEngineer.Setup(e => e.Transform(It.IsAny<DiscardCardDecisionEntity>())).Returns(new DiscardCardTrainingData());
-        _mockPlayCardEngineer.Setup(e => e.Transform(It.IsAny<PlayCardDecisionEntity>())).Returns(new PlayCardTrainingData());
+        _mockPlayCardEngineer.Setup(e => e.Transform(It.IsAny<PlayCardDecisionEntity>())).Returns(new AllPlayCardTrainingData());
 
         var result = _converter.Convert(games);
 
