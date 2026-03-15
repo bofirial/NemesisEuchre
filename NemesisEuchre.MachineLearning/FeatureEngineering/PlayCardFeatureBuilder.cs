@@ -7,6 +7,15 @@ namespace NemesisEuchre.MachineLearning.FeatureEngineering;
 
 public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecisionEntity, AllPlayCardTrainingData>
 {
+    private static readonly Rank[] TrumpRanks =
+        [Rank.Nine, Rank.Ten, Rank.Queen, Rank.King, Rank.Ace, Rank.LeftBower, Rank.RightBower];
+
+    private static readonly Rank[] NonTrumpSameColorRanks =
+        [Rank.Nine, Rank.Ten, Rank.Queen, Rank.King, Rank.Ace];
+
+    private static readonly Rank[] NonTrumpOppositeColorRanks =
+        [Rank.Nine, Rank.Ten, Rank.Jack, Rank.Queen, Rank.King, Rank.Ace];
+
     public static AllPlayCardTrainingData BuildFeatures(PlayCardFeatureBuilderContext context)
     {
         return BuildFeaturesFromContext(context);
@@ -70,6 +79,8 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
         var wonTricks = context.WonTricks;
         var opponentsWonTricks = context.OpponentsWonTricks;
         var chosenCard = context.ChosenCard;
+
+        var effectiveAccountedFor = BuildEffectiveAccountedFor(cardsAccountedFor, dealer, dealerPickedUpCard);
 
         playedCards.TryGetValue(RelativePlayerPosition.LeftHandOpponent, out RelativeCard? leftHandOpponentPlayedCard);
         playedCards.TryGetValue(RelativePlayerPosition.Partner, out RelativeCard? partnerPlayedCard);
@@ -151,17 +162,17 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
             JackOfNonTrumpOppositeColor2HasBeenAccountedFor = IsCardAccountedFor(cardsAccountedFor, Rank.Jack, RelativeSuit.NonTrumpOppositeColor2),
             TenOfNonTrumpOppositeColor2HasBeenAccountedFor = IsCardAccountedFor(cardsAccountedFor, Rank.Ten, RelativeSuit.NonTrumpOppositeColor2),
             NineOfNonTrumpOppositeColor2HasBeenAccountedFor = IsCardAccountedFor(cardsAccountedFor, Rank.Nine, RelativeSuit.NonTrumpOppositeColor2),
-            Card1UnaccountedForThreats = -1f,
-            Card2UnaccountedForThreats = -1f,
-            Card3UnaccountedForThreats = -1f,
-            Card4UnaccountedForThreats = -1f,
-            Card5UnaccountedForThreats = -1f,
+            Card1Threats = GetCardThreats(cardsInHand, 0, effectiveAccountedFor, knownPlayerSuitVoids),
+            Card2Threats = GetCardThreats(cardsInHand, 1, effectiveAccountedFor, knownPlayerSuitVoids),
+            Card3Threats = GetCardThreats(cardsInHand, 2, effectiveAccountedFor, knownPlayerSuitVoids),
+            Card4Threats = GetCardThreats(cardsInHand, 3, effectiveAccountedFor, knownPlayerSuitVoids),
+            Card5Threats = GetCardThreats(cardsInHand, 4, effectiveAccountedFor, knownPlayerSuitVoids),
             Card1BeatsWinningTrickCard = -1f,
             Card2BeatsWinningTrickCard = -1f,
             Card3BeatsWinningTrickCard = -1f,
             Card4BeatsWinningTrickCard = -1f,
             Card5BeatsWinningTrickCard = -1f,
-            ChosenCardUnaccountedForThreats = -1f,
+            ChosenCardThreats = CalculateThreats(chosenCard, effectiveAccountedFor, knownPlayerSuitVoids),
             ChosenCardBeatsWinningTrickCard = -1f,
         };
     }
@@ -187,5 +198,142 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
         RelativeSuit suit)
     {
         return accountedCards.Any(card => card.Rank == rank && card.Suit == suit) ? 1.0f : 0.0f;
+    }
+
+    private static RelativeCard[] BuildEffectiveAccountedFor(
+        RelativeCard[] cardsAccountedFor,
+        RelativePlayerPosition dealer,
+        RelativeCard? dealerPickedUpCard)
+    {
+        if (dealerPickedUpCard == null)
+        {
+            return cardsAccountedFor;
+        }
+
+        if (dealer is RelativePlayerPosition.LeftHandOpponent or RelativePlayerPosition.RightHandOpponent)
+        {
+            return [.. cardsAccountedFor
+                .Where(c => c.Rank != dealerPickedUpCard.Rank || c.Suit != dealerPickedUpCard.Suit)];
+        }
+
+        return cardsAccountedFor;
+    }
+
+    private static float GetCardThreats(
+        RelativeCard[] cardsInHand,
+        int index,
+        RelativeCard[] effectiveAccountedFor,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids)
+    {
+        if (index >= cardsInHand.Length)
+        {
+            return -1f;
+        }
+
+        return CalculateThreats(cardsInHand[index], effectiveAccountedFor, knownPlayerSuitVoids);
+    }
+
+    private static float CalculateThreats(
+        RelativeCard card,
+        RelativeCard[] effectiveAccountedFor,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids)
+    {
+        if (card.Suit == RelativeSuit.Trump)
+        {
+            if (BothOpponentsVoidIn(knownPlayerSuitVoids, RelativeSuit.Trump))
+            {
+                return 0f;
+            }
+
+            return CountUnaccountedHigherCards(card.Rank, RelativeSuit.Trump, TrumpRanks, effectiveAccountedFor);
+        }
+
+        float threats = 0f;
+
+        if (!BothOpponentsVoidIn(knownPlayerSuitVoids, RelativeSuit.Trump))
+        {
+            threats += CountAllUnaccountedTrumpCards(effectiveAccountedFor);
+        }
+
+        if (!BothOpponentsVoidIn(knownPlayerSuitVoids, card.Suit))
+        {
+            Rank[] ranksForSuit = card.Suit == RelativeSuit.NonTrumpSameColor
+                ? NonTrumpSameColorRanks
+                : NonTrumpOppositeColorRanks;
+
+            threats += CountUnaccountedHigherCards(card.Rank, card.Suit, ranksForSuit, effectiveAccountedFor);
+        }
+
+        return threats;
+    }
+
+    private static bool BothOpponentsVoidIn(RelativePlayerSuitVoid[] voids, RelativeSuit suit)
+    {
+        bool lhoVoid = false;
+        bool rhoVoid = false;
+
+        for (int i = 0; i < voids.Length; i++)
+        {
+            if (voids[i].Suit == suit)
+            {
+                if (voids[i].PlayerPosition == RelativePlayerPosition.LeftHandOpponent)
+                {
+                    lhoVoid = true;
+                }
+                else if (voids[i].PlayerPosition == RelativePlayerPosition.RightHandOpponent)
+                {
+                    rhoVoid = true;
+                }
+            }
+        }
+
+        return lhoVoid && rhoVoid;
+    }
+
+    private static float CountUnaccountedHigherCards(
+        Rank rank,
+        RelativeSuit suit,
+        Rank[] validRanks,
+        RelativeCard[] effectiveAccountedFor)
+    {
+        float count = 0f;
+
+        for (int i = 0; i < validRanks.Length; i++)
+        {
+            if (validRanks[i] > rank && !IsAccountedFor(validRanks[i], suit, effectiveAccountedFor))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private static float CountAllUnaccountedTrumpCards(RelativeCard[] effectiveAccountedFor)
+    {
+        float count = 0f;
+
+        for (int i = 0; i < TrumpRanks.Length; i++)
+        {
+            if (!IsAccountedFor(TrumpRanks[i], RelativeSuit.Trump, effectiveAccountedFor))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private static bool IsAccountedFor(Rank rank, RelativeSuit suit, RelativeCard[] effectiveAccountedFor)
+    {
+        for (int i = 0; i < effectiveAccountedFor.Length; i++)
+        {
+            if (effectiveAccountedFor[i].Rank == rank && effectiveAccountedFor[i].Suit == suit)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

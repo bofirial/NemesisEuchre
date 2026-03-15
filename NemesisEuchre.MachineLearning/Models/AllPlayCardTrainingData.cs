@@ -213,19 +213,19 @@ public class AllPlayCardTrainingData
     public float ExpectedDealPoints { get; set; }
 
     [LoadColumn(69)]
-    public float Card1UnaccountedForThreats { get; set; }
+    public float Card1Threats { get; set; }
 
     [LoadColumn(70)]
-    public float Card2UnaccountedForThreats { get; set; }
+    public float Card2Threats { get; set; }
 
     [LoadColumn(71)]
-    public float Card3UnaccountedForThreats { get; set; }
+    public float Card3Threats { get; set; }
 
     [LoadColumn(72)]
-    public float Card4UnaccountedForThreats { get; set; }
+    public float Card4Threats { get; set; }
 
     [LoadColumn(73)]
-    public float Card5UnaccountedForThreats { get; set; }
+    public float Card5Threats { get; set; }
 
     [LoadColumn(74)]
     public float Card1BeatsWinningTrickCard { get; set; }
@@ -243,7 +243,7 @@ public class AllPlayCardTrainingData
     public float Card5BeatsWinningTrickCard { get; set; }
 
     [LoadColumn(79)]
-    public float ChosenCardUnaccountedForThreats { get; set; }
+    public float ChosenCardThreats { get; set; }
 
     [LoadColumn(80)]
     public float ChosenCardBeatsWinningTrickCard { get; set; }

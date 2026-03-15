@@ -3,6 +3,7 @@ using FluentAssertions;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.FeatureEngineering;
+using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.Tests.FeatureEngineering;
 
@@ -347,6 +348,308 @@ public class PlayCardFeatureBuilderTests
         result.WinningTrickPlayer.Should().Be(-1.0f);
         result.DealerPickedUpCardRank.Should().Be(-1.0f);
         result.DealerPickedUpCardSuit.Should().Be(-1.0f);
+    }
+
+    [Fact]
+    public void BuildFeatures_RightBowerOfTrump_HasZeroThreats()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.RightBower, RelativeSuit.Trump),
+            new(Rank.Nine, RelativeSuit.NonTrumpSameColor),
+        };
+
+        var result = BuildWithDefaults(cards, cards[0]);
+
+        result.Card1Threats.Should().Be(0f);
+    }
+
+    [Fact]
+    public void BuildFeatures_LeftBowerWithRightBowerUnaccounted_HasOneThreat()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.LeftBower, RelativeSuit.Trump),
+        };
+
+        var result = BuildWithDefaults(cards, cards[0]);
+
+        result.Card1Threats.Should().Be(1f);
+    }
+
+    [Fact]
+    public void BuildFeatures_LeftBowerWithRightBowerAccountedFor_HasZeroThreats()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.LeftBower, RelativeSuit.Trump),
+        };
+        var accountedFor = new RelativeCard[]
+        {
+            new(Rank.RightBower, RelativeSuit.Trump),
+        };
+
+        var result = BuildWithDefaults(cards, cards[0], cardsAccountedFor: accountedFor);
+
+        result.Card1Threats.Should().Be(0f);
+    }
+
+    [Fact]
+    public void BuildFeatures_NonTrumpKingTrick1NoAccountedCards_HasEightThreats()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
+        };
+
+        var result = BuildWithDefaults(cards, cards[0]);
+
+        // 7 trump + 1 Ace of same suit = 8 threats
+        result.Card1Threats.Should().Be(8f);
+    }
+
+    [Fact]
+    public void BuildFeatures_NonTrumpWithSomeAccountedCards_DecreasesCount()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
+        };
+        var accountedFor = new RelativeCard[]
+        {
+            new(Rank.RightBower, RelativeSuit.Trump),
+            new(Rank.LeftBower, RelativeSuit.Trump),
+            new(Rank.Ace, RelativeSuit.NonTrumpOppositeColor1),
+        };
+
+        var result = BuildWithDefaults(cards, cards[0], cardsAccountedFor: accountedFor);
+
+        // 5 unaccounted trump + 0 higher same-suit = 5 threats
+        result.Card1Threats.Should().Be(5f);
+    }
+
+    [Fact]
+    public void BuildFeatures_BothOpponentsVoidInTrump_NonTrumpExcludesTrumpThreats()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
+        };
+        var voids = new RelativePlayerSuitVoid[]
+        {
+            new() { PlayerPosition = RelativePlayerPosition.LeftHandOpponent, Suit = RelativeSuit.Trump },
+            new() { PlayerPosition = RelativePlayerPosition.RightHandOpponent, Suit = RelativeSuit.Trump },
+        };
+
+        var result = BuildWithDefaults(cards, cards[0], knownPlayerSuitVoids: voids);
+
+        // 0 trump threats + 1 Ace of same suit = 1 threat
+        result.Card1Threats.Should().Be(1f);
+    }
+
+    [Fact]
+    public void BuildFeatures_BothOpponentsVoidInCardSuit_ExcludesSameSuitThreats()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.Nine, RelativeSuit.NonTrumpOppositeColor1),
+        };
+        var voids = new RelativePlayerSuitVoid[]
+        {
+            new() { PlayerPosition = RelativePlayerPosition.LeftHandOpponent, Suit = RelativeSuit.NonTrumpOppositeColor1 },
+            new() { PlayerPosition = RelativePlayerPosition.RightHandOpponent, Suit = RelativeSuit.NonTrumpOppositeColor1 },
+        };
+
+        var result = BuildWithDefaults(cards, cards[0], knownPlayerSuitVoids: voids);
+
+        // 7 trump threats + 0 same-suit threats = 7
+        result.Card1Threats.Should().Be(7f);
+    }
+
+    [Fact]
+    public void BuildFeatures_OnlyOneOpponentVoid_StillCountsThreats()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.King, RelativeSuit.NonTrumpOppositeColor1),
+        };
+        var voids = new RelativePlayerSuitVoid[]
+        {
+            new() { PlayerPosition = RelativePlayerPosition.LeftHandOpponent, Suit = RelativeSuit.Trump },
+        };
+
+        var result = BuildWithDefaults(cards, cards[0], knownPlayerSuitVoids: voids);
+
+        // Both opponents must be void to exclude; only LHO is void
+        // 7 trump + 1 Ace = 8
+        result.Card1Threats.Should().Be(8f);
+    }
+
+    [Fact]
+    public void BuildFeatures_MissingCardSlots_ReturnSentinel()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.RightBower, RelativeSuit.Trump),
+            new(Rank.Ace, RelativeSuit.Trump),
+            new(Rank.King, RelativeSuit.Trump),
+        };
+
+        var result = BuildWithDefaults(cards, cards[0]);
+
+        result.Card1Threats.Should().Be(0f);
+        result.Card2Threats.Should().Be(2f);
+        result.Card3Threats.Should().Be(3f);
+        result.Card4Threats.Should().Be(-1f);
+        result.Card5Threats.Should().Be(-1f);
+    }
+
+    [Fact]
+    public void BuildFeatures_ChosenCardThreats_MatchesChosenCard()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.RightBower, RelativeSuit.Trump),
+            new(Rank.LeftBower, RelativeSuit.Trump),
+        };
+
+        var result = BuildWithDefaults(cards, cards[1]);
+
+        // ChosenCard is LeftBower → 1 threat (RightBower unaccounted)
+        result.ChosenCardThreats.Should().Be(1f);
+    }
+
+    [Fact]
+    public void BuildFeatures_TrumpWithSomeHigherTrumpAccountedFor_PartialCount()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.King, RelativeSuit.Trump),
+        };
+        var accountedFor = new RelativeCard[]
+        {
+            new(Rank.RightBower, RelativeSuit.Trump),
+            new(Rank.Ace, RelativeSuit.Trump),
+        };
+
+        var result = BuildWithDefaults(cards, cards[0], cardsAccountedFor: accountedFor);
+
+        // Higher: LeftBower (unaccounted) → 1 threat
+        result.Card1Threats.Should().Be(1f);
+    }
+
+    [Fact]
+    public void BuildFeatures_NineOfTrump_HasSixThreatsWhenNoneAccountedFor()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.Nine, RelativeSuit.Trump),
+        };
+
+        var result = BuildWithDefaults(cards, cards[0]);
+
+        // Ten, Queen, King, Ace, LeftBower, RightBower = 6
+        result.Card1Threats.Should().Be(6f);
+    }
+
+    [Fact]
+    public void BuildFeatures_OpponentDealerPickedUpCard_StillCountsAsThreat()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.King, RelativeSuit.Trump),
+        };
+        var pickedUpCard = new RelativeCard(Rank.Ace, RelativeSuit.Trump);
+        var accountedFor = new RelativeCard[]
+        {
+            new(Rank.Ace, RelativeSuit.Trump),
+            new(Rank.RightBower, RelativeSuit.Trump),
+        };
+
+        var result = BuildWithDefaults(
+            cards,
+            cards[0],
+            dealer: RelativePlayerPosition.LeftHandOpponent,
+            dealerPickedUpCard: pickedUpCard,
+            cardsAccountedFor: accountedFor);
+
+        // Ace removed from effective accounted-for (opponent holds it), RightBower stays accounted
+        // Higher than King: Ace (unaccounted), LeftBower (unaccounted) = 2 threats
+        result.Card1Threats.Should().Be(2f);
+    }
+
+    [Fact]
+    public void BuildFeatures_PartnerDealerPickedUpCard_DoesNotCountAsThreat()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.King, RelativeSuit.Trump),
+        };
+        var pickedUpCard = new RelativeCard(Rank.Ace, RelativeSuit.Trump);
+        var accountedFor = new RelativeCard[]
+        {
+            new(Rank.Ace, RelativeSuit.Trump),
+            new(Rank.RightBower, RelativeSuit.Trump),
+        };
+
+        var result = BuildWithDefaults(
+            cards,
+            cards[0],
+            dealer: RelativePlayerPosition.Partner,
+            dealerPickedUpCard: pickedUpCard,
+            cardsAccountedFor: accountedFor);
+
+        // Ace stays accounted (partner holds it safely), RightBower stays accounted
+        // Higher than King: LeftBower (unaccounted) = 1 threat
+        result.Card1Threats.Should().Be(1f);
+    }
+
+    [Fact]
+    public void BuildFeatures_BothOpponentsVoidInTrump_TrumpCardHasZeroThreats()
+    {
+        var cards = new RelativeCard[]
+        {
+            new(Rank.Nine, RelativeSuit.Trump),
+        };
+        var voids = new RelativePlayerSuitVoid[]
+        {
+            new() { PlayerPosition = RelativePlayerPosition.LeftHandOpponent, Suit = RelativeSuit.Trump },
+            new() { PlayerPosition = RelativePlayerPosition.RightHandOpponent, Suit = RelativeSuit.Trump },
+        };
+
+        var result = BuildWithDefaults(cards, cards[0], knownPlayerSuitVoids: voids);
+
+        result.Card1Threats.Should().Be(0f);
+    }
+
+    private static AllPlayCardTrainingData BuildWithDefaults(
+        RelativeCard[] cardsInHand,
+        RelativeCard chosenCard,
+        RelativePlayerPosition dealer = RelativePlayerPosition.Partner,
+        RelativeCard? dealerPickedUpCard = null,
+        RelativeCard[]? cardsAccountedFor = null,
+        RelativePlayerSuitVoid[]? knownPlayerSuitVoids = null)
+    {
+        var context = new PlayCardFeatureBuilderContext(
+            CardsInHand: cardsInHand,
+            PlayedCards: [],
+            TeamScore: 0,
+            OpponentScore: 0,
+            LeadPlayer: RelativePlayerPosition.Self,
+            LeadSuit: null,
+            CallingPlayer: RelativePlayerPosition.Self,
+            CallingPlayerGoingAlone: false,
+            Dealer: dealer,
+            DealerPickedUpCard: dealerPickedUpCard,
+            KnownPlayerSuitVoids: knownPlayerSuitVoids ?? [],
+            CardsAccountedFor: cardsAccountedFor ?? [],
+            WinningTrickPlayer: null,
+            TrickNumber: 1,
+            WonTricks: 0,
+            OpponentsWonTricks: 0,
+            ChosenCard: chosenCard);
+
+        return PlayCardFeatureBuilder.BuildFeatures(context);
     }
 
     private static RelativeCard[] CreateDefaultHand()
