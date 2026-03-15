@@ -244,6 +244,98 @@ public class IdvMergeServiceTests : IDisposable
             Times.Exactly(3));
     }
 
+    [Fact]
+    public async Task MergeAsync_WithCallTrumpFilter_OnlyMergesCallTrump()
+    {
+        CreateSourceFiles("source1");
+        CreateSourceFiles("source2");
+
+        await _service.MergeAsync(
+            ["source1", "source2"],
+            "merged",
+            allowOverwrite: false,
+            decisionTypeFilter: DecisionType.CallTrump,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        _savedCallTrumpPaths.Should().ContainSingle(p => p.EndsWith("merged_CallTrump.idv"));
+        _savedPlayCardPaths.Should().BeEmpty();
+        _savedDiscardCardPaths.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task MergeAsync_WithPlayFilter_OnlyMergesPlayCard()
+    {
+        CreateSourceFiles("source1");
+        CreateSourceFiles("source2");
+
+        await _service.MergeAsync(
+            ["source1", "source2"],
+            "merged",
+            allowOverwrite: false,
+            decisionTypeFilter: DecisionType.Play,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        _savedPlayCardPaths.Should().ContainSingle(p => p.EndsWith("merged_PlayCard.idv"));
+        _savedCallTrumpPaths.Should().BeEmpty();
+        _savedDiscardCardPaths.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task MergeAsync_WithDiscardFilter_OnlyMergesDiscardCard()
+    {
+        CreateSourceFiles("source1");
+        CreateSourceFiles("source2");
+
+        await _service.MergeAsync(
+            ["source1", "source2"],
+            "merged",
+            allowOverwrite: false,
+            decisionTypeFilter: DecisionType.Discard,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        _savedDiscardCardPaths.Should().ContainSingle(p => p.EndsWith("merged_DiscardCard.idv"));
+        _savedPlayCardPaths.Should().BeEmpty();
+        _savedCallTrumpPaths.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task MergeAsync_WithCallTrumpFilter_DoesNotRequirePlayCardSourceFiles()
+    {
+        CreateSourceFile("source1", "CallTrump");
+        CreateSourceFile("source2", "CallTrump");
+
+        var act = async () => await _service.MergeAsync(
+            ["source1", "source2"],
+            "merged",
+            allowOverwrite: false,
+            decisionTypeFilter: DecisionType.CallTrump,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await act.Should().NotThrowAsync();
+        _savedCallTrumpPaths.Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task MergeAsync_WithCallTrumpFilter_OnlyChecksCallTrumpOutputForOverwrite()
+    {
+        CreateSourceFiles("source1");
+        CreateSourceFiles("source2");
+        await File.WriteAllTextAsync(
+            Path.Combine(_tempDirectory, "merged_PlayCard.idv"),
+            "existing",
+            TestContext.Current.CancellationToken);
+
+        var act = async () => await _service.MergeAsync(
+            ["source1", "source2"],
+            "merged",
+            allowOverwrite: false,
+            decisionTypeFilter: DecisionType.CallTrump,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await act.Should().NotThrowAsync();
+        _savedCallTrumpPaths.Should().ContainSingle();
+    }
+
     public void Dispose()
     {
         Dispose(disposing: true);

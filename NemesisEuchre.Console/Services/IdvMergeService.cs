@@ -15,6 +15,7 @@ public interface IIdvMergeService
         IReadOnlyList<string> sourceGenerationNames,
         string outputGenerationName,
         bool allowOverwrite,
+        DecisionType decisionTypeFilter = DecisionType.All,
         Action<string>? onStatusUpdate = null,
         CancellationToken cancellationToken = default);
 }
@@ -25,79 +26,109 @@ public sealed class IdvMergeService(
     IOptions<PersistenceOptions> persistenceOptions,
     ILogger<IdvMergeService> logger) : IIdvMergeService
 {
-    private static readonly string[] DecisionSuffixes = ["PlayCard", "CallTrump", "DiscardCard"];
+    private static readonly (string suffix, DecisionType type)[] DecisionSuffixMap =
+    [
+        (suffix: "PlayCard", type: DecisionType.Play),
+        (suffix: "CallTrump", type: DecisionType.CallTrump),
+        (suffix: "DiscardCard", type: DecisionType.Discard),
+    ];
 
     public async Task MergeAsync(
         IReadOnlyList<string> sourceGenerationNames,
         string outputGenerationName,
         bool allowOverwrite,
+        DecisionType decisionTypeFilter = DecisionType.All,
         Action<string>? onStatusUpdate = null,
         CancellationToken cancellationToken = default)
     {
         var basePath = persistenceOptions.Value.IdvOutputPath;
+        var activeSuffixes = GetActiveSuffixes(decisionTypeFilter);
 
-        ValidateSourceFiles(basePath, sourceGenerationNames);
-        GuardAgainstOverwrite(basePath, outputGenerationName, allowOverwrite);
+        ValidateSourceFiles(basePath, sourceGenerationNames, activeSuffixes);
+        GuardAgainstOverwrite(basePath, outputGenerationName, allowOverwrite, activeSuffixes);
 
         onStatusUpdate?.Invoke($"Loading metadata from {sourceGenerationNames.Count} source(s)...");
-        var allSourceMetadata = LoadAllSourceMetadata(basePath, sourceGenerationNames);
+        var allSourceMetadata = LoadAllSourceMetadata(basePath, sourceGenerationNames, activeSuffixes);
 
         var (gameCount, dealCount, trickCount, actors) = AggregateMetadata(allSourceMetadata);
 
         onStatusUpdate?.Invoke($"Merging {sourceGenerationNames.Count} source(s) into '{outputGenerationName}'...");
         LoggerMessages.LogIdvMergeSourcesStarting(logger, sourceGenerationNames.Count, outputGenerationName);
 
-        var playCardPaths = GetSourcePaths(basePath, sourceGenerationNames, "PlayCard");
-        var callTrumpPaths = GetSourcePaths(basePath, sourceGenerationNames, "CallTrump");
-        var discardCardPaths = GetSourcePaths(basePath, sourceGenerationNames, "DiscardCard");
-
         await Task.Run(
             () =>
             {
-                MergeDecisionType<PlayCardTrainingData>(
-                    playCardPaths,
-                    basePath,
-                    outputGenerationName,
-                    "PlayCard",
-                    DecisionType.Play,
-                    allSourceMetadata,
-                    gameCount,
-                    dealCount,
-                    trickCount,
-                    actors);
-                MergeDecisionType<CallTrumpTrainingData>(
-                    callTrumpPaths,
-                    basePath,
-                    outputGenerationName,
-                    "CallTrump",
-                    DecisionType.CallTrump,
-                    allSourceMetadata,
-                    gameCount,
-                    dealCount,
-                    trickCount,
-                    actors);
-                MergeDecisionType<DiscardCardTrainingData>(
-                    discardCardPaths,
-                    basePath,
-                    outputGenerationName,
-                    "DiscardCard",
-                    DecisionType.Discard,
-                    allSourceMetadata,
-                    gameCount,
-                    dealCount,
-                    trickCount,
-                    actors);
+                if (ShouldMerge(decisionTypeFilter, DecisionType.Play))
+                {
+                    var playCardPaths = GetSourcePaths(basePath, sourceGenerationNames, "PlayCard");
+                    MergeDecisionType<PlayCardTrainingData>(
+                        playCardPaths,
+                        basePath,
+                        outputGenerationName,
+                        "PlayCard",
+                        DecisionType.Play,
+                        allSourceMetadata,
+                        gameCount,
+                        dealCount,
+                        trickCount,
+                        actors);
+                }
+
+                if (ShouldMerge(decisionTypeFilter, DecisionType.CallTrump))
+                {
+                    var callTrumpPaths = GetSourcePaths(basePath, sourceGenerationNames, "CallTrump");
+                    MergeDecisionType<CallTrumpTrainingData>(
+                        callTrumpPaths,
+                        basePath,
+                        outputGenerationName,
+                        "CallTrump",
+                        DecisionType.CallTrump,
+                        allSourceMetadata,
+                        gameCount,
+                        dealCount,
+                        trickCount,
+                        actors);
+                }
+
+                if (ShouldMerge(decisionTypeFilter, DecisionType.Discard))
+                {
+                    var discardCardPaths = GetSourcePaths(basePath, sourceGenerationNames, "DiscardCard");
+                    MergeDecisionType<DiscardCardTrainingData>(
+                        discardCardPaths,
+                        basePath,
+                        outputGenerationName,
+                        "DiscardCard",
+                        DecisionType.Discard,
+                        allSourceMetadata,
+                        gameCount,
+                        dealCount,
+                        trickCount,
+                        actors);
+                }
             },
             cancellationToken).ConfigureAwait(false);
 
         onStatusUpdate?.Invoke($"Merge complete. Output: '{outputGenerationName}'");
     }
 
-    private static void ValidateSourceFiles(string basePath, IReadOnlyList<string> sourceNames)
+    private static bool ShouldMerge(DecisionType filter, DecisionType candidate)
+    {
+        return filter == DecisionType.All || filter == candidate;
+    }
+
+    private static string[] GetActiveSuffixes(DecisionType filter)
+    {
+        return [.. DecisionSuffixMap.Where(e => ShouldMerge(filter, e.type)).Select(e => e.suffix)];
+    }
+
+    private static void ValidateSourceFiles(
+        string basePath,
+        IReadOnlyList<string> sourceNames,
+        string[] activeSuffixes)
     {
         foreach (var name in sourceNames)
         {
-            foreach (var suffix in DecisionSuffixes)
+            foreach (var suffix in activeSuffixes)
             {
                 var path = Path.Combine(basePath, $"{name}_{suffix}{FileExtensions.Idv}");
                 if (!File.Exists(path))
@@ -108,14 +139,18 @@ public sealed class IdvMergeService(
         }
     }
 
-    private static void GuardAgainstOverwrite(string basePath, string outputName, bool allowOverwrite)
+    private static void GuardAgainstOverwrite(
+        string basePath,
+        string outputName,
+        bool allowOverwrite,
+        string[] activeSuffixes)
     {
         if (allowOverwrite)
         {
             return;
         }
 
-        var conflictingFiles = DecisionSuffixes
+        var conflictingFiles = activeSuffixes
             .SelectMany(s => new[]
             {
                 Path.Combine(basePath, $"{outputName}_{s}{FileExtensions.Idv}"),
@@ -160,13 +195,16 @@ public sealed class IdvMergeService(
         return [.. sourceNames.Select(n => Path.Combine(basePath, $"{n}_{suffix}{FileExtensions.Idv}"))];
     }
 
-    private List<IdvFileMetadata> LoadAllSourceMetadata(string basePath, IReadOnlyList<string> sourceNames)
+    private List<IdvFileMetadata> LoadAllSourceMetadata(
+        string basePath,
+        IReadOnlyList<string> sourceNames,
+        string[] activeSuffixes)
     {
         var metadata = new List<IdvFileMetadata>();
 
         foreach (var name in sourceNames)
         {
-            foreach (var suffix in DecisionSuffixes)
+            foreach (var suffix in activeSuffixes)
             {
                 var idvPath = Path.Combine(basePath, $"{name}_{suffix}{FileExtensions.Idv}");
                 var metaPath = idvPath + FileExtensions.IdvMetadataSuffix;

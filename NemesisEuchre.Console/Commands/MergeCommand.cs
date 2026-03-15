@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Console.Services;
 using NemesisEuchre.Foundation;
+using NemesisEuchre.Foundation.Constants;
 
 using Spectre.Console;
 
@@ -23,6 +24,9 @@ public class MergeCommand(
 
     [CliOption(Description = "Output generation name", Alias = "o")]
     public required string Output { get; set; }
+
+    [CliOption(Description = "Decision type to merge (CallTrump, Discard, Play, All)", Alias = "d")]
+    public DecisionType DecisionType { get; set; } = DecisionType.All;
 
     [CliOption(Description = "Overwrite existing output files if they exist")]
     public bool Overwrite { get; set; }
@@ -45,6 +49,7 @@ public class MergeCommand(
                             [.. Source],
                             Output,
                             Overwrite,
+                            DecisionType,
                             status => ctx.Status(status)));
 
             ansiConsole.MarkupLine($"[green]Successfully merged {Source.Count} source(s) into '{Output}'.[/]");

@@ -6,6 +6,7 @@ using Moq;
 
 using NemesisEuchre.Console.Commands;
 using NemesisEuchre.Console.Services;
+using NemesisEuchre.Foundation.Constants;
 
 using Spectre.Console.Testing;
 
@@ -37,6 +38,7 @@ public class MergeCommandTests
                 It.IsAny<IReadOnlyList<string>>(),
                 It.IsAny<string>(),
                 It.IsAny<bool>(),
+                It.IsAny<DecisionType>(),
                 It.IsAny<Action<string>?>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
@@ -53,6 +55,7 @@ public class MergeCommandTests
                 It.IsAny<IReadOnlyList<string>>(),
                 It.IsAny<string>(),
                 It.IsAny<bool>(),
+                It.IsAny<DecisionType>(),
                 It.IsAny<Action<string>?>(),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -83,6 +86,7 @@ public class MergeCommandTests
                 It.IsAny<IReadOnlyList<string>>(),
                 It.IsAny<string>(),
                 It.IsAny<bool>(),
+                It.IsAny<DecisionType>(),
                 It.IsAny<Action<string>?>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new FileNotFoundException("Source IDV file not found: /data/gen1_PlayCard.idv"));
@@ -100,5 +104,44 @@ public class MergeCommandTests
 
         exitCode.Should().Be(1);
         testConsole.Output.Should().Contain("Error");
+    }
+
+    [Fact]
+    public async Task RunAsync_PassesDecisionTypeToMergeService()
+    {
+        var testConsole = new TestConsole();
+        var mockMergeService = new Mock<IIdvMergeService>();
+
+        mockMergeService
+            .Setup(s => s.MergeAsync(
+                It.IsAny<IReadOnlyList<string>>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>(),
+                It.IsAny<DecisionType>(),
+                It.IsAny<Action<string>?>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var command = new MergeCommand(
+            Mock.Of<ILogger<MergeCommand>>(),
+            testConsole,
+            mockMergeService.Object)
+        {
+            Source = ["source1", "source2"],
+            Output = "merged",
+            DecisionType = DecisionType.CallTrump,
+        };
+
+        await command.RunAsync();
+
+        mockMergeService.Verify(
+            s => s.MergeAsync(
+                It.IsAny<IReadOnlyList<string>>(),
+                "merged",
+                false,
+                DecisionType.CallTrump,
+                It.IsAny<Action<string>?>(),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }
