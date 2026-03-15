@@ -43,9 +43,9 @@ public partial class GameToTrainingDataConverter(
             callTrumpData.AddRange(batch.CallTrumpData);
             discardCardData.AddRange(batch.DiscardCardData);
             actors.UnionWith(batch.Stats.Actors);
-            gameCount = batch.Stats.GameCount;
-            dealCount = batch.Stats.DealCount;
-            trickCount = batch.Stats.TrickCount;
+            gameCount += batch.Stats.GameCount;
+            dealCount += batch.Stats.DealCount;
+            trickCount += batch.Stats.TrickCount;
         }
 
         var stats = new TrainingDataBatchStats(gameCount, dealCount, trickCount, actors);
