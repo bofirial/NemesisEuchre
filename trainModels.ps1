@@ -1,13 +1,14 @@
 $modelNumber = 1;
+$generationDirectory = "Gen4 Training";
 
-$source = "can3a";
+$source = "idv5";
 $decisionType = "SimplePlay";
 
 if ($decisionType -eq "CallTrump") {
     $modelParameterLabel = "-t2m-call";
-    $csvPath = "reports/Gen4 Training/calltrump-modelResults.csv";
+    $csvPath = "reports/$generationDirectory/calltrump-modelResults.csv";
 
-    $modelPrefix = "can3ct";
+    $modelPrefix = "can5ct";
 
     $l1Regularizations = @(0.0);
     $l2Regularizations = @(0.01);
@@ -19,9 +20,9 @@ if ($decisionType -eq "CallTrump") {
 }
 elseif ($decisionType -eq "Discard") {
     $modelParameterLabel = "-t2m-discard";
-    $csvPath = "reports/Gen4 Training/discard-modelResults.csv";
+    $csvPath = "reports/$generationDirectory/discard-modelResults.csv";
     
-    $modelPrefix = "can3d";
+    $modelPrefix = "can5d";
 
     $l1Regularizations = @(0.0);
     $l2Regularizations = @(0.01);
@@ -33,9 +34,9 @@ elseif ($decisionType -eq "Discard") {
 }
 elseif ($decisionType -eq "Play") {
     $modelParameterLabel = "-t2m-play";
-    $csvPath = "reports/Gen4 Training/play-modelResults.csv";
+    $csvPath = "reports/$generationDirectory/play-modelResults.csv";
     
-    $modelPrefix = "can3p";
+    $modelPrefix = "can5p";
 
     $l1Regularizations = @(0.0);
     $l2Regularizations = @(0.01);
@@ -47,9 +48,23 @@ elseif ($decisionType -eq "Play") {
 }
 elseif ($decisionType -eq "SimplePlay") {
     $modelParameterLabel = "-t2m-simple-play";
-    $csvPath = "reports/Gen4 Training/simpleplay-modelResults.csv";
+    $csvPath = "reports/$generationDirectory/simpleplay-modelResults.csv";
     
-    $modelPrefix = "can3sp";
+    $modelPrefix = "can5sp";
+
+    $l1Regularizations = @(0.0);
+    $l2Regularizations = @(0.01);
+
+    $learnRates = @(0.5, 0.625, 0.675, 0.75)
+    $iterations = @(100, 150, 200)
+    $numbersOfLeaves = @(31, 63, 127)
+    $minimumExampleCountsPerLeaf = @(400, 600, 800)
+}
+elseif ($decisionType -eq "AdvancedPlay") {
+    $modelParameterLabel = "-t2m-advanced-play";
+    $csvPath = "reports/$generationDirectory/advancedplay-modelResults.csv";
+    
+    $modelPrefix = "can5ap";
 
     $l1Regularizations = @(0.0);
     $l2Regularizations = @(0.01);

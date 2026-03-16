@@ -21,7 +21,7 @@ foreach ($model in $models) {
 
         $csvData = Import-Csv -Path $CsvPath
 
-        if ($csvData | Where-Object { $_."Team 1 Name" -eq $model2 -and $_."Team 2 Name" -eq $model }) {
+        if ($csvData | Where-Object { ($_."Team 1 Name" -eq $model2 -and $_."Team 2 Name" -eq $model) -or ($_."Team 1 Name" -eq $model -and $_."Team 2 Name" -eq $model2) }) {
             Write-Host "Skipping $model vs $model2 (Already Played)";
             continue;
         }

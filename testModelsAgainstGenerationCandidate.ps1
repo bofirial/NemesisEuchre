@@ -1,4 +1,4 @@
-$CsvPath = "battle-modelResults.csv";
+$CsvPath = "reports/Gen 4 Training/battle-modelResults.csv";
 
 $candidateModel = "gen4bc";
 $numberOfGames = 25000;
@@ -28,6 +28,13 @@ $simplePlayModels = @(
 );
 
 $playModels = @(
+    "can3p.20",   # 0.50604 - LR=0.5, Iter=75, Leaves=255, MinEx=400
+    "can3p.25",   # 0.50308 - LR=0.5, Iter=200, Leaves=127, MinEx=400
+    "can3p.32",   # 0.50256 - LR=0.75, Iter=150, Leaves=255, MinEx=400
+    "can3p.30"    # 0.50232 - LR=0.75, Iter=75, Leaves=511, MinEx=400
+);
+
+$advancedPlayModels = @(
     "can3p.20",   # 0.50604 - LR=0.5, Iter=75, Leaves=255, MinEx=400
     "can3p.25",   # 0.50308 - LR=0.5, Iter=200, Leaves=127, MinEx=400
     "can3p.32",   # 0.50256 - LR=0.75, Iter=150, Leaves=255, MinEx=400
@@ -115,6 +122,28 @@ foreach ($model in $playModels) {
         $newRow = [PSCustomObject]@{
             "Model Name"         = $Model
             "DecisionType"       = "Play";
+            "Win Rate vs gen4bc" = $playBattleOutput.Team2WinRate
+        }
+
+        $newRow | Export-Csv -Path $CsvPath -Append -NoTypeInformation
+    }
+}
+
+foreach ($model in $advancedPlayModels) {
+    if (Test-Path -path "models/$($model)_advancedplaycard.zip") {
+        $outputFile = "output.json";
+
+        $command = "dotnet run --project NemesisEuchre.Console -- -t1m $candidateModel -t2m $candidateModel -t2m-advanced-play $Model -c $numberOfGames -json $outputFile";
+
+        Write-Host $command;
+
+        Invoke-Expression $command
+
+        $playBattleOutput = Get-Content -Path $outputFile -Raw | ConvertFrom-Json
+
+        $newRow = [PSCustomObject]@{
+            "Model Name"         = $Model
+            "DecisionType"       = "Advanced Play";
             "Win Rate vs gen4bc" = $playBattleOutput.Team2WinRate
         }
 

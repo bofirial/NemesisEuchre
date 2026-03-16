@@ -12,6 +12,13 @@ $models = @(
 );
 
 foreach ($model in $models) {
+
+    $csvData = Import-Csv -Path $CsvPath
+
+    if ($csvData | Where-Object { $_."Model Name" -eq $model }) {
+        Write-Host "Skipping $model (Already Tested)";
+        continue;
+    }
     
     $testCommand = "dotnet run --project NemesisEuchre.Console -- test -m $model -json $outputFile";
 
@@ -30,6 +37,9 @@ foreach ($model in $models) {
     }
     elseif (Test-Path -Path "models/$($model)_simpleplaycard.json") {
         $playSidecar = Get-Content -Path "models/$($model)_simpleplaycard.json" -Raw | ConvertFrom-Json
+    }
+    elseif (Test-Path -Path "models/$($model)_advancedplaycard.json") {
+        $playSidecar = Get-Content -Path "models/$($model)_advancedplaycard.json" -Raw | ConvertFrom-Json
     }
 
     $newRow = [PSCustomObject]@{

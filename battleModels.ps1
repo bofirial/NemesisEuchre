@@ -23,7 +23,7 @@ Param(
 
 $outputFile = "output.json";
 
-$battleCommand = "dotnet run --project NemesisEuchre.Console -- -t1m gen3b -t2m gen3b $ModelParameterLabel $Model -c 25000 -json $outputFile";
+$battleCommand = "dotnet run --project NemesisEuchre.Console -- -t1m gen4b -t2m gen4b $ModelParameterLabel $Model -c 25000 -json $outputFile";
 
 Write-Host $battleCommand;
 
@@ -52,6 +52,7 @@ $newRow = [PSCustomObject]@{
     "CallTrump Passed Tests"         = $testOutput.TestsByDecisionType.CallTrump.Passed
     "Discard Passed Tests"           = $testOutput.TestsByDecisionType.Discard.Passed
     "Play Passed Tests"              = $testOutput.TestsByDecisionType.Play.Passed
+    "Completion Time"                = Get-Date -Format "[yyyy/MM/dd HH:mm:ss]"
     "Battle Command"                 = $battleCommand
     "Test Command"                   = $testCommand
 }
