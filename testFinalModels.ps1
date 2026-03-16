@@ -7,7 +7,8 @@ $models = @(
     "gen2b",
     "gen2t",
     "gen3b",
-    "gen3t"
+    "gen3t",
+    "gen4b"
 );
 
 foreach ($model in $models) {
