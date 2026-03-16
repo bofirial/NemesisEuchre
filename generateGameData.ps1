@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 
-$Model = "gen4c"
+$Model = "gen4b"
 $TestModel = "gen3t"
 $ProjectPath = "NemesisEuchre.Console"
 
