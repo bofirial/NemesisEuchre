@@ -7,9 +7,8 @@ using NemesisEuchre.MachineLearning.Loading;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.CallTrump;
 
-public class StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer(
-    ICallTrumpBehavioralTestRunner runner)
-    : CallTrumpBehavioralTest(runner)
+public class StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer
+    : CallTrumpBehavioralTest
 {
     private static readonly CallTrumpDecision[] RoundOneDecisions =
     [
@@ -27,7 +26,8 @@ public class StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer(
 
     public override IReadOnlyList<BehavioralTestResult> Run(
         IPredictionEngineProvider engineProvider,
-        string modelName)
+        string modelName,
+        ICallTrumpBehavioralTestRunner runner)
     {
         var results = new List<BehavioralTestResult>(4);
 
@@ -52,7 +52,7 @@ public class StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer(
 
                 foreach (var decision in RoundOneDecisions)
                 {
-                    var scoreOrNull = Runner.TryScore(
+                    var scoreOrNull = runner.TryScore(
                         engineProvider,
                         modelName,
                         hand,
@@ -67,12 +67,12 @@ public class StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer(
                     {
                         return [new BehavioralTestResult(
                             Name,
-                            DecisionType,
+                            runner.DecisionType,
                             false,
                             "-",
                             AssertionDescription,
                             [],
-                            $"Failed to load {DecisionType} model")];
+                            $"Failed to load {runner.DecisionType} model")];
                     }
 
                     if (scoreOrNull.Value > bestScore)
@@ -98,7 +98,7 @@ public class StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer(
 
             results.Add(new BehavioralTestResult(
                 $"{Name} ({suit})",
-                DecisionType,
+                runner.DecisionType,
                 passed,
                 $"Team: {teamMax:F4}, Opp: {opponentMax:F4}",
                 AssertionDescription,

@@ -6,18 +6,13 @@ using NemesisEuchre.MachineLearning.Loading;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests;
 
-public abstract class CallTrumpBehavioralTest(
-    ICallTrumpBehavioralTestRunner runner) : IModelBehavioralTest
+public abstract class CallTrumpBehavioralTest : ICallTrumpBehavioralTest
 {
     public abstract string Name { get; }
 
     public abstract string Description { get; }
 
-    public DecisionType DecisionType => Runner.DecisionType;
-
     public abstract string AssertionDescription { get; }
-
-    protected ICallTrumpBehavioralTestRunner Runner { get; } = runner;
 
     protected virtual RelativePlayerPosition DealerPosition => RelativePlayerPosition.LeftHandOpponent;
 
@@ -25,7 +20,8 @@ public abstract class CallTrumpBehavioralTest(
 
     protected virtual short OpponentScore => 0;
 
-    public virtual IReadOnlyList<BehavioralTestResult> Run(IPredictionEngineProvider engineProvider, string modelName)
+    public virtual IReadOnlyList<BehavioralTestResult> Run(
+        IPredictionEngineProvider engineProvider, string modelName, ICallTrumpBehavioralTestRunner runner)
     {
         var testCases = GetTestCases();
         var results = new List<BehavioralTestResult>(testCases.Count);
@@ -38,7 +34,7 @@ public abstract class CallTrumpBehavioralTest(
 
             foreach (var decision in testCase.ValidDecisions)
             {
-                var scoreOrNull = Runner.TryScore(
+                var scoreOrNull = runner.TryScore(
                     engineProvider,
                     modelName,
                     testCase.CardsInHand,
@@ -53,12 +49,12 @@ public abstract class CallTrumpBehavioralTest(
                 {
                     return [new BehavioralTestResult(
                         Name,
-                        DecisionType,
+                        runner.DecisionType,
                         false,
                         "-",
                         AssertionDescription,
                         [],
-                        $"Failed to load {DecisionType} model")];
+                        $"Failed to load {runner.DecisionType} model")];
                 }
 
                 var score = scoreOrNull.Value;
@@ -79,7 +75,7 @@ public abstract class CallTrumpBehavioralTest(
 
             results.Add(new BehavioralTestResult(
                 testCase.Label,
-                DecisionType,
+                runner.DecisionType,
                 passed,
                 chosenDisplay,
                 AssertionDescription,

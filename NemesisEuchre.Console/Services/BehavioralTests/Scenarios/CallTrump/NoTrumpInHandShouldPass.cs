@@ -4,9 +4,8 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.CallTrump;
 
-public class NoTrumpInHandShouldPass(
-    ICallTrumpBehavioralTestRunner runner)
-    : CallTrumpBehavioralTest(runner)
+public class NoTrumpInHandShouldPass
+    : CallTrumpBehavioralTest
 {
     public override string Name => "No trump in hand";
 

@@ -5,14 +5,11 @@ using NemesisEuchre.MachineLearning.Loading;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests;
 
-public abstract class DiscardCardBehavioralTest(
-    IDiscardCardBehavioralTestRunner runner) : IModelBehavioralTest
+public abstract class DiscardCardBehavioralTest : IDiscardCardBehavioralTest
 {
     public abstract string Name { get; }
 
     public abstract string Description { get; }
-
-    public DecisionType DecisionType => runner.DecisionType;
 
     public abstract string AssertionDescription { get; }
 
@@ -24,7 +21,8 @@ public abstract class DiscardCardBehavioralTest(
 
     protected virtual short OpponentScore => 0;
 
-    public IReadOnlyList<BehavioralTestResult> Run(IPredictionEngineProvider engineProvider, string modelName)
+    public IReadOnlyList<BehavioralTestResult> Run(
+        IPredictionEngineProvider engineProvider, string modelName, IDiscardCardBehavioralTestRunner runner)
     {
         var testCases = GetTestCases();
         var results = new List<BehavioralTestResult>(testCases.Count);
@@ -51,12 +49,12 @@ public abstract class DiscardCardBehavioralTest(
                 {
                     return [new BehavioralTestResult(
                         Name,
-                        DecisionType,
+                        runner.DecisionType,
                         false,
                         "-",
                         AssertionDescription,
                         [],
-                        $"Failed to load {DecisionType} model")];
+                        $"Failed to load {runner.DecisionType} model")];
                 }
 
                 var score = scoreOrNull.Value;
@@ -78,7 +76,7 @@ public abstract class DiscardCardBehavioralTest(
 
             results.Add(new BehavioralTestResult(
                 testCase.Label,
-                DecisionType,
+                runner.DecisionType,
                 passed,
                 chosenDisplay,
                 AssertionDescription,

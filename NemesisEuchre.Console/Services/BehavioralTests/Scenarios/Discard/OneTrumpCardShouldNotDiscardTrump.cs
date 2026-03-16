@@ -3,9 +3,8 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.Discard;
 
-public class OneTrumpCardShouldNotDiscardTrump(
-    IDiscardCardBehavioralTestRunner runner)
-    : DiscardCardBehavioralTest(runner)
+public class OneTrumpCardShouldNotDiscardTrump
+    : DiscardCardBehavioralTest
 {
     public override string Name => "Keep lone trump card";
 

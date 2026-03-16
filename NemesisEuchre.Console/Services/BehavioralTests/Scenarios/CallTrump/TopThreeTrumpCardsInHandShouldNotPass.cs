@@ -5,9 +5,8 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.CallTrump;
 
-public class TopThreeTrumpCardsInHandShouldNotPass(
-    ICallTrumpBehavioralTestRunner runner)
-    : CallTrumpBehavioralTest(runner)
+public class TopThreeTrumpCardsInHandShouldNotPass
+    : CallTrumpBehavioralTest
 {
     public override string Name => "Top three trump cards in hand";
 

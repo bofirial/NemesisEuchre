@@ -6,14 +6,11 @@ using NemesisEuchre.MachineLearning.Loading;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests;
 
-public abstract class PlayCardBehavioralTest(
-    IPlayCardBehavioralTestRunner runner) : IModelBehavioralTest
+public abstract class PlayCardBehavioralTest : IPlayCardBehavioralTest
 {
     public abstract string Name { get; }
 
     public abstract string Description { get; }
-
-    public DecisionType DecisionType => runner.DecisionType;
 
     public abstract string AssertionDescription { get; }
 
@@ -47,7 +44,8 @@ public abstract class PlayCardBehavioralTest(
 
     protected virtual short OpponentsWonTricks => 0;
 
-    public IReadOnlyList<BehavioralTestResult> Run(IPredictionEngineProvider engineProvider, string modelName)
+    public IReadOnlyList<BehavioralTestResult> Run(
+        IPredictionEngineProvider engineProvider, string modelName, IPlayCardBehavioralTestRunner runner)
     {
         var testCases = GetTestCases();
         var results = new List<BehavioralTestResult>(testCases.Count);
@@ -110,7 +108,7 @@ public abstract class PlayCardBehavioralTest(
 
             results.Add(new BehavioralTestResult(
                 testCase.Label,
-                DecisionType.Play,
+                runner.DecisionType,
                 passed,
                 chosenDisplay,
                 AssertionDescription,

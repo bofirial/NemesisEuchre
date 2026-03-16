@@ -3,9 +3,8 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.Discard;
 
-public class FiveTrumpPlusOneNonTrumpShouldDiscardNonTrump(
-    IDiscardCardBehavioralTestRunner runner)
-    : DiscardCardBehavioralTest(runner)
+public class FiveTrumpPlusOneNonTrumpShouldDiscardNonTrump
+    : DiscardCardBehavioralTest
 {
     public override string Name => "Five trump plus one non-trump";
 

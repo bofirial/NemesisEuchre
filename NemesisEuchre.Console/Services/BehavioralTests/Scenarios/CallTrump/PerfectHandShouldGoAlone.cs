@@ -5,9 +5,8 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.CallTrump;
 
-public class PerfectHandShouldGoAlone(
-    ICallTrumpBehavioralTestRunner runner)
-    : CallTrumpBehavioralTest(runner)
+public class PerfectHandShouldGoAlone
+    : CallTrumpBehavioralTest
 {
     public override string Name => "Perfect hand go alone";
 

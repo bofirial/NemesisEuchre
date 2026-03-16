@@ -3,9 +3,8 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.PlayCard;
 
-public class OpponentWinningTrickShouldPlayTrump(
-    IPlayCardBehavioralTestRunner runner)
-    : PlayCardBehavioralTest(runner)
+public class OpponentWinningTrickShouldPlayTrump
+    : PlayCardBehavioralTest
 {
     public override string Name => "Opponent winning trick should play trump";
 

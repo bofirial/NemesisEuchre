@@ -58,83 +58,30 @@ public static class ConsoleServiceCollectionExtensions
         services.AddScoped<IModelBehavioralTestRunner, ModelBehavioralTestRunner>();
         services.AddScoped<ITestResultsRenderer, TestResultsRenderer>();
 
-        services.AddScoped<CallTrumpBehavioralTestRunner>();
-        services.AddScoped<AdvancedCallTrumpBehavioralTestRunner>();
-        services.AddScoped<DiscardCardBehavioralTestRunner>();
-        services.AddScoped<AdvancedDiscardCardBehavioralTestRunner>();
+        services.AddScoped<ICallTrumpBehavioralTestRunner, CallTrumpBehavioralTestRunner>();
+        services.AddScoped<ICallTrumpBehavioralTestRunner, AdvancedCallTrumpBehavioralTestRunner>();
+        services.AddScoped<IDiscardCardBehavioralTestRunner, DiscardCardBehavioralTestRunner>();
+        services.AddScoped<IDiscardCardBehavioralTestRunner, AdvancedDiscardCardBehavioralTestRunner>();
+        services.AddScoped<IPlayCardBehavioralTestRunner, PlayCardBehavioralTestRunner>();
+        services.AddScoped<IPlayCardBehavioralTestRunner, SimplePlayCardBehavioralTestRunner>();
+        services.AddScoped<IPlayCardBehavioralTestRunner, AdvancedPlayCardBehavioralTestRunner>();
 
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new NoTrumpInHandShouldPass(sp.GetRequiredService<CallTrumpBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new NoTrumpInHandShouldPass(sp.GetRequiredService<AdvancedCallTrumpBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new FiveTrumpInHandShouldNotPass(sp.GetRequiredService<CallTrumpBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new FiveTrumpInHandShouldNotPass(sp.GetRequiredService<AdvancedCallTrumpBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new TopThreeTrumpCardsInHandShouldNotPass(sp.GetRequiredService<CallTrumpBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new TopThreeTrumpCardsInHandShouldNotPass(sp.GetRequiredService<AdvancedCallTrumpBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new PerfectHandShouldGoAlone(sp.GetRequiredService<CallTrumpBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new PerfectHandShouldGoAlone(sp.GetRequiredService<AdvancedCallTrumpBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new ForcedCallShouldChooseBestTrump(sp.GetRequiredService<CallTrumpBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new ForcedCallShouldChooseBestTrump(sp.GetRequiredService<AdvancedCallTrumpBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer(sp.GetRequiredService<CallTrumpBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer(sp.GetRequiredService<AdvancedCallTrumpBehavioralTestRunner>()));
+        services.AddScoped<ICallTrumpBehavioralTest, NoTrumpInHandShouldPass>();
+        services.AddScoped<ICallTrumpBehavioralTest, FiveTrumpInHandShouldNotPass>();
+        services.AddScoped<ICallTrumpBehavioralTest, TopThreeTrumpCardsInHandShouldNotPass>();
+        services.AddScoped<ICallTrumpBehavioralTest, PerfectHandShouldGoAlone>();
+        services.AddScoped<ICallTrumpBehavioralTest, ForcedCallShouldChooseBestTrump>();
+        services.AddScoped<ICallTrumpBehavioralTest, StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer>();
 
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new FiveTrumpPlusOneNonTrumpShouldDiscardNonTrump(sp.GetRequiredService<DiscardCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new FiveTrumpPlusOneNonTrumpShouldDiscardNonTrump(sp.GetRequiredService<AdvancedDiscardCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new OneTrumpCardShouldNotDiscardTrump(sp.GetRequiredService<DiscardCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new OneTrumpCardShouldNotDiscardTrump(sp.GetRequiredService<AdvancedDiscardCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new LoneSuitShouldBeDiscardedToReduceToThreeSuits(sp.GetRequiredService<DiscardCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new LoneSuitShouldBeDiscardedToReduceToThreeSuits(sp.GetRequiredService<AdvancedDiscardCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new LoneSuitShouldBeDiscardedToReduceToTwoSuits(sp.GetRequiredService<DiscardCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new LoneSuitShouldBeDiscardedToReduceToTwoSuits(sp.GetRequiredService<AdvancedDiscardCardBehavioralTestRunner>()));
+        services.AddScoped<IDiscardCardBehavioralTest, FiveTrumpPlusOneNonTrumpShouldDiscardNonTrump>();
+        services.AddScoped<IDiscardCardBehavioralTest, OneTrumpCardShouldNotDiscardTrump>();
+        services.AddScoped<IDiscardCardBehavioralTest, LoneSuitShouldBeDiscardedToReduceToThreeSuits>();
+        services.AddScoped<IDiscardCardBehavioralTest, LoneSuitShouldBeDiscardedToReduceToTwoSuits>();
 
-        services.AddScoped<PlayCardBehavioralTestRunner>();
-        services.AddScoped<SimplePlayCardBehavioralTestRunner>();
-        services.AddScoped<AdvancedPlayCardBehavioralTestRunner>();
-
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new PartnerWinningTrickShouldNotPlayTrump(sp.GetRequiredService<PlayCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new OpponentWinningTrickShouldPlayTrump(sp.GetRequiredService<PlayCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new OpponentWinningTrickShouldPlayLowestTrump(sp.GetRequiredService<PlayCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new OpponentVoidInSuitShouldLeadTheOtherAce(sp.GetRequiredService<PlayCardBehavioralTestRunner>()));
-
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new PartnerWinningTrickShouldNotPlayTrump(sp.GetRequiredService<SimplePlayCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new OpponentWinningTrickShouldPlayTrump(sp.GetRequiredService<SimplePlayCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new OpponentWinningTrickShouldPlayLowestTrump(sp.GetRequiredService<SimplePlayCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new OpponentVoidInSuitShouldLeadTheOtherAce(sp.GetRequiredService<SimplePlayCardBehavioralTestRunner>()));
-
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new PartnerWinningTrickShouldNotPlayTrump(sp.GetRequiredService<AdvancedPlayCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new OpponentWinningTrickShouldPlayTrump(sp.GetRequiredService<AdvancedPlayCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new OpponentWinningTrickShouldPlayLowestTrump(sp.GetRequiredService<AdvancedPlayCardBehavioralTestRunner>()));
-        services.AddScoped<IModelBehavioralTest>(sp =>
-            new OpponentVoidInSuitShouldLeadTheOtherAce(sp.GetRequiredService<AdvancedPlayCardBehavioralTestRunner>()));
+        services.AddScoped<IPlayCardBehavioralTest, PartnerWinningTrickShouldNotPlayTrump>();
+        services.AddScoped<IPlayCardBehavioralTest, OpponentWinningTrickShouldPlayTrump>();
+        services.AddScoped<IPlayCardBehavioralTest, OpponentWinningTrickShouldPlayLowestTrump>();
+        services.AddScoped<IPlayCardBehavioralTest, OpponentVoidInSuitShouldLeadTheOtherAce>();
 
         services.Configure<GameOptions>(_ => { });
         services.AddOptions<GameExecutionOptions>()

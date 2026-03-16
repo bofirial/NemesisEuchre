@@ -3,9 +3,8 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.PlayCard;
 
-public class OpponentVoidInSuitShouldLeadTheOtherAce(
-    IPlayCardBehavioralTestRunner runner)
-    : PlayCardBehavioralTest(runner)
+public class OpponentVoidInSuitShouldLeadTheOtherAce
+    : PlayCardBehavioralTest
 {
     public override string Name => "2 Aces in hand should lead suit not played";
 

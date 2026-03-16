@@ -5,9 +5,8 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.CallTrump;
 
-public class ForcedCallShouldChooseBestTrump(
-    ICallTrumpBehavioralTestRunner runner)
-    : CallTrumpBehavioralTest(runner)
+public class ForcedCallShouldChooseBestTrump
+    : CallTrumpBehavioralTest
 {
     public override string Name => "Forced call should choose best trump";
 

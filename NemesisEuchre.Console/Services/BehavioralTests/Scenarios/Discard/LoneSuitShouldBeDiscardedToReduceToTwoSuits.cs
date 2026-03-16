@@ -3,9 +3,8 @@ using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.Discard;
 
-public class LoneSuitShouldBeDiscardedToReduceToTwoSuits(
-    IDiscardCardBehavioralTestRunner runner)
-    : DiscardCardBehavioralTest(runner)
+public class LoneSuitShouldBeDiscardedToReduceToTwoSuits
+    : DiscardCardBehavioralTest
 {
     public override string Name => "Discard lone suit to reduce to two suits";
 
