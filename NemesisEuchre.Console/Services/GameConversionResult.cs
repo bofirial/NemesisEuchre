@@ -9,9 +9,9 @@ public partial class GameToTrainingDataConverter
     {
         public List<AllPlayCardTrainingData> PlayCardData { get; } = [];
 
-        public List<CallTrumpTrainingData> CallTrumpData { get; } = [];
+        public List<AllCallTrumpTrainingData> CallTrumpData { get; } = [];
 
-        public List<DiscardCardTrainingData> DiscardCardData { get; } = [];
+        public List<AllDiscardCardTrainingData> DiscardCardData { get; } = [];
 
         public HashSet<Actor> Actors { get; } = [];
     }

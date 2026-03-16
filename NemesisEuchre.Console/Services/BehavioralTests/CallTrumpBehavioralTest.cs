@@ -2,24 +2,22 @@ using NemesisEuchre.Console.Models.BehavioralTests;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
-using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Loading;
-using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests;
 
 public abstract class CallTrumpBehavioralTest(
-    ICallTrumpInferenceFeatureBuilder featureBuilder) : IModelBehavioralTest
+    ICallTrumpBehavioralTestRunner runner) : IModelBehavioralTest
 {
     public abstract string Name { get; }
 
     public abstract string Description { get; }
 
-    public DecisionType DecisionType => DecisionType.CallTrump;
+    public DecisionType DecisionType => Runner.DecisionType;
 
     public abstract string AssertionDescription { get; }
 
-    protected ICallTrumpInferenceFeatureBuilder FeatureBuilder { get; } = featureBuilder;
+    protected ICallTrumpBehavioralTestRunner Runner { get; } = runner;
 
     protected virtual RelativePlayerPosition DealerPosition => RelativePlayerPosition.LeftHandOpponent;
 
@@ -29,21 +27,6 @@ public abstract class CallTrumpBehavioralTest(
 
     public virtual IReadOnlyList<BehavioralTestResult> Run(IPredictionEngineProvider engineProvider, string modelName)
     {
-        var engine = engineProvider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-            "CallTrump", modelName);
-
-        if (engine == null)
-        {
-            return [new BehavioralTestResult(
-                Name,
-                DecisionType,
-                false,
-                "-",
-                AssertionDescription,
-                [],
-                "Failed to load CallTrump model")];
-        }
-
         var testCases = GetTestCases();
         var results = new List<BehavioralTestResult>(testCases.Count);
 
@@ -55,7 +38,9 @@ public abstract class CallTrumpBehavioralTest(
 
             foreach (var decision in testCase.ValidDecisions)
             {
-                var features = FeatureBuilder.BuildFeatures(
+                var scoreOrNull = Runner.TryScore(
+                    engineProvider,
+                    modelName,
                     testCase.CardsInHand,
                     testCase.UpCard,
                     testCase.DealerPosition ?? DealerPosition,
@@ -63,8 +48,20 @@ public abstract class CallTrumpBehavioralTest(
                     OpponentScore,
                     decision,
                     1);
-                var prediction = engine.Predict(features);
-                var score = prediction.PredictedPoints;
+
+                if (scoreOrNull == null)
+                {
+                    return [new BehavioralTestResult(
+                        Name,
+                        DecisionType,
+                        false,
+                        "-",
+                        AssertionDescription,
+                        [],
+                        $"Failed to load {DecisionType} model")];
+                }
+
+                var score = scoreOrNull.Value;
                 var display = decision.ToString();
                 scores[display] = score;
 

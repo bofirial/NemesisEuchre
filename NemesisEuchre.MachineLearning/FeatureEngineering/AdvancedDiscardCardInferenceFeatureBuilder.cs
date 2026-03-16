@@ -4,9 +4,9 @@ using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.FeatureEngineering;
 
-public interface IDiscardCardInferenceFeatureBuilder
+public interface IAdvancedDiscardCardInferenceFeatureBuilder
 {
-    DiscardCardTrainingData BuildFeatures(
+    AdvancedDiscardCardTrainingData BuildFeatures(
         RelativeCard[] cardsInHand,
         RelativePlayerPosition callingPlayer,
         bool callingPlayerGoingAlone,
@@ -15,9 +15,9 @@ public interface IDiscardCardInferenceFeatureBuilder
         RelativeCard chosenCard);
 }
 
-public class DiscardCardInferenceFeatureBuilder : IDiscardCardInferenceFeatureBuilder
+public class AdvancedDiscardCardInferenceFeatureBuilder : IAdvancedDiscardCardInferenceFeatureBuilder
 {
-    public DiscardCardTrainingData BuildFeatures(
+    public AdvancedDiscardCardTrainingData BuildFeatures(
         RelativeCard[] cardsInHand,
         RelativePlayerPosition callingPlayer,
         bool callingPlayerGoingAlone,
@@ -33,6 +33,6 @@ public class DiscardCardInferenceFeatureBuilder : IDiscardCardInferenceFeatureBu
             opponentScore,
             chosenCard);
 
-        return DiscardCardTrainingDataMapper.MapFrom<DiscardCardTrainingData>(full);
+        return DiscardCardTrainingDataMapper.MapFrom<AdvancedDiscardCardTrainingData>(full);
     }
 }

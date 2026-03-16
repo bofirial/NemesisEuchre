@@ -5,8 +5,8 @@ namespace NemesisEuchre.Console.Models;
 
 public record TrainingDataBatch(
     List<AllPlayCardTrainingData> PlayCardData,
-    List<CallTrumpTrainingData> CallTrumpData,
-    List<DiscardCardTrainingData> DiscardCardData,
+    List<AllCallTrumpTrainingData> CallTrumpData,
+    List<AllDiscardCardTrainingData> DiscardCardData,
     TrainingDataBatchStats Stats);
 
 public record TrainingDataBatchStats(

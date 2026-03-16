@@ -13,6 +13,8 @@ public class ModelBotFactory(
     IPlayCardInferenceFeatureBuilder playCardFeatureBuilder,
     ISimplePlayCardInferenceFeatureBuilder simplePlayCardFeatureBuilder,
     IAdvancedPlayCardInferenceFeatureBuilder advancedPlayCardFeatureBuilder,
+    IAdvancedCallTrumpInferenceFeatureBuilder advancedCallTrumpFeatureBuilder,
+    IAdvancedDiscardCardInferenceFeatureBuilder advancedDiscardCardFeatureBuilder,
     IRandomNumberGenerator random) : IPlayerActorFactory
 {
     public ActorType ActorType => ActorType.Model;
@@ -27,6 +29,6 @@ public class ModelBotFactory(
                 "--t1m-play, --t1m-call, --t1m-discard for specific types.");
         }
 
-        return new ModelBot(engineProvider, callTrumpFeatureBuilder, discardCardFeatureBuilder, playCardFeatureBuilder, random, actor, simplePlayCardFeatureBuilder, advancedPlayCardFeatureBuilder);
+        return new ModelBot(engineProvider, callTrumpFeatureBuilder, discardCardFeatureBuilder, playCardFeatureBuilder, random, actor, simplePlayCardFeatureBuilder, advancedPlayCardFeatureBuilder, advancedCallTrumpFeatureBuilder, advancedDiscardCardFeatureBuilder);
     }
 }

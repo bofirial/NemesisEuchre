@@ -1,14 +1,15 @@
 using NemesisEuchre.DataAccess.Entities;
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.FeatureEngineering;
 
-public sealed class CallTrumpFeatureBuilder : FeatureBuilderBase<CallTrumpDecisionEntity, CallTrumpTrainingData>
+public sealed class CallTrumpFeatureBuilder : FeatureBuilderBase<CallTrumpDecisionEntity, AllCallTrumpTrainingData>
 {
-    public static CallTrumpTrainingData BuildFeatures(
+    public static AllCallTrumpTrainingData BuildFeatures(
         Card[] cards,
         Card upCard,
         RelativePlayerPosition dealerPosition,
@@ -27,7 +28,21 @@ public sealed class CallTrumpFeatureBuilder : FeatureBuilderBase<CallTrumpDecisi
             chosenDecision);
     }
 
-    protected override CallTrumpTrainingData BuildFeaturesCore(CallTrumpDecisionEntity entity)
+    internal static Suit? CallTrumpDecisionToSuit(CallTrumpDecision decision, Card upCard)
+    {
+        return decision switch
+        {
+            CallTrumpDecision.Pass => null,
+            CallTrumpDecision.OrderItUp or CallTrumpDecision.OrderItUpAndGoAlone => upCard.Suit,
+            CallTrumpDecision.CallSpades or CallTrumpDecision.CallSpadesAndGoAlone => Suit.Spades,
+            CallTrumpDecision.CallHearts or CallTrumpDecision.CallHeartsAndGoAlone => Suit.Hearts,
+            CallTrumpDecision.CallClubs or CallTrumpDecision.CallClubsAndGoAlone => Suit.Clubs,
+            CallTrumpDecision.CallDiamonds or CallTrumpDecision.CallDiamondsAndGoAlone => Suit.Diamonds,
+            _ => null,
+        };
+    }
+
+    protected override AllCallTrumpTrainingData BuildFeaturesCore(CallTrumpDecisionEntity entity)
     {
         var context = CallTrumpFeatureContextBuilder.Build(entity);
 
@@ -54,7 +69,7 @@ public sealed class CallTrumpFeatureBuilder : FeatureBuilderBase<CallTrumpDecisi
         }
     }
 
-    private static CallTrumpTrainingData BuildFeaturesFromContext(
+    private static AllCallTrumpTrainingData BuildFeaturesFromContext(
         Card[] cards,
         Card upCard,
         RelativePlayerPosition dealerPosition,
@@ -63,7 +78,47 @@ public sealed class CallTrumpFeatureBuilder : FeatureBuilderBase<CallTrumpDecisi
         byte decisionNumber,
         CallTrumpDecision chosenDecision)
     {
-        return new CallTrumpTrainingData
+        var trumpSuit = CallTrumpDecisionToSuit(chosenDecision, upCard);
+        var isPass = trumpSuit == null;
+
+        float card1Threats = -1f;
+        float card2Threats = -1f;
+        float card3Threats = -1f;
+        float card4Threats = -1f;
+        float card5Threats = -1f;
+        float upCardThreats = -1f;
+
+        if (!isPass)
+        {
+            var suit = trumpSuit!.Value;
+            var relativeCards = new RelativeCard[cards.Length];
+            for (int i = 0; i < cards.Length; i++)
+            {
+                relativeCards[i] = cards[i].ToRelative(suit);
+            }
+
+            var relativeUpCard = upCard.ToRelative(suit);
+
+            var isUpCardAccountedFor = decisionNumber >= 5 || dealerPosition == RelativePlayerPosition.Self;
+            var accountedFor = isUpCardAccountedFor
+                ? [.. relativeCards, relativeUpCard]
+                : relativeCards;
+
+            RelativePlayerSuitVoid[] emptyVoids = [];
+
+            card1Threats = ThreatCalculator.CalculateThreats(relativeCards[0], accountedFor, emptyVoids);
+            card2Threats = ThreatCalculator.CalculateThreats(relativeCards[1], accountedFor, emptyVoids);
+            card3Threats = ThreatCalculator.CalculateThreats(relativeCards[2], accountedFor, emptyVoids);
+            card4Threats = ThreatCalculator.CalculateThreats(relativeCards[3], accountedFor, emptyVoids);
+            card5Threats = ThreatCalculator.CalculateThreats(relativeCards[4], accountedFor, emptyVoids);
+
+            if (dealerPosition == RelativePlayerPosition.Self && decisionNumber <= 4)
+            {
+                upCardThreats = ThreatCalculator.CalculateThreats(relativeUpCard, accountedFor, emptyVoids);
+            }
+        }
+
+        return new AllCallTrumpTrainingData
         {
             Card1Rank = (float)cards[0].Rank,
             Card1Suit = (float)cards[0].Suit,
@@ -82,6 +137,13 @@ public sealed class CallTrumpFeatureBuilder : FeatureBuilderBase<CallTrumpDecisi
             OpponentScore = opponentScore,
             DecisionNumber = decisionNumber,
             ChosenDecision = (float)chosenDecision,
+            Card1Threats = card1Threats,
+            Card2Threats = card2Threats,
+            Card3Threats = card3Threats,
+            Card4Threats = card4Threats,
+            Card5Threats = card5Threats,
+            UpCardThreats = upCardThreats,
+            ScoreDifferential = teamScore - opponentScore,
         };
     }
 }

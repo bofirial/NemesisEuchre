@@ -7,15 +7,6 @@ namespace NemesisEuchre.MachineLearning.FeatureEngineering;
 
 public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecisionEntity, AllPlayCardTrainingData>
 {
-    private static readonly Rank[] TrumpRanks =
-        [Rank.Nine, Rank.Ten, Rank.Queen, Rank.King, Rank.Ace, Rank.LeftBower, Rank.RightBower];
-
-    private static readonly Rank[] NonTrumpSameColorRanks =
-        [Rank.Nine, Rank.Ten, Rank.Queen, Rank.King, Rank.Ace];
-
-    private static readonly Rank[] NonTrumpOppositeColorRanks =
-        [Rank.Nine, Rank.Ten, Rank.Jack, Rank.Queen, Rank.King, Rank.Ace];
-
     public static AllPlayCardTrainingData BuildFeatures(PlayCardFeatureBuilderContext context)
     {
         return BuildFeaturesFromContext(context);
@@ -238,103 +229,12 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
         RelativeCard[] effectiveAccountedFor,
         RelativePlayerSuitVoid[] knownPlayerSuitVoids)
     {
-        if (card.Suit == RelativeSuit.Trump)
-        {
-            if (BothOpponentsVoidIn(knownPlayerSuitVoids, RelativeSuit.Trump))
-            {
-                return 0f;
-            }
-
-            return CountUnaccountedHigherCards(card.Rank, RelativeSuit.Trump, TrumpRanks, effectiveAccountedFor);
-        }
-
-        float threats = 0f;
-
-        if (!BothOpponentsVoidIn(knownPlayerSuitVoids, RelativeSuit.Trump))
-        {
-            threats += CountAllUnaccountedTrumpCards(effectiveAccountedFor);
-        }
-
-        if (!BothOpponentsVoidIn(knownPlayerSuitVoids, card.Suit))
-        {
-            Rank[] ranksForSuit = card.Suit == RelativeSuit.NonTrumpSameColor
-                ? NonTrumpSameColorRanks
-                : NonTrumpOppositeColorRanks;
-
-            threats += CountUnaccountedHigherCards(card.Rank, card.Suit, ranksForSuit, effectiveAccountedFor);
-        }
-
-        return threats;
-    }
-
-    private static bool BothOpponentsVoidIn(RelativePlayerSuitVoid[] voids, RelativeSuit suit)
-    {
-        bool lhoVoid = false;
-        bool rhoVoid = false;
-
-        for (int i = 0; i < voids.Length; i++)
-        {
-            if (voids[i].Suit == suit)
-            {
-                if (voids[i].PlayerPosition == RelativePlayerPosition.LeftHandOpponent)
-                {
-                    lhoVoid = true;
-                }
-                else if (voids[i].PlayerPosition == RelativePlayerPosition.RightHandOpponent)
-                {
-                    rhoVoid = true;
-                }
-            }
-        }
-
-        return lhoVoid && rhoVoid;
-    }
-
-    private static float CountUnaccountedHigherCards(
-        Rank rank,
-        RelativeSuit suit,
-        Rank[] validRanks,
-        RelativeCard[] effectiveAccountedFor)
-    {
-        float count = 0f;
-
-        for (int i = 0; i < validRanks.Length; i++)
-        {
-            if (validRanks[i] > rank && !IsAccountedFor(validRanks[i], suit, effectiveAccountedFor))
-            {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    private static float CountAllUnaccountedTrumpCards(RelativeCard[] effectiveAccountedFor)
-    {
-        float count = 0f;
-
-        for (int i = 0; i < TrumpRanks.Length; i++)
-        {
-            if (!IsAccountedFor(TrumpRanks[i], RelativeSuit.Trump, effectiveAccountedFor))
-            {
-                count++;
-            }
-        }
-
-        return count;
+        return ThreatCalculator.CalculateThreats(card, effectiveAccountedFor, knownPlayerSuitVoids);
     }
 
     private static bool IsAccountedFor(Rank rank, RelativeSuit suit, RelativeCard[] effectiveAccountedFor)
     {
-        for (int i = 0; i < effectiveAccountedFor.Length; i++)
-        {
-            if (effectiveAccountedFor[i].Rank == rank && effectiveAccountedFor[i].Suit == suit)
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return ThreatCalculator.IsAccountedFor(rank, suit, effectiveAccountedFor);
     }
 
     private static float GetCardThreatsThisTrick(
@@ -508,17 +408,17 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
         // Check trump cards that beat our card
         if (card.Suit == RelativeSuit.Trump)
         {
-            threats += CountTrickThreatsInSuit(card.Rank, RelativeSuit.Trump, TrumpRanks, true, leadSuit, opponentsAfterMe, effectiveAccountedFor, knownPlayerSuitVoids);
+            threats += CountTrickThreatsInSuit(card.Rank, RelativeSuit.Trump, ThreatCalculator.TrumpRanks, true, leadSuit, opponentsAfterMe, effectiveAccountedFor, knownPlayerSuitVoids);
         }
         else
         {
-            threats += CountTrickThreatsInSuit(Rank.Nine - 1, RelativeSuit.Trump, TrumpRanks, false, leadSuit, opponentsAfterMe, effectiveAccountedFor, knownPlayerSuitVoids);
+            threats += CountTrickThreatsInSuit(Rank.Nine - 1, RelativeSuit.Trump, ThreatCalculator.TrumpRanks, false, leadSuit, opponentsAfterMe, effectiveAccountedFor, knownPlayerSuitVoids);
 
             if (card.Suit == leadSuit)
             {
                 Rank[] ranksForSuit = leadSuit == RelativeSuit.NonTrumpSameColor
-                    ? NonTrumpSameColorRanks
-                    : NonTrumpOppositeColorRanks;
+                    ? ThreatCalculator.NonTrumpSameColorRanks
+                    : ThreatCalculator.NonTrumpOppositeColorRanks;
                 threats += CountTrickThreatsInSuit(card.Rank, leadSuit, ranksForSuit, true, leadSuit, opponentsAfterMe, effectiveAccountedFor, knownPlayerSuitVoids);
             }
         }

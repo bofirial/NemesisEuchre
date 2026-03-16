@@ -1,12 +1,11 @@
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
-using NemesisEuchre.MachineLearning.FeatureEngineering;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.Discard;
 
 public class OneTrumpCardShouldNotDiscardTrump(
-    IDiscardCardInferenceFeatureBuilder featureBuilder)
-    : DiscardCardBehavioralTest(featureBuilder)
+    IDiscardCardBehavioralTestRunner runner)
+    : DiscardCardBehavioralTest(runner)
 {
     public override string Name => "Keep lone trump card";
 

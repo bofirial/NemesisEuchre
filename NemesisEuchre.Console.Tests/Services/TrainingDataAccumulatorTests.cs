@@ -54,16 +54,16 @@ public class TrainingDataAccumulatorTests : IDisposable
                 CreateStubFile(path);
             });
         _mockIdvFileService
-            .Setup(x => x.Save(It.IsAny<IEnumerable<CallTrumpTrainingData>>(), It.IsAny<string>()))
-            .Callback((IEnumerable<CallTrumpTrainingData> data, string path) =>
+            .Setup(x => x.Save(It.IsAny<IEnumerable<AllCallTrumpTrainingData>>(), It.IsAny<string>()))
+            .Callback((IEnumerable<AllCallTrumpTrainingData> data, string path) =>
             {
                 var materialized = data.ToList();
                 _savedCallTrumpCalls.Add((path, count: materialized.Count));
                 CreateStubFile(path);
             });
         _mockIdvFileService
-            .Setup(x => x.Save(It.IsAny<IEnumerable<DiscardCardTrainingData>>(), It.IsAny<string>()))
-            .Callback((IEnumerable<DiscardCardTrainingData> data, string path) =>
+            .Setup(x => x.Save(It.IsAny<IEnumerable<AllDiscardCardTrainingData>>(), It.IsAny<string>()))
+            .Callback((IEnumerable<AllDiscardCardTrainingData> data, string path) =>
             {
                 var materialized = data.ToList();
                 _savedDiscardCardCalls.Add((path, count: materialized.Count));
@@ -403,12 +403,12 @@ public class TrainingDataAccumulatorTests : IDisposable
             Times.Once);
         _mockIdvFileService.Verify(
             x => x.Save(
-                It.IsAny<List<CallTrumpTrainingData>>(),
+                It.IsAny<List<AllCallTrumpTrainingData>>(),
                 Path.Combine(expectedChunkDir, "CallTrump_chunk0001.idv")),
             Times.Once);
         _mockIdvFileService.Verify(
             x => x.Save(
-                It.IsAny<List<DiscardCardTrainingData>>(),
+                It.IsAny<List<AllDiscardCardTrainingData>>(),
                 Path.Combine(expectedChunkDir, "DiscardCard_chunk0001.idv")),
             Times.Once);
     }
@@ -426,10 +426,10 @@ public class TrainingDataAccumulatorTests : IDisposable
             x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()),
             Times.Never);
         _mockIdvFileService.Verify(
-            x => x.StreamFromBinary<CallTrumpTrainingData>(It.IsAny<string>()),
+            x => x.StreamFromBinary<AllCallTrumpTrainingData>(It.IsAny<string>()),
             Times.Never);
         _mockIdvFileService.Verify(
-            x => x.StreamFromBinary<DiscardCardTrainingData>(It.IsAny<string>()),
+            x => x.StreamFromBinary<AllDiscardCardTrainingData>(It.IsAny<string>()),
             Times.Never);
     }
 
@@ -440,11 +440,11 @@ public class TrainingDataAccumulatorTests : IDisposable
             .Setup(x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()))
             .Returns([new AllPlayCardTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<CallTrumpTrainingData>(It.IsAny<string>()))
-            .Returns([new CallTrumpTrainingData()]);
+            .Setup(x => x.StreamFromBinary<AllCallTrumpTrainingData>(It.IsAny<string>()))
+            .Returns([new AllCallTrumpTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<DiscardCardTrainingData>(It.IsAny<string>()))
-            .Returns([new DiscardCardTrainingData()]);
+            .Setup(x => x.StreamFromBinary<AllDiscardCardTrainingData>(It.IsAny<string>()))
+            .Returns([new AllDiscardCardTrainingData()]);
 
         _accumulator.Add(CreateBatch(playCardCount: 2, callTrumpCount: 1, discardCardCount: 1));
         _accumulator.SaveChunk("gen1");
@@ -456,10 +456,10 @@ public class TrainingDataAccumulatorTests : IDisposable
             x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()),
             Times.Exactly(2));
         _mockIdvFileService.Verify(
-            x => x.StreamFromBinary<CallTrumpTrainingData>(It.IsAny<string>()),
+            x => x.StreamFromBinary<AllCallTrumpTrainingData>(It.IsAny<string>()),
             Times.Exactly(2));
         _mockIdvFileService.Verify(
-            x => x.StreamFromBinary<DiscardCardTrainingData>(It.IsAny<string>()),
+            x => x.StreamFromBinary<AllDiscardCardTrainingData>(It.IsAny<string>()),
             Times.Exactly(2));
     }
 
@@ -473,11 +473,11 @@ public class TrainingDataAccumulatorTests : IDisposable
             .Setup(x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()))
             .Returns([new AllPlayCardTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<CallTrumpTrainingData>(It.IsAny<string>()))
-            .Returns([new CallTrumpTrainingData()]);
+            .Setup(x => x.StreamFromBinary<AllCallTrumpTrainingData>(It.IsAny<string>()))
+            .Returns([new AllCallTrumpTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<DiscardCardTrainingData>(It.IsAny<string>()))
-            .Returns([new DiscardCardTrainingData()]);
+            .Setup(x => x.StreamFromBinary<AllDiscardCardTrainingData>(It.IsAny<string>()))
+            .Returns([new AllDiscardCardTrainingData()]);
 
         _accumulator.Add(batch1);
         _accumulator.SaveChunk("gen1");
@@ -550,11 +550,11 @@ public class TrainingDataAccumulatorTests : IDisposable
             .Setup(x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()))
             .Returns([new AllPlayCardTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<CallTrumpTrainingData>(It.IsAny<string>()))
-            .Returns([new CallTrumpTrainingData()]);
+            .Setup(x => x.StreamFromBinary<AllCallTrumpTrainingData>(It.IsAny<string>()))
+            .Returns([new AllCallTrumpTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<DiscardCardTrainingData>(It.IsAny<string>()))
-            .Returns([new DiscardCardTrainingData()]);
+            .Setup(x => x.StreamFromBinary<AllDiscardCardTrainingData>(It.IsAny<string>()))
+            .Returns([new AllDiscardCardTrainingData()]);
 
         _accumulator.Add(CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1));
         _accumulator.SaveChunk("gen1");
@@ -658,10 +658,10 @@ public class TrainingDataAccumulatorTests : IDisposable
             .Select(_ => new AllPlayCardTrainingData { Card1Rank = 1.0f })
             .ToList();
         var callTrumpData = Enumerable.Range(0, callTrumpCount)
-            .Select(_ => new CallTrumpTrainingData { Card1Rank = 1.0f })
+            .Select(_ => new AllCallTrumpTrainingData { Card1Rank = 1.0f })
             .ToList();
         var discardCardData = Enumerable.Range(0, discardCardCount)
-            .Select(_ => new DiscardCardTrainingData { Card1Rank = 1.0f })
+            .Select(_ => new AllDiscardCardTrainingData { Card1Rank = 1.0f })
             .ToList();
 
         var stats = new TrainingDataBatchStats(1, 5, 20, [new Actor(ActorType.Chaos)]);

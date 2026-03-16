@@ -20,7 +20,9 @@ public class ModelBot(
     IRandomNumberGenerator random,
     Actor actor,
     ISimplePlayCardInferenceFeatureBuilder? simplePlayCardFeatureBuilder = null,
-    IAdvancedPlayCardInferenceFeatureBuilder? advancedPlayCardFeatureBuilder = null) : BotBase(random)
+    IAdvancedPlayCardInferenceFeatureBuilder? advancedPlayCardFeatureBuilder = null,
+    IAdvancedCallTrumpInferenceFeatureBuilder? advancedCallTrumpFeatureBuilder = null,
+    IAdvancedDiscardCardInferenceFeatureBuilder? advancedDiscardCardFeatureBuilder = null) : BotBase(random)
 {
     private readonly ICallTrumpInferenceFeatureBuilder _callTrumpFeatureBuilder = callTrumpFeatureBuilder ?? throw new ArgumentNullException(nameof(callTrumpFeatureBuilder));
     private readonly IDiscardCardInferenceFeatureBuilder _discardCardFeatureBuilder = discardCardFeatureBuilder ?? throw new ArgumentNullException(nameof(discardCardFeatureBuilder));
@@ -35,6 +37,14 @@ public class ModelBot(
     private readonly bool _hasExplicitPlayCardModel = actor.ModelNames?.ContainsKey("PlayCard") == true;
     private readonly bool _hasExplicitSimplePlayCardModel = actor.ModelNames?.ContainsKey("SimplePlayCard") == true;
     private readonly bool _hasExplicitAdvancedPlayCardModel = actor.ModelNames?.ContainsKey("AdvancedPlayCard") == true;
+    private readonly IAdvancedCallTrumpInferenceFeatureBuilder? _advancedCallTrumpFeatureBuilder = advancedCallTrumpFeatureBuilder;
+    private readonly IAdvancedDiscardCardInferenceFeatureBuilder? _advancedDiscardCardFeatureBuilder = advancedDiscardCardFeatureBuilder;
+    private readonly PredictionEngine<AdvancedCallTrumpTrainingData, CallTrumpRegressionPrediction>? _advancedCallTrumpEngine = engineProvider.TryGetEngine<AdvancedCallTrumpTrainingData, CallTrumpRegressionPrediction>("AdvancedCallTrump", actor.GetModelName("AdvancedCallTrump") ?? string.Empty);
+    private readonly PredictionEngine<AdvancedDiscardCardTrainingData, DiscardCardRegressionPrediction>? _advancedDiscardCardEngine = engineProvider.TryGetEngine<AdvancedDiscardCardTrainingData, DiscardCardRegressionPrediction>("AdvancedDiscardCard", actor.GetModelName("AdvancedDiscardCard") ?? string.Empty);
+    private readonly bool _hasExplicitCallTrumpModel = actor.ModelNames?.ContainsKey("CallTrump") == true;
+    private readonly bool _hasExplicitDiscardCardModel = actor.ModelNames?.ContainsKey("DiscardCard") == true;
+    private readonly bool _hasExplicitAdvancedCallTrumpModel = actor.ModelNames?.ContainsKey("AdvancedCallTrump") == true;
+    private readonly bool _hasExplicitAdvancedDiscardCardModel = actor.ModelNames?.ContainsKey("AdvancedDiscardCard") == true;
 
     public override ActorType ActorType => ActorType.Model;
 
@@ -49,25 +59,23 @@ public class ModelBot(
         CallTrumpDecision[] validCallTrumpDecisions,
         byte decisionNumber)
     {
-        var (bestOption, scores) = PredictBestOption(
-            _callTrumpEngine,
-            validCallTrumpDecisions,
-            decision => _callTrumpFeatureBuilder.BuildFeatures(
-                cardsInHand,
-                upCard,
-                dealerPosition,
-                teamScore,
-                opponentScore,
-                decision,
-                decisionNumber),
-            prediction => prediction.PredictedPoints,
-            "CallTrump");
+        Func<CallTrumpDecision, AdvancedCallTrumpTrainingData>? advancedBuilder = _advancedCallTrumpFeatureBuilder != null
+            ? decision => _advancedCallTrumpFeatureBuilder.BuildFeatures(
+                cardsInHand, upCard, dealerPosition, teamScore, opponentScore, decision, decisionNumber)
+            : null;
 
-        return new CallTrumpDecisionContext
+        CallTrumpTrainingData BaseBuilder(CallTrumpDecision decision)
         {
-            ChosenCallTrumpDecision = bestOption,
-            DecisionPredictedPoints = scores,
-        };
+            return _callTrumpFeatureBuilder.BuildFeatures(
+                cardsInHand, upCard, dealerPosition, teamScore, opponentScore, decision, decisionNumber);
+        }
+
+        return TryPredictCallTrumpIfExplicit(_advancedCallTrumpEngine, validCallTrumpDecisions, advancedBuilder, "AdvancedCallTrump", _hasExplicitAdvancedCallTrumpModel)
+            ?? TryPredictCallTrumpIfExplicit(_callTrumpEngine, validCallTrumpDecisions, BaseBuilder, "CallTrump", _hasExplicitCallTrumpModel)
+            ?? TryPredictCallTrumpIfExplicit(_advancedCallTrumpEngine, validCallTrumpDecisions, advancedBuilder, "AdvancedCallTrump", !_hasExplicitAdvancedCallTrumpModel)
+            ?? TryPredictCallTrumpIfExplicit(_callTrumpEngine, validCallTrumpDecisions, BaseBuilder, "CallTrump", !_hasExplicitCallTrumpModel)
+            ?? throw new ModelUnavailableException(
+                $"No CallTrump prediction engine could be loaded for actor '{Actor}'.");
     }
 
     public override async Task<RelativeCardDecisionContext> DiscardCardAsync(
@@ -83,24 +91,23 @@ public class ModelBot(
             throw new InvalidOperationException($"Expected 6 cards in hand for discard, got {cardsInHand.Length}");
         }
 
-        var (bestOption, scores) = PredictBestOption(
-            _discardCardEngine,
-            validCardsToDiscard,
-            card => _discardCardFeatureBuilder.BuildFeatures(
-                cardsInHand,
-                callingPlayer,
-                callingPlayerGoingAlone,
-                teamScore,
-                opponentScore,
-                card),
-            prediction => prediction.PredictedPoints,
-            "DiscardCard");
+        Func<RelativeCard, AdvancedDiscardCardTrainingData>? advancedBuilder = _advancedDiscardCardFeatureBuilder != null
+            ? card => _advancedDiscardCardFeatureBuilder.BuildFeatures(
+                cardsInHand, callingPlayer, callingPlayerGoingAlone, teamScore, opponentScore, card)
+            : null;
 
-        return new RelativeCardDecisionContext
+        DiscardCardTrainingData BaseBuilder(RelativeCard card)
         {
-            ChosenCard = bestOption,
-            DecisionPredictedPoints = scores,
-        };
+            return _discardCardFeatureBuilder.BuildFeatures(
+                cardsInHand, callingPlayer, callingPlayerGoingAlone, teamScore, opponentScore, card);
+        }
+
+        return TryPredictDiscardIfExplicit(_advancedDiscardCardEngine, validCardsToDiscard, advancedBuilder, "AdvancedDiscardCard", _hasExplicitAdvancedDiscardCardModel)
+            ?? TryPredictDiscardIfExplicit(_discardCardEngine, validCardsToDiscard, BaseBuilder, "DiscardCard", _hasExplicitDiscardCardModel)
+            ?? TryPredictDiscardIfExplicit(_advancedDiscardCardEngine, validCardsToDiscard, advancedBuilder, "AdvancedDiscardCard", !_hasExplicitAdvancedDiscardCardModel)
+            ?? TryPredictDiscardIfExplicit(_discardCardEngine, validCardsToDiscard, BaseBuilder, "DiscardCard", !_hasExplicitDiscardCardModel)
+            ?? throw new ModelUnavailableException(
+                $"No DiscardCard prediction engine could be loaded for actor '{Actor}'.");
     }
 
     public override async Task<RelativeCardDecisionContext> PlayCardAsync(
@@ -230,6 +237,90 @@ public class ModelBot(
         var (bestOption, scores) = PredictBestOption(
             engine,
             validCardsToPlay,
+            buildFeatures,
+            prediction => prediction.PredictedPoints,
+            engineName);
+
+        return new RelativeCardDecisionContext
+        {
+            ChosenCard = bestOption,
+            DecisionPredictedPoints = scores,
+        };
+    }
+
+    private CallTrumpDecisionContext? TryPredictCallTrumpIfExplicit<TData>(
+        PredictionEngine<TData, CallTrumpRegressionPrediction>? engine,
+        CallTrumpDecision[] validDecisions,
+        Func<CallTrumpDecision, TData>? buildFeatures,
+        string engineName,
+        bool condition)
+        where TData : class, new()
+    {
+        if (!condition)
+        {
+            return null;
+        }
+
+        return TryPredictCallTrump(engine, validDecisions, buildFeatures, engineName);
+    }
+
+    private CallTrumpDecisionContext? TryPredictCallTrump<TData>(
+        PredictionEngine<TData, CallTrumpRegressionPrediction>? engine,
+        CallTrumpDecision[] validDecisions,
+        Func<CallTrumpDecision, TData>? buildFeatures,
+        string engineName)
+        where TData : class, new()
+    {
+        if (engine == null || buildFeatures == null)
+        {
+            return null;
+        }
+
+        var (bestOption, scores) = PredictBestOption(
+            engine,
+            validDecisions,
+            buildFeatures,
+            prediction => prediction.PredictedPoints,
+            engineName);
+
+        return new CallTrumpDecisionContext
+        {
+            ChosenCallTrumpDecision = bestOption,
+            DecisionPredictedPoints = scores,
+        };
+    }
+
+    private RelativeCardDecisionContext? TryPredictDiscardIfExplicit<TData>(
+        PredictionEngine<TData, DiscardCardRegressionPrediction>? engine,
+        RelativeCard[] validCards,
+        Func<RelativeCard, TData>? buildFeatures,
+        string engineName,
+        bool condition)
+        where TData : class, new()
+    {
+        if (!condition)
+        {
+            return null;
+        }
+
+        return TryPredictDiscard(engine, validCards, buildFeatures, engineName);
+    }
+
+    private RelativeCardDecisionContext? TryPredictDiscard<TData>(
+        PredictionEngine<TData, DiscardCardRegressionPrediction>? engine,
+        RelativeCard[] validCards,
+        Func<RelativeCard, TData>? buildFeatures,
+        string engineName)
+        where TData : class, new()
+    {
+        if (engine == null || buildFeatures == null)
+        {
+            return null;
+        }
+
+        var (bestOption, scores) = PredictBestOption(
+            engine,
+            validCards,
             buildFeatures,
             prediction => prediction.PredictedPoints,
             engineName);

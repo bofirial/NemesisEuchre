@@ -72,7 +72,7 @@ public class Gen1TrainerBotTests
             1);
 
         return act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*'CallTrump'*");
+            .WithMessage("*CallTrump*");
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public class Gen1TrainerBotTests
             validCards);
 
         return act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*'DiscardCard'*");
+            .WithMessage("*DiscardCard*");
     }
 
     [Fact]

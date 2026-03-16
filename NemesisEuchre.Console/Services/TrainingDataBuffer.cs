@@ -26,10 +26,10 @@ public sealed class TrainingDataBuffer(
     private readonly DecisionTypeAccumulator<AllPlayCardTrainingData> _playCardAccumulator
         = new("PlayCard", idvFileService, logger);
 
-    private readonly DecisionTypeAccumulator<CallTrumpTrainingData> _callTrumpAccumulator
+    private readonly DecisionTypeAccumulator<AllCallTrumpTrainingData> _callTrumpAccumulator
         = new("CallTrump", idvFileService, logger);
 
-    private readonly DecisionTypeAccumulator<DiscardCardTrainingData> _discardCardAccumulator
+    private readonly DecisionTypeAccumulator<AllDiscardCardTrainingData> _discardCardAccumulator
         = new("DiscardCard", idvFileService, logger);
 
     public void Add(TrainingDataBatch batch)

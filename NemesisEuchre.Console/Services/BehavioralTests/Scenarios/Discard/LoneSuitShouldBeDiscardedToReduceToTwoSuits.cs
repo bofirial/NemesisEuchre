@@ -1,12 +1,11 @@
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
-using NemesisEuchre.MachineLearning.FeatureEngineering;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.Discard;
 
 public class LoneSuitShouldBeDiscardedToReduceToTwoSuits(
-    IDiscardCardInferenceFeatureBuilder featureBuilder)
-    : DiscardCardBehavioralTest(featureBuilder)
+    IDiscardCardBehavioralTestRunner runner)
+    : DiscardCardBehavioralTest(runner)
 {
     public override string Name => "Discard lone suit to reduce to two suits";
 

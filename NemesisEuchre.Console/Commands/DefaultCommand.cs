@@ -97,6 +97,18 @@ public class DefaultCommand(
     public string? Team1AdvancedPlayCardModelName { get; set; }
 
     [CliOption(
+        Description = "ModelName for Team1 AdvancedCallTrump decision (overrides --t1m)",
+        Required = false,
+        Alias = "t1m-advanced-call")]
+    public string? Team1AdvancedCallTrumpModelName { get; set; }
+
+    [CliOption(
+        Description = "ModelName for Team1 AdvancedDiscardCard decision (overrides --t1m)",
+        Required = false,
+        Alias = "t1m-advanced-discard")]
+    public string? Team1AdvancedDiscardCardModelName { get; set; }
+
+    [CliOption(
         Description = "ActorType for Team2",
         Alias = "t2")]
     public ActorType? Team2 { get; set; }
@@ -149,6 +161,18 @@ public class DefaultCommand(
     public string? Team2AdvancedPlayCardModelName { get; set; }
 
     [CliOption(
+        Description = "ModelName for Team2 AdvancedCallTrump decision (overrides --t2m)",
+        Required = false,
+        Alias = "t2m-advanced-call")]
+    public string? Team2AdvancedCallTrumpModelName { get; set; }
+
+    [CliOption(
+        Description = "ModelName for Team2 AdvancedDiscardCard decision (overrides --t2m)",
+        Required = false,
+        Alias = "t2m-advanced-discard")]
+    public string? Team2AdvancedDiscardCardModelName { get; set; }
+
+    [CliOption(
         Description = "Allow overwriting existing IDV files",
         Alias = "o")]
     public bool Overwrite { get; set; }
@@ -190,14 +214,18 @@ public class DefaultCommand(
         string? teamCallTrumpModelName,
         string? teamDiscardCardModelName,
         string? teamSimplePlayCardModelName,
-        string? teamAdvancedPlayCardModelName)
+        string? teamAdvancedPlayCardModelName,
+        string? teamAdvancedCallTrumpModelName,
+        string? teamAdvancedDiscardCardModelName)
     {
         bool hasAnyModel = !string.IsNullOrEmpty(teamModelName)
             || !string.IsNullOrEmpty(teamPlayCardModelName)
             || !string.IsNullOrEmpty(teamCallTrumpModelName)
             || !string.IsNullOrEmpty(teamDiscardCardModelName)
             || !string.IsNullOrEmpty(teamSimplePlayCardModelName)
-            || !string.IsNullOrEmpty(teamAdvancedPlayCardModelName);
+            || !string.IsNullOrEmpty(teamAdvancedPlayCardModelName)
+            || !string.IsNullOrEmpty(teamAdvancedCallTrumpModelName)
+            || !string.IsNullOrEmpty(teamAdvancedDiscardCardModelName);
 
         if (teamExplorationTemperature != default)
         {
@@ -217,7 +245,9 @@ public class DefaultCommand(
             || !string.IsNullOrEmpty(teamCallTrumpModelName)
             || !string.IsNullOrEmpty(teamDiscardCardModelName)
             || !string.IsNullOrEmpty(teamSimplePlayCardModelName)
-            || !string.IsNullOrEmpty(teamAdvancedPlayCardModelName);
+            || !string.IsNullOrEmpty(teamAdvancedPlayCardModelName)
+            || !string.IsNullOrEmpty(teamAdvancedCallTrumpModelName)
+            || !string.IsNullOrEmpty(teamAdvancedDiscardCardModelName);
 
         if (hasPerDecisionTypeModel)
         {
@@ -228,6 +258,8 @@ public class DefaultCommand(
                 discardCardModel: teamDiscardCardModelName,
                 simplePlayCardModel: teamSimplePlayCardModelName,
                 advancedPlayCardModel: teamAdvancedPlayCardModelName,
+                advancedCallTrumpModel: teamAdvancedCallTrumpModelName,
+                advancedDiscardCardModel: teamAdvancedDiscardCardModelName,
                 defaultModel: teamModelName,
                 explorationTemperature: teamExplorationTemperature,
                 explorationDecisionType: teamExplorationDecisionType);
@@ -275,6 +307,16 @@ public class DefaultCommand(
             parts.Add($"simple-play:{simplePlayModel}");
         }
 
+        if (actor.ModelNames.TryGetValue("AdvancedCallTrump", out var advancedCallModel))
+        {
+            parts.Add($"advanced-call:{advancedCallModel}");
+        }
+
+        if (actor.ModelNames.TryGetValue("AdvancedDiscardCard", out var advancedDiscardModel))
+        {
+            parts.Add($"advanced-discard:{advancedDiscardModel}");
+        }
+
         if (actor.ModelNames.TryGetValue("default", out var defaultModel))
         {
             parts.Add($"default:{defaultModel}");
@@ -308,7 +350,9 @@ public class DefaultCommand(
                 Team1CallTrumpModelName,
                 Team1DiscardCardModelName,
                 Team1SimplePlayCardModelName,
-                Team1AdvancedPlayCardModelName),
+                Team1AdvancedPlayCardModelName,
+                Team1AdvancedCallTrumpModelName,
+                Team1AdvancedDiscardCardModelName),
             Team.Team2 => GetTeamActor(
                 Team2,
                 Team2ModelName,
@@ -318,7 +362,9 @@ public class DefaultCommand(
                 Team2CallTrumpModelName,
                 Team2DiscardCardModelName,
                 Team2SimplePlayCardModelName,
-                Team2AdvancedPlayCardModelName),
+                Team2AdvancedPlayCardModelName,
+                Team2AdvancedCallTrumpModelName,
+                Team2AdvancedDiscardCardModelName),
             _ => throw new ArgumentOutOfRangeException(nameof(team), team, $"Invalid Team: {team}"),
         };
         return teamActor != null ? [teamActor, teamActor] : null;

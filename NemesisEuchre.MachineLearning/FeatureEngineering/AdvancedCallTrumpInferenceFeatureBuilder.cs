@@ -5,9 +5,9 @@ using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.MachineLearning.FeatureEngineering;
 
-public interface ICallTrumpInferenceFeatureBuilder
+public interface IAdvancedCallTrumpInferenceFeatureBuilder
 {
-    CallTrumpTrainingData BuildFeatures(
+    AdvancedCallTrumpTrainingData BuildFeatures(
         Card[] cardsInHand,
         Card upCard,
         RelativePlayerPosition dealerPosition,
@@ -17,9 +17,9 @@ public interface ICallTrumpInferenceFeatureBuilder
         byte decisionNumber);
 }
 
-public class CallTrumpInferenceFeatureBuilder : ICallTrumpInferenceFeatureBuilder
+public class AdvancedCallTrumpInferenceFeatureBuilder : IAdvancedCallTrumpInferenceFeatureBuilder
 {
-    public CallTrumpTrainingData BuildFeatures(
+    public AdvancedCallTrumpTrainingData BuildFeatures(
         Card[] cardsInHand,
         Card upCard,
         RelativePlayerPosition dealerPosition,
@@ -37,6 +37,6 @@ public class CallTrumpInferenceFeatureBuilder : ICallTrumpInferenceFeatureBuilde
             decisionNumber,
             chosenDecision);
 
-        return CallTrumpTrainingDataMapper.MapFrom<CallTrumpTrainingData>(full);
+        return CallTrumpTrainingDataMapper.MapFrom<AdvancedCallTrumpTrainingData>(full);
     }
 }

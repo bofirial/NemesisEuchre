@@ -3,15 +3,13 @@ using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
-using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Loading;
-using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.CallTrump;
 
 public class StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer(
-    ICallTrumpInferenceFeatureBuilder featureBuilder)
-    : CallTrumpBehavioralTest(featureBuilder)
+    ICallTrumpBehavioralTestRunner runner)
+    : CallTrumpBehavioralTest(runner)
 {
     private static readonly CallTrumpDecision[] RoundOneDecisions =
     [
@@ -31,21 +29,6 @@ public class StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer(
         IPredictionEngineProvider engineProvider,
         string modelName)
     {
-        var engine = engineProvider.TryGetEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>(
-            "CallTrump", modelName);
-
-        if (engine == null)
-        {
-            return [new BehavioralTestResult(
-                Name,
-                DecisionType,
-                false,
-                "-",
-                AssertionDescription,
-                [],
-                "Failed to load CallTrump model")];
-        }
-
         var results = new List<BehavioralTestResult>(4);
 
         foreach (var suit in Enum.GetValues<Suit>())
@@ -69,7 +52,9 @@ public class StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer(
 
                 foreach (var decision in RoundOneDecisions)
                 {
-                    var features = FeatureBuilder.BuildFeatures(
+                    var scoreOrNull = Runner.TryScore(
+                        engineProvider,
+                        modelName,
                         hand,
                         upCard,
                         dealerPos,
@@ -77,11 +62,22 @@ public class StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer(
                         OpponentScore,
                         decision,
                         1);
-                    var prediction = engine.Predict(features);
 
-                    if (prediction.PredictedPoints > bestScore)
+                    if (scoreOrNull == null)
                     {
-                        bestScore = prediction.PredictedPoints;
+                        return [new BehavioralTestResult(
+                            Name,
+                            DecisionType,
+                            false,
+                            "-",
+                            AssertionDescription,
+                            [],
+                            $"Failed to load {DecisionType} model")];
+                    }
+
+                    if (scoreOrNull.Value > bestScore)
+                    {
+                        bestScore = scoreOrNull.Value;
                     }
                 }
 

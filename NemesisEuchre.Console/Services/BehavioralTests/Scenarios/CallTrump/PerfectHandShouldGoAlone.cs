@@ -2,13 +2,12 @@ using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Extensions;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
-using NemesisEuchre.MachineLearning.FeatureEngineering;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests.Scenarios.CallTrump;
 
 public class PerfectHandShouldGoAlone(
-    ICallTrumpInferenceFeatureBuilder featureBuilder)
-    : CallTrumpBehavioralTest(featureBuilder)
+    ICallTrumpBehavioralTestRunner runner)
+    : CallTrumpBehavioralTest(runner)
 {
     public override string Name => "Perfect hand go alone";
 

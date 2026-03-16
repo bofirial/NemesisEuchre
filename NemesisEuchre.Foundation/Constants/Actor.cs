@@ -29,6 +29,8 @@ public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames 
         string? discardCardModel = null,
         string? simplePlayCardModel = null,
         string? advancedPlayCardModel = null,
+        string? advancedCallTrumpModel = null,
+        string? advancedDiscardCardModel = null,
         string? defaultModel = null,
         float explorationTemperature = default,
         DecisionType explorationDecisionType = DecisionType.All)
@@ -58,6 +60,16 @@ public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames 
         if (advancedPlayCardModel != null)
         {
             modelNames["AdvancedPlayCard"] = advancedPlayCardModel;
+        }
+
+        if (advancedCallTrumpModel != null)
+        {
+            modelNames["AdvancedCallTrump"] = advancedCallTrumpModel;
+        }
+
+        if (advancedDiscardCardModel != null)
+        {
+            modelNames["AdvancedDiscardCard"] = advancedDiscardCardModel;
         }
 
         if (defaultModel != null)

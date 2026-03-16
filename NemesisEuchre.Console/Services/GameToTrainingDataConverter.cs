@@ -21,8 +21,8 @@ public interface IGameToTrainingDataConverter
 public partial class GameToTrainingDataConverter(
     IGameToEntityMapper gameToEntityMapper,
     IFeatureEngineer<PlayCardDecisionEntity, AllPlayCardTrainingData> playCardFeatureEngineer,
-    IFeatureEngineer<CallTrumpDecisionEntity, CallTrumpTrainingData> callTrumpFeatureEngineer,
-    IFeatureEngineer<DiscardCardDecisionEntity, DiscardCardTrainingData> discardCardFeatureEngineer,
+    IFeatureEngineer<CallTrumpDecisionEntity, AllCallTrumpTrainingData> callTrumpFeatureEngineer,
+    IFeatureEngineer<DiscardCardDecisionEntity, AllDiscardCardTrainingData> discardCardFeatureEngineer,
     ILogger<GameToTrainingDataConverter> logger) : IGameToTrainingDataConverter
 {
     public TrainingDataBatch Convert(IReadOnlyList<Game> games)
@@ -30,8 +30,8 @@ public partial class GameToTrainingDataConverter(
         var byActor = ConvertByActor(games);
 
         var playCardData = new List<AllPlayCardTrainingData>();
-        var callTrumpData = new List<CallTrumpTrainingData>();
-        var discardCardData = new List<DiscardCardTrainingData>();
+        var callTrumpData = new List<AllCallTrumpTrainingData>();
+        var discardCardData = new List<AllDiscardCardTrainingData>();
         var actors = new HashSet<Actor>();
         var gameCount = 0;
         var dealCount = 0;
@@ -82,8 +82,8 @@ public partial class GameToTrainingDataConverter(
         foreach (var actorKey in allActorKeys)
         {
             var playCard = new List<AllPlayCardTrainingData>();
-            var callTrump = new List<CallTrumpTrainingData>();
-            var discard = new List<DiscardCardTrainingData>();
+            var callTrump = new List<AllCallTrumpTrainingData>();
+            var discard = new List<AllDiscardCardTrainingData>();
             var actors = new HashSet<Actor>();
 
             foreach (var result in results)

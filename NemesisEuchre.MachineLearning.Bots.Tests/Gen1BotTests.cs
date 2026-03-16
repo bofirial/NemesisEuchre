@@ -118,7 +118,7 @@ public class Gen1BotTests
             1);
 
         return act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*'CallTrump'*");
+            .WithMessage("*CallTrump*");
     }
 
     [Fact]
@@ -171,7 +171,7 @@ public class Gen1BotTests
             [cardsInHand[0], cardsInHand[1]]);
 
         return act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*'DiscardCard'*");
+            .WithMessage("*DiscardCard*");
     }
 
     [Fact]

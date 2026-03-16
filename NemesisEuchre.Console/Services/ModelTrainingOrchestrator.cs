@@ -124,6 +124,8 @@ public class ModelTrainingOrchestrator(
             DecisionType.Discard => "DiscardCard",
             DecisionType.SimplePlay => "PlayCard",
             DecisionType.AdvancedPlay => "PlayCard",
+            DecisionType.AdvancedCallTrump => "CallTrump",
+            DecisionType.AdvancedDiscard => "DiscardCard",
             DecisionType.All => throw new ArgumentOutOfRangeException(nameof(type), type, "DecisionType.All is not a valid individual decision type"),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unsupported decision type for IDV file prefix"),
         };

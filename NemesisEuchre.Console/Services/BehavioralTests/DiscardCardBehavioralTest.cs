@@ -1,20 +1,18 @@
 using NemesisEuchre.Console.Models.BehavioralTests;
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.PlayerDecisionEngine;
-using NemesisEuchre.MachineLearning.FeatureEngineering;
 using NemesisEuchre.MachineLearning.Loading;
-using NemesisEuchre.MachineLearning.Models;
 
 namespace NemesisEuchre.Console.Services.BehavioralTests;
 
 public abstract class DiscardCardBehavioralTest(
-    IDiscardCardInferenceFeatureBuilder featureBuilder) : IModelBehavioralTest
+    IDiscardCardBehavioralTestRunner runner) : IModelBehavioralTest
 {
     public abstract string Name { get; }
 
     public abstract string Description { get; }
 
-    public DecisionType DecisionType => DecisionType.Discard;
+    public DecisionType DecisionType => runner.DecisionType;
 
     public abstract string AssertionDescription { get; }
 
@@ -28,21 +26,6 @@ public abstract class DiscardCardBehavioralTest(
 
     public IReadOnlyList<BehavioralTestResult> Run(IPredictionEngineProvider engineProvider, string modelName)
     {
-        var engine = engineProvider.TryGetEngine<DiscardCardTrainingData, DiscardCardRegressionPrediction>(
-            "DiscardCard", modelName);
-
-        if (engine == null)
-        {
-            return [new BehavioralTestResult(
-                Name,
-                DecisionType,
-                false,
-                "-",
-                AssertionDescription,
-                [],
-                "Failed to load DiscardCard model")];
-        }
-
         var testCases = GetTestCases();
         var results = new List<BehavioralTestResult>(testCases.Count);
 
@@ -54,15 +37,29 @@ public abstract class DiscardCardBehavioralTest(
 
             foreach (var card in testCase.CardsInHand)
             {
-                var features = featureBuilder.BuildFeatures(
+                var scoreOrNull = runner.TryScore(
+                    engineProvider,
+                    modelName,
                     testCase.CardsInHand,
                     CallingPlayer,
                     CallingPlayerGoingAlone,
                     TeamScore,
                     OpponentScore,
                     card);
-                var prediction = engine.Predict(features);
-                var score = prediction.PredictedPoints;
+
+                if (scoreOrNull == null)
+                {
+                    return [new BehavioralTestResult(
+                        Name,
+                        DecisionType,
+                        false,
+                        "-",
+                        AssertionDescription,
+                        [],
+                        $"Failed to load {DecisionType} model")];
+                }
+
+                var score = scoreOrNull.Value;
                 var display = FormatCard(card);
                 scores[display] = score;
 

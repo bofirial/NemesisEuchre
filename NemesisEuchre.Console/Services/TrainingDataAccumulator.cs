@@ -103,8 +103,8 @@ public class TrainingDataAccumulator(
             await Task.Run(
                 () => Parallel.Invoke(
                     () => MergeChunksToFinal<AllPlayCardTrainingData>(playCardPaths, outputPath, generationName, "PlayCard", DecisionType.Play, playCardRows, actorInfos),
-                    () => MergeChunksToFinal<CallTrumpTrainingData>(callTrumpPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, callTrumpRows, actorInfos),
-                    () => MergeChunksToFinal<DiscardCardTrainingData>(discardCardPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, discardCardRows, actorInfos)),
+                    () => MergeChunksToFinal<AllCallTrumpTrainingData>(callTrumpPaths, outputPath, generationName, "CallTrump", DecisionType.CallTrump, callTrumpRows, actorInfos),
+                    () => MergeChunksToFinal<AllDiscardCardTrainingData>(discardCardPaths, outputPath, generationName, "DiscardCard", DecisionType.Discard, discardCardRows, actorInfos)),
                 cancellationToken).ConfigureAwait(false);
         }
 
