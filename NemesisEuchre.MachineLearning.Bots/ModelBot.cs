@@ -32,6 +32,9 @@ public class ModelBot(
     private readonly PredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>? _playCardEngine = engineProvider.TryGetEngine<PlayCardTrainingData, PlayCardRegressionPrediction>("PlayCard", actor.GetModelName("PlayCard") ?? string.Empty);
     private readonly PredictionEngine<SimplePlayCardTrainingData, PlayCardRegressionPrediction>? _simplePlayCardEngine = engineProvider.TryGetEngine<SimplePlayCardTrainingData, PlayCardRegressionPrediction>("SimplePlayCard", actor.GetModelName("SimplePlayCard") ?? string.Empty);
     private readonly PredictionEngine<AdvancedPlayCardTrainingData, PlayCardRegressionPrediction>? _advancedPlayCardEngine = engineProvider.TryGetEngine<AdvancedPlayCardTrainingData, PlayCardRegressionPrediction>("AdvancedPlayCard", actor.GetModelName("AdvancedPlayCard") ?? string.Empty);
+    private readonly bool _hasExplicitPlayCardModel = actor.ModelNames?.ContainsKey("PlayCard") == true;
+    private readonly bool _hasExplicitSimplePlayCardModel = actor.ModelNames?.ContainsKey("SimplePlayCard") == true;
+    private readonly bool _hasExplicitAdvancedPlayCardModel = actor.ModelNames?.ContainsKey("AdvancedPlayCard") == true;
 
     public override ActorType ActorType => ActorType.Model;
 
@@ -183,11 +186,33 @@ public class ModelBot(
                 card);
         }
 
-        return TryPredictPlayCard(_advancedPlayCardEngine, validCardsToPlay, advancedBuilder, "AdvancedPlayCard")
-            ?? TryPredictPlayCard(_simplePlayCardEngine, validCardsToPlay, simpleBuilder, "SimplePlayCard")
-            ?? TryPredictPlayCard(_playCardEngine, validCardsToPlay, PlayBuilder, "PlayCard")
+        // Explicit CLI overrides (-t2m-play, -t2m-simple-play, -t2m-advanced-play)
+        // always take priority over engines loaded from the default model.
+        // Within each tier, priority order is: Advanced > Simple > Play.
+        return TryPredictIfExplicit(_advancedPlayCardEngine, validCardsToPlay, advancedBuilder, "AdvancedPlayCard", _hasExplicitAdvancedPlayCardModel)
+            ?? TryPredictIfExplicit(_simplePlayCardEngine, validCardsToPlay, simpleBuilder, "SimplePlayCard", _hasExplicitSimplePlayCardModel)
+            ?? TryPredictIfExplicit(_playCardEngine, validCardsToPlay, PlayBuilder, "PlayCard", _hasExplicitPlayCardModel)
+            ?? TryPredictIfExplicit(_advancedPlayCardEngine, validCardsToPlay, advancedBuilder, "AdvancedPlayCard", !_hasExplicitAdvancedPlayCardModel)
+            ?? TryPredictIfExplicit(_simplePlayCardEngine, validCardsToPlay, simpleBuilder, "SimplePlayCard", !_hasExplicitSimplePlayCardModel)
+            ?? TryPredictIfExplicit(_playCardEngine, validCardsToPlay, PlayBuilder, "PlayCard", !_hasExplicitPlayCardModel)
             ?? throw new ModelUnavailableException(
                 $"No PlayCard prediction engine could be loaded for actor '{Actor}'.");
+    }
+
+    private RelativeCardDecisionContext? TryPredictIfExplicit<TData>(
+        PredictionEngine<TData, PlayCardRegressionPrediction>? engine,
+        RelativeCard[] validCardsToPlay,
+        Func<RelativeCard, TData>? buildFeatures,
+        string engineName,
+        bool condition)
+        where TData : class, new()
+    {
+        if (!condition)
+        {
+            return null;
+        }
+
+        return TryPredictPlayCard(engine, validCardsToPlay, buildFeatures, engineName);
     }
 
     private RelativeCardDecisionContext? TryPredictPlayCard<TData>(

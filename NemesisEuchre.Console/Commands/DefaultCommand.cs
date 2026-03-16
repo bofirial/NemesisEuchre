@@ -91,6 +91,12 @@ public class DefaultCommand(
     public string? Team1SimplePlayCardModelName { get; set; }
 
     [CliOption(
+        Description = "ModelName for Team1 AdvancedPlayCard decision (overrides --t1m)",
+        Required = false,
+        Alias = "t1m-advanced-play")]
+    public string? Team1AdvancedPlayCardModelName { get; set; }
+
+    [CliOption(
         Description = "ActorType for Team2",
         Alias = "t2")]
     public ActorType? Team2 { get; set; }
@@ -137,6 +143,12 @@ public class DefaultCommand(
     public string? Team2SimplePlayCardModelName { get; set; }
 
     [CliOption(
+        Description = "ModelName for Team2 AdvancedPlayCard decision (overrides --t2m)",
+        Required = false,
+        Alias = "t2m-advanced-play")]
+    public string? Team2AdvancedPlayCardModelName { get; set; }
+
+    [CliOption(
         Description = "Allow overwriting existing IDV files",
         Alias = "o")]
     public bool Overwrite { get; set; }
@@ -177,13 +189,15 @@ public class DefaultCommand(
         string? teamPlayCardModelName,
         string? teamCallTrumpModelName,
         string? teamDiscardCardModelName,
-        string? teamSimplePlayCardModelName)
+        string? teamSimplePlayCardModelName,
+        string? teamAdvancedPlayCardModelName)
     {
         bool hasAnyModel = !string.IsNullOrEmpty(teamModelName)
             || !string.IsNullOrEmpty(teamPlayCardModelName)
             || !string.IsNullOrEmpty(teamCallTrumpModelName)
             || !string.IsNullOrEmpty(teamDiscardCardModelName)
-            || !string.IsNullOrEmpty(teamSimplePlayCardModelName);
+            || !string.IsNullOrEmpty(teamSimplePlayCardModelName)
+            || !string.IsNullOrEmpty(teamAdvancedPlayCardModelName);
 
         if (teamExplorationTemperature != default)
         {
@@ -202,19 +216,21 @@ public class DefaultCommand(
         bool hasPerDecisionTypeModel = !string.IsNullOrEmpty(teamPlayCardModelName)
             || !string.IsNullOrEmpty(teamCallTrumpModelName)
             || !string.IsNullOrEmpty(teamDiscardCardModelName)
-            || !string.IsNullOrEmpty(teamSimplePlayCardModelName);
+            || !string.IsNullOrEmpty(teamSimplePlayCardModelName)
+            || !string.IsNullOrEmpty(teamAdvancedPlayCardModelName);
 
         if (hasPerDecisionTypeModel)
         {
             return Actor.WithModels(
                 teamActorType.Value,
-                teamPlayCardModelName,
-                teamCallTrumpModelName,
-                teamDiscardCardModelName,
-                teamSimplePlayCardModelName,
-                teamModelName,
-                teamExplorationTemperature,
-                teamExplorationDecisionType);
+                playCardModel: teamPlayCardModelName,
+                callTrumpModel: teamCallTrumpModelName,
+                discardCardModel: teamDiscardCardModelName,
+                simplePlayCardModel: teamSimplePlayCardModelName,
+                advancedPlayCardModel: teamAdvancedPlayCardModelName,
+                defaultModel: teamModelName,
+                explorationTemperature: teamExplorationTemperature,
+                explorationDecisionType: teamExplorationDecisionType);
         }
 
         if (!string.IsNullOrEmpty(teamModelName))
@@ -291,7 +307,8 @@ public class DefaultCommand(
                 Team1PlayCardModelName,
                 Team1CallTrumpModelName,
                 Team1DiscardCardModelName,
-                Team1SimplePlayCardModelName),
+                Team1SimplePlayCardModelName,
+                Team1AdvancedPlayCardModelName),
             Team.Team2 => GetTeamActor(
                 Team2,
                 Team2ModelName,
@@ -300,7 +317,8 @@ public class DefaultCommand(
                 Team2PlayCardModelName,
                 Team2CallTrumpModelName,
                 Team2DiscardCardModelName,
-                Team2SimplePlayCardModelName),
+                Team2SimplePlayCardModelName,
+                Team2AdvancedPlayCardModelName),
             _ => throw new ArgumentOutOfRangeException(nameof(team), team, $"Invalid Team: {team}"),
         };
         return teamActor != null ? [teamActor, teamActor] : null;
