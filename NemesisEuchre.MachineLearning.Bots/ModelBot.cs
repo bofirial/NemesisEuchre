@@ -119,76 +119,8 @@ public class ModelBot(
         short opponentsWonTricks,
         RelativeCard[] validCardsToPlay)
     {
-        if (_advancedPlayCardEngine != null && _advancedPlayCardFeatureBuilder != null)
-        {
-            var (bestAdvancedOption, advancedScores) = PredictBestOption(
-                _advancedPlayCardEngine,
-                validCardsToPlay,
-                card => _advancedPlayCardFeatureBuilder.BuildFeatures(
-                    cardsInHand,
-                    leadPlayer,
-                    leadSuit,
-                    playedCardsInTrick,
-                    teamScore,
-                    opponentScore,
-                    callingPlayer,
-                    callingPlayerGoingAlone,
-                    dealer,
-                    dealerPickedUpCard,
-                    knownPlayerSuitVoids,
-                    cardsAccountedFor,
-                    currentlyWinningTrickPlayer,
-                    trickNumber,
-                    wonTricks,
-                    opponentsWonTricks,
-                    card),
-                prediction => prediction.PredictedPoints,
-                "AdvancedPlayCard");
-
-            return new RelativeCardDecisionContext
-            {
-                ChosenCard = bestAdvancedOption,
-                DecisionPredictedPoints = advancedScores,
-            };
-        }
-
-        if (_simplePlayCardEngine != null && _simplePlayCardFeatureBuilder != null)
-        {
-            var (bestSimpleOption, simpleScores) = PredictBestOption(
-                _simplePlayCardEngine,
-                validCardsToPlay,
-                card => _simplePlayCardFeatureBuilder.BuildFeatures(
-                    cardsInHand,
-                    leadPlayer,
-                    leadSuit,
-                    playedCardsInTrick,
-                    teamScore,
-                    opponentScore,
-                    callingPlayer,
-                    callingPlayerGoingAlone,
-                    dealer,
-                    dealerPickedUpCard,
-                    knownPlayerSuitVoids,
-                    cardsAccountedFor,
-                    currentlyWinningTrickPlayer,
-                    trickNumber,
-                    wonTricks,
-                    opponentsWonTricks,
-                    card),
-                prediction => prediction.PredictedPoints,
-                "SimplePlayCard");
-
-            return new RelativeCardDecisionContext
-            {
-                ChosenCard = bestSimpleOption,
-                DecisionPredictedPoints = simpleScores,
-            };
-        }
-
-        var (bestOption, scores) = PredictBestOption(
-            _playCardEngine,
-            validCardsToPlay,
-            card => _playCardFeatureBuilder.BuildFeatures(
+        Func<RelativeCard, AdvancedPlayCardTrainingData>? advancedBuilder = _advancedPlayCardFeatureBuilder != null
+            ? card => _advancedPlayCardFeatureBuilder.BuildFeatures(
                 cardsInHand,
                 leadPlayer,
                 leadSuit,
@@ -205,9 +137,77 @@ public class ModelBot(
                 trickNumber,
                 wonTricks,
                 opponentsWonTricks,
-                card),
+                card)
+            : null;
+
+        Func<RelativeCard, SimplePlayCardTrainingData>? simpleBuilder = _simplePlayCardFeatureBuilder != null
+            ? card => _simplePlayCardFeatureBuilder.BuildFeatures(
+                cardsInHand,
+                leadPlayer,
+                leadSuit,
+                playedCardsInTrick,
+                teamScore,
+                opponentScore,
+                callingPlayer,
+                callingPlayerGoingAlone,
+                dealer,
+                dealerPickedUpCard,
+                knownPlayerSuitVoids,
+                cardsAccountedFor,
+                currentlyWinningTrickPlayer,
+                trickNumber,
+                wonTricks,
+                opponentsWonTricks,
+                card)
+            : null;
+
+        PlayCardTrainingData PlayBuilder(RelativeCard card)
+        {
+            return _playCardFeatureBuilder.BuildFeatures(
+                cardsInHand,
+                leadPlayer,
+                leadSuit,
+                playedCardsInTrick,
+                teamScore,
+                opponentScore,
+                callingPlayer,
+                callingPlayerGoingAlone,
+                dealer,
+                dealerPickedUpCard,
+                knownPlayerSuitVoids,
+                cardsAccountedFor,
+                currentlyWinningTrickPlayer,
+                trickNumber,
+                wonTricks,
+                opponentsWonTricks,
+                card);
+        }
+
+        return TryPredictPlayCard(_advancedPlayCardEngine, validCardsToPlay, advancedBuilder, "AdvancedPlayCard")
+            ?? TryPredictPlayCard(_simplePlayCardEngine, validCardsToPlay, simpleBuilder, "SimplePlayCard")
+            ?? TryPredictPlayCard(_playCardEngine, validCardsToPlay, PlayBuilder, "PlayCard")
+            ?? throw new ModelUnavailableException(
+                $"No PlayCard prediction engine could be loaded for actor '{Actor}'.");
+    }
+
+    private RelativeCardDecisionContext? TryPredictPlayCard<TData>(
+        PredictionEngine<TData, PlayCardRegressionPrediction>? engine,
+        RelativeCard[] validCardsToPlay,
+        Func<RelativeCard, TData>? buildFeatures,
+        string engineName)
+        where TData : class, new()
+    {
+        if (engine == null || buildFeatures == null)
+        {
+            return null;
+        }
+
+        var (bestOption, scores) = PredictBestOption(
+            engine,
+            validCardsToPlay,
+            buildFeatures,
             prediction => prediction.PredictedPoints,
-            "PlayCard");
+            engineName);
 
         return new RelativeCardDecisionContext
         {

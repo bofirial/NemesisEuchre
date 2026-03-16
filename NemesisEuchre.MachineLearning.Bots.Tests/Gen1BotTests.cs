@@ -210,7 +210,7 @@ public class Gen1BotTests
             [cardsInHand[0], cardsInHand[1]]);
 
         return act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*'PlayCard'*");
+            .WithMessage("*PlayCard*");
     }
 
     [Fact]

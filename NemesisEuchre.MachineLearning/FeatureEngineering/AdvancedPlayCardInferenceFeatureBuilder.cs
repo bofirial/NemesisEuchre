@@ -67,53 +67,6 @@ public class AdvancedPlayCardInferenceFeatureBuilder : IAdvancedPlayCardInferenc
             chosenCard);
 
         var full = PlayCardFeatureBuilder.BuildFeatures(context);
-
-        return new AdvancedPlayCardTrainingData
-        {
-            Card1Rank = full.Card1Rank,
-            Card1Suit = full.Card1Suit,
-            Card2Rank = full.Card2Rank,
-            Card2Suit = full.Card2Suit,
-            Card3Rank = full.Card3Rank,
-            Card3Suit = full.Card3Suit,
-            Card4Rank = full.Card4Rank,
-            Card4Suit = full.Card4Suit,
-            Card5Rank = full.Card5Rank,
-            Card5Suit = full.Card5Suit,
-            LeadPlayer = full.LeadPlayer,
-            LeadSuit = full.LeadSuit,
-            LeftHandOpponentPlayedCardRank = full.LeftHandOpponentPlayedCardRank,
-            LeftHandOpponentPlayedCardSuit = full.LeftHandOpponentPlayedCardSuit,
-            PartnerPlayedCardRank = full.PartnerPlayedCardRank,
-            PartnerPlayedCardSuit = full.PartnerPlayedCardSuit,
-            RightHandOpponentPlayedCardRank = full.RightHandOpponentPlayedCardRank,
-            RightHandOpponentPlayedCardSuit = full.RightHandOpponentPlayedCardSuit,
-            TeamScore = full.TeamScore,
-            OpponentScore = full.OpponentScore,
-            TrickNumber = full.TrickNumber,
-            CardsPlayedInTrick = full.CardsPlayedInTrick,
-            WinningTrickPlayer = full.WinningTrickPlayer,
-            ChosenCardRank = full.ChosenCardRank,
-            ChosenCardRelativeSuit = full.ChosenCardRelativeSuit,
-            CallingPlayerPosition = full.CallingPlayerPosition,
-            CallingPlayerGoingAlone = full.CallingPlayerGoingAlone,
-            DealerPlayerPosition = full.DealerPlayerPosition,
-            DealerPickedUpCardRank = full.DealerPickedUpCardRank,
-            DealerPickedUpCardSuit = full.DealerPickedUpCardSuit,
-            WonTricks = full.WonTricks,
-            OpponentsWonTricks = full.OpponentsWonTricks,
-            Card1Threats = full.Card1Threats,
-            Card2Threats = full.Card2Threats,
-            Card3Threats = full.Card3Threats,
-            Card4Threats = full.Card4Threats,
-            Card5Threats = full.Card5Threats,
-            Card1ThreatsThisTrick = full.Card1ThreatsThisTrick,
-            Card2ThreatsThisTrick = full.Card2ThreatsThisTrick,
-            Card3ThreatsThisTrick = full.Card3ThreatsThisTrick,
-            Card4ThreatsThisTrick = full.Card4ThreatsThisTrick,
-            Card5ThreatsThisTrick = full.Card5ThreatsThisTrick,
-            ChosenCardThreats = full.ChosenCardThreats,
-            ChosenCardThreatsThisTrick = full.ChosenCardThreatsThisTrick,
-        };
+        return PlayCardTrainingDataMapper.MapFrom<AdvancedPlayCardTrainingData>(full);
     }
 }

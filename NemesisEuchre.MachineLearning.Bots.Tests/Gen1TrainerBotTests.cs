@@ -143,7 +143,7 @@ public class Gen1TrainerBotTests
             validCards);
 
         return act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*'PlayCard'*");
+            .WithMessage("*PlayCard*");
     }
 
     private Card[] GenerateCards(int count)

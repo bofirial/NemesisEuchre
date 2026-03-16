@@ -388,18 +388,7 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
 
         if (opponentsAfterMe.Length == 0)
         {
-            bool myTeamWinning = resolvedWinner is RelativePlayerPosition.Self or RelativePlayerPosition.Partner;
-            if (myTeamWinning)
-            {
-                return 0f;
-            }
-
-            if (!playedCards.TryGetValue(resolvedWinner, out var winningCardLast))
-            {
-                return CalculateThreats(card, effectiveAccountedFor, knownPlayerSuitVoids);
-            }
-
-            return CardBeatsInTrick(card, winningCardLast) ? 0f : 25f;
+            return CalculateLastPlayerThreats(card, effectiveAccountedFor, knownPlayerSuitVoids, playedCards, resolvedWinner);
         }
 
         bool opponentWinning = resolvedWinner is RelativePlayerPosition.LeftHandOpponent or RelativePlayerPosition.RightHandOpponent;
@@ -427,6 +416,27 @@ public sealed class PlayCardFeatureBuilder : FeatureBuilderBase<PlayCardDecision
 
         var teamBestCard = CardBeatsInTrick(card, partnerCard) ? card : partnerCard;
         return CountThreatsFromOpponents(teamBestCard, resolvedLeadSuit, opponentsAfterMe, effectiveAccountedFor, knownPlayerSuitVoids);
+    }
+
+    private static float CalculateLastPlayerThreats(
+        RelativeCard card,
+        RelativeCard[] effectiveAccountedFor,
+        RelativePlayerSuitVoid[] knownPlayerSuitVoids,
+        Dictionary<RelativePlayerPosition, RelativeCard> playedCards,
+        RelativePlayerPosition resolvedWinner)
+    {
+        bool myTeamWinning = resolvedWinner is RelativePlayerPosition.Self or RelativePlayerPosition.Partner;
+        if (myTeamWinning)
+        {
+            return 0f;
+        }
+
+        if (!playedCards.TryGetValue(resolvedWinner, out var winningCard))
+        {
+            return CalculateThreats(card, effectiveAccountedFor, knownPlayerSuitVoids);
+        }
+
+        return CardBeatsInTrick(card, winningCard) ? 0f : 25f;
     }
 
     private static RelativePlayerPosition[] GetOpponentsAfterMe(

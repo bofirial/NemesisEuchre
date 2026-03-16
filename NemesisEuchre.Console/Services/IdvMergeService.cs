@@ -26,6 +26,13 @@ public sealed class IdvMergeService(
     IOptions<PersistenceOptions> persistenceOptions,
     ILogger<IdvMergeService> logger) : IIdvMergeService
 {
+    private static readonly (string suffix, DecisionType type, Action<IdvMergeService, MergeOperationContext> merge)[] DecisionMergeMap =
+    [
+        (suffix: "PlayCard", type: DecisionType.Play, merge: (svc, ctx) => svc.MergeDecisionType<AllPlayCardTrainingData>(ctx, "PlayCard", DecisionType.Play)),
+        (suffix: "CallTrump", type: DecisionType.CallTrump, merge: (svc, ctx) => svc.MergeDecisionType<CallTrumpTrainingData>(ctx, "CallTrump", DecisionType.CallTrump)),
+        (suffix: "DiscardCard", type: DecisionType.Discard, merge: (svc, ctx) => svc.MergeDecisionType<DiscardCardTrainingData>(ctx, "DiscardCard", DecisionType.Discard)),
+    ];
+
     private static readonly (string suffix, DecisionType type)[] DecisionSuffixMap =
     [
         (suffix: "PlayCard", type: DecisionType.Play),
@@ -55,55 +62,25 @@ public sealed class IdvMergeService(
         onStatusUpdate?.Invoke($"Merging {sourceGenerationNames.Count} source(s) into '{outputGenerationName}'...");
         LoggerMessages.LogIdvMergeSourcesStarting(logger, sourceGenerationNames.Count, outputGenerationName);
 
+        var mergeContext = new MergeOperationContext(
+            basePath,
+            outputGenerationName,
+            sourceGenerationNames,
+            allSourceMetadata,
+            gameCount,
+            dealCount,
+            trickCount,
+            actors);
+
         await Task.Run(
             () =>
             {
-                if (ShouldMerge(decisionTypeFilter, DecisionType.Play))
+                foreach (var (suffix, type, merge) in DecisionMergeMap)
                 {
-                    var playCardPaths = GetSourcePaths(basePath, sourceGenerationNames, "PlayCard");
-                    MergeDecisionType<AllPlayCardTrainingData>(
-                        playCardPaths,
-                        basePath,
-                        outputGenerationName,
-                        "PlayCard",
-                        DecisionType.Play,
-                        allSourceMetadata,
-                        gameCount,
-                        dealCount,
-                        trickCount,
-                        actors);
-                }
-
-                if (ShouldMerge(decisionTypeFilter, DecisionType.CallTrump))
-                {
-                    var callTrumpPaths = GetSourcePaths(basePath, sourceGenerationNames, "CallTrump");
-                    MergeDecisionType<CallTrumpTrainingData>(
-                        callTrumpPaths,
-                        basePath,
-                        outputGenerationName,
-                        "CallTrump",
-                        DecisionType.CallTrump,
-                        allSourceMetadata,
-                        gameCount,
-                        dealCount,
-                        trickCount,
-                        actors);
-                }
-
-                if (ShouldMerge(decisionTypeFilter, DecisionType.Discard))
-                {
-                    var discardCardPaths = GetSourcePaths(basePath, sourceGenerationNames, "DiscardCard");
-                    MergeDecisionType<DiscardCardTrainingData>(
-                        discardCardPaths,
-                        basePath,
-                        outputGenerationName,
-                        "DiscardCard",
-                        DecisionType.Discard,
-                        allSourceMetadata,
-                        gameCount,
-                        dealCount,
-                        trickCount,
-                        actors);
+                    if (ShouldMerge(decisionTypeFilter, type))
+                    {
+                        merge(this, mergeContext);
+                    }
                 }
             },
             cancellationToken).ConfigureAwait(false);
@@ -216,33 +193,27 @@ public sealed class IdvMergeService(
     }
 
     private void MergeDecisionType<T>(
-        IReadOnlyList<string> sourcePaths,
-        string basePath,
-        string outputName,
+        MergeOperationContext context,
         string suffix,
-        DecisionType decisionType,
-        List<IdvFileMetadata> allMetadata,
-        int gameCount,
-        int dealCount,
-        int trickCount,
-        List<ActorInfo> actors)
+        DecisionType decisionType)
         where T : class, new()
     {
-        var outputPath = Path.Combine(basePath, $"{outputName}_{suffix}{FileExtensions.Idv}");
-        var rowCount = allMetadata
+        var sourcePaths = GetSourcePaths(context.BasePath, context.SourceNames, suffix);
+        var outputPath = Path.Combine(context.BasePath, $"{context.OutputName}_{suffix}{FileExtensions.Idv}");
+        var rowCount = context.AllMetadata
             .Where(m => m.DecisionType == decisionType)
             .Sum(m => m.RowCount);
 
         idvFileService.Save(InterleaveAllSources<T>(sourcePaths), outputPath);
 
         var metadata = new IdvFileMetadata(
-            outputName,
+            context.OutputName,
             decisionType,
             rowCount,
-            gameCount,
-            dealCount,
-            trickCount,
-            actors,
+            context.GameCount,
+            context.DealCount,
+            context.TrickCount,
+            context.Actors,
             DateTime.UtcNow);
 
         metadataService.SaveMetadataWithVerification(outputPath, metadata);
@@ -283,4 +254,14 @@ public sealed class IdvMergeService(
             }
         }
     }
+
+    private record MergeOperationContext(
+        string BasePath,
+        string OutputName,
+        IReadOnlyList<string> SourceNames,
+        List<IdvFileMetadata> AllMetadata,
+        int GameCount,
+        int DealCount,
+        int TrickCount,
+        List<ActorInfo> Actors);
 }
