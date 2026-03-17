@@ -34,6 +34,8 @@ public class IdvFileService(MLContext mlContext) : IIdvFileService
 
         using var stream = File.Create(filePath);
         mlContext.Data.SaveAsBinary(dataView, stream);
+
+        (dataView as IDisposable)?.Dispose();
     }
 
     public IDataView Load(string filePath)

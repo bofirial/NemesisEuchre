@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 using Microsoft.Extensions.Logging;
 
 using NemesisEuchre.Foundation;
@@ -25,6 +27,7 @@ public sealed class IdvChunkMerger(
         LoggerMessages.LogIdvChunkMerging(logger, chunkPaths.Count, finalPath);
 
         idvFileService.Save(StreamAllChunks<T>(chunkPaths), finalPath);
+        ForceFinalization();
         LoggerMessages.LogIdvMergeComplete(logger, finalPath, totalRows, chunkPaths.Count);
     }
 
@@ -56,6 +59,14 @@ public sealed class IdvChunkMerger(
                 Thread.Sleep(attempt * 100);
             }
         }
+    }
+
+    [SuppressMessage("Reliability", "S1215:GC.Collect should not be called", Justification = "ML.NET BinaryLoader releases file handles via GC finalization, not IDisposable")]
+    private static void ForceFinalization()
+    {
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
     }
 
     private IEnumerable<T> StreamAllChunks<T>(IReadOnlyList<string> chunkPaths)
