@@ -18,7 +18,11 @@ Param(
     [Parameter(Position = 8)]
     [string]$ModelParameterLabel = "-t2m-call",
     [Parameter(Position = 9)]
-    [string]$CsvPath = "calltrump-modelResults.csv"
+    [string]$CsvPath = "calltrump-modelResults.csv",
+    [Parameter()]
+    [string]$DecisionType = "",
+    [Parameter()]
+    [string]$IdvSource = ""
 )
 
 $outputFile = "output.json";
@@ -39,7 +43,7 @@ Invoke-Expression $testCommand
 
 $testOutput = Get-Content -Path $outputFile -Raw | ConvertFrom-Json
 
-$newRow = [PSCustomObject]@{
+$rowData = [ordered]@{
     "Model Number"                   = $ModelNumber
     "Model Name"                     = $Model
     "Learn Rate"                     = $LearnRate
@@ -56,5 +60,15 @@ $newRow = [PSCustomObject]@{
     "Battle Command"                 = $battleCommand
     "Test Command"                   = $testCommand
 }
+
+if ($DecisionType -ne "") {
+    $rowData["Decision Type"] = $DecisionType
+}
+
+if ($IdvSource -ne "") {
+    $rowData["IDV Source"] = $IdvSource
+}
+
+$newRow = [PSCustomObject]$rowData
 
 $newRow | Export-Csv -Path $CsvPath -Append -NoTypeInformation
