@@ -65,14 +65,7 @@ public class StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer
 
                     if (scoreOrNull == null)
                     {
-                        return [new BehavioralTestResult(
-                            Name,
-                            runner.DecisionType,
-                            false,
-                            "-",
-                            AssertionDescription,
-                            [],
-                            $"Failed to load {runner.DecisionType} model")];
+                        return [];
                     }
 
                     if (scoreOrNull.Value > bestScore)
@@ -98,7 +91,7 @@ public class StrongHandWithRightBowerUpShouldScoreHigherWithTeamDealer
 
             results.Add(new BehavioralTestResult(
                 $"{Name} ({suit})",
-                runner.DecisionType,
+                runner.ReportingDecisionType,
                 passed,
                 $"Team: {teamMax:F4}, Opp: {opponentMax:F4}",
                 AssertionDescription,

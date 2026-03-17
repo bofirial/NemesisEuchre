@@ -7,7 +7,7 @@ namespace NemesisEuchre.Console.Services.BehavioralTests;
 
 public class SimplePlayCardBehavioralTestRunner(ISimplePlayCardInferenceFeatureBuilder featureBuilder) : IPlayCardBehavioralTestRunner
 {
-    public DecisionType DecisionType => DecisionType.SimplePlay;
+    public DecisionType ReportingDecisionType => DecisionType.Play;
 
     public float? TryScore(IPredictionEngineProvider engineProvider, string modelName, PlayCardFeatureBuilderContext context)
     {

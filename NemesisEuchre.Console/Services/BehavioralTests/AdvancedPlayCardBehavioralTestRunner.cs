@@ -7,7 +7,7 @@ namespace NemesisEuchre.Console.Services.BehavioralTests;
 
 public class AdvancedPlayCardBehavioralTestRunner(IAdvancedPlayCardInferenceFeatureBuilder featureBuilder) : IPlayCardBehavioralTestRunner
 {
-    public DecisionType DecisionType => DecisionType.AdvancedPlay;
+    public DecisionType ReportingDecisionType => DecisionType.Play;
 
     public float? TryScore(IPredictionEngineProvider engineProvider, string modelName, PlayCardFeatureBuilderContext context)
     {

@@ -108,7 +108,7 @@ public abstract class PlayCardBehavioralTest : IPlayCardBehavioralTest
 
             results.Add(new BehavioralTestResult(
                 testCase.Label,
-                runner.DecisionType,
+                runner.ReportingDecisionType,
                 passed,
                 chosenDisplay,
                 AssertionDescription,

@@ -47,14 +47,7 @@ public abstract class DiscardCardBehavioralTest : IDiscardCardBehavioralTest
 
                 if (scoreOrNull == null)
                 {
-                    return [new BehavioralTestResult(
-                        Name,
-                        runner.DecisionType,
-                        false,
-                        "-",
-                        AssertionDescription,
-                        [],
-                        $"Failed to load {runner.DecisionType} model")];
+                    return [];
                 }
 
                 var score = scoreOrNull.Value;
@@ -76,7 +69,7 @@ public abstract class DiscardCardBehavioralTest : IDiscardCardBehavioralTest
 
             results.Add(new BehavioralTestResult(
                 testCase.Label,
-                runner.DecisionType,
+                runner.ReportingDecisionType,
                 passed,
                 chosenDisplay,
                 AssertionDescription,

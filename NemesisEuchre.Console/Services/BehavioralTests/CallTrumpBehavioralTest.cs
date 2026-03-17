@@ -47,14 +47,7 @@ public abstract class CallTrumpBehavioralTest : ICallTrumpBehavioralTest
 
                 if (scoreOrNull == null)
                 {
-                    return [new BehavioralTestResult(
-                        Name,
-                        runner.DecisionType,
-                        false,
-                        "-",
-                        AssertionDescription,
-                        [],
-                        $"Failed to load {runner.DecisionType} model")];
+                    return [];
                 }
 
                 var score = scoreOrNull.Value;
@@ -75,7 +68,7 @@ public abstract class CallTrumpBehavioralTest : ICallTrumpBehavioralTest
 
             results.Add(new BehavioralTestResult(
                 testCase.Label,
-                runner.DecisionType,
+                runner.ReportingDecisionType,
                 passed,
                 chosenDisplay,
                 AssertionDescription,

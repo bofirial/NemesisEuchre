@@ -8,7 +8,7 @@ namespace NemesisEuchre.Console.Services.BehavioralTests;
 
 public interface IDiscardCardBehavioralTestRunner
 {
-    DecisionType DecisionType { get; }
+    DecisionType ReportingDecisionType { get; }
 
     float? TryScore(
         IPredictionEngineProvider engineProvider,
@@ -24,7 +24,7 @@ public interface IDiscardCardBehavioralTestRunner
 public class DiscardCardBehavioralTestRunner(
     IDiscardCardInferenceFeatureBuilder featureBuilder) : IDiscardCardBehavioralTestRunner
 {
-    public DecisionType DecisionType => DecisionType.Discard;
+    public DecisionType ReportingDecisionType => DecisionType.Discard;
 
     public float? TryScore(
         IPredictionEngineProvider engineProvider,
@@ -57,7 +57,7 @@ public class DiscardCardBehavioralTestRunner(
 public class AdvancedDiscardCardBehavioralTestRunner(
     IAdvancedDiscardCardInferenceFeatureBuilder featureBuilder) : IDiscardCardBehavioralTestRunner
 {
-    public DecisionType DecisionType => DecisionType.AdvancedDiscard;
+    public DecisionType ReportingDecisionType => DecisionType.Discard;
 
     public float? TryScore(
         IPredictionEngineProvider engineProvider,

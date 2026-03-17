@@ -9,7 +9,7 @@ namespace NemesisEuchre.Console.Services.BehavioralTests;
 
 public interface ICallTrumpBehavioralTestRunner
 {
-    DecisionType DecisionType { get; }
+    DecisionType ReportingDecisionType { get; }
 
     float? TryScore(
         IPredictionEngineProvider engineProvider,
@@ -26,7 +26,7 @@ public interface ICallTrumpBehavioralTestRunner
 public class CallTrumpBehavioralTestRunner(
     ICallTrumpInferenceFeatureBuilder featureBuilder) : ICallTrumpBehavioralTestRunner
 {
-    public DecisionType DecisionType => DecisionType.CallTrump;
+    public DecisionType ReportingDecisionType => DecisionType.CallTrump;
 
     public float? TryScore(
         IPredictionEngineProvider engineProvider,
@@ -61,7 +61,7 @@ public class CallTrumpBehavioralTestRunner(
 public class AdvancedCallTrumpBehavioralTestRunner(
     IAdvancedCallTrumpInferenceFeatureBuilder featureBuilder) : ICallTrumpBehavioralTestRunner
 {
-    public DecisionType DecisionType => DecisionType.AdvancedCallTrump;
+    public DecisionType ReportingDecisionType => DecisionType.CallTrump;
 
     public float? TryScore(
         IPredictionEngineProvider engineProvider,

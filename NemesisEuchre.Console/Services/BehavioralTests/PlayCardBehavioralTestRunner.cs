@@ -7,14 +7,14 @@ namespace NemesisEuchre.Console.Services.BehavioralTests;
 
 public interface IPlayCardBehavioralTestRunner
 {
-    DecisionType DecisionType { get; }
+    DecisionType ReportingDecisionType { get; }
 
     float? TryScore(IPredictionEngineProvider engineProvider, string modelName, PlayCardFeatureBuilderContext context);
 }
 
 public class PlayCardBehavioralTestRunner(IPlayCardInferenceFeatureBuilder featureBuilder) : IPlayCardBehavioralTestRunner
 {
-    public DecisionType DecisionType => DecisionType.Play;
+    public DecisionType ReportingDecisionType => DecisionType.Play;
 
     public float? TryScore(IPredictionEngineProvider engineProvider, string modelName, PlayCardFeatureBuilderContext context)
     {
