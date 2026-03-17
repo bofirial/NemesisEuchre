@@ -29,8 +29,8 @@ public sealed class IdvMergeService(
     private static readonly (string suffix, DecisionType type, Action<IdvMergeService, MergeOperationContext> merge)[] DecisionMergeMap =
     [
         (suffix: "PlayCard", type: DecisionType.Play, merge: (svc, ctx) => svc.MergeDecisionType<AllPlayCardTrainingData>(ctx, "PlayCard", DecisionType.Play)),
-        (suffix: "CallTrump", type: DecisionType.CallTrump, merge: (svc, ctx) => svc.MergeDecisionType<CallTrumpTrainingData>(ctx, "CallTrump", DecisionType.CallTrump)),
-        (suffix: "DiscardCard", type: DecisionType.Discard, merge: (svc, ctx) => svc.MergeDecisionType<DiscardCardTrainingData>(ctx, "DiscardCard", DecisionType.Discard)),
+        (suffix: "CallTrump", type: DecisionType.CallTrump, merge: (svc, ctx) => svc.MergeDecisionType<AllCallTrumpTrainingData>(ctx, "CallTrump", DecisionType.CallTrump)),
+        (suffix: "DiscardCard", type: DecisionType.Discard, merge: (svc, ctx) => svc.MergeDecisionType<AllDiscardCardTrainingData>(ctx, "DiscardCard", DecisionType.Discard)),
     ];
 
     private static readonly (string suffix, DecisionType type)[] DecisionSuffixMap =

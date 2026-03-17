@@ -60,11 +60,11 @@ public class IdvMergeServiceTests : IDisposable
             .Setup(x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()))
             .Returns([new AllPlayCardTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<CallTrumpTrainingData>(It.IsAny<string>()))
-            .Returns([new CallTrumpTrainingData()]);
+            .Setup(x => x.StreamFromBinary<AllCallTrumpTrainingData>(It.IsAny<string>()))
+            .Returns([new AllCallTrumpTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<DiscardCardTrainingData>(It.IsAny<string>()))
-            .Returns([new DiscardCardTrainingData()]);
+            .Setup(x => x.StreamFromBinary<AllDiscardCardTrainingData>(It.IsAny<string>()))
+            .Returns([new AllDiscardCardTrainingData()]);
 
         _mockIdvFileService
             .Setup(x => x.Save(It.IsAny<IEnumerable<AllPlayCardTrainingData>>(), It.IsAny<string>()))
@@ -74,15 +74,15 @@ public class IdvMergeServiceTests : IDisposable
                 _savedPlayCardPaths.Add(path);
             });
         _mockIdvFileService
-            .Setup(x => x.Save(It.IsAny<IEnumerable<CallTrumpTrainingData>>(), It.IsAny<string>()))
-            .Callback((IEnumerable<CallTrumpTrainingData> data, string path) =>
+            .Setup(x => x.Save(It.IsAny<IEnumerable<AllCallTrumpTrainingData>>(), It.IsAny<string>()))
+            .Callback((IEnumerable<AllCallTrumpTrainingData> data, string path) =>
             {
                 _ = data.ToList();
                 _savedCallTrumpPaths.Add(path);
             });
         _mockIdvFileService
-            .Setup(x => x.Save(It.IsAny<IEnumerable<DiscardCardTrainingData>>(), It.IsAny<string>()))
-            .Callback((IEnumerable<DiscardCardTrainingData> data, string path) =>
+            .Setup(x => x.Save(It.IsAny<IEnumerable<AllDiscardCardTrainingData>>(), It.IsAny<string>()))
+            .Callback((IEnumerable<AllDiscardCardTrainingData> data, string path) =>
             {
                 _ = data.ToList();
                 _savedDiscardCardPaths.Add(path);
