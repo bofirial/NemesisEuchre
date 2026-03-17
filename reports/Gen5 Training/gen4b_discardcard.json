@@ -1,0 +1,73 @@
+{
+  "ModelType": "DiscardCard",
+  "ModelName": "can3d.31",
+  "TrainingDate": "2026-03-11T21:29:41.4217688Z",
+  "TrainingSamples": 31848178,
+  "ValidationSamples": 6827586,
+  "TestSamples": 6830107,
+  "Hyperparameters": {
+    "Algorithm": "LightGbm",
+    "NumberOfLeaves": 63,
+    "NumberOfIterations": 150,
+    "LearningRate": 0.25,
+    "MinimumExampleCountPerLeaf": 300,
+    "L1Regularization": 0,
+    "L2Regularization": 0.01,
+    "EarlyStoppingRound": 0,
+    "RandomSeed": 42
+  },
+  "Metrics": {
+    "RSquared": 0.23257157798309258,
+    "MeanAbsoluteError": 1.1694157895379977,
+    "RootMeanSquaredError": 1.418870666734612,
+    "MeanSquaredError": 2.0131939689199223,
+    "LossFunction": 2.0131939690960574
+  },
+  "FeatureSchemaVersion": "1.0",
+  "TrainingDataSource": {
+    "GenerationName": "can3a",
+    "GameCount": 5000000,
+    "Actors": [
+      {
+        "ActorType": "Model",
+        "ModelName": "gen3b",
+        "ExplorationTemperature": 0
+      },
+      {
+        "ActorType": "ModelTrainer",
+        "ModelName": "gen3b",
+        "ExplorationTemperature": 0.01
+      },
+      {
+        "ActorType": "ModelTrainer",
+        "ModelName": "gen3b",
+        "ExplorationTemperature": 0.1
+      },
+      {
+        "ActorType": "ModelTrainer",
+        "ModelName": "gen3b",
+        "ExplorationTemperature": 0.5
+      },
+      {
+        "ActorType": "Model",
+        "ModelName": "gen3t",
+        "ExplorationTemperature": 0
+      },
+      {
+        "ActorType": "ModelTrainer",
+        "ModelName": "gen3t",
+        "ExplorationTemperature": 0.01
+      },
+      {
+        "ActorType": "ModelTrainer",
+        "ModelName": "gen3t",
+        "ExplorationTemperature": 0.1
+      },
+      {
+        "ActorType": "ModelTrainer",
+        "ModelName": "gen3t",
+        "ExplorationTemperature": 0.5
+      }
+    ]
+  }
+}
