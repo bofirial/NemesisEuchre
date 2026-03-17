@@ -1,0 +1,73 @@
+{
+  "ModelType": "CallTrump",
+  "ModelName": "can3ct.89",
+  "TrainingDate": "2026-03-11T15:35:27.5048171Z",
+  "TrainingSamples": 106335933,
+  "ValidationSamples": 22784247,
+  "TestSamples": 22790607,
+  "Hyperparameters": {
+    "Algorithm": "LightGbm",
+    "NumberOfLeaves": 255,
+    "NumberOfIterations": 75,
+    "LearningRate": 0.75,
+    "MinimumExampleCountPerLeaf": 500,
+    "L1Regularization": 0,
+    "L2Regularization": 0.01,
+    "EarlyStoppingRound": 0,
+    "RandomSeed": 42
+  },
+  "Metrics": {
+    "RSquared": 0.1533775421907676,
+    "MeanAbsoluteError": 1.2816892097882988,
+    "RootMeanSquaredError": 1.5290378526869737,
+    "MeanSquaredError": 2.3379567549495914,
+    "LossFunction": 2.3379567550273785
+  },
+  "FeatureSchemaVersion": "1.0",
+  "TrainingDataSource": {
+    "GenerationName": "can3a",
+    "GameCount": 5000000,
+    "Actors": [
+      {
+        "ActorType": "Model",
+        "ModelName": "gen3b",
+        "ExplorationTemperature": 0
+      },
+      {
+        "ActorType": "ModelTrainer",
+        "ModelName": "gen3b",
+        "ExplorationTemperature": 0.01
+      },
+      {
+        "ActorType": "ModelTrainer",
+        "ModelName": "gen3b",
+        "ExplorationTemperature": 0.1
+      },
+      {
+        "ActorType": "ModelTrainer",
+        "ModelName": "gen3b",
+        "ExplorationTemperature": 0.5
+      },
+      {
+        "ActorType": "Model",
+        "ModelName": "gen3t",
+        "ExplorationTemperature": 0
+      },
+      {
+        "ActorType": "ModelTrainer",
+        "ModelName": "gen3t",
+        "ExplorationTemperature": 0.01
+      },
+      {
+        "ActorType": "ModelTrainer",
+        "ModelName": "gen3t",
+        "ExplorationTemperature": 0.1
+      },
+      {
+        "ActorType": "ModelTrainer",
+        "ModelName": "gen3t",
+        "ExplorationTemperature": 0.5
+      }
+    ]
+  }
+}
