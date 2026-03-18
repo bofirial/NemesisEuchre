@@ -44,6 +44,8 @@ public sealed class IdvChunkMerger(
             return;
         }
 
+        ForceFinalization();
+
         const int maxAttempts = 5;
         for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
@@ -54,9 +56,12 @@ public sealed class IdvChunkMerger(
             }
             catch (IOException) when (attempt < maxAttempts)
             {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                Thread.Sleep(attempt * 100);
+                ForceFinalization();
+                Thread.Sleep(attempt * 200);
+            }
+            catch (IOException ex)
+            {
+                LoggerMessages.LogIdvChunkCleanupFailed(logger, chunkDirectory, ex);
             }
         }
     }
@@ -74,7 +79,7 @@ public sealed class IdvChunkMerger(
     {
         foreach (var path in chunkPaths)
         {
-            foreach (var row in idvFileService.StreamFromBinary<T>(path))
+            foreach (var row in idvFileService.StreamFromBinaryDetached<T>(path))
             {
                 yield return row;
             }

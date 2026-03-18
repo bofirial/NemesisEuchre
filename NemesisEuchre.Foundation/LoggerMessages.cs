@@ -450,6 +450,12 @@ public static partial class LoggerMessages
         Message = "Sampling {MaxRows:N0} of {TotalRows:N0} training rows for memory efficiency")]
     public static partial void LogSamplingTrainingRows(ILogger logger, long totalRows, long maxRows);
 
+    [LoggerMessage(
+        EventId = 76,
+        Level = LogLevel.Warning,
+        Message = "Failed to clean up chunk directory (file handles still held by ML.NET): {DirectoryPath}")]
+    public static partial void LogIdvChunkCleanupFailed(ILogger logger, string directoryPath, Exception exception);
+
     // EventID 75: Batch abort — model unavailable
     [LoggerMessage(
         EventId = 75,

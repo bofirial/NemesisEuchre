@@ -423,13 +423,13 @@ public class TrainingDataAccumulatorTests : IDisposable
         await _accumulator.FinalizeAsync("gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         _mockIdvFileService.Verify(
-            x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()),
+            x => x.StreamFromBinaryDetached<AllPlayCardTrainingData>(It.IsAny<string>()),
             Times.Never);
         _mockIdvFileService.Verify(
-            x => x.StreamFromBinary<AllCallTrumpTrainingData>(It.IsAny<string>()),
+            x => x.StreamFromBinaryDetached<AllCallTrumpTrainingData>(It.IsAny<string>()),
             Times.Never);
         _mockIdvFileService.Verify(
-            x => x.StreamFromBinary<AllDiscardCardTrainingData>(It.IsAny<string>()),
+            x => x.StreamFromBinaryDetached<AllDiscardCardTrainingData>(It.IsAny<string>()),
             Times.Never);
     }
 
@@ -437,13 +437,13 @@ public class TrainingDataAccumulatorTests : IDisposable
     public async Task Finalize_MultipleChunks_MergesViaStreaming()
     {
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()))
+            .Setup(x => x.StreamFromBinaryDetached<AllPlayCardTrainingData>(It.IsAny<string>()))
             .Returns([new AllPlayCardTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<AllCallTrumpTrainingData>(It.IsAny<string>()))
+            .Setup(x => x.StreamFromBinaryDetached<AllCallTrumpTrainingData>(It.IsAny<string>()))
             .Returns([new AllCallTrumpTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<AllDiscardCardTrainingData>(It.IsAny<string>()))
+            .Setup(x => x.StreamFromBinaryDetached<AllDiscardCardTrainingData>(It.IsAny<string>()))
             .Returns([new AllDiscardCardTrainingData()]);
 
         _accumulator.Add(CreateBatch(playCardCount: 2, callTrumpCount: 1, discardCardCount: 1));
@@ -453,13 +453,13 @@ public class TrainingDataAccumulatorTests : IDisposable
         await _accumulator.FinalizeAsync("gen1", cancellationToken: TestContext.Current.CancellationToken);
 
         _mockIdvFileService.Verify(
-            x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()),
+            x => x.StreamFromBinaryDetached<AllPlayCardTrainingData>(It.IsAny<string>()),
             Times.Exactly(2));
         _mockIdvFileService.Verify(
-            x => x.StreamFromBinary<AllCallTrumpTrainingData>(It.IsAny<string>()),
+            x => x.StreamFromBinaryDetached<AllCallTrumpTrainingData>(It.IsAny<string>()),
             Times.Exactly(2));
         _mockIdvFileService.Verify(
-            x => x.StreamFromBinary<AllDiscardCardTrainingData>(It.IsAny<string>()),
+            x => x.StreamFromBinaryDetached<AllDiscardCardTrainingData>(It.IsAny<string>()),
             Times.Exactly(2));
     }
 
@@ -470,13 +470,13 @@ public class TrainingDataAccumulatorTests : IDisposable
         var batch2 = CreateBatch(playCardCount: 10, callTrumpCount: 4, discardCardCount: 1);
 
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()))
+            .Setup(x => x.StreamFromBinaryDetached<AllPlayCardTrainingData>(It.IsAny<string>()))
             .Returns([new AllPlayCardTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<AllCallTrumpTrainingData>(It.IsAny<string>()))
+            .Setup(x => x.StreamFromBinaryDetached<AllCallTrumpTrainingData>(It.IsAny<string>()))
             .Returns([new AllCallTrumpTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<AllDiscardCardTrainingData>(It.IsAny<string>()))
+            .Setup(x => x.StreamFromBinaryDetached<AllDiscardCardTrainingData>(It.IsAny<string>()))
             .Returns([new AllDiscardCardTrainingData()]);
 
         _accumulator.Add(batch1);
@@ -547,13 +547,13 @@ public class TrainingDataAccumulatorTests : IDisposable
     public async Task Finalize_InvokesStatusCallback_AtKeyPoints()
     {
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<AllPlayCardTrainingData>(It.IsAny<string>()))
+            .Setup(x => x.StreamFromBinaryDetached<AllPlayCardTrainingData>(It.IsAny<string>()))
             .Returns([new AllPlayCardTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<AllCallTrumpTrainingData>(It.IsAny<string>()))
+            .Setup(x => x.StreamFromBinaryDetached<AllCallTrumpTrainingData>(It.IsAny<string>()))
             .Returns([new AllCallTrumpTrainingData()]);
         _mockIdvFileService
-            .Setup(x => x.StreamFromBinary<AllDiscardCardTrainingData>(It.IsAny<string>()))
+            .Setup(x => x.StreamFromBinaryDetached<AllDiscardCardTrainingData>(It.IsAny<string>()))
             .Returns([new AllDiscardCardTrainingData()]);
 
         _accumulator.Add(CreateBatch(playCardCount: 1, callTrumpCount: 1, discardCardCount: 1));

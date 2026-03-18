@@ -284,6 +284,53 @@ public class IdvFileServiceTests : IDisposable
         act.Should().Throw<ArgumentException>();
     }
 
+    [Fact]
+    public void StreamFromBinaryDetached_ReturnsCorrectData()
+    {
+        var testData = new List<TestData>
+        {
+            new() { Feature1 = 1.5f, Feature2 = 2.5f, Label = 1 },
+            new() { Feature1 = 3.5f, Feature2 = 4.5f, Label = 2 },
+            new() { Feature1 = 5.5f, Feature2 = 6.5f, Label = 3 },
+        };
+        var filePath = Path.Combine(_tempDirectory, "stream-detached-test.idv");
+        _service.Save(testData, filePath);
+
+        var streamed = _service.StreamFromBinaryDetached<TestData>(filePath).ToList();
+
+        streamed.Should().HaveCount(3);
+        streamed[0].Feature1.Should().BeApproximately(1.5f, 0.001f);
+        streamed[0].Feature2.Should().BeApproximately(2.5f, 0.001f);
+        streamed[0].Label.Should().Be(1);
+        streamed[2].Feature1.Should().BeApproximately(5.5f, 0.001f);
+        streamed[2].Label.Should().Be(3);
+    }
+
+    [Fact]
+    public void StreamFromBinaryDetached_DoesNotHoldFileHandle()
+    {
+        var testData = new List<TestData>
+        {
+            new() { Feature1 = 1.0f, Feature2 = 2.0f, Label = 1 },
+        };
+        var filePath = Path.Combine(_tempDirectory, "detached-handle-test.idv");
+        _service.Save(testData, filePath);
+
+        var streamed = _service.StreamFromBinaryDetached<TestData>(filePath).ToList();
+        File.Delete(filePath);
+
+        streamed.Should().ContainSingle();
+        File.Exists(filePath).Should().BeFalse();
+    }
+
+    [Fact]
+    public void StreamFromBinaryDetached_WithNullPath_ThrowsArgumentException()
+    {
+        var act = () => _service.StreamFromBinaryDetached<TestData>(null!);
+
+        act.Should().Throw<ArgumentException>();
+    }
+
     public void Dispose()
     {
         Dispose(true);

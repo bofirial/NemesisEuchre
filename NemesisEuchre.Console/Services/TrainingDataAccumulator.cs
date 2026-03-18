@@ -56,10 +56,8 @@ public class TrainingDataAccumulator(
             GuardAgainstOverwrite(outputPath, generationName, allowOverwrite);
 
             var chunkDir = GetChunkDirectory(outputPath, generationName);
-            if (!Directory.Exists(chunkDir))
-            {
-                Directory.CreateDirectory(chunkDir);
-            }
+            merger.CleanupChunkDirectory(chunkDir);
+            Directory.CreateDirectory(chunkDir);
         }
 
         var chunkDirectory = GetChunkDirectory(outputPath, generationName);

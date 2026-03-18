@@ -1,6 +1,7 @@
 using System.Text.Json;
 
 using Microsoft.ML;
+using Microsoft.ML.Data;
 
 using NemesisEuchre.DataAccess.Configuration;
 using NemesisEuchre.MachineLearning.Models;
@@ -15,6 +16,9 @@ public interface IIdvFileService
     IDataView Load(string filePath);
 
     IEnumerable<T> StreamFromBinary<T>(string filePath)
+        where T : class, new();
+
+    IEnumerable<T> StreamFromBinaryDetached<T>(string filePath)
         where T : class, new();
 
     void SaveMetadata(IdvFileMetadata metadata, string metadataPath);
@@ -51,6 +55,14 @@ public class IdvFileService(MLContext mlContext) : IIdvFileService
         ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
 
         return StreamFromBinaryCore<T>(filePath);
+    }
+
+    public IEnumerable<T> StreamFromBinaryDetached<T>(string filePath)
+        where T : class, new()
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+
+        return StreamFromBinaryDetachedCore<T>(filePath);
     }
 
     public void SaveMetadata(IdvFileMetadata metadata, string metadataPath)
@@ -90,6 +102,44 @@ public class IdvFileService(MLContext mlContext) : IIdvFileService
         finally
         {
             (dataView as IDisposable)?.Dispose();
+        }
+    }
+
+    private IEnumerable<T> StreamFromBinaryDetachedCore<T>(string filePath)
+        where T : class, new()
+    {
+        var fileBytes = File.ReadAllBytes(filePath);
+        var dataView = mlContext.Data.LoadFromBinary(new InMemoryStreamSource(fileBytes));
+        try
+        {
+            foreach (var row in mlContext.Data.CreateEnumerable<T>(dataView, reuseRowObject: false))
+            {
+                yield return row;
+            }
+        }
+        finally
+        {
+            (dataView as IDisposable)?.Dispose();
+        }
+    }
+
+    private sealed class InMemoryStreamSource(byte[] data) : IMultiStreamSource
+    {
+        public int Count => 1;
+
+        public string GetPathOrNull(int index)
+        {
+            return null!;
+        }
+
+        public Stream Open(int index)
+        {
+            return new MemoryStream(data, writable: false);
+        }
+
+        public TextReader OpenTextReader(int index)
+        {
+            return new StreamReader(Open(index));
         }
     }
 }
