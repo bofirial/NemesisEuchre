@@ -1,0 +1,16 @@
+{
+  "GenerationName": "idv5c1",
+  "DecisionType": "Play",
+  "RowCount": 655981447,
+  "GameCount": 6250000,
+  "DealCount": 63124322,
+  "TrickCount": 315621610,
+  "Actors": [
+    {
+      "ActorType": "ModelTrainer",
+      "ModelName": "gen4b",
+      "ExplorationTemperature": 0.01
+    }
+  ],
+  "CreatedAtUtc": "2026-03-17T18:40:17.5277709Z"
+}

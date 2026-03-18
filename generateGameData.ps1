@@ -82,60 +82,60 @@ function Invoke-IdvMerge {
     Write-StepLog "Completed merge -> $Output"
 }
 
-# ── Grouping 1 (idv5c1): Baseline — 100% gen4c-vs-gen4c, t=0.01 ──
-Write-StepLog "=== Grouping 1 (idv5c1): Baseline t=0.01 ==="
-Invoke-GameGeneration -IdvName "idv5c1a" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
-Invoke-GameGeneration -IdvName "idv5c1b" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
-Invoke-IdvMerge -Sources @("idv5c1a_gen4c_0.01t", "idv5c1b_gen4c_0.01t") -Output "idv5c1"
+# # ── Grouping 1 (idv5c1): Baseline — 100% gen4b-vs-gen4b, t=0.01 ──
+# Write-StepLog "=== Grouping 1 (idv5c1): Baseline t=0.01 ==="
+# Invoke-GameGeneration -IdvName "idv5c1a" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
+# Invoke-GameGeneration -IdvName "idv5c1b" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
+# Invoke-IdvMerge -Sources @("idv5c1a_gen4b_0.01t", "idv5c1b_gen4b_0.01t") -Output "idv5c1"
 
-# ── Grouping 2 (idv5c2): 100% gen4c-vs-gen4c, t=0.1 ──
+# ── Grouping 2 (idv5c2): 100% gen4b-vs-gen4b, t=0.1 ──
 Write-StepLog "=== Grouping 2 (idv5c2): Baseline t=0.1 ==="
-Invoke-GameGeneration -IdvName "idv5c2a" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.1 -Team2Model $Model -Team2Temp 0.1
+# Invoke-GameGeneration -IdvName "idv5c2a" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.1 -Team2Model $Model -Team2Temp 0.1
 Invoke-GameGeneration -IdvName "idv5c2b" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.1 -Team2Model $Model -Team2Temp 0.1
-Invoke-IdvMerge -Sources @("idv5c2a_gen4c_0.1t", "idv5c2b_gen4c_0.1t") -Output "idv5c2"
+Invoke-IdvMerge -Sources @("idv5c2a_gen4b_0.1t", "idv5c2b_gen4b_0.1t") -Output "idv5c2"
 
 # ── Grouping 3 (idv5c3): 70% t=0.01 + 30% t=0.5 ──
 Write-StepLog "=== Grouping 3 (idv5c3): 70% t=0.01 + 30% t=0.5 ==="
 Invoke-GameGeneration -IdvName "idv5c3_low" -Count $MirrorLowCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
 Invoke-GameGeneration -IdvName "idv5c3_high" -Count $MirrorHighCount -Team1Model $Model -Team1Temp 0.5 -Team2Model $Model -Team2Temp 0.5
-Invoke-IdvMerge -Sources @("idv5c3_low_gen4c_0.01t", "idv5c3_high_gen4c_0.5t") -Output "idv5c3"
+Invoke-IdvMerge -Sources @("idv5c3_low_gen4b_0.01t", "idv5c3_high_gen4b_0.5t") -Output "idv5c3"
 
-# ── Grouping 4 (idv5c4): 100% gen4c-vs-ChaosBot, t=0.01 (strong team only) ──
-Write-StepLog "=== Grouping 4 (idv5c4): gen4c vs ChaosBot ==="
+# ── Grouping 4 (idv5c4): 100% gen4b-vs-ChaosBot, t=0.01 (strong team only) ──
+Write-StepLog "=== Grouping 4 (idv5c4): gen4b vs ChaosBot ==="
 Invoke-GameGeneration -IdvName "idv5c4a" -Count $ChaosFullHalfCount -Team1Model $Model -Team1Temp 0.01 -Team2ActorType "Chaos"
 Invoke-GameGeneration -IdvName "idv5c4b" -Count $ChaosFullHalfCount -Team1Model $Model -Team1Temp 0.01 -Team2ActorType "Chaos"
-Invoke-IdvMerge -Sources @("idv5c4a_gen4c_0.01t", "idv5c4b_gen4c_0.01t") -Output "idv5c4"
+Invoke-IdvMerge -Sources @("idv5c4a_gen4b_0.01t", "idv5c4b_gen4b_0.01t") -Output "idv5c4"
 
 # ── Grouping 5 (idv5c5): 70% mirror + 30% ChaosBot, t=0.01 ──
 Write-StepLog "=== Grouping 5 (idv5c5): 70% mirror + 30% ChaosBot ==="
 Invoke-GameGeneration -IdvName "idv5c5_mirror" -Count $MixedMirrorCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
 Invoke-GameGeneration -IdvName "idv5c5_chaos" -Count $MixedOpponentCount -Team1Model $Model -Team1Temp 0.01 -Team2ActorType "Chaos"
-Invoke-IdvMerge -Sources @("idv5c5_mirror_gen4c_0.01t", "idv5c5_chaos_gen4c_0.01t") -Output "idv5c5"
+Invoke-IdvMerge -Sources @("idv5c5_mirror_gen4b_0.01t", "idv5c5_chaos_gen4b_0.01t") -Output "idv5c5"
 
 # ── Grouping 6 (idv5c6): 70% mirror + 30% ChadBot, t=0.01 ──
 Write-StepLog "=== Grouping 6 (idv5c6): 70% mirror + 30% ChadBot ==="
 Invoke-GameGeneration -IdvName "idv5c6_mirror" -Count $MixedMirrorCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
 Invoke-GameGeneration -IdvName "idv5c6_chad" -Count $MixedOpponentCount -Team1Model $Model -Team1Temp 0.01 -Team2ActorType "Chad"
-Invoke-IdvMerge -Sources @("idv5c6_mirror_gen4c_0.01t", "idv5c6_chad_gen4c_0.01t") -Output "idv5c6"
+Invoke-IdvMerge -Sources @("idv5c6_mirror_gen4b_0.01t", "idv5c6_chad_gen4b_0.01t") -Output "idv5c6"
 
 # ── Grouping 7 (idv5c7): 50% mirror + 25% Chaos + 25% Chad, t=0.01 ──
 Write-StepLog "=== Grouping 7 (idv5c7): 50% mirror + 25% Chaos + 25% Chad ==="
 Invoke-GameGeneration -IdvName "idv5c7_mirror" -Count $ThreeWayCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
 Invoke-GameGeneration -IdvName "idv5c7_chaos" -Count $ThreeWayCount -Team1Model $Model -Team1Temp 0.01 -Team2ActorType "Chaos"
 Invoke-GameGeneration -IdvName "idv5c7_chad" -Count $ThreeWayCount -Team1Model $Model -Team1Temp 0.01 -Team2ActorType "Chad"
-Invoke-IdvMerge -Sources @("idv5c7_mirror_gen4c_0.01t", "idv5c7_chaos_gen4c_0.01t", "idv5c7_chad_gen4c_0.01t") -Output "idv5c7"
+Invoke-IdvMerge -Sources @("idv5c7_mirror_gen4b_0.01t", "idv5c7_chaos_gen4b_0.01t", "idv5c7_chad_gen4b_0.01t") -Output "idv5c7"
 
-# ── Grouping 8 (idv5c8): Gen4 formula with gen4c (3 temps, 2:2:1 ratio) ──
+# ── Grouping 8 (idv5c8): Gen4 formula with gen4b (3 temps, 2:2:1 ratio) ──
 Write-StepLog "=== Grouping 8 (idv5c8): Gen4 formula (2:2:1 temp ratio) ==="
 Invoke-GameGeneration -IdvName "idv5c8_t001" -Count $Gen4FormulaLow -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
 Invoke-GameGeneration -IdvName "idv5c8_t01" -Count $Gen4FormulaLow -Team1Model $Model -Team1Temp 0.1 -Team2Model $Model -Team2Temp 0.1
 Invoke-GameGeneration -IdvName "idv5c8_t05" -Count $Gen4FormulaHigh -Team1Model $Model -Team1Temp 0.5 -Team2Model $Model -Team2Temp 0.5
-Invoke-IdvMerge -Sources @("idv5c8_t001_gen4c_0.01t", "idv5c8_t01_gen4c_0.1t", "idv5c8_t05_gen4c_0.5t") -Output "idv5c8"
+Invoke-IdvMerge -Sources @("idv5c8_t001_gen4b_0.01t", "idv5c8_t01_gen4b_0.1t", "idv5c8_t05_gen4b_0.5t") -Output "idv5c8"
 
 # ── Grouping 9 (idv5c9): 70% mirror + 30% gen3t, t=0.01 (both teams' data) ──
 Write-StepLog "=== Grouping 9 (idv5c9): 70% mirror + 30% gen3t ==="
 Invoke-GameGeneration -IdvName "idv5c9_mirror" -Count $MixedMirrorCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
 Invoke-GameGeneration -IdvName "idv5c9_gen3t" -Count $Gen3tOpponentCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $TestModel -Team2Temp 0.01
-Invoke-IdvMerge -Sources @("idv5c9_mirror_gen4c_0.01t", "idv5c9_gen3t_gen4c_0.01t", "idv5c9_gen3t_gen3t_0.01t") -Output "idv5c9"
+Invoke-IdvMerge -Sources @("idv5c9_mirror_gen4b_0.01t", "idv5c9_gen3t_gen4b_0.01t", "idv5c9_gen3t_gen3t_0.01t") -Output "idv5c9"
 
 Write-StepLog "=== All 9 groupings complete ==="
