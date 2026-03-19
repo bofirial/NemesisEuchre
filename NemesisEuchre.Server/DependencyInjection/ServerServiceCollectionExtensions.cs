@@ -12,6 +12,9 @@ using Microsoft.IdentityModel.Tokens;
 
 using NemesisEuchre.DataAccess;
 using NemesisEuchre.GameEngine.DependencyInjection;
+using NemesisEuchre.MachineLearning.Bots.DependencyInjection;
+using NemesisEuchre.MachineLearning.DependencyInjection;
+using NemesisEuchre.MachineLearning.Loading;
 using NemesisEuchre.Server.Auth;
 using NemesisEuchre.Server.Services;
 
@@ -29,11 +32,15 @@ public static class ServerServiceCollectionExtensions
         var audience = configuration["Jwt:Audience"] ?? "NemesisEuchre";
 
         services.AddNemesisEuchreGameEngine();
+        services.AddNemesisEuchreMachineLearning(configuration);
+        services.AddNemesisEuchreMachineLearningBots();
+        services.AddSingleton<IModelFileProvider, AzureBlobModelFileProvider>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IBotStorageService, BotStorageService>();
         services.AddSingleton<IActiveGameService, ActiveGameService>();
         services.AddScoped<IGameSessionService, GameSessionService>();
         services.AddScoped<IPlayerStateProjector, PlayerStateProjector>();
+        services.AddScoped<IInteractiveTrumpService, InteractiveTrumpService>();
 
         var connectionString = configuration.GetConnectionString("NemesisEuchreDb");
         if (string.IsNullOrEmpty(connectionString))

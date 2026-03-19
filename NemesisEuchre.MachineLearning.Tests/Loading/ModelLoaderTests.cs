@@ -13,13 +13,15 @@ namespace NemesisEuchre.MachineLearning.Tests.Loading;
 public class ModelLoaderTests
 {
     private readonly Mock<IModelCache> _mockModelCache;
+    private readonly Mock<IModelFileProvider> _mockModelFileProvider;
     private readonly ModelLoader _loader;
 
     public ModelLoaderTests()
     {
         _mockModelCache = new Mock<IModelCache>();
+        _mockModelFileProvider = new Mock<IModelFileProvider>();
         var mockLogger = new Mock<ILogger<ModelLoader>>();
-        _loader = new ModelLoader(_mockModelCache.Object, mockLogger.Object);
+        _loader = new ModelLoader(_mockModelCache.Object, _mockModelFileProvider.Object, mockLogger.Object);
     }
 
     [Fact]
@@ -57,24 +59,36 @@ public class ModelLoaderTests
     }
 
     [Fact]
-    public void LoadModel_BuildsCorrectFilePath_DelegatesToModelCache()
+    public void LoadModel_DelegatesToModelFileProvider()
     {
         var expectedPath = Path.Combine("models", "gen1_calltrump.zip");
+        _mockModelFileProvider
+            .Setup(p => p.EnsureModelFile("models", "gen1", "CallTrump"))
+            .Returns(expectedPath);
 
         _loader.LoadModel<CallTrumpTrainingData, CallTrumpRegressionPrediction>("models", "gen1", "CallTrump");
 
+        _mockModelFileProvider.Verify(
+            p => p.EnsureModelFile("models", "gen1", "CallTrump"),
+            Times.Once);
         _mockModelCache.Verify(
             c => c.GetOrCreatePredictionEngine<CallTrumpTrainingData, CallTrumpRegressionPrediction>(expectedPath),
             Times.Once);
     }
 
     [Fact]
-    public void LoadModel_LowercasesDecisionType()
+    public void LoadModel_PassesDecisionTypeToProvider()
     {
         var expectedPath = Path.Combine("dir", "name_playcard.zip");
+        _mockModelFileProvider
+            .Setup(p => p.EnsureModelFile("dir", "name", "PlayCard"))
+            .Returns(expectedPath);
 
         _loader.LoadModel<PlayCardTrainingData, PlayCardRegressionPrediction>("dir", "name", "PlayCard");
 
+        _mockModelFileProvider.Verify(
+            p => p.EnsureModelFile("dir", "name", "PlayCard"),
+            Times.Once);
         _mockModelCache.Verify(
             c => c.GetOrCreatePredictionEngine<PlayCardTrainingData, PlayCardRegressionPrediction>(expectedPath),
             Times.Once);

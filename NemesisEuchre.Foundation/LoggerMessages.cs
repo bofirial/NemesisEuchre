@@ -462,4 +462,17 @@ public static partial class LoggerMessages
         Level = LogLevel.Error,
         Message = "Batch aborted: {Message}")]
     public static partial void LogBatchAbortedModelUnavailable(ILogger logger, string message);
+
+    // EventID 77-78: Azure Blob model download
+    [LoggerMessage(
+        EventId = 77,
+        Level = LogLevel.Information,
+        Message = "Downloaded {FileCount} model files from blob storage for bot: {ModelName}")]
+    public static partial void LogBotModelsDownloadedFromBlob(ILogger logger, int fileCount, string modelName);
+
+    [LoggerMessage(
+        EventId = 78,
+        Level = LogLevel.Warning,
+        Message = "Failed to download model from blob storage: {BlobPath}")]
+    public static partial void LogModelDownloadFromBlobFailed(ILogger logger, string blobPath, Exception exception);
 }
