@@ -3,6 +3,7 @@ import type { RefObject } from 'react';
 import type { HubConnection } from '@microsoft/signalr';
 import { useAuth } from '@/auth/useAuth';
 import type { CallTrumpDecision, Card, PlayerGameState, PlayerPosition, SeatOccupant } from '@/types/game';
+import { toScreenPosition, type ScreenPosition } from '@/lib/boardRotation';
 import { PlayerHand } from './PlayerHand';
 import { ScoreDisplay } from './ScoreDisplay';
 import { UpCard } from './UpCard';
@@ -30,6 +31,42 @@ const DEALER_TRUMP_DECISION_LABELS: Partial<Record<CallTrumpDecision, string>> =
     OrderItUp: 'Pick It Up',
     OrderItUpAndGoAlone: 'Pick It Up (Alone)',
 };
+
+const SCREEN_SEAT_LAYOUT: Record<ScreenPosition, {
+    container: string;
+    labelPosition: 'above' | 'below' | 'left' | 'right';
+    labelStyle?: string;
+}> = {
+    North: {
+        container: 'absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-10',
+        labelPosition: 'above',
+    },
+    South: {
+        container: 'absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-10',
+        labelPosition: 'below',
+    },
+    West: {
+        container: 'absolute left-0 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 z-10',
+        labelPosition: 'left',
+        labelStyle: '[writing-mode:vertical-rl] rotate-180',
+    },
+    East: {
+        container: 'absolute right-0 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 z-10',
+        labelPosition: 'right',
+        labelStyle: '[writing-mode:vertical-rl]',
+    },
+};
+
+const HAND_POSITION_CLASS: Record<ScreenPosition, string> = {
+    North: 'absolute top-[148px] left-1/2 -translate-x-1/2 z-20',
+    South: 'absolute bottom-[148px] left-1/2 -translate-x-1/2 z-20',
+    West: 'absolute left-[148px] top-1/2 -translate-y-1/2 z-20',
+    East: 'absolute right-[148px] top-1/2 -translate-y-1/2 z-20',
+};
+
+function teamLabel(gamePosition: PlayerPosition): string {
+    return gamePosition === 'East' || gamePosition === 'West' ? 'Team 1' : 'Team 2';
+}
 
 function botDisplayName(seat: SeatOccupant): string {
     if (seat.botModelName) return seat.botModelName;
@@ -116,6 +153,7 @@ export function GameActive({ gameState, connectionRef }: Props) {
     const myLogin = user?.login;
 
     const deal = gameState.currentDeal;
+    const screen = (pos: PlayerPosition) => toScreenPosition(pos, gameState.myPosition);
 
     function handForPosition(position: PlayerPosition): { cards: Card[] | null; count: number } {
         if (!deal) return { cards: null, count: 0 };
@@ -203,45 +241,32 @@ export function GameActive({ gameState, connectionRef }: Props) {
                         )}
                     </div>
 
-                    {/* North seat — TEAM 2 */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-10">
-                        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium">Team 2</span>
-                        {seatCard('North')}
-                    </div>
-
-                    {/* South seat — TEAM 2 */}
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-10">
-                        {seatCard('South')}
-                        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium">Team 2</span>
-                    </div>
-
-                    {/* West seat — TEAM 1 */}
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 z-10">
-                        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium [writing-mode:vertical-rl] rotate-180">Team 1</span>
-                        {seatCard('West')}
-                    </div>
-
-                    {/* East seat — TEAM 1 */}
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-row items-center gap-1 z-10">
-                        {seatCard('East')}
-                        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium [writing-mode:vertical-rl]">Team 1</span>
-                    </div>
-
-                    {/* Hands — positioned just inside the felt border (inset 140px → hands at 148px) */}
-                    {(['North', 'South', 'East', 'West'] as PlayerPosition[]).map(position => {
-                        const isMyPos = position === gameState.myPosition;
-                        const positionClass = position === 'North'
-                            ? 'absolute top-[148px] left-1/2 -translate-x-1/2 z-20'
-                            : position === 'South'
-                            ? 'absolute bottom-[148px] left-1/2 -translate-x-1/2 z-20'
-                            : position === 'West'
-                            ? 'absolute left-[148px] top-1/2 -translate-y-1/2 z-20'
-                            : 'absolute right-[148px] top-1/2 -translate-y-1/2 z-20';
+                    {(['North', 'East', 'South', 'West'] as PlayerPosition[]).map(gamePos => {
+                        const sp = screen(gamePos);
+                        const layout = SCREEN_SEAT_LAYOUT[sp];
+                        const team = teamLabel(gamePos);
+                        const label = (
+                            <span className={`text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium ${layout.labelStyle ?? ''}`}>
+                                {team}
+                            </span>
+                        );
                         return (
-                            <div key={position} className={positionClass}>
+                            <div key={gamePos} className={layout.container}>
+                                {(layout.labelPosition === 'above' || layout.labelPosition === 'left') && label}
+                                {seatCard(gamePos)}
+                                {(layout.labelPosition === 'below' || layout.labelPosition === 'right') && label}
+                            </div>
+                        );
+                    })}
+
+                    {(['North', 'East', 'South', 'West'] as PlayerPosition[]).map(gamePos => {
+                        const sp = screen(gamePos);
+                        const isMyPos = gamePos === gameState.myPosition;
+                        return (
+                            <div key={gamePos} className={HAND_POSITION_CLASS[sp]}>
                                 <PlayerHand
-                                    {...handForPosition(position)}
-                                    position={position}
+                                    {...handForPosition(gamePos)}
+                                    position={sp}
                                     onCardClick={isMyPos && isMyDiscardTurn
                                         ? (card) => connectionRef.current?.invoke('MakeDealerDiscardAsync', card)
                                         : undefined}
@@ -254,7 +279,7 @@ export function GameActive({ gameState, connectionRef }: Props) {
                     {(deal?.dealStatus === 'SelectingTrumpPhase1' || deal?.dealStatus === 'SelectingTrumpPhase2') && deal.dealerPosition && (
                         <UpCard
                             card={deal.dealStatus === 'SelectingTrumpPhase1' ? deal.upCard : null}
-                            dealerPosition={deal.dealerPosition}
+                            dealerPosition={screen(deal.dealerPosition)}
                         />
                     )}
                 </div>
