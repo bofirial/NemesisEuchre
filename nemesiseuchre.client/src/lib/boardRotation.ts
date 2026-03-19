@@ -11,6 +11,11 @@ const OFFSET: Record<PlayerPosition, number> = {
     West: 3,
 };
 
+export function getPartnerPosition(position: PlayerPosition): PlayerPosition {
+    const idx = RING.indexOf(position);
+    return RING[(idx + 2) % 4];
+}
+
 export function toScreenPosition(gamePosition: PlayerPosition, myPosition: PlayerPosition): ScreenPosition {
     const idx = RING.indexOf(gamePosition);
     return RING[(idx + OFFSET[myPosition]) % 4];

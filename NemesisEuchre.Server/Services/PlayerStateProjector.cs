@@ -66,7 +66,14 @@ public class PlayerStateProjector(IInteractiveTrumpService interactiveTrumpServi
             CallingPlayerIsGoingAlone = deal.CallingPlayerIsGoingAlone,
             MyHand = myHand,
             OtherHandCounts = otherHandCounts,
-            CompletedTricks = [],
+            CompletedTricks = [.. deal.CompletedTricks.Select(t => new CompletedTrickInfo
+            {
+                TrickNumber = t.TrickNumber,
+                LeadPosition = t.LeadPosition,
+                CardsPlayed = [.. t.CardsPlayed],
+                WinningPosition = t.WinningPosition!.Value,
+                WinningTeam = t.WinningTeam!.Value,
+            })],
             CurrentDeciderPosition = currentDeciderPosition,
             ValidTrumpDecisions = trumpDecider?.position == myPosition
                 ? trumpDecider.Value.validDecisions

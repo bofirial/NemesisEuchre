@@ -2,8 +2,9 @@ import { Bot, Star } from 'lucide-react';
 import type { RefObject } from 'react';
 import type { HubConnection } from '@microsoft/signalr';
 import { useAuth } from '@/auth/useAuth';
-import type { CallTrumpDecision, Card, PlayerGameState, PlayerPosition, SeatOccupant } from '@/types/game';
-import { toScreenPosition, type ScreenPosition } from '@/lib/boardRotation';
+import type { CallTrumpDecision, Card, DealState, PlayerGameState, PlayerPosition, SeatOccupant, Team } from '@/types/game';
+import { getPartnerPosition, toScreenPosition, type ScreenPosition } from '@/lib/boardRotation';
+import { suitColor, suitSymbol } from '@/lib/cardUtils';
 import { PlayerHand } from './PlayerHand';
 import { ScoreDisplay } from './ScoreDisplay';
 import { UpCard } from './UpCard';
@@ -83,6 +84,53 @@ function seatDisplayName(position: PlayerPosition, seats: PlayerGameState['seats
     return botDisplayName(occupant);
 }
 
+type TrickEmphasis = 'normal' | 'won' | 'set' | 'march';
+
+function getCallingTeam(deal: DealState): Team | null {
+    if (!deal.callingPlayer) return null;
+    return deal.callingPlayer === 'North' || deal.callingPlayer === 'South' ? 'Team1' : 'Team2';
+}
+
+function getTrickCounts(deal: DealState): { team1: number; team2: number } {
+    let team1 = 0;
+    let team2 = 0;
+    for (const trick of deal.completedTricks) {
+        if (trick.winningTeam === 'Team1') team1++;
+        else team2++;
+    }
+    return { team1, team2 };
+}
+
+function getTrickEmphasis(tricks: number, calling: Team | null, thisTeam: Team): TrickEmphasis {
+    if (tricks === 5) return 'march';
+    if (tricks >= 3 && calling !== null && calling !== thisTeam) return 'set';
+    if (tricks >= 3) return 'won';
+    return 'normal';
+}
+
+const EMPHASIS_STYLES: Record<TrickEmphasis, string> = {
+    normal: 'text-muted-foreground',
+    won: 'text-green-400',
+    set: 'text-amber-400',
+    march: 'text-yellow-300 font-black',
+};
+
+function TrickCount({ count, emphasis }: { count: number; emphasis: TrickEmphasis }) {
+    const label = emphasis === 'march' ? 'March!' : emphasis === 'set' ? 'Euchred!' : '';
+    return (
+        <div className="flex flex-col items-center">
+            <span className={`text-sm font-bold ${EMPHASIS_STYLES[emphasis]}`}>
+                {count}/5 tricks
+            </span>
+            {label && (
+                <span className={`text-[10px] font-semibold uppercase tracking-wide ${EMPHASIS_STYLES[emphasis]}`}>
+                    {label}
+                </span>
+            )}
+        </div>
+    );
+}
+
 function SmallAvatar({ occupant }: { occupant: SeatOccupant | undefined }) {
     if (!occupant) {
         return (
@@ -112,11 +160,15 @@ function ActiveSeatCard({
     isMe,
     isDealer,
     isDeciding,
+    calledTrump,
+    isGoingAlone,
 }: {
     occupant: SeatOccupant | undefined;
     isMe: boolean;
     isDealer: boolean;
     isDeciding: boolean;
+    calledTrump: boolean;
+    isGoingAlone: boolean;
 }) {
     const isBot = occupant !== undefined && occupant.gitHubLogin === null;
     const name = occupant ? (isBot ? botDisplayName(occupant) : occupant.gitHubLogin) : null;
@@ -134,8 +186,19 @@ function ActiveSeatCard({
                 : 'bg-background/60 border-dashed border-muted-foreground/40'
         }`}>
             {isDealer && (
-                <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-yellow-400 text-black text-[10px] font-bold flex items-center justify-center shadow z-10">
+                <div
+                    className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-yellow-400 text-black text-[10px] font-bold flex items-center justify-center shadow z-10"
+                    title="Dealer"
+                >
                     D
+                </div>
+            )}
+            {calledTrump && (
+                <div
+                    className="absolute -top-2 -left-2 w-5 h-5 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center shadow z-10"
+                    title={isGoingAlone ? 'Called trump — going alone' : 'Called trump'}
+                >
+                    {isGoingAlone ? 'A' : 'T'}
                 </div>
             )}
             <SmallAvatar occupant={occupant} />
@@ -166,12 +229,16 @@ export function GameActive({ gameState, connectionRef }: Props) {
         const isMe = occupant?.gitHubLogin === myLogin;
         const isDealer = deal?.dealerPosition === position;
         const isDeciding = deal?.currentDeciderPosition === position;
+        const calledTrump = deal?.callingPlayer === position;
+        const isGoingAlone = calledTrump && (deal?.callingPlayerIsGoingAlone ?? false);
         return (
             <ActiveSeatCard
                 occupant={occupant}
                 isMe={isMe}
                 isDealer={isDealer ?? false}
                 isDeciding={isDeciding ?? false}
+                calledTrump={calledTrump ?? false}
+                isGoingAlone={isGoingAlone ?? false}
             />
         );
     }
@@ -179,6 +246,8 @@ export function GameActive({ gameState, connectionRef }: Props) {
     const isMyTrumpTurn = deal?.validTrumpDecisions !== null && deal?.validTrumpDecisions !== undefined;
     const isMyDiscardTurn = deal?.validDiscardCards !== null && deal?.validDiscardCards !== undefined;
     const isDealer = deal?.dealerPosition === gameState.myPosition;
+    const tricks = deal ? getTrickCounts(deal) : null;
+    const calling = deal ? getCallingTeam(deal) : null;
     const showWaitingIndicator =
         deal?.currentDeciderPosition !== null &&
         deal?.currentDeciderPosition !== undefined &&
@@ -220,18 +289,31 @@ export function GameActive({ gameState, connectionRef }: Props) {
 
                     {/* Felt table */}
                     <div className="absolute inset-[140px] rounded-3xl bg-muted/40 border-4 border-border shadow-inner flex flex-col items-center justify-center gap-2 select-none">
-                        {/* Score — felt top corners */}
-                        <div className="absolute top-3 left-4">
+                        {/* Score + trick counts — felt top corners */}
+                        <div className="absolute top-3 left-4 flex flex-col items-center gap-1">
                             <ScoreDisplay teamName="Team 1" score={gameState.team1Score} />
+                            {tricks && tricks.team1 + tricks.team2 > 0 && (
+                                <TrickCount count={tricks.team1} emphasis={getTrickEmphasis(tricks.team1, calling, 'Team1')} />
+                            )}
                         </div>
-                        <div className="absolute top-3 right-4">
+                        <div className="absolute top-3 right-4 flex flex-col items-center gap-1">
                             <ScoreDisplay teamName="Team 2" score={gameState.team2Score} />
+                            {tricks && tricks.team1 + tricks.team2 > 0 && (
+                                <TrickCount count={tricks.team2} emphasis={getTrickEmphasis(tricks.team2, calling, 'Team2')} />
+                            )}
                         </div>
                         <img src="/nemesiseuchreLogo.svg" alt="NemesisEuchre" className="h-10 w-10 opacity-60" />
                         <span className="text-sm font-semibold tracking-tight opacity-60">
                             <span className="text-brand-blue">Nemesis</span>
                             <span className="text-brand-red">Euchre</span>
                         </span>
+
+                        {deal?.trump && (
+                            <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Trump</span>
+                                <span className={`text-3xl ${suitColor(deal.trump)}`}>{suitSymbol(deal.trump)}</span>
+                            </div>
+                        )}
 
                         {/* Waiting indicator */}
                         {showWaitingIndicator && deal?.currentDeciderPosition && (
@@ -262,6 +344,12 @@ export function GameActive({ gameState, connectionRef }: Props) {
                     {(['North', 'East', 'South', 'West'] as PlayerPosition[]).map(gamePos => {
                         const sp = screen(gamePos);
                         const isMyPos = gamePos === gameState.myPosition;
+
+                        const goingAlonePartner = deal?.callingPlayer && deal.callingPlayerIsGoingAlone
+                            ? getPartnerPosition(deal.callingPlayer)
+                            : null;
+                        if (gamePos === goingAlonePartner) return null;
+
                         return (
                             <div key={gamePos} className={HAND_POSITION_CLASS[sp]}>
                                 <PlayerHand
