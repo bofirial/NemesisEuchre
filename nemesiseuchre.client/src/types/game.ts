@@ -3,7 +3,15 @@ export type GameStatusViewModel = 'Lobby' | 'Playing';
 export type Suit = 'Spades' | 'Clubs' | 'Hearts' | 'Diamonds';
 export type Rank = 'Nine' | 'Ten' | 'Jack' | 'Queen' | 'King' | 'Ace';
 export type Team = 'Team1' | 'Team2';
-export type DealStatus = 'NotStarted' | 'SelectingTrumpPhase1' | 'SelectingTrumpPhase2' | 'Playing' | 'Scoring' | 'Complete';
+export type DealStatus = 'NotStarted' | 'SelectingTrumpPhase1' | 'SelectingTrumpPhase2' | 'Playing' | 'Scoring' | 'Complete' | 'DealerDiscarding';
+
+export type CallTrumpDecision =
+    | 'Pass'
+    | 'OrderItUp' | 'OrderItUpAndGoAlone'
+    | 'CallSpades' | 'CallSpadesAndGoAlone'
+    | 'CallHearts' | 'CallHeartsAndGoAlone'
+    | 'CallClubs' | 'CallClubsAndGoAlone'
+    | 'CallDiamonds' | 'CallDiamondsAndGoAlone';
 
 export interface Card { suit: Suit; rank: Rank; }
 export interface PlayedCard { card: Card; playerPosition: PlayerPosition; }
@@ -32,6 +40,9 @@ export interface DealState {
     myHand: Card[];
     otherHandCounts: Partial<Record<PlayerPosition, number>>;
     completedTricks: CompletedTrickInfo[];
+    currentDeciderPosition: PlayerPosition | null;
+    validTrumpDecisions: CallTrumpDecision[] | null;
+    validDiscardCards: Card[] | null;
 }
 
 export interface ConnectedUserInfo {

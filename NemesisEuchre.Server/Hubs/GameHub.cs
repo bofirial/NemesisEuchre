@@ -4,13 +4,19 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 using NemesisEuchre.Server.Models;
 using NemesisEuchre.Server.Services;
 
 namespace NemesisEuchre.Server.Hubs;
 
 [Authorize]
-public class GameHub(IGameSessionService sessionService, IPlayerStateProjector stateProjector) : Hub
+public class GameHub(
+    IGameSessionService sessionService,
+    IPlayerStateProjector stateProjector,
+    IActiveGameService activeGameService,
+    IInteractiveTrumpService interactiveTrumpService) : Hub
 {
     public async Task<PlayerGameState> JoinGameAsync(string sessionName)
     {
@@ -132,7 +138,118 @@ public class GameHub(IGameSessionService sessionService, IPlayerStateProjector s
             return;
         }
 
-        await BroadcastGameStateAsync(context);
+        var game = activeGameService.GetGame(context.SessionId);
+        if (game?.CurrentDeal is not null)
+        {
+            var sessionLock = activeGameService.GetOrCreateLock(context.SessionId);
+            await sessionLock.WaitAsync();
+            try
+            {
+                await interactiveTrumpService.ProcessBotTrumpDecisionsAsync(game.CurrentDeal);
+            }
+            finally
+            {
+                sessionLock.Release();
+            }
+
+            context = await sessionService.GetSessionContextAsync(context.SessionId, context.SessionName);
+        }
+
+        await BroadcastGameStateAsync(context with { Status = GameStatusViewModel.Playing });
+    }
+
+    public async Task<string?> MakeTrumpDecisionAsync(CallTrumpDecision decision)
+    {
+        var info = await sessionService.GetConnectionInfoAsync(Context.ConnectionId);
+        if (info is null)
+        {
+            return "Not in a session";
+        }
+
+        var (sessionId, sessionName, myPosition) = info.Value;
+        if (myPosition is null)
+        {
+            return "Not seated";
+        }
+
+        var game = activeGameService.GetGame(sessionId);
+        if (game?.CurrentDeal is null)
+        {
+            return "No active game";
+        }
+
+        var sessionLock = activeGameService.GetOrCreateLock(sessionId);
+        if (!await sessionLock.WaitAsync(0))
+        {
+            return "Another decision is in progress";
+        }
+
+        try
+        {
+            await interactiveTrumpService.ApplyHumanTrumpDecisionAsync(
+                game.CurrentDeal,
+                myPosition.Value,
+                decision);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return ex.Message;
+        }
+        finally
+        {
+            sessionLock.Release();
+        }
+
+        var context = await sessionService.GetSessionContextAsync(sessionId, sessionName);
+        await BroadcastGameStateAsync(context with { Status = GameStatusViewModel.Playing });
+        return null;
+    }
+
+    public async Task<string?> MakeDealerDiscardAsync(Card card)
+    {
+        var info = await sessionService.GetConnectionInfoAsync(Context.ConnectionId);
+        if (info is null)
+        {
+            return "Not in a session";
+        }
+
+        var (sessionId, sessionName, myPosition) = info.Value;
+        if (myPosition is null)
+        {
+            return "Not seated";
+        }
+
+        var game = activeGameService.GetGame(sessionId);
+        if (game?.CurrentDeal is null)
+        {
+            return "No active game";
+        }
+
+        var sessionLock = activeGameService.GetOrCreateLock(sessionId);
+        if (!await sessionLock.WaitAsync(0))
+        {
+            return "Another decision is in progress";
+        }
+
+        try
+        {
+            await interactiveTrumpService.ApplyHumanDealerDiscardAsync(
+                game.CurrentDeal,
+                myPosition.Value,
+                card);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return ex.Message;
+        }
+        finally
+        {
+            sessionLock.Release();
+        }
+
+        var context = await sessionService.GetSessionContextAsync(sessionId, sessionName);
+        await BroadcastGameStateAsync(context with { Status = GameStatusViewModel.Playing });
+        return null;
     }
 
     private async Task BroadcastGameStateAsync(GameContext context, string? excludeConnectionId = null)

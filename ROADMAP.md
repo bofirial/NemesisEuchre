@@ -519,11 +519,11 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 10. ~~Create a Card Component~~
 11. ~~Create a Score Component~~
 12. ~~Create a Hand Component~~
-13. Create an UpCard Component
+13. ~~Create an UpCard Component~~
 14. Create a Current Trick Component
-15. Process Call Trump Decision using SignalR
+15. ~~Process Call Trump Decision using SignalR~~
 16. Process Discard Card Decision using SignalR
 17. Process Play Card Decision using SignalR
 18. Add animations? to simulate bot actions and allow for human reactions
-19. Create a Data Store (Cosmos?  SQL?)
+19. ~~Create a Data Store (Cosmos?  SQL?)~~
 

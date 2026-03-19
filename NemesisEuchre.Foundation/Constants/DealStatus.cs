@@ -8,4 +8,5 @@ public enum DealStatus
     Scoring = 3,
     Complete = 4,
     SelectingTrumpPhase2 = 5,
+    DealerDiscarding = 6,
 }

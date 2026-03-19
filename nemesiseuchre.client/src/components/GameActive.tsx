@@ -2,7 +2,7 @@ import { Bot, Star } from 'lucide-react';
 import type { RefObject } from 'react';
 import type { HubConnection } from '@microsoft/signalr';
 import { useAuth } from '@/auth/useAuth';
-import type { Card, PlayerGameState, PlayerPosition, SeatOccupant } from '@/types/game';
+import type { CallTrumpDecision, Card, PlayerGameState, PlayerPosition, SeatOccupant } from '@/types/game';
 import { PlayerHand } from './PlayerHand';
 import { ScoreDisplay } from './ScoreDisplay';
 import { UpCard } from './UpCard';
@@ -12,12 +12,38 @@ interface Props {
     connectionRef: RefObject<HubConnection | null>;
 }
 
+const TRUMP_DECISION_LABELS: Record<CallTrumpDecision, string> = {
+    Pass: 'Pass',
+    OrderItUp: 'Order It Up',
+    OrderItUpAndGoAlone: 'Order It Up (Alone)',
+    CallSpades: 'Call Spades',
+    CallSpadesAndGoAlone: 'Call Spades (Alone)',
+    CallHearts: 'Call Hearts',
+    CallHeartsAndGoAlone: 'Call Hearts (Alone)',
+    CallClubs: 'Call Clubs',
+    CallClubsAndGoAlone: 'Call Clubs (Alone)',
+    CallDiamonds: 'Call Diamonds',
+    CallDiamondsAndGoAlone: 'Call Diamonds (Alone)',
+};
+
+const DEALER_TRUMP_DECISION_LABELS: Partial<Record<CallTrumpDecision, string>> = {
+    OrderItUp: 'Pick It Up',
+    OrderItUpAndGoAlone: 'Pick It Up (Alone)',
+};
+
 function botDisplayName(seat: SeatOccupant): string {
     if (seat.botModelName) return seat.botModelName;
     if (seat.botActorType === 'Chaos') return 'ChaosBot';
     if (seat.botActorType === 'Beta') return 'BetaBot';
     if (seat.botActorType === 'Chad') return 'ChadBot';
     return 'Bot';
+}
+
+function seatDisplayName(position: PlayerPosition, seats: PlayerGameState['seats']): string {
+    const occupant = seats[position];
+    if (!occupant) return position;
+    if (occupant.gitHubLogin) return occupant.gitHubLogin;
+    return botDisplayName(occupant);
 }
 
 function SmallAvatar({ occupant }: { occupant: SeatOccupant | undefined }) {
@@ -44,12 +70,26 @@ function SmallAvatar({ occupant }: { occupant: SeatOccupant | undefined }) {
     );
 }
 
-function ActiveSeatCard({ occupant, isMe, isDealer }: { occupant: SeatOccupant | undefined; isMe: boolean; isDealer: boolean }) {
+function ActiveSeatCard({
+    occupant,
+    isMe,
+    isDealer,
+    isDeciding,
+}: {
+    occupant: SeatOccupant | undefined;
+    isMe: boolean;
+    isDealer: boolean;
+    isDeciding: boolean;
+}) {
     const isBot = occupant !== undefined && occupant.gitHubLogin === null;
     const name = occupant ? (isBot ? botDisplayName(occupant) : occupant.gitHubLogin) : null;
 
     return (
         <div className={`relative flex flex-col items-center gap-1 rounded-xl border-2 p-2 w-28 text-sm shadow-md ${
+            isDeciding
+                ? 'ring-2 ring-amber-400 animate-pulse'
+                : ''
+        } ${
             isMe
                 ? 'bg-background border-primary'
                 : occupant
@@ -71,7 +111,7 @@ function ActiveSeatCard({ occupant, isMe, isDealer }: { occupant: SeatOccupant |
     );
 }
 
-export function GameActive({ gameState }: Props) {
+export function GameActive({ gameState, connectionRef }: Props) {
     const { user } = useAuth();
     const myLogin = user?.login;
 
@@ -87,8 +127,26 @@ export function GameActive({ gameState }: Props) {
         const occupant = gameState.seats[position];
         const isMe = occupant?.gitHubLogin === myLogin;
         const isDealer = deal?.dealerPosition === position;
-        return <ActiveSeatCard occupant={occupant} isMe={isMe} isDealer={isDealer ?? false} />;
+        const isDeciding = deal?.currentDeciderPosition === position;
+        return (
+            <ActiveSeatCard
+                occupant={occupant}
+                isMe={isMe}
+                isDealer={isDealer ?? false}
+                isDeciding={isDeciding ?? false}
+            />
+        );
     }
+
+    const isMyTrumpTurn = deal?.validTrumpDecisions !== null && deal?.validTrumpDecisions !== undefined;
+    const isMyDiscardTurn = deal?.validDiscardCards !== null && deal?.validDiscardCards !== undefined;
+    const isDealer = deal?.dealerPosition === gameState.myPosition;
+    const showWaitingIndicator =
+        deal?.currentDeciderPosition !== null &&
+        deal?.currentDeciderPosition !== undefined &&
+        deal.currentDeciderPosition !== gameState.myPosition &&
+        !isMyTrumpTurn &&
+        !isMyDiscardTurn;
 
     return (
         <div className="relative w-full flex justify-center">
@@ -136,6 +194,13 @@ export function GameActive({ gameState }: Props) {
                             <span className="text-brand-blue">Nemesis</span>
                             <span className="text-brand-red">Euchre</span>
                         </span>
+
+                        {/* Waiting indicator */}
+                        {showWaitingIndicator && deal?.currentDeciderPosition && (
+                            <p className="text-sm text-muted-foreground mt-2">
+                                Waiting for {seatDisplayName(deal.currentDeciderPosition, gameState.seats)} to decide...
+                            </p>
+                        )}
                     </div>
 
                     {/* North seat — TEAM 2 */}
@@ -163,18 +228,28 @@ export function GameActive({ gameState }: Props) {
                     </div>
 
                     {/* Hands — positioned just inside the felt border (inset 140px → hands at 148px) */}
-                    <div className="absolute top-[148px] left-1/2 -translate-x-1/2 z-20">
-                        <PlayerHand {...handForPosition('North')} position="North" />
-                    </div>
-                    <div className="absolute bottom-[148px] left-1/2 -translate-x-1/2 z-20">
-                        <PlayerHand {...handForPosition('South')} position="South" />
-                    </div>
-                    <div className="absolute left-[148px] top-1/2 -translate-y-1/2 z-20">
-                        <PlayerHand {...handForPosition('West')} position="West" />
-                    </div>
-                    <div className="absolute right-[148px] top-1/2 -translate-y-1/2 z-20">
-                        <PlayerHand {...handForPosition('East')} position="East" />
-                    </div>
+                    {(['North', 'South', 'East', 'West'] as PlayerPosition[]).map(position => {
+                        const isMyPos = position === gameState.myPosition;
+                        const positionClass = position === 'North'
+                            ? 'absolute top-[148px] left-1/2 -translate-x-1/2 z-20'
+                            : position === 'South'
+                            ? 'absolute bottom-[148px] left-1/2 -translate-x-1/2 z-20'
+                            : position === 'West'
+                            ? 'absolute left-[148px] top-1/2 -translate-y-1/2 z-20'
+                            : 'absolute right-[148px] top-1/2 -translate-y-1/2 z-20';
+                        return (
+                            <div key={position} className={positionClass}>
+                                <PlayerHand
+                                    {...handForPosition(position)}
+                                    position={position}
+                                    onCardClick={isMyPos && isMyDiscardTurn
+                                        ? (card) => connectionRef.current?.invoke('MakeDealerDiscardAsync', card)
+                                        : undefined}
+                                    highlightCards={isMyPos && isMyDiscardTurn}
+                                />
+                            </div>
+                        );
+                    })}
 
                     {(deal?.dealStatus === 'SelectingTrumpPhase1' || deal?.dealStatus === 'SelectingTrumpPhase2') && deal.dealerPosition && (
                         <UpCard
@@ -183,6 +258,32 @@ export function GameActive({ gameState }: Props) {
                         />
                     )}
                 </div>
+
+                {/* Trump decision panel — below table */}
+                {isMyTrumpTurn && (
+                    <div className="bg-background/90 border border-border rounded-xl px-6 py-4 shadow-lg flex flex-col items-center gap-3">
+                        <p className="text-sm font-semibold text-amber-500 uppercase tracking-wide">Your turn to decide</p>
+                        <div className="flex flex-wrap justify-center gap-2 max-w-[480px]">
+                            {deal!.validTrumpDecisions!.map(d => (
+                                <button
+                                    key={d}
+                                    className="px-4 py-2 text-sm rounded-md border border-border bg-background hover:bg-accent transition-colors cursor-pointer"
+                                    onClick={() => connectionRef.current?.invoke('MakeTrumpDecisionAsync', d)}
+                                >
+                                    {(isDealer && DEALER_TRUMP_DECISION_LABELS[d]) || TRUMP_DECISION_LABELS[d]}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Dealer discard panel — below table */}
+                {isMyDiscardTurn && (
+                    <div className="bg-background/90 border border-border rounded-xl px-6 py-4 shadow-lg flex flex-col items-center gap-2">
+                        <p className="text-sm font-semibold text-amber-500 uppercase tracking-wide">Choose a card to discard</p>
+                        <p className="text-sm text-muted-foreground">Click a card in your hand above</p>
+                    </div>
+                )}
             </div>
         </div>
     );

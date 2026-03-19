@@ -1,5 +1,6 @@
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
+using NemesisEuchre.GameEngine.PlayerDecisionEngine;
 
 namespace NemesisEuchre.Server.Models;
 
@@ -22,4 +23,10 @@ public record DealState
     public required IReadOnlyDictionary<PlayerPosition, int> OtherHandCounts { get; init; }
 
     public required IReadOnlyList<CompletedTrickInfo> CompletedTricks { get; init; }
+
+    public PlayerPosition? CurrentDeciderPosition { get; init; }
+
+    public IReadOnlyList<CallTrumpDecision>? ValidTrumpDecisions { get; init; }
+
+    public IReadOnlyList<Card>? ValidDiscardCards { get; init; }
 }

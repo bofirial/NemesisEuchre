@@ -4,6 +4,8 @@ namespace NemesisEuchre.Server.Models;
 
 public record GameContext
 {
+    public required int SessionId { get; init; }
+
     public required string SessionName { get; init; }
 
     public required IReadOnlyList<ActiveSessionMember> Members { get; init; }
