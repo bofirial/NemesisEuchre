@@ -16,7 +16,8 @@ public class GameHub(
     IGameSessionService sessionService,
     IPlayerStateProjector stateProjector,
     IActiveGameService activeGameService,
-    IInteractiveTrumpService interactiveTrumpService) : Hub
+    IInteractiveTrumpService interactiveTrumpService,
+    IInteractiveCardPlayService interactiveCardPlayService) : Hub
 {
     public async Task<PlayerGameState> JoinGameAsync(string sessionName)
     {
@@ -146,6 +147,11 @@ public class GameHub(
             try
             {
                 await interactiveTrumpService.ProcessBotTrumpDecisionsAsync(game.CurrentDeal);
+
+                if (game.CurrentDeal.DealStatus == DealStatus.Playing)
+                {
+                    await interactiveCardPlayService.ProcessBotCardPlaysAsync(game.CurrentDeal, game);
+                }
             }
             finally
             {
@@ -190,6 +196,11 @@ public class GameHub(
                 game.CurrentDeal,
                 myPosition.Value,
                 decision);
+
+            if (game.CurrentDeal.DealStatus == DealStatus.Playing)
+            {
+                await interactiveCardPlayService.ProcessBotCardPlaysAsync(game.CurrentDeal, game);
+            }
         }
         catch (InvalidOperationException ex)
         {
@@ -237,6 +248,11 @@ public class GameHub(
                 game.CurrentDeal,
                 myPosition.Value,
                 card);
+
+            if (game.CurrentDeal.DealStatus == DealStatus.Playing)
+            {
+                await interactiveCardPlayService.ProcessBotCardPlaysAsync(game.CurrentDeal, game);
+            }
         }
         catch (InvalidOperationException ex)
         {
@@ -249,6 +265,67 @@ public class GameHub(
 
         var context = await sessionService.GetSessionContextAsync(sessionId, sessionName);
         await BroadcastGameStateAsync(context with { Status = GameStatusViewModel.Playing });
+        return null;
+    }
+
+    public async Task<string?> PlayCardAsync(Card card)
+    {
+        var info = await sessionService.GetConnectionInfoAsync(Context.ConnectionId);
+        if (info is null)
+        {
+            return "Not in a session";
+        }
+
+        var (sessionId, sessionName, myPosition) = info.Value;
+        if (myPosition is null)
+        {
+            return "Not seated";
+        }
+
+        var game = activeGameService.GetGame(sessionId);
+        if (game?.CurrentDeal is null)
+        {
+            return "No active game";
+        }
+
+        var sessionLock = activeGameService.GetOrCreateLock(sessionId);
+        if (!await sessionLock.WaitAsync(0))
+        {
+            return "Another decision is in progress";
+        }
+
+        try
+        {
+            await interactiveCardPlayService.ApplyHumanCardPlayAsync(
+                game.CurrentDeal,
+                game,
+                myPosition.Value,
+                card);
+
+            if (game.CurrentDeal?.DealStatus is DealStatus.SelectingTrumpPhase1)
+            {
+                await interactiveTrumpService.ProcessBotTrumpDecisionsAsync(game.CurrentDeal);
+
+                if (game.CurrentDeal.DealStatus == DealStatus.Playing)
+                {
+                    await interactiveCardPlayService.ProcessBotCardPlaysAsync(game.CurrentDeal, game);
+                }
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            return ex.Message;
+        }
+        finally
+        {
+            sessionLock.Release();
+        }
+
+        var context = await sessionService.GetSessionContextAsync(sessionId, sessionName);
+        var status = game.GameStatus == GameStatus.Complete
+            ? GameStatusViewModel.Lobby
+            : GameStatusViewModel.Playing;
+        await BroadcastGameStateAsync(context with { Status = status });
         return null;
     }
 

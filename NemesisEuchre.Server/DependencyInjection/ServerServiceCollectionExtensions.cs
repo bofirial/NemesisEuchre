@@ -41,6 +41,7 @@ public static class ServerServiceCollectionExtensions
         services.AddScoped<IGameSessionService, GameSessionService>();
         services.AddScoped<IPlayerStateProjector, PlayerStateProjector>();
         services.AddScoped<IInteractiveTrumpService, InteractiveTrumpService>();
+        services.AddScoped<IInteractiveCardPlayService, InteractiveCardPlayService>();
 
         var connectionString = configuration.GetConnectionString("NemesisEuchreDb");
         if (string.IsNullOrEmpty(connectionString))

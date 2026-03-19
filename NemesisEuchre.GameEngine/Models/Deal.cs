@@ -35,6 +35,8 @@ public class Deal
 
     public List<PlayerSuitVoid> KnownPlayerSuitVoids { get; set; } = [];
 
+    public Trick? CurrentTrick { get; set; }
+
     public List<Trick> CompletedTricks { get; set; } = [];
 
     public List<CallTrumpDecisionRecord> CallTrumpDecisions { get; set; } = [];

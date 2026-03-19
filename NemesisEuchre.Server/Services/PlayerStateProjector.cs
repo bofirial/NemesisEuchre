@@ -9,7 +9,9 @@ public interface IPlayerStateProjector
     PlayerGameState Project(GameContext context, ActiveSessionMember player);
 }
 
-public class PlayerStateProjector(IInteractiveTrumpService interactiveTrumpService) : IPlayerStateProjector
+public class PlayerStateProjector(
+    IInteractiveTrumpService interactiveTrumpService,
+    IInteractiveCardPlayService interactiveCardPlayService) : IPlayerStateProjector
 {
     public PlayerGameState Project(GameContext context, ActiveSessionMember player)
     {
@@ -28,8 +30,8 @@ public class PlayerStateProjector(IInteractiveTrumpService interactiveTrumpServi
             GameStatus = context.Status,
             MyPosition = myPosition,
             Players = new Dictionary<PlayerPosition, PlayerInfo>(),
-            Team1Score = 0,
-            Team2Score = 0,
+            Team1Score = context.ActiveGame?.Team1Score ?? 0,
+            Team2Score = context.ActiveGame?.Team2Score ?? 0,
             ConnectedUsers = [.. context.Members
                 .Select(m => new ConnectedUserInfo
                 {
@@ -53,8 +55,9 @@ public class PlayerStateProjector(IInteractiveTrumpService interactiveTrumpServi
 
         var trumpDecider = interactiveTrumpService.GetCurrentTrumpDecider(deal);
         var discardDecider = interactiveTrumpService.GetCurrentDiscardDecider(deal);
+        var cardPlayer = interactiveCardPlayService.GetCurrentCardPlayer(deal);
 
-        var currentDeciderPosition = trumpDecider?.position ?? discardDecider?.position;
+        var currentDeciderPosition = trumpDecider?.position ?? discardDecider?.position ?? cardPlayer?.position;
 
         return new DealState
         {
@@ -74,12 +77,16 @@ public class PlayerStateProjector(IInteractiveTrumpService interactiveTrumpServi
                 WinningPosition = t.WinningPosition!.Value,
                 WinningTeam = t.WinningTeam!.Value,
             })],
+            CurrentTrickCards = [.. deal.CurrentTrick?.CardsPlayed ?? []],
             CurrentDeciderPosition = currentDeciderPosition,
             ValidTrumpDecisions = trumpDecider?.position == myPosition
                 ? trumpDecider.Value.validDecisions
                 : null,
             ValidDiscardCards = discardDecider?.position == myPosition
                 ? discardDecider.Value.validCards
+                : null,
+            ValidCardsToPlay = cardPlayer?.position == myPosition
+                ? cardPlayer.Value.validCards
                 : null,
         };
     }

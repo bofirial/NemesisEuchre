@@ -40,9 +40,11 @@ export interface DealState {
     myHand: Card[];
     otherHandCounts: Partial<Record<PlayerPosition, number>>;
     completedTricks: CompletedTrickInfo[];
+    currentTrickCards: PlayedCard[];
     currentDeciderPosition: PlayerPosition | null;
     validTrumpDecisions: CallTrumpDecision[] | null;
     validDiscardCards: Card[] | null;
+    validCardsToPlay: Card[] | null;
 }
 
 export interface ConnectedUserInfo {

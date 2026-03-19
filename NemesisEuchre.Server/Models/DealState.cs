@@ -29,4 +29,8 @@ public record DealState
     public IReadOnlyList<CallTrumpDecision>? ValidTrumpDecisions { get; init; }
 
     public IReadOnlyList<Card>? ValidDiscardCards { get; init; }
+
+    public IReadOnlyList<PlayedCard> CurrentTrickCards { get; init; } = [];
+
+    public IReadOnlyList<Card>? ValidCardsToPlay { get; init; }
 }
