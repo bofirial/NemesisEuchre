@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import type { Card } from '@/types/game';
 import { rankLabel, suitSymbol } from '@/lib/cardUtils';
 import { cn } from '@/lib/utils';
@@ -46,11 +45,8 @@ function CardFace({ card, small }: { card: Card; small: boolean }) {
 }
 
 export function PlayingCard({ card, selected = false, className, small = false }: PlayingCardProps) {
-    const layoutId = card ? `card-${card.suit}-${card.rank}` : undefined;
-
     return (
-        <motion.div
-            layoutId={layoutId}
+        <div
             className={cn(
                 'relative rounded-lg border-2 shadow-md transition-transform duration-150 overflow-hidden',
                 small ? 'w-10 h-14' : 'w-16 h-24',
@@ -59,6 +55,6 @@ export function PlayingCard({ card, selected = false, className, small = false }
             )}
         >
             {card ? <CardFace card={card} small={small} /> : <CardBack small={small} />}
-        </motion.div>
+        </div>
     );
 }

@@ -6,6 +6,7 @@ import type { CallTrumpDecision, Card, DealState, PlayerGameState, PlayerPositio
 import { getPartnerPosition, toScreenPosition, type ScreenPosition } from '@/lib/boardRotation';
 import { suitColor, suitSymbol } from '@/lib/cardUtils';
 import { PlayerHand } from './PlayerHand';
+import { PlayingCard } from './PlayingCard';
 import { ScoreDisplay } from './ScoreDisplay';
 import { UpCard } from './UpCard';
 
@@ -65,8 +66,15 @@ const HAND_POSITION_CLASS: Record<ScreenPosition, string> = {
     East: 'absolute right-[148px] top-1/2 -translate-y-1/2 z-20',
 };
 
+const PLAYED_CARD_POSITION: Record<ScreenPosition, string> = {
+    North: 'absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-full z-30',
+    South: 'absolute bottom-[35%] left-1/2 -translate-x-1/2 translate-y-full z-30',
+    West: 'absolute left-[35%] top-1/2 -translate-y-1/2 -translate-x-full z-30',
+    East: 'absolute right-[35%] top-1/2 -translate-y-1/2 translate-x-full z-30',
+};
+
 function teamLabel(gamePosition: PlayerPosition): string {
-    return gamePosition === 'East' || gamePosition === 'West' ? 'Team 1' : 'Team 2';
+    return gamePosition === 'North' || gamePosition === 'South' ? 'Team 1' : 'Team 2';
 }
 
 function botDisplayName(seat: SeatOccupant): string {
@@ -245,6 +253,7 @@ export function GameActive({ gameState, connectionRef }: Props) {
 
     const isMyTrumpTurn = deal?.validTrumpDecisions !== null && deal?.validTrumpDecisions !== undefined;
     const isMyDiscardTurn = deal?.validDiscardCards !== null && deal?.validDiscardCards !== undefined;
+    const isMyCardPlayTurn = deal?.validCardsToPlay !== null && deal?.validCardsToPlay !== undefined;
     const isDealer = deal?.dealerPosition === gameState.myPosition;
     const tricks = deal ? getTrickCounts(deal) : null;
     const calling = deal ? getCallingTeam(deal) : null;
@@ -253,7 +262,8 @@ export function GameActive({ gameState, connectionRef }: Props) {
         deal?.currentDeciderPosition !== undefined &&
         deal.currentDeciderPosition !== gameState.myPosition &&
         !isMyTrumpTurn &&
-        !isMyDiscardTurn;
+        !isMyDiscardTurn &&
+        !isMyCardPlayTurn;
 
     return (
         <div className="relative w-full flex justify-center">
@@ -350,15 +360,20 @@ export function GameActive({ gameState, connectionRef }: Props) {
                             : null;
                         if (gamePos === goingAlonePartner) return null;
 
+                        const canInteract = isMyPos && (isMyDiscardTurn || isMyCardPlayTurn);
                         return (
                             <div key={gamePos} className={HAND_POSITION_CLASS[sp]}>
                                 <PlayerHand
                                     {...handForPosition(gamePos)}
                                     position={sp}
-                                    onCardClick={isMyPos && isMyDiscardTurn
-                                        ? (card) => connectionRef.current?.invoke('MakeDealerDiscardAsync', card)
+                                    onCardClick={canInteract
+                                        ? (card) => {
+                                            if (isMyDiscardTurn) connectionRef.current?.invoke('MakeDealerDiscardAsync', card);
+                                            else connectionRef.current?.invoke('PlayCardAsync', card);
+                                        }
                                         : undefined}
-                                    highlightCards={isMyPos && isMyDiscardTurn}
+                                    highlightCards={canInteract}
+                                    validCards={isMyPos && isMyCardPlayTurn ? deal!.validCardsToPlay! : undefined}
                                 />
                             </div>
                         );
@@ -370,6 +385,12 @@ export function GameActive({ gameState, connectionRef }: Props) {
                             dealerPosition={screen(deal.dealerPosition)}
                         />
                     )}
+
+                    {deal?.currentTrickCards?.map(pc => (
+                        <div key={`${pc.card.suit}-${pc.card.rank}`} className={PLAYED_CARD_POSITION[screen(pc.playerPosition)]}>
+                            <PlayingCard card={pc.card} />
+                        </div>
+                    ))}
                 </div>
 
                 {/* Trump decision panel — below table */}
