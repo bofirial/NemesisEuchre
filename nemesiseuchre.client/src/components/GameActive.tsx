@@ -3,9 +3,12 @@ import type { RefObject } from 'react';
 import type { HubConnection } from '@microsoft/signalr';
 import { useAuth } from '@/auth/useAuth';
 import type { AnimationState } from '@/hooks/useAnimationQueue';
-import type { CallTrumpDecision, Card, DealState, PlayerGameState, PlayerPosition, SeatOccupant, Team } from '@/types/game';
+import type { Card, DealState, PlayerGameState, PlayerPosition, SeatOccupant, Team } from '@/types/game';
 import { getPartnerPosition, toScreenPosition, type ScreenPosition } from '@/lib/boardRotation';
 import { suitColor, suitSymbol } from '@/lib/cardUtils';
+import { botDisplayName, seatDisplayName } from '@/lib/seatUtils';
+import { getTeamLabel, getTeamForPosition } from '@/lib/teamUtils';
+import { TRUMP_DECISION_LABELS, DEALER_TRUMP_DECISION_LABELS } from '@/lib/trumpUtils';
 import { PlayerHand } from './PlayerHand';
 import { PlayingCard } from './PlayingCard';
 import { ScoreDisplay } from './ScoreDisplay';
@@ -17,24 +20,6 @@ interface Props {
     connectionRef: RefObject<HubConnection | null>;
 }
 
-const TRUMP_DECISION_LABELS: Record<CallTrumpDecision, string> = {
-    Pass: 'Pass',
-    OrderItUp: 'Order It Up',
-    OrderItUpAndGoAlone: 'Order It Up (Alone)',
-    CallSpades: 'Call Spades',
-    CallSpadesAndGoAlone: 'Call Spades (Alone)',
-    CallHearts: 'Call Hearts',
-    CallHeartsAndGoAlone: 'Call Hearts (Alone)',
-    CallClubs: 'Call Clubs',
-    CallClubsAndGoAlone: 'Call Clubs (Alone)',
-    CallDiamonds: 'Call Diamonds',
-    CallDiamondsAndGoAlone: 'Call Diamonds (Alone)',
-};
-
-const DEALER_TRUMP_DECISION_LABELS: Partial<Record<CallTrumpDecision, string>> = {
-    OrderItUp: 'Pick It Up',
-    OrderItUpAndGoAlone: 'Pick It Up (Alone)',
-};
 
 const SCREEN_SEAT_LAYOUT: Record<ScreenPosition, {
     container: string;
@@ -82,30 +67,12 @@ const SPEECH_BUBBLE_POSITION: Record<ScreenPosition, string> = {
     East: 'absolute right-[60px] top-1/2 -translate-y-1/2 z-40',
 };
 
-function teamLabel(gamePosition: PlayerPosition): string {
-    return gamePosition === 'North' || gamePosition === 'South' ? 'Team 1' : 'Team 2';
-}
-
-function botDisplayName(seat: SeatOccupant): string {
-    if (seat.botModelName) return seat.botModelName;
-    if (seat.botActorType === 'Chaos') return 'ChaosBot';
-    if (seat.botActorType === 'Beta') return 'BetaBot';
-    if (seat.botActorType === 'Chad') return 'ChadBot';
-    return 'Bot';
-}
-
-function seatDisplayName(position: PlayerPosition, seats: PlayerGameState['seats']): string {
-    const occupant = seats[position];
-    if (!occupant) return position;
-    if (occupant.gitHubLogin) return occupant.gitHubLogin;
-    return botDisplayName(occupant);
-}
 
 type TrickEmphasis = 'normal' | 'won' | 'set' | 'march';
 
 function getCallingTeam(deal: DealState): Team | null {
     if (!deal.callingPlayer) return null;
-    return deal.callingPlayer === 'North' || deal.callingPlayer === 'South' ? 'Team1' : 'Team2';
+    return getTeamForPosition(deal.callingPlayer);
 }
 
 function getTrickCounts(deal: DealState): { team1: number; team2: number } {
@@ -345,7 +312,7 @@ export function GameActive({ gameState, animationState, connectionRef }: Props) 
                     {(['North', 'East', 'South', 'West'] as PlayerPosition[]).map(gamePos => {
                         const sp = screen(gamePos);
                         const layout = SCREEN_SEAT_LAYOUT[sp];
-                        const team = teamLabel(gamePos);
+                        const team = getTeamLabel(gamePos);
                         const label = (
                             <span className={`text-[10px] text-muted-foreground/60 uppercase tracking-widest font-medium ${layout.labelStyle ?? ''}`}>
                                 {team}

@@ -5,18 +5,11 @@ import type { HubConnection } from '@microsoft/signalr';
 import { useAuth } from '@/auth/useAuth';
 import { authFetch } from '@/api/fetchUtils';
 import type { ActorType, PlayerGameState, PlayerPosition, SeatOccupant } from '@/types/game';
+import { botDisplayName } from '@/lib/seatUtils';
 
 interface Props {
     gameState: PlayerGameState;
     connectionRef: RefObject<HubConnection | null>;
-}
-
-function botDisplayName(seat: SeatOccupant): string {
-    if (seat.botModelName) return seat.botModelName;
-    if (seat.botActorType === 'Chaos') return 'ChaosBot';
-    if (seat.botActorType === 'Beta') return 'BetaBot';
-    if (seat.botActorType === 'Chad') return 'ChadBot';
-    return 'Bot';
 }
 
 function Avatar({ occupant }: { occupant: SeatOccupant | undefined }) {

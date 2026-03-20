@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { CallTrumpDecision, DealResult, PlayedCard, PlayerGameState, PlayerPosition, Team } from '@/types/game';
+import type { PlayedCard, PlayerGameState, PlayerPosition } from '@/types/game';
+import { ANIMATION_DURATIONS } from '@/lib/animationTimings';
+import { buildDealResultMessage } from '@/lib/dealResultUtils';
+import { TRUMP_BUBBLE_LABELS } from '@/lib/trumpUtils';
 
 export interface AnimationState {
     activeBubble: { position: PlayerPosition; text: string } | null;
@@ -14,45 +17,6 @@ const EMPTY_ANIMATION: AnimationState = {
     dealResultMessage: null,
     overrideTrickCards: null,
 };
-
-const TRUMP_BUBBLE_LABELS: Record<CallTrumpDecision, string> = {
-    Pass: 'Pass',
-    OrderItUp: 'Order It Up',
-    OrderItUpAndGoAlone: 'Order It Up Alone!',
-    CallSpades: 'Spades',
-    CallSpadesAndGoAlone: 'Spades, Alone!',
-    CallHearts: 'Hearts',
-    CallHeartsAndGoAlone: 'Hearts, Alone!',
-    CallClubs: 'Clubs',
-    CallClubsAndGoAlone: 'Clubs, Alone!',
-    CallDiamonds: 'Diamonds',
-    CallDiamondsAndGoAlone: 'Diamonds, Alone!',
-};
-
-function buildDealResultMessage(
-    result: DealResult,
-    winningTeam: Team,
-    callingPlayer: PlayerPosition | null,
-    completedTrickCount: number,
-): string {
-    const teamName = winningTeam === 'Team1' ? 'Team 1' : 'Team 2';
-    const callingTeam = callingPlayer === 'North' || callingPlayer === 'South' ? 'Team1' : 'Team2';
-
-    switch (result) {
-        case 'WonAndWentAlone':
-            return `${teamName} goes alone and sweeps! (+4)`;
-        case 'WonGotAllTricks':
-            return `${teamName} marches for all 5 tricks! (+2)`;
-        case 'OpponentsEuchred': {
-            const euchredTeam = callingTeam === 'Team1' ? 'Team 1' : 'Team 2';
-            return `${euchredTeam} got euchred! ${teamName} scores (+2)`;
-        }
-        case 'WonStandardBid':
-            return `${teamName} wins with ${completedTrickCount} tricks (+1)`;
-        case 'ThrowIn':
-            return 'Throw-in — no one called trump';
-    }
-}
 
 interface QueuedStep {
     animation: AnimationState;
@@ -146,17 +110,17 @@ export function useAnimationQueue(rawState: PlayerGameState | null) {
             const d = trumps[i];
             steps.push({
                 animation: { ...EMPTY_ANIMATION, activeBubble: { position: d.position, text: TRUMP_BUBBLE_LABELS[d.decision] } },
-                durationMs: 1000,
+                durationMs: ANIMATION_DURATIONS.TRUMP_DECISION,
             });
         }
         if (trumps.length > seenTrumpRef.current) {
             const allPhase1Passed = trumps.length >= 4 && trumps.slice(0, 4).every(d => d.decision === 'Pass');
             if (allPhase1Passed && seenTrumpRef.current < 4) {
-                steps.push({ animation: { ...EMPTY_ANIMATION, upCardAnimating: 'flipping' }, durationMs: 1000 });
+                steps.push({ animation: { ...EMPTY_ANIMATION, upCardAnimating: 'flipping' }, durationMs: ANIMATION_DURATIONS.UP_CARD_FLIP });
             }
             const last = trumps[trumps.length - 1];
             if (last.decision === 'OrderItUp' || last.decision === 'OrderItUpAndGoAlone') {
-                steps.push({ animation: { ...EMPTY_ANIMATION, upCardAnimating: 'pickup' }, durationMs: 1000 });
+                steps.push({ animation: { ...EMPTY_ANIMATION, upCardAnimating: 'pickup' }, durationMs: ANIMATION_DURATIONS.UP_CARD_PICKUP });
             }
             seenTrumpRef.current = trumps.length;
         }
@@ -171,10 +135,10 @@ export function useAnimationQueue(rawState: PlayerGameState | null) {
                 for (let c = (t === seenCompletedRef.current ? seenTrickCardsRef.current : 0); c < trick.cardsPlayed.length; c++) {
                     steps.push({
                         animation: { ...EMPTY_ANIMATION, overrideTrickCards: trick.cardsPlayed.slice(0, c + 1) },
-                        durationMs: 1000,
+                        durationMs: ANIMATION_DURATIONS.CARD_PLAY,
                     });
                 }
-                steps.push({ animation: EMPTY_ANIMATION, durationMs: 1200 });
+                steps.push({ animation: EMPTY_ANIMATION, durationMs: ANIMATION_DURATIONS.TRICK_CLEAR });
                 steps.push({ animation: EMPTY_ANIMATION, applyState: rawState, durationMs: 0 });
             }
             seenTrickCardsRef.current = 0;
@@ -185,7 +149,7 @@ export function useAnimationQueue(rawState: PlayerGameState | null) {
             for (let c = seenTrickCardsRef.current; c < trickCards.length; c++) {
                 steps.push({
                     animation: { ...EMPTY_ANIMATION, overrideTrickCards: trickCards.slice(0, c + 1) },
-                    durationMs: 1000,
+                    durationMs: ANIMATION_DURATIONS.CARD_PLAY,
                 });
             }
             seenTrickCardsRef.current = trickCards.length;
@@ -193,7 +157,7 @@ export function useAnimationQueue(rawState: PlayerGameState | null) {
 
         if (deal.dealResult && !seenDealResultRef.current) {
             const msg = buildDealResultMessage(deal.dealResult, deal.winningTeam!, deal.callingPlayer, completedTricks.length);
-            steps.push({ animation: { ...EMPTY_ANIMATION, dealResultMessage: msg }, applyState: rawState, durationMs: 2500 });
+            steps.push({ animation: { ...EMPTY_ANIMATION, dealResultMessage: msg }, applyState: rawState, durationMs: ANIMATION_DURATIONS.DEAL_RESULT });
             seenDealResultRef.current = true;
         }
 

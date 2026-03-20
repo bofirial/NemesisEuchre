@@ -1,11 +1,12 @@
 import type { Card, PlayerPosition } from '@/types/game';
+import { isCardValid } from '@/lib/cardUtils';
 import { PlayingCard } from './PlayingCard';
 
 interface PlayerHandProps {
     cards: Card[] | null;
     count: number;
     position: PlayerPosition;
-    onCardClick?: (card: Card) => void;
+    onCardClick?: (_card: Card) => void;
     highlightCards?: boolean;
     validCards?: Card[];
 }
@@ -16,11 +17,6 @@ const rotationByPosition: Record<PlayerPosition, string> = {
     East: '-rotate-90',
     West: 'rotate-90',
 };
-
-function isCardValid(card: Card, validCards?: Card[]): boolean {
-    if (!validCards) return true;
-    return validCards.some(vc => vc.suit === card.suit && vc.rank === card.rank);
-}
 
 export function PlayerHand({ cards, count, position, onCardClick, highlightCards, validCards }: PlayerHandProps) {
     const cardCount = cards !== null ? cards.length : count;
