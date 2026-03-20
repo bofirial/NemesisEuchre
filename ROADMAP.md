@@ -524,6 +524,6 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 15. ~~Process Call Trump Decision using SignalR~~
 16. ~~Process Discard Card Decision using SignalR~~
 17. ~~Process Play Card Decision using SignalR~~
-18. Add animations? to simulate bot actions and allow for human reactions
+18. ~~Add animations? to simulate bot actions and allow for human reactions~~
 19. ~~Create a Data Store (Cosmos?  SQL?)~~
 

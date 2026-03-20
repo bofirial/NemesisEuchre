@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CallTrumpDecision, DealResult, PlayedCard, PlayerGameState, PlayerPosition, Team } from '@/types/game';
 
 export interface AnimationState {
@@ -54,16 +54,6 @@ function buildDealResultMessage(
     }
 }
 
-function getCardsForCurrentTrick(deal: PlayerGameState['currentDeal']): PlayedCard[] {
-    if (!deal) return [];
-    return deal.currentTrickCards ?? [];
-}
-
-function getLastCompletedTrickCards(deal: PlayerGameState['currentDeal']): PlayedCard[] {
-    if (!deal || !deal.completedTricks?.length) return [];
-    return deal.completedTricks[deal.completedTricks.length - 1].cardsPlayed;
-}
-
 interface QueuedStep {
     animation: AnimationState;
     applyState?: PlayerGameState;
@@ -85,34 +75,36 @@ export function useAnimationQueue(rawState: PlayerGameState | null) {
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [drainCount, setDrainCount] = useState(0);
 
-    useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+    const drainRef = useRef<() => void>(() => {});
 
-    function drain() {
-        if (queueRef.current.length === 0) {
-            runningRef.current = false;
-            setDrainCount(c => c + 1);
-            return;
-        }
-        runningRef.current = true;
-        const step = queueRef.current.shift()!;
-        setAnimation(step.animation);
-        if (step.applyState) setDisplayState(step.applyState);
-        if (step.durationMs > 0) {
-            timerRef.current = setTimeout(drain, step.durationMs);
-        } else {
-            drain();
-        }
-    }
+    useEffect(() => {
+        drainRef.current = () => {
+            if (queueRef.current.length === 0) {
+                runningRef.current = false;
+                setDrainCount(c => c + 1);
+                return;
+            }
+            runningRef.current = true;
+            const step = queueRef.current.shift()!;
+            setAnimation(step.animation);
+            if (step.applyState) setDisplayState(step.applyState);
+            if (step.durationMs > 0) {
+                timerRef.current = setTimeout(() => drainRef.current(), step.durationMs);
+            } else {
+                drainRef.current();
+            }
+        };
+        return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+    }, []);
 
-    function enqueue(steps: QueuedStep[]) {
+    const enqueue = useCallback((steps: QueuedStep[]) => {
         queueRef.current.push(...steps);
-        if (!runningRef.current) drain();
-    }
+        if (!runningRef.current) drainRef.current();
+    }, []);
 
     useEffect(() => {
         if (!rawState) {
-            setDisplayState(null);
-            setAnimation(EMPTY_ANIMATION);
+            enqueue([{ animation: EMPTY_ANIMATION, applyState: undefined, durationMs: 0 }]);
             seenTrumpRef.current = 0;
             seenTrickCardsRef.current = 0;
             seenCompletedRef.current = 0;
@@ -122,7 +114,6 @@ export function useAnimationQueue(rawState: PlayerGameState | null) {
         }
 
         const deal = rawState.currentDeal;
-        const steps: QueuedStep[] = [];
 
         if (!deal) {
             seenTrumpRef.current = 0;
@@ -130,8 +121,7 @@ export function useAnimationQueue(rawState: PlayerGameState | null) {
             seenCompletedRef.current = 0;
             seenDealResultRef.current = false;
             lastDealerRef.current = null;
-            if (!runningRef.current) setDisplayState(rawState);
-            else queueRef.current.push({ animation: EMPTY_ANIMATION, applyState: rawState, durationMs: 0 });
+            enqueue([{ animation: EMPTY_ANIMATION, applyState: rawState, durationMs: 0 }]);
             return;
         }
 
@@ -148,6 +138,8 @@ export function useAnimationQueue(rawState: PlayerGameState | null) {
         if (lastDealerRef.current === null) {
             lastDealerRef.current = deal.dealerPosition;
         }
+
+        const steps: QueuedStep[] = [];
 
         const trumps = deal.trumpDecisions ?? [];
         for (let i = seenTrumpRef.current; i < trumps.length; i++) {
@@ -209,13 +201,13 @@ export function useAnimationQueue(rawState: PlayerGameState | null) {
             steps.push({ animation: EMPTY_ANIMATION, applyState: rawState, durationMs: 0 });
             enqueue(steps);
         } else if (runningRef.current) {
-            const last = queueRef.current[queueRef.current.length - 1];
-            if (last) last.applyState = rawState;
+            const lastStep = queueRef.current[queueRef.current.length - 1];
+            if (lastStep) lastStep.applyState = rawState;
             else queueRef.current.push({ animation: EMPTY_ANIMATION, applyState: rawState, durationMs: 0 });
         } else {
-            setDisplayState(rawState);
+            enqueue([{ animation: EMPTY_ANIMATION, applyState: rawState, durationMs: 0 }]);
         }
-    }, [rawState, drainCount]);
+    }, [rawState, drainCount, enqueue]);
 
     return { displayState, animationState: animation };
 }
