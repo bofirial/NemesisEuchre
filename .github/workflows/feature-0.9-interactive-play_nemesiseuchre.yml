@@ -45,6 +45,8 @@ jobs:
     runs-on: windows-latest
     needs: build
     if: github.ref == 'refs/heads/feature/0.9-interactive-play'
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
@@ -56,7 +58,7 @@ jobs:
           name: .net-app
       
       - name: Login to Azure
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_19F7E618A50B474FB1BBF349EFD2C20D }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B846A9B6BB6A4C6A927D419B1398D65B }}
