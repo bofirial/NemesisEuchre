@@ -2,6 +2,7 @@ import { Bot, Star } from 'lucide-react';
 import type { RefObject } from 'react';
 import type { HubConnection } from '@microsoft/signalr';
 import { useAuth } from '@/auth/useAuth';
+import type { AnimationState } from '@/hooks/useAnimationQueue';
 import type { CallTrumpDecision, Card, DealState, PlayerGameState, PlayerPosition, SeatOccupant, Team } from '@/types/game';
 import { getPartnerPosition, toScreenPosition, type ScreenPosition } from '@/lib/boardRotation';
 import { suitColor, suitSymbol } from '@/lib/cardUtils';
@@ -12,6 +13,7 @@ import { UpCard } from './UpCard';
 
 interface Props {
     gameState: PlayerGameState;
+    animationState: AnimationState;
     connectionRef: RefObject<HubConnection | null>;
 }
 
@@ -71,6 +73,13 @@ const PLAYED_CARD_POSITION: Record<ScreenPosition, string> = {
     South: 'absolute bottom-[35%] left-1/2 -translate-x-1/2 translate-y-full z-30',
     West: 'absolute left-[35%] top-1/2 -translate-y-1/2 -translate-x-full z-30',
     East: 'absolute right-[35%] top-1/2 -translate-y-1/2 translate-x-full z-30',
+};
+
+const SPEECH_BUBBLE_POSITION: Record<ScreenPosition, string> = {
+    North: 'absolute top-[60px] left-1/2 -translate-x-1/2 z-40',
+    South: 'absolute bottom-[60px] left-1/2 -translate-x-1/2 z-40',
+    West: 'absolute left-[60px] top-1/2 -translate-y-1/2 z-40',
+    East: 'absolute right-[60px] top-1/2 -translate-y-1/2 z-40',
 };
 
 function teamLabel(gamePosition: PlayerPosition): string {
@@ -219,7 +228,7 @@ function ActiveSeatCard({
     );
 }
 
-export function GameActive({ gameState, connectionRef }: Props) {
+export function GameActive({ gameState, animationState, connectionRef }: Props) {
     const { user } = useAuth();
     const myLogin = user?.login;
 
@@ -379,14 +388,24 @@ export function GameActive({ gameState, connectionRef }: Props) {
                         );
                     })}
 
-                    {(deal?.dealStatus === 'SelectingTrumpPhase1' || deal?.dealStatus === 'SelectingTrumpPhase2') && deal.dealerPosition && (
+                    {(deal?.dealStatus === 'SelectingTrumpPhase1' || deal?.dealStatus === 'SelectingTrumpPhase2'
+                        || animationState.upCardAnimating) && deal?.dealerPosition && (
                         <UpCard
-                            card={deal.dealStatus === 'SelectingTrumpPhase1' ? deal.upCard : null}
+                            card={animationState.upCardAnimating === 'flipping' ? null : (deal.dealStatus === 'SelectingTrumpPhase1' ? deal.upCard : null)}
                             dealerPosition={screen(deal.dealerPosition)}
+                            animating={animationState.upCardAnimating}
                         />
                     )}
 
-                    {deal?.currentTrickCards?.map(pc => (
+                    {animationState.activeBubble && (
+                        <div className={SPEECH_BUBBLE_POSITION[screen(animationState.activeBubble.position)]}>
+                            <div className="bg-background border border-border rounded-lg px-3 py-1.5 text-sm font-semibold shadow-lg animate-in fade-in zoom-in-95 duration-200">
+                                {animationState.activeBubble.text}
+                            </div>
+                        </div>
+                    )}
+
+                    {(animationState.overrideTrickCards ?? deal?.currentTrickCards)?.map(pc => (
                         <div key={`${pc.card.suit}-${pc.card.rank}`} className={PLAYED_CARD_POSITION[screen(pc.playerPosition)]}>
                             <PlayingCard card={pc.card} />
                         </div>
@@ -416,6 +435,13 @@ export function GameActive({ gameState, connectionRef }: Props) {
                     <div className="bg-background/90 border border-border rounded-xl px-6 py-4 shadow-lg flex flex-col items-center gap-2">
                         <p className="text-sm font-semibold text-amber-500 uppercase tracking-wide">Choose a card to discard</p>
                         <p className="text-sm text-muted-foreground">Click a card in your hand above</p>
+                    </div>
+                )}
+
+                {/* Deal result display */}
+                {animationState.dealResultMessage && (
+                    <div className="bg-background/90 border border-border rounded-xl px-6 py-4 shadow-lg text-center animate-in fade-in zoom-in-95 duration-300">
+                        <p className="text-lg font-semibold">{animationState.dealResultMessage}</p>
                     </div>
                 )}
             </div>

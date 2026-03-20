@@ -4,6 +4,7 @@ export type Suit = 'Spades' | 'Clubs' | 'Hearts' | 'Diamonds';
 export type Rank = 'Nine' | 'Ten' | 'Jack' | 'Queen' | 'King' | 'Ace';
 export type Team = 'Team1' | 'Team2';
 export type DealStatus = 'NotStarted' | 'SelectingTrumpPhase1' | 'SelectingTrumpPhase2' | 'Playing' | 'Scoring' | 'Complete' | 'DealerDiscarding';
+export type DealResult = 'WonStandardBid' | 'WonGotAllTricks' | 'OpponentsEuchred' | 'WonAndWentAlone' | 'ThrowIn';
 
 export type CallTrumpDecision =
     | 'Pass'
@@ -15,6 +16,7 @@ export type CallTrumpDecision =
 
 export interface Card { suit: Suit; rank: Rank; }
 export interface PlayedCard { card: Card; playerPosition: PlayerPosition; }
+export interface TrumpDecisionInfo { position: PlayerPosition; decision: CallTrumpDecision; }
 
 export interface PlayerInfo {
     position: PlayerPosition;
@@ -45,6 +47,9 @@ export interface DealState {
     validTrumpDecisions: CallTrumpDecision[] | null;
     validDiscardCards: Card[] | null;
     validCardsToPlay: Card[] | null;
+    trumpDecisions: TrumpDecisionInfo[];
+    dealResult: DealResult | null;
+    winningTeam: Team | null;
 }
 
 export interface ConnectedUserInfo {

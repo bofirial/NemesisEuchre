@@ -88,6 +88,13 @@ public class PlayerStateProjector(
             ValidCardsToPlay = cardPlayer?.position == myPosition
                 ? cardPlayer.Value.validCards
                 : null,
+            TrumpDecisions = [.. deal.CallTrumpDecisions.Select(d => new TrumpDecisionInfo
+            {
+                Position = d.PlayerPosition,
+                Decision = d.ChosenDecision,
+            })],
+            DealResult = deal.DealResult,
+            WinningTeam = deal.WinningTeam,
         };
     }
 }

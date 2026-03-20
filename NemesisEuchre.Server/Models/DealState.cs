@@ -33,4 +33,10 @@ public record DealState
     public IReadOnlyList<PlayedCard> CurrentTrickCards { get; init; } = [];
 
     public IReadOnlyList<Card>? ValidCardsToPlay { get; init; }
+
+    public IReadOnlyList<TrumpDecisionInfo> TrumpDecisions { get; init; } = [];
+
+    public DealResult? DealResult { get; init; }
+
+    public Team? WinningTeam { get; init; }
 }
