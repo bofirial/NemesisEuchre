@@ -1,6 +1,7 @@
 using NemesisEuchre.Foundation.Constants;
 using NemesisEuchre.GameEngine.Models;
 using NemesisEuchre.Server.Models;
+using NemesisEuchre.Server.Models.Events;
 
 namespace NemesisEuchre.Server.Services;
 
@@ -40,6 +41,46 @@ public class PlayerStateProjector(
                 })],
             Seats = seats,
             CurrentDeal = currentDeal is not null ? MapDealState(currentDeal, myPosition) : null,
+            Events = context.ActiveGame is not null
+                ? ProjectEvents(context.ActiveGame.GameEvents, myPosition)
+                : [],
+        };
+    }
+
+    private static IReadOnlyList<PlayerGameEvent> ProjectEvents(
+        List<GameEvent> gameEvents,
+        PlayerPosition myPosition)
+    {
+        return [.. gameEvents.Select(e => ProjectEvent(e, myPosition))];
+    }
+
+    private static PlayerGameEvent ProjectEvent(GameEvent e, PlayerPosition myPosition)
+    {
+        return e switch
+        {
+            NewDealStartedEvent ev => new PlayerNewDealStartedEvent(
+                ev.EventIndex,
+                ev.DealNumber,
+                ev.DealerPosition,
+                ev.UpCard,
+                ev.Hands.TryGetValue(myPosition, out var hand) ? hand : []),
+            TrumpDecisionMadeEvent ev => new PlayerTrumpDecisionMadeEvent(
+                ev.EventIndex, ev.Position, ev.Decision),
+            UpCardFlippedEvent ev => new PlayerUpCardFlippedEvent(ev.EventIndex),
+            UpCardPickedUpEvent ev => new PlayerUpCardPickedUpEvent(ev.EventIndex, ev.DealerPosition),
+            DealerDiscardedEvent ev => new PlayerDealerDiscardedEvent(
+                ev.EventIndex,
+                ev.Position,
+                ev.Position == myPosition ? ev.Card : null),
+            CardPlayedEvent ev => new PlayerCardPlayedEvent(ev.EventIndex, ev.Position, ev.Card),
+            TrickCompletedEvent ev => new PlayerTrickCompletedEvent(
+                ev.EventIndex, ev.TrickNumber, ev.WinnerPosition, ev.WinningTeam),
+            DealCompletedEvent ev => new PlayerDealCompletedEvent(
+                ev.EventIndex, ev.DealNumber, ev.Result, ev.WinningTeam, ev.PointsAwarded, ev.Team1Score, ev.Team2Score),
+            GameCompletedEvent ev => new PlayerGameCompletedEvent(
+                ev.EventIndex, ev.WinningTeam, ev.Team1Score, ev.Team2Score),
+            WaitingForDecisionEvent ev => new PlayerWaitingForDecisionEvent(ev.EventIndex, ev.Position),
+            _ => throw new ArgumentOutOfRangeException(nameof(e), e.GetType().Name, "Unknown game event type"),
         };
     }
 

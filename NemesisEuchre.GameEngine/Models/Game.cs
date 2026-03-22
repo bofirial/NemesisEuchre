@@ -16,5 +16,12 @@ public class Game
 
     public List<Deal> CompletedDeals { get; } = [];
 
+    public List<GameEvent> GameEvents { get; } = [];
+
     public Team? WinningTeam { get; set; }
+
+    public int NextEventIndex()
+    {
+        return GameEvents.Count;
+    }
 }

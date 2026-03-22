@@ -241,7 +241,7 @@ public class BatchResultsExporterTests : IDisposable
 
         var exportData = JsonSerializer.Deserialize<BatchGameResultsExport>(jsonContent, JsonSerializationOptions.WithNaNHandling);
         exportData.Should().NotBeNull();
-        exportData!.Throughput.Should().BeApproximately(10.0, 0.1);
+        exportData.Throughput.Should().BeApproximately(10.0, 0.1);
     }
 
     [Fact]
@@ -276,7 +276,7 @@ public class BatchResultsExporterTests : IDisposable
         var deserialized = JsonSerializer.Deserialize<BatchGameResultsExport>(jsonContent, JsonSerializationOptions.WithNaNHandling);
 
         deserialized.Should().NotBeNull();
-        deserialized!.TotalGames.Should().Be(100);
+        deserialized.TotalGames.Should().Be(100);
         deserialized.Team1Wins.Should().Be(60);
         deserialized.Team2Wins.Should().Be(40);
         deserialized.Team1WinRate.Should().BeApproximately(0.6, 0.001);

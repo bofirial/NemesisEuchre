@@ -73,7 +73,7 @@ public class InteractiveCardPlayService(
 
             if (trick.CardsPlayed.Count >= cardsToPlay)
             {
-                CompleteTrick(deal);
+                CompleteTrick(deal, game);
 
                 if (deal.CompletedTricks.Count >= TricksPerDeal)
                 {
@@ -93,10 +93,11 @@ public class InteractiveCardPlayService(
             var dealPlayer = deal.Players[cardPlayer.Value.position];
             if (dealPlayer.Actor.ActorType == ActorType.User)
             {
+                game.GameEvents.Add(new WaitingForDecisionEvent(game.NextEventIndex(), cardPlayer.Value.position));
                 return;
             }
 
-            await ExecuteBotCardPlayAsync(deal, trick, cardPlayer.Value.position, cardPlayer.Value.validCards);
+            await ExecuteBotCardPlayAsync(deal, game, trick, cardPlayer.Value.position, cardPlayer.Value.validCards);
         }
     }
 
@@ -119,7 +120,7 @@ public class InteractiveCardPlayService(
         var player = deal.Players[position];
         var hand = player.CurrentHand.ToArray();
 
-        ApplyCardPlay(deal, trick, position, card, hand, cardPlayer.Value.validCards);
+        ApplyCardPlay(deal, game, trick, position, card, hand, cardPlayer.Value.validCards);
 
         return ProcessBotCardPlaysAsync(deal, game, ct);
     }
@@ -170,7 +171,7 @@ public class InteractiveCardPlayService(
         return goingAloneHandler.GetNextActivePlayer(lastPlayer, deal);
     }
 
-    private async Task ExecuteBotCardPlayAsync(Deal deal, Trick trick, PlayerPosition position, Card[] validCards)
+    private async Task ExecuteBotCardPlayAsync(Deal deal, Game game, Trick trick, PlayerPosition position, Card[] validCards)
     {
         var player = deal.Players[position];
         var hand = player.CurrentHand.ToArray();
@@ -178,11 +179,12 @@ public class InteractiveCardPlayService(
 
         validator.ValidateCardChoice(cardDecision.ChosenCard, validCards);
 
-        ApplyCardPlay(deal, trick, position, cardDecision.ChosenCard, hand, validCards, cardDecision);
+        ApplyCardPlay(deal, game, trick, position, cardDecision.ChosenCard, hand, validCards, cardDecision);
     }
 
     private void ApplyCardPlay(
         Deal deal,
+        Game game,
         Trick trick,
         PlayerPosition position,
         Card card,
@@ -220,6 +222,8 @@ public class InteractiveCardPlayService(
 
         trick.CardsPlayed.Add(new PlayedCard(card, position));
         player.CurrentHand.Remove(card);
+
+        game.GameEvents.Add(new CardPlayedEvent(game.NextEventIndex(), position, card));
     }
 
     private Task<CardDecisionContext> GetBotCardChoiceAsync(
@@ -275,7 +279,7 @@ public class InteractiveCardPlayService(
         return playerActor.PlayCardAsync(context);
     }
 
-    private void CompleteTrick(Deal deal)
+    private void CompleteTrick(Deal deal, Game game)
     {
         var trick = deal.CurrentTrick!;
         var winningPosition = trickWinnerCalculator.CalculateWinner(trick, deal.Trump!.Value);
@@ -286,6 +290,8 @@ public class InteractiveCardPlayService(
 
         deal.CompletedTricks.Add(trick);
         deal.CurrentTrick = null;
+
+        game.GameEvents.Add(new TrickCompletedEvent(game.NextEventIndex(), trick.TrickNumber, winningPosition, trick.WinningTeam.Value));
     }
 
     private async Task FinalizeDealAsync(Deal deal, Game game)
@@ -321,15 +327,35 @@ public class InteractiveCardPlayService(
 
         game.CompletedDeals.Add(deal);
 
+        game.GameEvents.Add(new DealCompletedEvent(
+            game.NextEventIndex(),
+            deal.DealNumber,
+            dealResult,
+            winningTeam,
+            scoreChange,
+            game.Team1Score,
+            game.Team2Score));
+
         if (game.Team1Score >= gameOptions.Value.WinningScore || game.Team2Score >= gameOptions.Value.WinningScore)
         {
             game.GameStatus = GameStatus.Complete;
             game.CurrentDeal = null;
+            game.GameEvents.Add(new GameCompletedEvent(game.NextEventIndex(), winningTeam, game.Team1Score, game.Team2Score));
             return;
         }
 
         var newDeal = await dealFactory.CreateDealAsync(game, deal);
         newDeal.DealStatus = DealStatus.SelectingTrumpPhase1;
         game.CurrentDeal = newDeal;
+
+        var hands = newDeal.Players.ToDictionary(
+            p => p.Key,
+            p => (IReadOnlyList<Card>)[.. p.Value.CurrentHand]);
+        game.GameEvents.Add(new NewDealStartedEvent(
+            game.NextEventIndex(),
+            newDeal.DealNumber,
+            newDeal.DealerPosition!.Value,
+            newDeal.UpCard!,
+            hands));
     }
 }

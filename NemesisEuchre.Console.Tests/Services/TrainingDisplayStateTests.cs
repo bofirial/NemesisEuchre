@@ -23,7 +23,7 @@ public class TrainingDisplayStateTests
         state.Update(new TrainingProgress("PlayCard", TrainingPhase.LoadingData, 0, "Loading..."));
 
         state.LatestSnapshot.Should().NotBeNull();
-        state.LatestSnapshot!.TotalModels.Should().Be(3);
+        state.LatestSnapshot.TotalModels.Should().Be(3);
         state.LatestSnapshot.CompletedModels.Should().Be(0);
         state.LatestSnapshot.Models.Should().HaveCount(1);
     }

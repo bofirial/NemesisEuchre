@@ -21,7 +21,7 @@ public class TeamConfigurationTests
         config.ActorType.Should().Be(ActorType.Model);
         config.ModelNames.Should().NotBeNull();
         config.ModelNames.Should().ContainKey("PlayCard");
-        config.ModelNames!["PlayCard"].Should().Be("Gen2A");
+        config.ModelNames["PlayCard"].Should().Be("Gen2A");
         config.ModelNames.Should().ContainKey("CallTrump");
         config.ModelNames["CallTrump"].Should().Be("Gen2B");
         config.ModelNames.Should().ContainKey("default");
@@ -64,7 +64,7 @@ public class TeamConfigurationTests
         config.ExplorationTemperature.Should().Be(0.3f);
         config.ModelNames.Should().NotBeNull();
         config.ModelNames.Should().HaveCount(3);
-        config.ModelNames!["PlayCard"].Should().Be("Gen2A");
+        config.ModelNames["PlayCard"].Should().Be("Gen2A");
         config.ModelNames["CallTrump"].Should().Be("Gen2B");
         config.ModelNames["DiscardCard"].Should().Be("Gen2C");
     }

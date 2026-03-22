@@ -17,16 +17,18 @@ public interface IInteractiveTrumpService
 
     (PlayerPosition position, Card[] validCards)? GetCurrentDiscardDecider(Deal deal);
 
-    Task ProcessBotTrumpDecisionsAsync(Deal deal, CancellationToken ct = default);
+    Task ProcessBotTrumpDecisionsAsync(Deal deal, Game game, CancellationToken ct = default);
 
     Task ApplyHumanTrumpDecisionAsync(
         Deal deal,
+        Game game,
         PlayerPosition position,
         CallTrumpDecision decision,
         CancellationToken ct = default);
 
     Task ApplyHumanDealerDiscardAsync(
         Deal deal,
+        Game game,
         PlayerPosition position,
         Card card,
         CancellationToken ct = default);
@@ -86,7 +88,7 @@ public class InteractiveTrumpService(
         return (position, [.. hand]);
     }
 
-    public async Task ProcessBotTrumpDecisionsAsync(Deal deal, CancellationToken ct = default)
+    public async Task ProcessBotTrumpDecisionsAsync(Deal deal, Game game, CancellationToken ct = default)
     {
         while (true)
         {
@@ -97,6 +99,7 @@ public class InteractiveTrumpService(
                 if (dealerDealPlayer.Actor.ActorType != ActorType.User)
                 {
                     await ExecuteBotDealerDiscardAsync(deal, dealerPosition, dealerDealPlayer);
+                    game.GameEvents.Add(new DealerDiscardedEvent(game.NextEventIndex(), dealerPosition, deal.DiscardedCard!));
                     deal.DealStatus = DealStatus.Playing;
                 }
 
@@ -112,18 +115,20 @@ public class InteractiveTrumpService(
             var dealPlayer = deal.Players[decider.Value.position];
             if (dealPlayer.Actor.ActorType == ActorType.User)
             {
+                game.GameEvents.Add(new WaitingForDecisionEvent(game.NextEventIndex(), decider.Value.position));
                 return;
             }
 
             var actor = actorResolver.GetPlayerActor(dealPlayer);
             var context = BuildCallTrumpContext(deal, decider.Value.position, decider.Value.validDecisions);
             var result = await actor.CallTrumpAsync(context);
-            ApplyDecisionToDeal(deal, decider.Value.position, result, decider.Value.validDecisions);
+            ApplyDecisionToDeal(deal, game, decider.Value.position, result, decider.Value.validDecisions);
         }
     }
 
     public Task ApplyHumanTrumpDecisionAsync(
         Deal deal,
+        Game game,
         PlayerPosition position,
         CallTrumpDecision decision,
         CancellationToken ct = default)
@@ -137,13 +142,14 @@ public class InteractiveTrumpService(
         validator.ValidateDecision(decision, decider.Value.validDecisions);
 
         var result = new CallTrumpDecisionContext { ChosenCallTrumpDecision = decision };
-        ApplyDecisionToDeal(deal, position, result, decider.Value.validDecisions);
+        ApplyDecisionToDeal(deal, game, position, result, decider.Value.validDecisions);
 
-        return ProcessBotTrumpDecisionsAsync(deal, ct);
+        return ProcessBotTrumpDecisionsAsync(deal, game, ct);
     }
 
     public Task ApplyHumanDealerDiscardAsync(
         Deal deal,
+        Game game,
         PlayerPosition position,
         Card card,
         CancellationToken ct = default)
@@ -169,6 +175,8 @@ public class InteractiveTrumpService(
         deal.DiscardedCard = card;
         dealer.CurrentHand.Remove(card);
         deal.DealStatus = DealStatus.Playing;
+
+        game.GameEvents.Add(new DealerDiscardedEvent(game.NextEventIndex(), position, card));
 
         return Task.CompletedTask;
     }
@@ -208,6 +216,7 @@ public class InteractiveTrumpService(
 
     private void ApplyDecisionToDeal(
         Deal deal,
+        Game game,
         PlayerPosition position,
         CallTrumpDecisionContext result,
         CallTrumpDecision[] validDecisions)
@@ -217,6 +226,8 @@ public class InteractiveTrumpService(
         var recordingContext = new CallTrumpRecordingContext(deal, position, validDecisions, result);
         var order = (byte)deal.CallTrumpDecisions.Count;
         decisionRecorder.RecordCallTrumpDecision(recordingContext, ref order);
+
+        game.GameEvents.Add(new TrumpDecisionMadeEvent(game.NextEventIndex(), position, decision));
 
         if (decision != CallTrumpDecision.Pass)
         {
@@ -231,6 +242,7 @@ public class InteractiveTrumpService(
 
             if (isPhase1)
             {
+                game.GameEvents.Add(new UpCardPickedUpEvent(game.NextEventIndex(), deal.DealerPosition!.Value));
                 deal.Players[deal.DealerPosition!.Value].CurrentHand.Add(deal.UpCard!);
                 deal.DealStatus = DealStatus.DealerDiscarding;
             }
@@ -241,6 +253,7 @@ public class InteractiveTrumpService(
         }
         else if (deal.CallTrumpDecisions.Count == 4)
         {
+            game.GameEvents.Add(new UpCardFlippedEvent(game.NextEventIndex()));
             deal.DealStatus = DealStatus.SelectingTrumpPhase2;
         }
         else if (deal.CallTrumpDecisions.Count == 8)

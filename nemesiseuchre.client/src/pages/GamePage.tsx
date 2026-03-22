@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { GameActive } from '@/components/GameActive';
 import { GameLobby } from '@/components/GameLobby';
-import { useAnimationQueue } from '@/hooks/useAnimationQueue';
+import { useEventAnimator } from '@/hooks/useEventAnimator';
 import { useGameHub } from '@/signalr/useGameHub';
 import type { PlayerGameState } from '@/types/game';
 
@@ -12,7 +12,7 @@ export function GamePage() {
     const { connectionRef, connectionState } = useGameHub();
     const navigate = useNavigate();
     const [rawGameState, setRawGameState] = useState<PlayerGameState | null>(null);
-    const { displayState, animationState } = useAnimationQueue(rawGameState);
+    const { displayState, animationState } = useEventAnimator(rawGameState);
 
     useEffect(() => {
         if (connectionState !== HubConnectionState.Connected || !connectionRef.current || !sessionName) return;

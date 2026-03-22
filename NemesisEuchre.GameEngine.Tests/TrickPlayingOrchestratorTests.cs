@@ -258,7 +258,7 @@ public class TrickPlayingOrchestratorTests
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
         capturedValidCards.Should().HaveCount(2);
-        capturedValidCards!.All(c => c.Suit == Suit.Spades).Should().BeTrue();
+        capturedValidCards.All(c => c.Suit == Suit.Spades).Should().BeTrue();
     }
 
     [Fact]
@@ -429,7 +429,7 @@ public class TrickPlayingOrchestratorTests
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
         capturedValidCards.Should().HaveCount(1);
-        capturedValidCards![0].Suit.Should().Be(Suit.Clubs);
+        capturedValidCards[0].Suit.Should().Be(Suit.Clubs);
     }
 
     [Fact]
@@ -483,8 +483,8 @@ public class TrickPlayingOrchestratorTests
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
         capturedValidCards.Should().HaveCount(1);
-        capturedValidCards![0].Rank.Should().Be(Rank.Jack);
-        capturedValidCards![0].Suit.Should().Be(Suit.Clubs);
+        capturedValidCards[0].Rank.Should().Be(Rank.Jack);
+        capturedValidCards[0].Suit.Should().Be(Suit.Clubs);
     }
 
     [Fact]
@@ -517,8 +517,8 @@ public class TrickPlayingOrchestratorTests
         await _sut.PlayTrickAsync(deal, PlayerPosition.North);
 
         capturedValidCards.Should().HaveCount(1);
-        capturedValidCards![0].Rank.Should().Be(Rank.Jack);
-        capturedValidCards![0].Suit.Should().Be(Suit.Diamonds);
+        capturedValidCards[0].Rank.Should().Be(Rank.Jack);
+        capturedValidCards[0].Suit.Should().Be(Suit.Diamonds);
     }
 
     [Fact]

@@ -26,7 +26,7 @@ public class DealExtensionsTests
         relative.DealStatus.Should().Be(DealStatus.Playing);
         relative.DealerPosition.Should().Be(RelativePlayerPosition.RightHandOpponent);
         relative.UpCard.Should().NotBeNull();
-        relative.UpCard!.Rank.Should().Be(Rank.Nine);
+        relative.UpCard.Rank.Should().Be(Rank.Nine);
         relative.UpCard.Suit.Should().Be(RelativeSuit.Trump);
         relative.CallingPlayer.Should().Be(RelativePlayerPosition.Self);
     }

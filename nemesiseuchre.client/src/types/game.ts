@@ -65,6 +65,92 @@ export interface SeatOccupant {
     botModelName: string | null;
 }
 
+export interface NewDealStartedEvent {
+    eventType: 'NewDealStarted';
+    eventIndex: number;
+    dealNumber: number;
+    dealerPosition: PlayerPosition;
+    upCard: Card;
+    myHand: Card[];
+}
+
+export interface TrumpDecisionMadeEvent {
+    eventType: 'TrumpDecisionMade';
+    eventIndex: number;
+    position: PlayerPosition;
+    decision: CallTrumpDecision;
+}
+
+export interface UpCardFlippedEvent {
+    eventType: 'UpCardFlipped';
+    eventIndex: number;
+}
+
+export interface UpCardPickedUpEvent {
+    eventType: 'UpCardPickedUp';
+    eventIndex: number;
+    dealerPosition: PlayerPosition;
+}
+
+export interface DealerDiscardedEvent {
+    eventType: 'DealerDiscarded';
+    eventIndex: number;
+    position: PlayerPosition;
+    card: Card | null;
+}
+
+export interface CardPlayedEvent {
+    eventType: 'CardPlayed';
+    eventIndex: number;
+    position: PlayerPosition;
+    card: Card;
+}
+
+export interface TrickCompletedEvent {
+    eventType: 'TrickCompleted';
+    eventIndex: number;
+    trickNumber: number;
+    winnerPosition: PlayerPosition;
+    winningTeam: Team;
+}
+
+export interface DealCompletedEvent {
+    eventType: 'DealCompleted';
+    eventIndex: number;
+    dealNumber: number;
+    result: DealResult;
+    winningTeam: Team;
+    pointsAwarded: number;
+    team1Score: number;
+    team2Score: number;
+}
+
+export interface GameCompletedEvent {
+    eventType: 'GameCompleted';
+    eventIndex: number;
+    winningTeam: Team;
+    team1Score: number;
+    team2Score: number;
+}
+
+export interface WaitingForDecisionEvent {
+    eventType: 'WaitingForDecision';
+    eventIndex: number;
+    position: PlayerPosition;
+}
+
+export type PlayerGameEvent =
+    | NewDealStartedEvent
+    | TrumpDecisionMadeEvent
+    | UpCardFlippedEvent
+    | UpCardPickedUpEvent
+    | DealerDiscardedEvent
+    | CardPlayedEvent
+    | TrickCompletedEvent
+    | DealCompletedEvent
+    | GameCompletedEvent
+    | WaitingForDecisionEvent;
+
 export interface PlayerGameState {
     sessionName: string;
     gameStatus: GameStatusViewModel;
@@ -75,4 +161,5 @@ export interface PlayerGameState {
     connectedUsers: ConnectedUserInfo[];
     seats: Partial<Record<PlayerPosition, SeatOccupant>>;
     currentDeal: DealState | null;
+    events: PlayerGameEvent[];
 }
