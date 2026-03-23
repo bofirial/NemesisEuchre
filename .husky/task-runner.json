@@ -7,6 +7,13 @@
       "include": ["**/*.cs"]
     },
     {
+      "name": "ESLint",
+      "command": "npx",
+      "args": ["eslint", "src/"],
+      "cwd": "nemesiseuchre.client",
+      "include": ["**/*.ts", "**/*.tsx"]
+    },
+    {
       "name": "Build and Test",
       "command": "dotnet",
       "args": ["test", "--configuration", "Release", "--no-restore"]
