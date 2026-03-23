@@ -6,7 +6,7 @@ $adOutput = "idv5ad9"
 
 # Merge top 3 ACT IDV files
 $actSourceArgs = ($actSources | ForEach-Object { "-s $_" }) -join " "
-$actMergeCommand = "dotnet run --project NemesisEuchre.Console -- merge $actSourceArgs -o $actOutput -d AdvancedCallTrump --overwrite"
+$actMergeCommand = "dotnet run --project NemesisEuchre.Console -- merge $actSourceArgs -o $actOutput -d CallTrump --overwrite"
 Write-Host $actMergeCommand
 Invoke-Expression $actMergeCommand
 
@@ -19,7 +19,7 @@ Write-Host "ACT merge complete $(Get-Date)" -ForegroundColor Green
 
 # Merge all 9 AD IDV files
 $adSourceArgs = ($adSources | ForEach-Object { "-s $_" }) -join " "
-$adMergeCommand = "dotnet run --project NemesisEuchre.Console -- merge $adSourceArgs -o $adOutput -d AdvancedDiscard --overwrite"
+$adMergeCommand = "dotnet run --project NemesisEuchre.Console -- merge $adSourceArgs -o $adOutput -d Discard --overwrite"
 Write-Host $adMergeCommand
 Invoke-Expression $adMergeCommand
 
