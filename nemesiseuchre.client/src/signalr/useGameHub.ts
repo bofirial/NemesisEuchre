@@ -6,6 +6,8 @@ export function useGameHub() {
     const [connectionState, setConnectionState] = useState<HubConnectionState>(HubConnectionState.Disconnected);
 
     useEffect(() => {
+        let cancelled = false;
+
         const conn = new HubConnectionBuilder()
             .withUrl('/hub/game', {
                 accessTokenFactory: () => sessionStorage.getItem('auth_token') ?? '',
@@ -16,19 +18,28 @@ export function useGameHub() {
 
         conn.onreconnecting(() => setConnectionState(HubConnectionState.Reconnecting));
         conn.onreconnected(() => setConnectionState(HubConnectionState.Connected));
-        conn.onclose(() => setConnectionState(HubConnectionState.Disconnected));
+        conn.onclose(() => {
+            if (!cancelled) setConnectionState(HubConnectionState.Disconnected);
+        });
 
         connectionRef.current = conn;
+        setConnectionState(HubConnectionState.Connecting);
 
-        let cancelled = false;
         conn.start()
-            .then(() => { if (!cancelled) setConnectionState(HubConnectionState.Connected); })
-            .catch(err => { if (!cancelled) console.error('SignalR connection error:', err); });
+            .then(() => {
+                if (cancelled) {
+                    conn.stop();
+                } else {
+                    setConnectionState(HubConnectionState.Connected);
+                }
+            })
+            .catch(err => {
+                if (!cancelled) console.error('SignalR connection error:', err);
+            });
 
         return () => {
             cancelled = true;
             connectionRef.current = null;
-            conn.stop();
         };
     }, []);
 
