@@ -1,7 +1,7 @@
 $modelNumber = 1;
 $generationDirectory = "Gen5 Training";
 
-$source = "idv5";
+$source = "idv5act3";
 $decisionType = "AdvancedCallTrump";
 
 if ($decisionType -eq "CallTrump") {
