@@ -327,6 +327,7 @@ public class InteractiveCardPlayService(
 
         game.CompletedDeals.Add(deal);
 
+        var winningTeamTrickCount = deal.CompletedTricks.Count(t => t.WinningTeam == winningTeam);
         game.GameEvents.Add(new DealCompletedEvent(
             game.NextEventIndex(),
             deal.DealNumber,
@@ -334,7 +335,9 @@ public class InteractiveCardPlayService(
             winningTeam,
             scoreChange,
             game.Team1Score,
-            game.Team2Score));
+            game.Team2Score,
+            deal.CallingPlayer,
+            winningTeamTrickCount));
 
         if (game.Team1Score >= gameOptions.Value.WinningScore || game.Team2Score >= gameOptions.Value.WinningScore)
         {

@@ -76,7 +76,7 @@ public class PlayerStateProjector(
             TrickCompletedEvent ev => new PlayerTrickCompletedEvent(
                 ev.EventIndex, ev.TrickNumber, ev.WinnerPosition, ev.WinningTeam),
             DealCompletedEvent ev => new PlayerDealCompletedEvent(
-                ev.EventIndex, ev.DealNumber, ev.Result, ev.WinningTeam, ev.PointsAwarded, ev.Team1Score, ev.Team2Score),
+                ev.EventIndex, ev.DealNumber, ev.Result, ev.WinningTeam, ev.PointsAwarded, ev.Team1Score, ev.Team2Score, ev.CallingPlayer, ev.WinningTeamTrickCount),
             GameCompletedEvent ev => new PlayerGameCompletedEvent(
                 ev.EventIndex, ev.WinningTeam, ev.Team1Score, ev.Team2Score),
             WaitingForDecisionEvent ev => new PlayerWaitingForDecisionEvent(ev.EventIndex, ev.Position),

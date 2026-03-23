@@ -59,7 +59,9 @@ public record DealCompletedEvent(
     Team WinningTeam,
     short PointsAwarded,
     short Team1Score,
-    short Team2Score) : GameEvent(EventIndex);
+    short Team2Score,
+    PlayerPosition? CallingPlayer,
+    int WinningTeamTrickCount) : GameEvent(EventIndex);
 
 public record GameCompletedEvent(
     int EventIndex,

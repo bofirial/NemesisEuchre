@@ -51,6 +51,10 @@ function adjustOtherHandCount(
     return { ...counts, [position]: current - 1 };
 }
 
+function maybeDealState(rawState: PlayerGameState, currentDeal: DealState | null): PlayerGameState | undefined {
+    return currentDeal ? withDeal(rawState, currentDeal) : undefined;
+}
+
 function buildSteps(
     events: PlayerGameEvent[],
     startAfter: number,
@@ -58,8 +62,11 @@ function buildSteps(
 ): AnimationStep[] {
     const steps: AnimationStep[] = [];
     const trickCards: PlayedCard[] = [];
-    let currentDeal = rawState.currentDeal;
     const myPosition = rawState.myPosition;
+
+    const newEvents = events.filter(e => e.eventIndex > startAfter);
+    const spansDealBoundary = newEvents.some(e => e.eventType === 'NewDealStarted');
+    let currentDeal: DealState | null = spansDealBoundary ? null : rawState.currentDeal;
 
     for (const event of events) {
         if (event.eventIndex <= startAfter) {
@@ -73,8 +80,7 @@ function buildSteps(
 
         switch (event.eventType) {
             case 'NewDealStarted': {
-                currentDeal = currentDeal ? {
-                    ...currentDeal,
+                currentDeal = {
                     dealStatus: 'SelectingTrumpPhase1',
                     dealerPosition: event.dealerPosition,
                     upCard: event.upCard,
@@ -82,13 +88,11 @@ function buildSteps(
                     callingPlayer: null,
                     callingPlayerIsGoingAlone: false,
                     myHand: event.myHand,
-                    otherHandCounts: {
-                        ...Object.fromEntries(
-                            (['North', 'East', 'South', 'West'] as PlayerPosition[])
-                                .filter(p => p !== myPosition)
-                                .map(p => [p, 5]),
-                        ),
-                    },
+                    otherHandCounts: Object.fromEntries(
+                        (['North', 'East', 'South', 'West'] as PlayerPosition[])
+                            .filter(p => p !== myPosition)
+                            .map(p => [p, 5]),
+                    ),
                     completedTricks: [],
                     currentTrickCards: [],
                     currentDeciderPosition: null,
@@ -98,10 +102,10 @@ function buildSteps(
                     trumpDecisions: [],
                     dealResult: null,
                     winningTeam: null,
-                } : currentDeal;
+                };
                 steps.push({
                     animation: EMPTY_ANIMATION,
-                    applyState: currentDeal ? withDeal(rawState, currentDeal) : rawState,
+                    applyState: withDeal(rawState, currentDeal),
                     eventIndex: event.eventIndex,
                     durationMs: 0,
                 });
@@ -143,7 +147,7 @@ function buildSteps(
                 }
                 steps.push({
                     animation: { ...EMPTY_ANIMATION, upCardAnimating: 'pickup' },
-                    applyState: currentDeal ? withDeal(rawState, currentDeal) : rawState,
+                    applyState: maybeDealState(rawState, currentDeal),
                     eventIndex: event.eventIndex,
                     durationMs: ANIMATION_DURATIONS.UP_CARD_PICKUP,
                 });
@@ -162,7 +166,7 @@ function buildSteps(
                 }
                 steps.push({
                     animation: EMPTY_ANIMATION,
-                    applyState: currentDeal ? withDeal(rawState, currentDeal) : rawState,
+                    applyState: maybeDealState(rawState, currentDeal),
                     eventIndex: event.eventIndex,
                     durationMs: 0,
                 });
@@ -182,7 +186,7 @@ function buildSteps(
                 trickCards.push({ card: event.card, playerPosition: event.position });
                 steps.push({
                     animation: { ...EMPTY_ANIMATION, overrideTrickCards: [...trickCards] },
-                    applyState: currentDeal ? withDeal(rawState, currentDeal) : rawState,
+                    applyState: maybeDealState(rawState, currentDeal),
                     eventIndex: event.eventIndex,
                     durationMs: ANIMATION_DURATIONS.CARD_PLAY,
                 });
@@ -203,8 +207,8 @@ function buildSteps(
                         dealResultMessage: buildDealResultMessage(
                             event.result,
                             event.winningTeam,
-                            null,
-                            0,
+                            event.callingPlayer,
+                            event.winningTeamTrickCount,
                         ),
                     },
                     eventIndex: event.eventIndex,
@@ -225,20 +229,6 @@ function buildSteps(
     return steps;
 }
 
-function buildBaseState(rawState: PlayerGameState, events: PlayerGameEvent[], startAfter: number): PlayerGameState {
-    if (!rawState.currentDeal) return rawState;
-
-    const newEvents = events.filter(e => e.eventIndex > startAfter);
-    if (newEvents.length === 0) return rawState;
-
-    const firstEvent = newEvents[0];
-    if (firstEvent.eventType === 'NewDealStarted') {
-        return rawState;
-    }
-
-    return { ...rawState, gameStatus: 'Playing' };
-}
-
 export function useEventAnimator(rawState: PlayerGameState | null) {
     const [displayState, setDisplayState] = useState<PlayerGameState | null>(null);
     const [animation, setAnimation] = useState<AnimationState>(EMPTY_ANIMATION);
@@ -249,6 +239,7 @@ export function useEventAnimator(rawState: PlayerGameState | null) {
     const runningRef = useRef(false);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const latestRawRef = useRef<PlayerGameState | null>(null);
+    const processedRawRef = useRef<PlayerGameState | null>(null);
     const [drainCount, setDrainCount] = useState(0);
 
     const drainRef = useRef<() => void>(() => {});
@@ -288,17 +279,18 @@ export function useEventAnimator(rawState: PlayerGameState | null) {
     useEffect(() => {
         if (!rawState) {
             latestRawRef.current = null;
+            processedRawRef.current = null;
             lastAnimatedRef.current = -1;
             initializedRef.current = false;
-            enqueue([{ animation: EMPTY_ANIMATION, applyState: undefined, eventIndex: -1, durationMs: 0 }]);
             return;
         }
 
         latestRawRef.current = rawState;
-        const events = rawState.events ?? [];
 
         if (!initializedRef.current) {
             initializedRef.current = true;
+            processedRawRef.current = rawState;
+            const events = rawState.events ?? [];
             if (events.length > 0) {
                 lastAnimatedRef.current = events[events.length - 1].eventIndex;
             }
@@ -306,13 +298,15 @@ export function useEventAnimator(rawState: PlayerGameState | null) {
             return;
         }
 
+        if (rawState === processedRawRef.current) {
+            return;
+        }
+        processedRawRef.current = rawState;
+
+        const events = rawState.events ?? [];
         const steps = buildSteps(events, lastAnimatedRef.current, rawState);
 
         if (steps.length > 0) {
-            const baseState = buildBaseState(rawState, events, lastAnimatedRef.current);
-            if (!steps[0].applyState) {
-                steps[0] = { ...steps[0], applyState: baseState };
-            }
             enqueue(steps);
         } else if (!runningRef.current) {
             enqueue([{ animation: EMPTY_ANIMATION, applyState: rawState, eventIndex: lastAnimatedRef.current, durationMs: 0 }]);

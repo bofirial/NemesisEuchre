@@ -123,6 +123,8 @@ export interface DealCompletedEvent {
     pointsAwarded: number;
     team1Score: number;
     team2Score: number;
+    callingPlayer: PlayerPosition | null;
+    winningTeamTrickCount: number;
 }
 
 export interface GameCompletedEvent {
