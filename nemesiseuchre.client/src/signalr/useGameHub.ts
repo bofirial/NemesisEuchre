@@ -23,7 +23,6 @@ export function useGameHub() {
         });
 
         connectionRef.current = conn;
-        setConnectionState(HubConnectionState.Connecting);
 
         conn.start()
             .then(() => {

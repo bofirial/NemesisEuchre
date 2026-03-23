@@ -529,15 +529,15 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 
 ### Interactive Play 0.91
 
-1. **Game Event Pipeline & Animation Rewrite**
-   - Add a `GameEvent` discriminated union on the server representing every discrete game action (trump decision, upcard flip, upcard pickup, dealer discard, card played, trick completed, deal completed, new deal started, game completed, waiting for decision)
-   - Events are player-specific — `PlayerStateProjector` projects each event per player (e.g., dealer sees the discarded card, others see only that a discard happened)
-   - Add `IReadOnlyList<GameEvent> EventHistory` to `PlayerGameState` alongside the existing materialized state
-   - `ActiveGameService` accumulates events in-memory per session
-   - On reconnect/join, client receives full `PlayerGameState` with complete `EventHistory`, marks all existing events as already-animated, and begins animating only new events going forward
-   - Replace the client's snapshot-diffing `useAnimationQueue` (seenTrumpRef/seenTrickCardsRef/seenCompletedRef pattern) with an event-driven animation consumer that processes events sequentially from the history
-   - Each event type maps to a known animation (speech bubble, card play, trick clear, deal result, etc.)
-   - Fixes current issues: final trick not animating on deal completion, deal transitions swallowing state updates, multiple simultaneous changes being dropped
+1. ~~**Game Event Pipeline & Animation Rewrite**~~
+   - ~~Add a `GameEvent` discriminated union on the server representing every discrete game action (trump decision, upcard flip, upcard pickup, dealer discard, card played, trick completed, deal completed, new deal started, game completed, waiting for decision)~~
+   - ~~Events are player-specific — `PlayerStateProjector` projects each event per player (e.g., dealer sees the discarded card, others see only that a discard happened)~~
+   - ~~Add `IReadOnlyList<GameEvent> EventHistory` to `PlayerGameState` alongside the existing materialized state~~
+   - ~~`ActiveGameService` accumulates events in-memory per session~~
+   - ~~On reconnect/join, client receives full `PlayerGameState` with complete `EventHistory`, marks all existing events as already-animated, and begins animating only new events going forward~~
+   - ~~Replace the client's snapshot-diffing `useAnimationQueue` (seenTrumpRef/seenTrickCardsRef/seenCompletedRef pattern) with an event-driven animation consumer that processes events sequentially from the history~~
+   - ~~Each event type maps to a known animation (speech bubble, card play, trick clear, deal result, etc.)~~
+   - ~~Fixes current issues: final trick not animating on deal completion, deal transitions swallowing state updates, multiple simultaneous changes being dropped~~
 
 2. **Decision History Sidebar**
    - Add a scrollable panel on the side of the game board displaying the full `EventHistory` as human-readable entries
