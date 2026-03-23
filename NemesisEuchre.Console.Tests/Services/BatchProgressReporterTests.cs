@@ -56,7 +56,7 @@ public class BatchProgressReporterTests
         subReporter.ReportProgress(currentBatchSnapshot);
 
         reportedSnapshot.Should().NotBeNull();
-        reportedSnapshot!.CompletedGames.Should().Be(105);
+        reportedSnapshot.CompletedGames.Should().Be(105);
         reportedSnapshot.Team1Wins.Should().Be(63);
         reportedSnapshot.Team2Wins.Should().Be(31);
         reportedSnapshot.FailedGames.Should().Be(11);

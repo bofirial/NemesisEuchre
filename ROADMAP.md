@@ -527,3 +527,69 @@ This version introduces ML.NET-powered bots that learn from game data, establish
 18. ~~Add animations? to simulate bot actions and allow for human reactions~~
 19. ~~Create a Data Store (Cosmos?  SQL?)~~
 
+### Interactive Play 0.91
+
+1. **Game Event Pipeline & Animation Rewrite**
+   - Add a `GameEvent` discriminated union on the server representing every discrete game action (trump decision, upcard flip, upcard pickup, dealer discard, card played, trick completed, deal completed, new deal started, game completed, waiting for decision)
+   - Events are player-specific — `PlayerStateProjector` projects each event per player (e.g., dealer sees the discarded card, others see only that a discard happened)
+   - Add `IReadOnlyList<GameEvent> EventHistory` to `PlayerGameState` alongside the existing materialized state
+   - `ActiveGameService` accumulates events in-memory per session
+   - On reconnect/join, client receives full `PlayerGameState` with complete `EventHistory`, marks all existing events as already-animated, and begins animating only new events going forward
+   - Replace the client's snapshot-diffing `useAnimationQueue` (seenTrumpRef/seenTrickCardsRef/seenCompletedRef pattern) with an event-driven animation consumer that processes events sequentially from the history
+   - Each event type maps to a known animation (speech bubble, card play, trick clear, deal result, etc.)
+   - Fixes current issues: final trick not animating on deal completion, deal transitions swallowing state updates, multiple simultaneous changes being dropped
+
+2. **Decision History Sidebar**
+   - Add a scrollable panel on the side of the game board displaying the full `EventHistory` as human-readable entries
+   - Each event rendered with player-relative labels (e.g., "Left Opponent passed", "Partner called Hearts", "You played Ace of Spades", "Right Opponent won the trick")
+   - History spans the entire game across all deals, with deal boundaries clearly marked
+   - Auto-scrolls to latest entry but allows scrolling back to review past decisions
+   - Useful for debugging, testing, and understanding bot behavior during interactive play
+
+3. **Reconnection Resilience & Game Persistence**
+   - Serialize the full `Game` object (including `GameEvent` history) as a JSON snapshot column on `GameSessionEntity` (~100-170 KB per game)
+   - Persist the snapshot on deal completion, game completion, and when all human players disconnect
+   - Track `LastActivityDate` on `GameSessionEntity`, updated on every game action (trump decision, card play, discard, etc.)
+   - On reconnect, `JoinGameAsync` restores the game from the DB snapshot if not found in `ActiveGameService` (covers server restarts and app pool recycles)
+   - Recreate bot `IPlayerActor` instances (with ML model loading) when restoring a game from snapshot
+   - Client stores active session name in `localStorage`; HomePage shows a "Rejoin Game" button when an active session exists
+   - Brief grace period on SignalR disconnect before marking the connection as inactive (prevents flicker during page refresh)
+   - Multi-device support: verify existing multi-connection-per-user infrastructure works end-to-end (seat tied to `UserId`, state broadcast to all connection IDs)
+   - On game completion, persist the finished game using the existing `GameToEntityMapper` → entity graph pipeline for permanent storage
+   - `StaleSessionCleanupService` as a `BackgroundService` — periodically scans for sessions where `LastActivityDate` is older than 24 hours, discards incomplete game state, clears seats, and marks `AllUsersDisconnectedDate` so the session name can be reused
+
+4. **User Experience & Responsive Design Pass**
+   - Replace the text-based `PlayingCard` component with an SVG playing card deck for crisp, scalable card rendering at any size with proper pip layouts and face card imagery
+   - Collapse opponent hands to card count badges next to their avatar instead of rendering full-size face-down card fans; only fan out the human player's hand
+   - Responsive game board layout with breakpoints: desktop (≥1024px) full layout, tablet (768-1023px) collapsed opponent hands and smaller felt table, mobile (<768px) vertical stack with hand at bottom, trick in center, opponents as compact strip at top
+   - Responsive lobby layout — seat grid adapts to smaller screens (2×2 or stacked), sidebar collapses to a drawer
+   - Prominent "your turn" indicator — glow/pulse on the player's hand area, plus a unified action bar replacing the separate trump decision, discard instruction, and card play panels that appear/disappear below the table
+   - Score display improvements — persistent scoreboard with higher visual prominence, since score drives Euchre strategy (going alone decisions, risk assessment)
+   - Error feedback via toast notifications for failed SignalR operations ("Not your turn," "Invalid card," etc.) — currently `invoke` return values are silently ignored
+   - Touch-friendly interaction targets for mobile — larger card hit areas, appropriately sized buttons, and gesture-friendly card selection
+
+5. **End-of-Game Summary Screen**
+   - When a game completes, show a results screen instead of immediately returning to the lobby
+   - Display final score, total deals played, deal-by-deal breakdown (who called trump, result, points awarded)
+   - Highlight notable moments — marches, euchres, lone hand attempts and outcomes
+   - "Play Again" button to start a new game with the same seat configuration and "Return to Lobby" to go back to seat selection
+   - Built on the `GameEvent` history from item 1 — the event log provides all the data needed for the summary
+
+6. **Spectator Mode**
+   - Explicitly handle users who join a session but are not seated in a game position
+   - Spectators see a dedicated view: all card counts (no hands revealed), the current trick, trump indicator, scores, and the full event history sidebar
+   - Spectators cannot take game actions (trump decisions, card play, discard) but remain in the connected users list
+   - `PlayerStateProjector` produces a spectator-specific projection instead of falling back to South's perspective
+   - Spectators see the game board from a neutral orientation (no rotation since they have no "my position")
+
+7. **Sound Effects**
+   - Audio feedback for key game events: card play, trump call, trick sweep, euchre/march fanfare, deal shuffle, upcard flip
+   - Each `GameEvent` type maps to an optional sound cue, played alongside its animation
+   - Volume control and mute toggle persisted in `localStorage`
+   - Use small audio assets (Web Audio API or `<audio>` elements) to keep bundle size minimal
+
+8. **Turn Timer**
+   - Configurable turn timer (e.g., 60 seconds) with a visual countdown displayed on the deciding player's seat card
+   - When the timer expires, auto-play on behalf of the human using the bot ML model assigned to the session (or a default bot)
+   - Timer is optional and configured by the session leader in the lobby before starting a game
+   - Prevents games from stalling indefinitely when a human disconnects or walks away, especially important for sessions with multiple human players

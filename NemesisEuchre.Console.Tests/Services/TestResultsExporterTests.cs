@@ -161,7 +161,7 @@ public class TestResultsExporterTests : IDisposable
         var jsonContent = File.ReadAllText(outputPath);
         var exportData = JsonSerializer.Deserialize<TestResultsExport>(jsonContent, JsonSerializationOptions.WithNaNHandling);
         exportData.Should().NotBeNull();
-        exportData!.PassRate.Should().BeApproximately(0.75, 0.001);
+        exportData.PassRate.Should().BeApproximately(0.75, 0.001);
     }
 
     [Fact]
@@ -195,7 +195,7 @@ public class TestResultsExporterTests : IDisposable
 
         var exportData = JsonSerializer.Deserialize<TestResultsExport>(jsonContent, JsonSerializationOptions.WithNaNHandling);
         exportData.Should().NotBeNull();
-        exportData!.TestResults[0].OptionScores.Should().ContainKey("9♣");
+        exportData.TestResults[0].OptionScores.Should().ContainKey("9♣");
         exportData.TestResults[0].OptionScores["9♣"].Should().BeApproximately(0.8542f, 0.0001f);
         exportData.TestResults[0].OptionScores["J♥"].Should().BeApproximately(0.1234f, 0.0001f);
         exportData.TestResults[0].OptionScores["A♠"].Should().BeApproximately(0.0224f, 0.0001f);
@@ -214,7 +214,7 @@ public class TestResultsExporterTests : IDisposable
         var deserialized = JsonSerializer.Deserialize<TestResultsExport>(jsonContent, JsonSerializationOptions.WithNaNHandling);
 
         deserialized.Should().NotBeNull();
-        deserialized!.ModelName.Should().Be("gen2");
+        deserialized.ModelName.Should().Be("gen2");
         deserialized.TotalTests.Should().Be(3);
         deserialized.PassedTests.Should().Be(2);
         deserialized.FailedTests.Should().Be(1);
@@ -270,7 +270,7 @@ public class TestResultsExporterTests : IDisposable
         var exportData = JsonSerializer.Deserialize<TestResultsExport>(jsonContent, JsonSerializationOptions.WithNaNHandling);
 
         exportData.Should().NotBeNull();
-        exportData!.TestsByDecisionType.Should().ContainKey(DecisionType.Play);
+        exportData.TestsByDecisionType.Should().ContainKey(DecisionType.Play);
         exportData.TestsByDecisionType[DecisionType.Play].Total.Should().Be(2);
         exportData.TestsByDecisionType[DecisionType.Play].Passed.Should().Be(1);
         exportData.TestsByDecisionType[DecisionType.Play].Failed.Should().Be(1);

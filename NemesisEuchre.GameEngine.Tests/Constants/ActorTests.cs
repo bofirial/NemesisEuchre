@@ -15,7 +15,7 @@ public class ActorTests
         actor.ModelName.Should().Be("Gen2");
         actor.ModelNames.Should().NotBeNull();
         actor.ModelNames.Should().ContainKey("default");
-        actor.ModelNames!["default"].Should().Be("Gen2");
+        actor.ModelNames["default"].Should().Be("Gen2");
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public class ActorTests
         actor.ActorType.Should().Be(ActorType.Model);
         actor.ModelNames.Should().NotBeNull();
         actor.ModelNames.Should().ContainKey("PlayCard");
-        actor.ModelNames!["PlayCard"].Should().Be("Gen2A");
+        actor.ModelNames["PlayCard"].Should().Be("Gen2A");
         actor.ModelNames.Should().ContainKey("CallTrump");
         actor.ModelNames["CallTrump"].Should().Be("Gen2B");
         actor.ModelNames.Should().ContainKey("DiscardCard");
@@ -58,7 +58,7 @@ public class ActorTests
         actor.ModelName.Should().Be("Gen2");
         actor.ModelNames.Should().NotBeNull();
         actor.ModelNames.Should().ContainKey("default");
-        actor.ModelNames!["default"].Should().Be("Gen2");
+        actor.ModelNames["default"].Should().Be("Gen2");
     }
 
     [Fact]

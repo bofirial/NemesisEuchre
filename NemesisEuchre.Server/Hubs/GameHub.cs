@@ -142,11 +142,22 @@ public class GameHub(
         var game = activeGameService.GetGame(context.SessionId);
         if (game?.CurrentDeal is not null)
         {
+            var deal = game.CurrentDeal;
+            var hands = deal.Players.ToDictionary(
+                p => p.Key,
+                p => (IReadOnlyList<Card>)[.. p.Value.CurrentHand]);
+            game.GameEvents.Add(new NewDealStartedEvent(
+                game.NextEventIndex(),
+                deal.DealNumber,
+                deal.DealerPosition!.Value,
+                deal.UpCard!,
+                hands));
+
             var sessionLock = activeGameService.GetOrCreateLock(context.SessionId);
             await sessionLock.WaitAsync();
             try
             {
-                await interactiveTrumpService.ProcessBotTrumpDecisionsAsync(game.CurrentDeal);
+                await interactiveTrumpService.ProcessBotTrumpDecisionsAsync(game.CurrentDeal, game);
 
                 if (game.CurrentDeal.DealStatus == DealStatus.Playing)
                 {
@@ -194,6 +205,7 @@ public class GameHub(
         {
             await interactiveTrumpService.ApplyHumanTrumpDecisionAsync(
                 game.CurrentDeal,
+                game,
                 myPosition.Value,
                 decision);
 
@@ -246,6 +258,7 @@ public class GameHub(
         {
             await interactiveTrumpService.ApplyHumanDealerDiscardAsync(
                 game.CurrentDeal,
+                game,
                 myPosition.Value,
                 card);
 
@@ -304,7 +317,7 @@ public class GameHub(
 
             if (game.CurrentDeal?.DealStatus is DealStatus.SelectingTrumpPhase1)
             {
-                await interactiveTrumpService.ProcessBotTrumpDecisionsAsync(game.CurrentDeal);
+                await interactiveTrumpService.ProcessBotTrumpDecisionsAsync(game.CurrentDeal, game);
 
                 if (game.CurrentDeal.DealStatus == DealStatus.Playing)
                 {

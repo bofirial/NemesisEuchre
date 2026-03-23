@@ -1,4 +1,5 @@
 using NemesisEuchre.Foundation.Constants;
+using NemesisEuchre.Server.Models.Events;
 
 namespace NemesisEuchre.Server.Models;
 
@@ -21,4 +22,6 @@ public record PlayerGameState
     public required IReadOnlyDictionary<PlayerPosition, SeatInfo> Seats { get; init; }
 
     public DealState? CurrentDeal { get; init; }
+
+    public IReadOnlyList<PlayerGameEvent> Events { get; init; } = [];
 }

@@ -77,7 +77,7 @@ public sealed class CardDisplayRenderer : ICardDisplayRenderer
         var rankSymbol = RankSymbols.GetValueOrDefault(card.Rank, "?");
         var suitSymbol = SuitSymbols.GetValueOrDefault(card.Suit, "?");
         var suitColor = SuitColors.GetValueOrDefault(card.Suit, Color.Grey);
-        var backgroundColor = trump != null && card.IsTrump(trump!.Value) ? " on grey30" : string.Empty;
+        var backgroundColor = trump != null && card.IsTrump(trump.Value) ? " on grey30" : string.Empty;
 
         return $"[{suitColor}{backgroundColor}]{rankSymbol}{suitSymbol}[/]";
     }
