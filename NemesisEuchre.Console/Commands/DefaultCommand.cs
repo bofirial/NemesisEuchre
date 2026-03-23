@@ -307,6 +307,11 @@ public class DefaultCommand(
             parts.Add($"simple-play:{simplePlayModel}");
         }
 
+        if (actor.ModelNames.TryGetValue("AdvancedPlayCard", out var advancedPlayModel))
+        {
+            parts.Add($"advanced-play:{advancedPlayModel}");
+        }
+
         if (actor.ModelNames.TryGetValue("AdvancedCallTrump", out var advancedCallModel))
         {
             parts.Add($"advanced-call:{advancedCallModel}");
