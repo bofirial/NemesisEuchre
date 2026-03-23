@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
+    CallTrumpDecision,
     Card,
     DealState,
+    DealStatus,
     PlayedCard,
     PlayerGameEvent,
     PlayerGameState,
     PlayerPosition,
+    Suit,
 } from '@/types/game';
 import { ANIMATION_DURATIONS } from '@/lib/animationTimings';
 import { buildDealResultMessage } from '@/lib/dealResultUtils';
@@ -49,6 +52,29 @@ function adjustOtherHandCount(
     const current = counts[position];
     if (current === undefined || current <= 0) return counts;
     return { ...counts, [position]: current - 1 };
+}
+
+function getTrumpSuit(decision: CallTrumpDecision, upCard: Card | null): Suit | null {
+    switch (decision) {
+        case 'OrderItUp': case 'OrderItUpAndGoAlone': return upCard?.suit ?? null;
+        case 'CallSpades': case 'CallSpadesAndGoAlone': return 'Spades';
+        case 'CallHearts': case 'CallHeartsAndGoAlone': return 'Hearts';
+        case 'CallClubs': case 'CallClubsAndGoAlone': return 'Clubs';
+        case 'CallDiamonds': case 'CallDiamondsAndGoAlone': return 'Diamonds';
+        default: return null;
+    }
+}
+
+function isGoingAlone(decision: CallTrumpDecision): boolean {
+    return decision === 'OrderItUpAndGoAlone'
+        || decision === 'CallSpadesAndGoAlone'
+        || decision === 'CallHeartsAndGoAlone'
+        || decision === 'CallClubsAndGoAlone'
+        || decision === 'CallDiamondsAndGoAlone';
+}
+
+function isPhase1Call(decision: CallTrumpDecision): boolean {
+    return decision === 'OrderItUp' || decision === 'OrderItUpAndGoAlone';
 }
 
 function maybeDealState(rawState: PlayerGameState, currentDeal: DealState | null): PlayerGameState | undefined {
@@ -111,16 +137,36 @@ function buildSteps(
                 });
                 break;
             }
-            case 'TrumpDecisionMade':
+            case 'TrumpDecisionMade': {
+                if (currentDeal && event.decision !== 'Pass') {
+                    const trump = getTrumpSuit(event.decision, currentDeal.upCard);
+                    const nextStatus: DealStatus = isPhase1Call(event.decision)
+                        ? 'DealerDiscarding'
+                        : 'Playing';
+                    currentDeal = {
+                        ...currentDeal,
+                        callingPlayer: event.position,
+                        callingPlayerIsGoingAlone: isGoingAlone(event.decision),
+                        trump,
+                        dealStatus: nextStatus,
+                    };
+                } else if (currentDeal && currentDeal.dealStatus === 'SelectingTrumpPhase1') {
+                    const passCount = (currentDeal.trumpDecisions?.length ?? 0) + 1;
+                    if (passCount >= 4) {
+                        currentDeal = { ...currentDeal, dealStatus: 'SelectingTrumpPhase2' };
+                    }
+                }
                 steps.push({
                     animation: {
                         ...EMPTY_ANIMATION,
                         activeBubble: { position: event.position, text: TRUMP_BUBBLE_LABELS[event.decision] },
                     },
+                    applyState: maybeDealState(rawState, currentDeal),
                     eventIndex: event.eventIndex,
                     durationMs: ANIMATION_DURATIONS.TRUMP_DECISION,
                 });
                 break;
+            }
             case 'UpCardFlipped':
                 steps.push({
                     animation: { ...EMPTY_ANIMATION, upCardAnimating: 'flipping' },
@@ -153,15 +199,16 @@ function buildSteps(
                 });
                 break;
             case 'DealerDiscarded':
-                if (currentDeal && event.card && myPosition === event.position) {
+                if (currentDeal) {
+                    const handUpdate = event.card && myPosition === event.position
+                        ? { myHand: removeCardFromHand(currentDeal.myHand, event.card) }
+                        : myPosition !== event.position
+                            ? { otherHandCounts: adjustOtherHandCount(currentDeal.otherHandCounts, event.position) }
+                            : {};
                     currentDeal = {
                         ...currentDeal,
-                        myHand: removeCardFromHand(currentDeal.myHand, event.card),
-                    };
-                } else if (currentDeal && myPosition !== event.position) {
-                    currentDeal = {
-                        ...currentDeal,
-                        otherHandCounts: adjustOtherHandCount(currentDeal.otherHandCounts, event.position),
+                        ...handUpdate,
+                        dealStatus: 'Playing' as DealStatus,
                     };
                 }
                 steps.push({
@@ -304,6 +351,15 @@ export function useEventAnimator(rawState: PlayerGameState | null) {
         processedRawRef.current = rawState;
 
         const events = rawState.events ?? [];
+        const maxEventIndex = events.length > 0 ? events[events.length - 1].eventIndex : -1;
+
+        if (maxEventIndex < lastAnimatedRef.current) {
+            lastAnimatedRef.current = maxEventIndex;
+            queueRef.current.length = 0;
+            enqueue([{ animation: EMPTY_ANIMATION, applyState: rawState, eventIndex: maxEventIndex, durationMs: 0 }]);
+            return;
+        }
+
         const steps = buildSteps(events, lastAnimatedRef.current, rawState);
 
         if (steps.length > 0) {
