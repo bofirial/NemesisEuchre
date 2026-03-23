@@ -2,7 +2,7 @@ import { Bot, Star } from 'lucide-react';
 import type { RefObject } from 'react';
 import type { HubConnection } from '@microsoft/signalr';
 import { useAuth } from '@/auth/useAuth';
-import type { AnimationState } from '@/hooks/useAnimationQueue';
+import type { AnimationState } from '@/hooks/useEventAnimator';
 import type { Card, DealState, PlayerGameState, PlayerPosition, SeatOccupant, Team } from '@/types/game';
 import { getPartnerPosition, toScreenPosition, type ScreenPosition } from '@/lib/boardRotation';
 import { suitColor, suitSymbol } from '@/lib/cardUtils';
