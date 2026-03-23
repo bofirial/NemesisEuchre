@@ -5,7 +5,7 @@ import { useAuth } from '@/auth/useAuth';
 import type { AnimationState } from '@/hooks/useEventAnimator';
 import type { Card, DealState, PlayerGameState, PlayerPosition, SeatOccupant, Team } from '@/types/game';
 import { getPartnerPosition, toScreenPosition, type ScreenPosition } from '@/lib/boardRotation';
-import { suitColor, suitSymbol } from '@/lib/cardUtils';
+import { sortHandByTrump, suitColor, suitSymbol } from '@/lib/cardUtils';
 import { botDisplayName, seatDisplayName } from '@/lib/seatUtils';
 import { getTeamLabel, getTeamForPosition } from '@/lib/teamUtils';
 import { TRUMP_DECISION_LABELS, DEALER_TRUMP_DECISION_LABELS } from '@/lib/trumpUtils';
@@ -204,7 +204,9 @@ export function GameActive({ gameState, animationState, connectionRef }: Props) 
 
     function handForPosition(position: PlayerPosition): { cards: Card[] | null; count: number } {
         if (!deal) return { cards: null, count: 0 };
-        if (position === gameState.myPosition) return { cards: deal.myHand, count: deal.myHand.length };
+        if (position === gameState.myPosition) {
+            return { cards: sortHandByTrump(deal.myHand, deal.trump), count: deal.myHand.length };
+        }
         return { cards: null, count: deal.otherHandCounts[position] ?? 0 };
     }
 
