@@ -17,10 +17,25 @@ public partial class AdminController(IBotStorageService storageService) : Contro
     [
         ("callTrumpZip", "_calltrump.zip"),
         ("callTrumpJson", "_calltrump.json"),
+        ("advancedCallTrumpZip", "_advancedcalltrump.zip"),
+        ("advancedCallTrumpJson", "_advancedcalltrump.json"),
         ("discardCardZip", "_discardcard.zip"),
         ("discardCardJson", "_discardcard.json"),
+        ("advancedDiscardCardZip", "_advanceddiscardcard.zip"),
+        ("advancedDiscardCardJson", "_advanceddiscardcard.json"),
         ("playCardZip", "_playcard.zip"),
         ("playCardJson", "_playcard.json"),
+        ("simplePlayCardZip", "_simpleplaycard.zip"),
+        ("simplePlayCardJson", "_simpleplaycard.json"),
+        ("advancedPlayCardZip", "_advancedplaycard.zip"),
+        ("advancedPlayCardJson", "_advancedplaycard.json"),
+    ];
+
+    private static readonly (string name, string[] variants)[] BotFileCategories =
+    [
+        ("Call Trump", ["callTrump", "advancedCallTrump"]),
+        ("Discard Card", ["discardCard", "advancedDiscardCard"]),
+        ("Play Card", ["playCard", "simplePlayCard", "advancedPlayCard"]),
     ];
 
     [HttpGet]
@@ -63,7 +78,7 @@ public partial class AdminController(IBotStorageService storageService) : Contro
             errors.Add("botName must be 1–50 characters: letters, digits, spaces, hyphens, underscores.");
         }
 
-        var files = CollectAndValidateFiles(GetFileProviders(request), requireAll: true, errors);
+        var files = CollectAndValidateFiles(GetFileProviders(request), requireOnePerCategory: true, errors);
 
         if (errors.Count > 0)
         {
@@ -101,7 +116,7 @@ public partial class AdminController(IBotStorageService storageService) : Contro
             }
         }
 
-        var files = CollectAndValidateFiles(GetFileProviders(request), requireAll: false, errors);
+        var files = CollectAndValidateFiles(GetFileProviders(request), requireOnePerCategory: false, errors);
 
         if (errors.Count > 0)
         {
@@ -139,28 +154,33 @@ public partial class AdminController(IBotStorageService storageService) : Contro
         [
             (field: "callTrumpZip", file: request.CallTrumpZip),
             (field: "callTrumpJson", file: request.CallTrumpJson),
+            (field: "advancedCallTrumpZip", file: request.AdvancedCallTrumpZip),
+            (field: "advancedCallTrumpJson", file: request.AdvancedCallTrumpJson),
             (field: "discardCardZip", file: request.DiscardCardZip),
             (field: "discardCardJson", file: request.DiscardCardJson),
+            (field: "advancedDiscardCardZip", file: request.AdvancedDiscardCardZip),
+            (field: "advancedDiscardCardJson", file: request.AdvancedDiscardCardJson),
             (field: "playCardZip", file: request.PlayCardZip),
             (field: "playCardJson", file: request.PlayCardJson),
+            (field: "simplePlayCardZip", file: request.SimplePlayCardZip),
+            (field: "simplePlayCardJson", file: request.SimplePlayCardJson),
+            (field: "advancedPlayCardZip", file: request.AdvancedPlayCardZip),
+            (field: "advancedPlayCardJson", file: request.AdvancedPlayCardJson),
         ];
     }
 
     private static List<IFormFile> CollectAndValidateFiles(
         (string field, IFormFile? file)[] provided,
-        bool requireAll,
+        bool requireOnePerCategory,
         List<string> errors)
     {
         var files = new List<IFormFile>();
+        var providedByField = provided.ToDictionary(p => p.field, p => p.file);
+
         foreach (var ((field, requiredSuffix), (_, file)) in BotFileSpecs.Zip(provided))
         {
             if (file is null || file.Length == 0)
             {
-                if (requireAll)
-                {
-                    errors.Add($"{field} is required.");
-                }
-
                 continue;
             }
 
@@ -173,7 +193,44 @@ public partial class AdminController(IBotStorageService storageService) : Contro
             files.Add(file);
         }
 
+        if (requireOnePerCategory)
+        {
+            foreach (var (categoryName, variants) in BotFileCategories)
+            {
+                var variantsWithFiles = variants
+                    .Where(v => HasFile(providedByField, v + "Zip") || HasFile(providedByField, v + "Json"))
+                    .ToList();
+
+                if (variantsWithFiles.Count == 0)
+                {
+                    errors.Add($"{categoryName}: one variant is required ({string.Join(" or ", variants)}).");
+                }
+                else if (variantsWithFiles.Count > 1)
+                {
+                    errors.Add($"{categoryName}: provide only one variant, not multiple ({string.Join(", ", variantsWithFiles)}).");
+                }
+                else
+                {
+                    var variant = variantsWithFiles[0];
+                    if (!HasFile(providedByField, variant + "Zip"))
+                    {
+                        errors.Add($"{variant}Zip is required.");
+                    }
+
+                    if (!HasFile(providedByField, variant + "Json"))
+                    {
+                        errors.Add($"{variant}Json is required.");
+                    }
+                }
+            }
+        }
+
         return files;
+    }
+
+    private static bool HasFile(Dictionary<string, IFormFile?> provided, string field)
+    {
+        return provided.TryGetValue(field, out var file) && file?.Length > 0;
     }
 
     [GeneratedRegex(@"^[a-zA-Z0-9 _-]{1,50}$")]

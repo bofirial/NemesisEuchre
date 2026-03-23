@@ -12,16 +12,58 @@ interface FileSpec {
 const FILE_SPECS: FileSpec[] = [
     { field: 'callTrumpZip', label: 'Model (.zip)', requiredSuffix: '_calltrump.zip' },
     { field: 'callTrumpJson', label: 'Metadata (.json)', requiredSuffix: '_calltrump.json' },
+    { field: 'advancedCallTrumpZip', label: 'Model (.zip)', requiredSuffix: '_advancedcalltrump.zip' },
+    { field: 'advancedCallTrumpJson', label: 'Metadata (.json)', requiredSuffix: '_advancedcalltrump.json' },
     { field: 'discardCardZip', label: 'Model (.zip)', requiredSuffix: '_discardcard.zip' },
     { field: 'discardCardJson', label: 'Metadata (.json)', requiredSuffix: '_discardcard.json' },
+    { field: 'advancedDiscardCardZip', label: 'Model (.zip)', requiredSuffix: '_advanceddiscardcard.zip' },
+    { field: 'advancedDiscardCardJson', label: 'Metadata (.json)', requiredSuffix: '_advanceddiscardcard.json' },
     { field: 'playCardZip', label: 'Model (.zip)', requiredSuffix: '_playcard.zip' },
     { field: 'playCardJson', label: 'Metadata (.json)', requiredSuffix: '_playcard.json' },
+    { field: 'simplePlayCardZip', label: 'Model (.zip)', requiredSuffix: '_simpleplaycard.zip' },
+    { field: 'simplePlayCardJson', label: 'Metadata (.json)', requiredSuffix: '_simpleplaycard.json' },
+    { field: 'advancedPlayCardZip', label: 'Model (.zip)', requiredSuffix: '_advancedplaycard.zip' },
+    { field: 'advancedPlayCardJson', label: 'Metadata (.json)', requiredSuffix: '_advancedplaycard.json' },
 ];
 
-const GROUPS = [
-    { label: 'Call Trump', specs: FILE_SPECS.slice(0, 2) },
-    { label: 'Discard Card', specs: FILE_SPECS.slice(2, 4) },
-    { label: 'Play Card', specs: FILE_SPECS.slice(4, 6) },
+interface VariantSpec {
+    variantLabel: string;
+    prefix: string;
+    specs: FileSpec[];
+}
+
+interface CategorySpec {
+    label: string;
+    variants: VariantSpec[];
+}
+
+function specsForPrefix(prefix: string): FileSpec[] {
+    return FILE_SPECS.filter(s => s.field.startsWith(prefix));
+}
+
+const CATEGORIES: CategorySpec[] = [
+    {
+        label: 'Call Trump',
+        variants: [
+            { variantLabel: 'Call Trump', prefix: 'callTrump', specs: specsForPrefix('callTrump') },
+            { variantLabel: 'Advanced Call Trump', prefix: 'advancedCallTrump', specs: specsForPrefix('advancedCallTrump') },
+        ],
+    },
+    {
+        label: 'Discard Card',
+        variants: [
+            { variantLabel: 'Discard Card', prefix: 'discardCard', specs: specsForPrefix('discardCard') },
+            { variantLabel: 'Advanced Discard Card', prefix: 'advancedDiscardCard', specs: specsForPrefix('advancedDiscardCard') },
+        ],
+    },
+    {
+        label: 'Play Card',
+        variants: [
+            { variantLabel: 'Play Card', prefix: 'playCard', specs: specsForPrefix('playCard') },
+            { variantLabel: 'Simple Play Card', prefix: 'simplePlayCard', specs: specsForPrefix('simplePlayCard') },
+            { variantLabel: 'Advanced Play Card', prefix: 'advancedPlayCard', specs: specsForPrefix('advancedPlayCard') },
+        ],
+    },
 ];
 
 const BOT_NAME_REGEX = /^[a-zA-Z0-9 _-]{1,50}$/;
@@ -44,6 +86,31 @@ function assignFiles(fileList: FileList): { assigned: Record<string, File | null
         }
     }
     return { assigned, unrecognized };
+}
+
+function variantHasFiles(variant: VariantSpec, files: Record<string, File | null>): boolean {
+    return variant.specs.some(s => files[s.field] !== null);
+}
+
+function validateCategories(files: Record<string, File | null>): string[] {
+    const errors: string[] = [];
+    for (const category of CATEGORIES) {
+        const filledVariants = category.variants.filter(v => variantHasFiles(v, files));
+        if (filledVariants.length === 0) {
+            const names = category.variants.map(v => v.variantLabel).join(' or ');
+            errors.push(`${category.label}: provide one variant (${names}).`);
+        } else if (filledVariants.length > 1) {
+            errors.push(`${category.label}: provide only one variant, not multiple.`);
+        } else {
+            const variant = filledVariants[0];
+            for (const spec of variant.specs) {
+                if (!files[spec.field]) {
+                    errors.push(`${variant.variantLabel}: ${spec.label} is required.`);
+                }
+            }
+        }
+    }
+    return errors;
 }
 
 export interface BotUploadFormProps {
@@ -86,11 +153,11 @@ export function BotUploadForm({ mode, initialBotName, onSuccess }: BotUploadForm
     }, [mode, initialBotName]);
 
     const nameError = validateBotName(botName.trim());
-    const missingFiles = mode === 'create' ? FILE_SPECS.filter(s => !files[s.field]) : [];
+    const categoryErrors = mode === 'create' ? validateCategories(files) : [];
 
     const allErrors: string[] = [
         ...(nameError ? [`Bot name: ${nameError}`] : []),
-        ...(missingFiles.length > 0 ? [`Missing files: ${missingFiles.map(s => s.requiredSuffix).join(', ')}`] : []),
+        ...categoryErrors,
     ];
     const isValid = allErrors.length === 0;
     const anyTouched = Object.values(touched).some(Boolean);
@@ -120,7 +187,9 @@ export function BotUploadForm({ mode, initialBotName, onSuccess }: BotUploadForm
             method = 'POST';
             formData.append('botName', botName.trim());
             for (const spec of FILE_SPECS) {
-                formData.append(spec.field, files[spec.field]!);
+                if (files[spec.field]) {
+                    formData.append(spec.field, files[spec.field]!);
+                }
             }
         } else {
             url = `/api/admin/bots/${encodeURIComponent(initialBotName!)}`;
@@ -183,7 +252,7 @@ export function BotUploadForm({ mode, initialBotName, onSuccess }: BotUploadForm
                     </label>
                     <span className="text-xs text-muted-foreground">
                         {mode === 'create'
-                            ? 'Select all 6 model files at once (.zip + .json for each decision type)'
+                            ? 'Select model files (.zip + .json for each decision type)'
                             : 'Optionally replace model files (.zip + .json for each decision type)'}
                     </span>
                     <input
@@ -204,21 +273,30 @@ export function BotUploadForm({ mode, initialBotName, onSuccess }: BotUploadForm
                 )}
 
                 <div className="flex flex-col gap-4 rounded border border-border p-4">
-                    {GROUPS.map(group => (
-                        <div key={group.label} className="flex flex-col gap-1.5">
-                            <p className="text-sm font-semibold">{group.label}</p>
-                            {group.specs.map(spec => {
-                                const newFile = files[spec.field];
-                                const existingFile = existingFiles[spec.field];
+                    {CATEGORIES.map(category => (
+                        <div key={category.label} className="flex flex-col gap-2">
+                            <p className="text-sm font-semibold">{category.label}</p>
+                            {category.variants.map(variant => {
+                                const hasAny = variantHasFiles(variant, files) ||
+                                    variant.specs.some(s => existingFiles[s.field]);
                                 return (
-                                    <div key={spec.field} className="flex items-center gap-2 text-sm">
-                                        <span className={newFile ? 'text-green-600' : 'text-muted-foreground'}>
-                                            {newFile ? '✓' : '○'}
-                                        </span>
-                                        <span className="text-muted-foreground w-28 shrink-0">{spec.label}</span>
-                                        <span className={`flex-1 min-w-0 truncate ${newFile ? 'text-foreground' : existingFile ? 'text-muted-foreground' : 'text-muted-foreground italic'}`}>
-                                            {newFile ? newFile.name : existingFile ?? `*${spec.requiredSuffix}`}
-                                        </span>
+                                    <div key={variant.prefix} className={`flex flex-col gap-1 pl-3 ${!hasAny ? 'opacity-50' : ''}`}>
+                                        <p className="text-xs font-medium text-muted-foreground">{variant.variantLabel}</p>
+                                        {variant.specs.map(spec => {
+                                            const newFile = files[spec.field];
+                                            const existingFile = existingFiles[spec.field];
+                                            return (
+                                                <div key={spec.field} className="flex items-center gap-2 text-sm">
+                                                    <span className={newFile ? 'text-green-600' : 'text-muted-foreground'}>
+                                                        {newFile ? '✓' : '○'}
+                                                    </span>
+                                                    <span className="text-muted-foreground w-28 shrink-0">{spec.label}</span>
+                                                    <span className={`flex-1 min-w-0 truncate ${newFile ? 'text-foreground' : existingFile ? 'text-muted-foreground' : 'text-muted-foreground italic'}`}>
+                                                        {newFile ? newFile.name : existingFile ?? `*${spec.requiredSuffix}`}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 );
                             })}

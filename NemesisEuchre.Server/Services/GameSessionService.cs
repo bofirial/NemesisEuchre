@@ -47,6 +47,9 @@ public interface IGameSessionService
         CancellationToken ct = default);
 
     Task<GameContext?> StartGameAsync(string connectionId, CancellationToken ct = default);
+
+    Task<(int sessionId, string sessionName, PlayerPosition? playerPosition)?> GetConnectionInfoAsync(
+        string connectionId, CancellationToken ct = default);
 }
 
 public class GameSessionService(NemesisEuchreDbContext db, IActiveGameService activeGameService, IDealFactory dealFactory) : IGameSessionService
@@ -431,6 +434,26 @@ public class GameSessionService(NemesisEuchreDbContext db, IActiveGameService ac
         return context with { Status = GameStatusViewModel.Playing };
     }
 
+    public async Task<(int sessionId, string sessionName, PlayerPosition? playerPosition)?> GetConnectionInfoAsync(
+        string connectionId, CancellationToken ct = default)
+    {
+        var connection = await db.GameSessionConnections!
+            .Include(c => c.GameSession)
+            .FirstOrDefaultAsync(c => c.ConnectionId == connectionId && c.DisconnectedDate == null, ct);
+
+        if (connection is null)
+        {
+            return null;
+        }
+
+        var seat = await db.GameSessionSeats!
+            .FirstOrDefaultAsync(
+                s => s.GameSessionId == connection.GameSessionId && s.UserId == connection.UserId,
+                ct);
+
+        return (sessionId: connection.GameSessionId, sessionName: connection.GameSession!.SessionName, playerPosition: seat?.Position);
+    }
+
     private async Task<GameContext> BuildGameContextAsync(int sessionId, string sessionName, CancellationToken ct)
     {
         var members = await GetActiveSessionMembersAsync(sessionId, ct);
@@ -450,6 +473,7 @@ public class GameSessionService(NemesisEuchreDbContext db, IActiveGameService ac
 
         return new GameContext
         {
+            SessionId = sessionId,
             SessionName = sessionName,
             Members = members,
             Seats = seatInfos,

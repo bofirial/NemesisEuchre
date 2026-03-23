@@ -1,9 +1,11 @@
 import type { Card, PlayerPosition } from '@/types/game';
+import { cn } from '@/lib/utils';
 import { PlayingCard } from './PlayingCard';
 
 interface Props {
     card: Card | null;
     dealerPosition: PlayerPosition;
+    animating?: 'flipping' | 'pickup' | null;
 }
 
 const positionClasses: Record<PlayerPosition, string> = {
@@ -13,9 +15,14 @@ const positionClasses: Record<PlayerPosition, string> = {
     West: 'absolute left-[290px] top-1/2 -translate-y-1/2',
 };
 
-export function UpCard({ card, dealerPosition }: Props) {
+export function UpCard({ card, dealerPosition, animating }: Props) {
     return (
-        <div className={`${positionClasses[dealerPosition]} z-30`}>
+        <div className={cn(
+            positionClasses[dealerPosition],
+            'z-30 transition-all duration-700 ease-in-out',
+            animating === 'flipping' && '[transform:rotateY(90deg)]',
+            animating === 'pickup' && 'scale-0 opacity-0',
+        )}>
             <PlayingCard card={card} />
         </div>
     );

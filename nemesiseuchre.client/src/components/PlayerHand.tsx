@@ -1,10 +1,14 @@
 import type { Card, PlayerPosition } from '@/types/game';
+import { isCardValid } from '@/lib/cardUtils';
 import { PlayingCard } from './PlayingCard';
 
 interface PlayerHandProps {
     cards: Card[] | null;
     count: number;
     position: PlayerPosition;
+    onCardClick?: (_card: Card) => void;
+    highlightCards?: boolean;
+    validCards?: Card[];
 }
 
 const rotationByPosition: Record<PlayerPosition, string> = {
@@ -14,7 +18,7 @@ const rotationByPosition: Record<PlayerPosition, string> = {
     West: 'rotate-90',
 };
 
-export function PlayerHand({ cards, count, position }: PlayerHandProps) {
+export function PlayerHand({ cards, count, position, onCardClick, highlightCards, validCards }: PlayerHandProps) {
     const cardCount = cards !== null ? cards.length : count;
 
     if (cardCount === 0) return null;
@@ -29,14 +33,19 @@ export function PlayerHand({ cards, count, position }: PlayerHandProps) {
                     const dx = offset * 28;
                     const dy = Math.abs(offset) * 6;
                     const angle = offset * 6;
+                    const card = cards !== null ? cards[i] : null;
+                    const canPlay = highlightCards && card && isCardValid(card, validCards);
 
                     return (
                         <div
                             key={i}
-                            className="absolute left-1/2 top-0"
+                            className={`absolute left-1/2 top-0 ${
+                                canPlay ? 'cursor-pointer hover:scale-110 transition-transform' : ''
+                            } ${highlightCards && card && !canPlay ? 'opacity-40' : ''}`}
                             style={{ transform: `translateX(calc(-50% + ${dx}px)) translateY(${dy}px) rotate(${angle}deg)` }}
+                            onClick={canPlay && onCardClick ? () => onCardClick(card) : undefined}
                         >
-                            <PlayingCard card={cards !== null ? cards[i] : null} />
+                            <PlayingCard card={card} />
                         </div>
                     );
                 })}

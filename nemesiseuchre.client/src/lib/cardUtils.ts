@@ -1,4 +1,4 @@
-import type { Rank, Suit } from '@/types/game';
+import type { Card, Rank, Suit } from '@/types/game';
 
 export function suitSymbol(suit: Suit): string {
     switch (suit) {
@@ -22,4 +22,9 @@ export function rankLabel(rank: Rank): string {
         case 'King': return 'K';
         case 'Ace': return 'A';
     }
+}
+
+export function isCardValid(card: Card, validCards?: Card[]): boolean {
+    if (!validCards) return true;
+    return validCards.some(vc => vc.suit === card.suit && vc.rank === card.rank);
 }

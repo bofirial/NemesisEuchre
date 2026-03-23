@@ -9,7 +9,9 @@ public interface IPlayerStateProjector
     PlayerGameState Project(GameContext context, ActiveSessionMember player);
 }
 
-public class PlayerStateProjector : IPlayerStateProjector
+public class PlayerStateProjector(
+    IInteractiveTrumpService interactiveTrumpService,
+    IInteractiveCardPlayService interactiveCardPlayService) : IPlayerStateProjector
 {
     public PlayerGameState Project(GameContext context, ActiveSessionMember player)
     {
@@ -28,8 +30,8 @@ public class PlayerStateProjector : IPlayerStateProjector
             GameStatus = context.Status,
             MyPosition = myPosition,
             Players = new Dictionary<PlayerPosition, PlayerInfo>(),
-            Team1Score = 0,
-            Team2Score = 0,
+            Team1Score = context.ActiveGame?.Team1Score ?? 0,
+            Team2Score = context.ActiveGame?.Team2Score ?? 0,
             ConnectedUsers = [.. context.Members
                 .Select(m => new ConnectedUserInfo
                 {
@@ -41,7 +43,7 @@ public class PlayerStateProjector : IPlayerStateProjector
         };
     }
 
-    private static DealState MapDealState(Deal deal, PlayerPosition myPosition)
+    private DealState MapDealState(Deal deal, PlayerPosition myPosition)
     {
         var myHand = deal.Players.TryGetValue(myPosition, out var dealPlayer)
             ? (IReadOnlyList<Card>)dealPlayer.CurrentHand
@@ -50,6 +52,12 @@ public class PlayerStateProjector : IPlayerStateProjector
         var otherHandCounts = deal.Players
             .Where(p => p.Key != myPosition)
             .ToDictionary(p => p.Key, p => p.Value.CurrentHand.Count);
+
+        var trumpDecider = interactiveTrumpService.GetCurrentTrumpDecider(deal);
+        var discardDecider = interactiveTrumpService.GetCurrentDiscardDecider(deal);
+        var cardPlayer = interactiveCardPlayService.GetCurrentCardPlayer(deal);
+
+        var currentDeciderPosition = trumpDecider?.position ?? discardDecider?.position ?? cardPlayer?.position;
 
         return new DealState
         {
@@ -61,7 +69,32 @@ public class PlayerStateProjector : IPlayerStateProjector
             CallingPlayerIsGoingAlone = deal.CallingPlayerIsGoingAlone,
             MyHand = myHand,
             OtherHandCounts = otherHandCounts,
-            CompletedTricks = [],
+            CompletedTricks = [.. deal.CompletedTricks.Select(t => new CompletedTrickInfo
+            {
+                TrickNumber = t.TrickNumber,
+                LeadPosition = t.LeadPosition,
+                CardsPlayed = [.. t.CardsPlayed],
+                WinningPosition = t.WinningPosition!.Value,
+                WinningTeam = t.WinningTeam!.Value,
+            })],
+            CurrentTrickCards = [.. deal.CurrentTrick?.CardsPlayed ?? []],
+            CurrentDeciderPosition = currentDeciderPosition,
+            ValidTrumpDecisions = trumpDecider?.position == myPosition
+                ? trumpDecider.Value.validDecisions
+                : null,
+            ValidDiscardCards = discardDecider?.position == myPosition
+                ? discardDecider.Value.validCards
+                : null,
+            ValidCardsToPlay = cardPlayer?.position == myPosition
+                ? cardPlayer.Value.validCards
+                : null,
+            TrumpDecisions = [.. deal.CallTrumpDecisions.Select(d => new TrumpDecisionInfo
+            {
+                Position = d.PlayerPosition,
+                Decision = d.ChosenDecision,
+            })],
+            DealResult = deal.DealResult,
+            WinningTeam = deal.WinningTeam,
         };
     }
 }
