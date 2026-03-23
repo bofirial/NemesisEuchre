@@ -82,15 +82,15 @@ function Invoke-IdvMerge {
     Write-StepLog "Completed merge -> $Output"
 }
 
-# # ── Grouping 1 (idv5c1): Baseline — 100% gen4b-vs-gen4b, t=0.01 ──
-# Write-StepLog "=== Grouping 1 (idv5c1): Baseline t=0.01 ==="
-# Invoke-GameGeneration -IdvName "idv5c1a" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
-# Invoke-GameGeneration -IdvName "idv5c1b" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
-# Invoke-IdvMerge -Sources @("idv5c1a_gen4b_0.01t", "idv5c1b_gen4b_0.01t") -Output "idv5c1"
+# ── Grouping 1 (idv5c1): Baseline — 100% gen4b-vs-gen4b, t=0.01 ──
+Write-StepLog "=== Grouping 1 (idv5c1): Baseline t=0.01 ==="
+Invoke-GameGeneration -IdvName "idv5c1a" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
+Invoke-GameGeneration -IdvName "idv5c1b" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.01 -Team2Model $Model -Team2Temp 0.01
+Invoke-IdvMerge -Sources @("idv5c1a_gen4b_0.01t", "idv5c1b_gen4b_0.01t") -Output "idv5c1"
 
 # ── Grouping 2 (idv5c2): 100% gen4b-vs-gen4b, t=0.1 ──
 Write-StepLog "=== Grouping 2 (idv5c2): Baseline t=0.1 ==="
-# Invoke-GameGeneration -IdvName "idv5c2a" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.1 -Team2Model $Model -Team2Temp 0.1
+Invoke-GameGeneration -IdvName "idv5c2a" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.1 -Team2Model $Model -Team2Temp 0.1
 Invoke-GameGeneration -IdvName "idv5c2b" -Count $BaselineCount -Team1Model $Model -Team1Temp 0.1 -Team2Model $Model -Team2Temp 0.1
 Invoke-IdvMerge -Sources @("idv5c2a_gen4b_0.1t", "idv5c2b_gen4b_0.1t") -Output "idv5c2"
 
