@@ -1,8 +1,8 @@
-$modelNumber = 82;
+$modelNumber = 1;
 $generationDirectory = "Gen5 Training";
 
-$source = "idv5act3";
-$decisionType = "AdvancedCallTrump";
+$source = "idv5ad9";
+$decisionType = "AdvancedDiscard";
 
 if ($decisionType -eq "CallTrump") {
     $modelParameterLabel = "-t2m-call";
@@ -73,6 +73,20 @@ elseif ($decisionType -eq "AdvancedCallTrump") {
     $iterations = @(25, 50)
     $numbersOfLeaves = @(255)
     $minimumExampleCountsPerLeaf = @(300, 500)
+}
+elseif ($decisionType -eq "AdvancedDiscard") {
+    $modelParameterLabel = "-t2m-advanced-discard";
+    $csvPath = "reports/$generationDirectory/advanceddiscard-modelResults.csv";
+
+    $modelPrefix = "can5ad";
+
+    $l1Regularizations = @(0.0);
+    $l2Regularizations = @(0.01);
+
+    $learnRates = @(0.125, 0.25, 0.375)
+    $iterations = @(75, 150, 225)
+    $numbersOfLeaves = @(31, 63, 127)
+    $minimumExampleCountsPerLeaf = @(200, 300)
 }
 elseif ($decisionType -eq "AdvancedPlay") {
     $modelParameterLabel = "-t2m-advanced-play";
