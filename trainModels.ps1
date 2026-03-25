@@ -1,4 +1,4 @@
-$modelNumber = 1;
+$modelNumber = 82;
 $generationDirectory = "Gen5 Training";
 
 $source = "idv5act3";
@@ -69,10 +69,10 @@ elseif ($decisionType -eq "AdvancedCallTrump") {
     $l1Regularizations = @(0.0);
     $l2Regularizations = @(0.01);
 
-    $learnRates = @(0.625, 0.75, 0.875)
-    $iterations = @(50, 75, 100)
-    $numbersOfLeaves = @(127, 255, 511)
-    $minimumExampleCountsPerLeaf = @(300, 500, 700)
+    $learnRates = @(0.375, 0.5)
+    $iterations = @(25, 50)
+    $numbersOfLeaves = @(255)
+    $minimumExampleCountsPerLeaf = @(300, 500)
 }
 elseif ($decisionType -eq "AdvancedPlay") {
     $modelParameterLabel = "-t2m-advanced-play";
