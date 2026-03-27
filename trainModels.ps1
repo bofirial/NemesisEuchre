@@ -1,8 +1,8 @@
 $modelNumber = 1;
 $generationDirectory = "Gen5 Training";
 
-$source = "idv5ad9";
-$decisionType = "AdvancedDiscard";
+$source = "idv5c4";
+$decisionType = "AdvancedPlay";
 
 if ($decisionType -eq "CallTrump") {
     $modelParameterLabel = "-t2m-call";
@@ -91,24 +91,24 @@ elseif ($decisionType -eq "AdvancedDiscard") {
 elseif ($decisionType -eq "AdvancedPlay") {
     $modelParameterLabel = "-t2m-advanced-play";
     $csvPath = "reports/$generationDirectory/advancedplay-modelResults.csv";
-    
+
     $modelPrefix = "can5ap";
 
-    $l1Regularizations = @(0.0);
-    $l2Regularizations = @(0.01);
+    $l1Regularizations = @(0.0, 0.1)
+    $l2Regularizations = @(0.01, 0.1)
 
-    $learnRates = @(0.5, 0.625, 0.675, 0.75)
-    $iterations = @(100, 150, 200)
-    $numbersOfLeaves = @(31, 63, 127)
-    $minimumExampleCountsPerLeaf = @(400, 600, 800)
+    $learnRates = @(0.75, 1.0, 0.625)
+    $iterations = @(100, 50, 150)
+    $numbersOfLeaves = @(255, 511, 127)
+    $minimumExampleCountsPerLeaf = @(400, 200)
 }
 
-foreach ($l2Regularization in $l2Regularizations) {
-    foreach ($l1Regularization in $l1Regularizations) {
-        foreach ($minimumExampleCountPerLeaf in $minimumExampleCountsPerLeaf) {
-            foreach ($learnRate in $learnRates) {
-                foreach ($iteration in $iterations) {
-                    foreach ($numberOfLeaves in $numbersOfLeaves) {
+foreach ($minimumExampleCountPerLeaf in $minimumExampleCountsPerLeaf) {
+    foreach ($numberOfLeaves in $numbersOfLeaves) {
+        foreach ($iteration in $iterations) {
+            foreach ($l2Regularization in $l2Regularizations) {
+                foreach ($l1Regularization in $l1Regularizations) {
+                    foreach ($learnRate in $learnRates) {
                         $model = "$modelPrefix.$modelNumber";
 
                         $trainCommand = "dotnet run --project NemesisEuchre.Console -- train -s $source -m $model -d $decisionType -lr $learnRate -i $iteration -l $numberOfLeaves -msl $minimumExampleCountPerLeaf -l1 $l1Regularization -l2 $l2Regularization";
