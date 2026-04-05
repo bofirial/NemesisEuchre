@@ -111,6 +111,12 @@ foreach ($minimumExampleCountPerLeaf in $minimumExampleCountsPerLeaf) {
                     foreach ($learnRate in $learnRates) {
                         $model = "$modelPrefix.$modelNumber";
 
+                        if ((Test-Path $csvPath) -and (Select-String -Path $csvPath -Pattern "`"$model`"" -Quiet)) {
+                            Write-Host "Skipping $model (already in CSV)"
+                            $modelNumber = $modelNumber + 1
+                            continue
+                        }
+
                         $trainCommand = "dotnet run --project NemesisEuchre.Console -- train -s $source -m $model -d $decisionType -lr $learnRate -i $iteration -l $numberOfLeaves -msl $minimumExampleCountPerLeaf -l1 $l1Regularization -l2 $l2Regularization";
 
                         Write-Host $trainCommand;
