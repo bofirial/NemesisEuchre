@@ -173,6 +173,16 @@ public class DefaultCommand(
     public string? Team2AdvancedDiscardCardModelName { get; set; }
 
     [CliOption(
+        Description = "SimulationCount for Team1 MonteCarloBots",
+        Alias = "t1s")]
+    public int Team1SimulationCount { get; set; }
+
+    [CliOption(
+        Description = "SimulationCount for Team2 MonteCarloBots",
+        Alias = "t2s")]
+    public int Team2SimulationCount { get; set; }
+
+    [CliOption(
         Description = "Allow overwriting existing IDV files",
         Alias = "o")]
     public bool Overwrite { get; set; }
@@ -216,7 +226,8 @@ public class DefaultCommand(
         string? teamSimplePlayCardModelName,
         string? teamAdvancedPlayCardModelName,
         string? teamAdvancedCallTrumpModelName,
-        string? teamAdvancedDiscardCardModelName)
+        string? teamAdvancedDiscardCardModelName,
+        int teamSimulationCount = 0)
     {
         bool hasAnyModel = !string.IsNullOrEmpty(teamModelName)
             || !string.IsNullOrEmpty(teamPlayCardModelName)
@@ -227,7 +238,11 @@ public class DefaultCommand(
             || !string.IsNullOrEmpty(teamAdvancedCallTrumpModelName)
             || !string.IsNullOrEmpty(teamAdvancedDiscardCardModelName);
 
-        if (teamExplorationTemperature != default)
+        if (teamSimulationCount > 0)
+        {
+            teamActorType = ActorType.MonteCarlo;
+        }
+        else if (teamExplorationTemperature != default)
         {
             teamActorType = ActorType.ModelTrainer;
         }
@@ -262,15 +277,16 @@ public class DefaultCommand(
                 advancedDiscardCardModel: teamAdvancedDiscardCardModelName,
                 defaultModel: teamModelName,
                 explorationTemperature: teamExplorationTemperature,
-                explorationDecisionType: teamExplorationDecisionType);
+                explorationDecisionType: teamExplorationDecisionType,
+                simulationCount: teamSimulationCount);
         }
 
         if (!string.IsNullOrEmpty(teamModelName))
         {
-            return Actor.WithModel(teamActorType.Value, teamModelName, teamExplorationTemperature, teamExplorationDecisionType);
+            return Actor.WithModel(teamActorType.Value, teamModelName, teamExplorationTemperature, teamExplorationDecisionType, teamSimulationCount);
         }
 
-        return new Actor(teamActorType.Value, null, teamExplorationTemperature, teamExplorationDecisionType);
+        return new Actor(teamActorType.Value, null, teamExplorationTemperature, teamExplorationDecisionType, teamSimulationCount);
     }
 
     private static string GetModelDisplay(Actor? actor)
@@ -338,6 +354,7 @@ public class DefaultCommand(
             ActorType.Chaos or ActorType.Chad or ActorType.Beta => $"{actor.ActorType}Bots",
             ActorType.Model => $"{actor.ActorType}Bots ({GetModelDisplay(actor)})",
             ActorType.ModelTrainer => $"{actor.ActorType}Bots ({GetModelDisplay(actor)} {actor.ExplorationTemperature})",
+            ActorType.MonteCarlo => $"MonteCarloBots ({GetModelDisplay(actor)} {actor.SimulationCount}sims)",
             _ => $"{ActorType.Chaos}Bots",
         };
     }
@@ -357,7 +374,8 @@ public class DefaultCommand(
                 Team1SimplePlayCardModelName,
                 Team1AdvancedPlayCardModelName,
                 Team1AdvancedCallTrumpModelName,
-                Team1AdvancedDiscardCardModelName),
+                Team1AdvancedDiscardCardModelName,
+                Team1SimulationCount),
             Team.Team2 => GetTeamActor(
                 Team2,
                 Team2ModelName,
@@ -369,7 +387,8 @@ public class DefaultCommand(
                 Team2SimplePlayCardModelName,
                 Team2AdvancedPlayCardModelName,
                 Team2AdvancedCallTrumpModelName,
-                Team2AdvancedDiscardCardModelName),
+                Team2AdvancedDiscardCardModelName,
+                Team2SimulationCount),
             _ => throw new ArgumentOutOfRangeException(nameof(team), team, $"Invalid Team: {team}"),
         };
         return teamActor != null ? [teamActor, teamActor] : null;

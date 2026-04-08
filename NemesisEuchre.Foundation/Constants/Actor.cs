@@ -1,6 +1,6 @@
 ﻿namespace NemesisEuchre.Foundation.Constants;
 
-public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames = null, float ExplorationTemperature = default, DecisionType ExplorationDecisionType = DecisionType.All)
+public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames = null, float ExplorationTemperature = default, DecisionType ExplorationDecisionType = DecisionType.All, int SimulationCount = 0)
 {
     public string? ModelName => ModelNames?.GetValueOrDefault("default");
 
@@ -8,18 +8,24 @@ public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames 
     {
         var baseName = ModelName ?? ActorType.ToString();
 
+        if (SimulationCount > 0)
+        {
+            baseName = $"{baseName}_{SimulationCount}mc";
+        }
+
         return ExplorationTemperature > 0
             ? $"{baseName}_{ExplorationTemperature}t"
             : baseName;
     }
 
-    public static Actor WithModel(ActorType actorType, string modelName, float explorationTemperature = default, DecisionType explorationDecisionType = DecisionType.All)
+    public static Actor WithModel(ActorType actorType, string modelName, float explorationTemperature = default, DecisionType explorationDecisionType = DecisionType.All, int simulationCount = 0)
     {
         return new Actor(
             actorType,
             new Dictionary<string, string> { ["default"] = modelName },
             explorationTemperature,
-            explorationDecisionType);
+            explorationDecisionType,
+            simulationCount);
     }
 
     public static Actor WithModels(
@@ -33,7 +39,8 @@ public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames 
         string? advancedDiscardCardModel = null,
         string? defaultModel = null,
         float explorationTemperature = default,
-        DecisionType explorationDecisionType = DecisionType.All)
+        DecisionType explorationDecisionType = DecisionType.All,
+        int simulationCount = 0)
     {
         var modelNames = new Dictionary<string, string>();
 
@@ -77,7 +84,7 @@ public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames 
             modelNames["default"] = defaultModel;
         }
 
-        return new Actor(actorType, modelNames, explorationTemperature, explorationDecisionType);
+        return new Actor(actorType, modelNames, explorationTemperature, explorationDecisionType, simulationCount);
     }
 
     public string? GetModelName(string decisionType)
