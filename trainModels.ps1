@@ -94,13 +94,13 @@ elseif ($decisionType -eq "AdvancedPlay") {
 
     $modelPrefix = "can5ap";
 
-    $l1Regularizations = @(0.0, 0.1)
-    $l2Regularizations = @(0.01, 0.1)
+    $l1Regularizations = @(0.0)
+    $l2Regularizations = @(0.1, 0.05, 0.01)
 
-    $learnRates = @(0.75, 1.0, 0.625)
-    $iterations = @(100, 50, 150)
-    $numbersOfLeaves = @(255, 511, 127)
-    $minimumExampleCountsPerLeaf = @(400, 200)
+    $learnRates = @(0.625, 0.75, 0.5)
+    $iterations = @(50, 25)
+    $numbersOfLeaves = @(127, 63)
+    $minimumExampleCountsPerLeaf = @(400, 200, 600)
 }
 
 foreach ($minimumExampleCountPerLeaf in $minimumExampleCountsPerLeaf) {
