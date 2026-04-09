@@ -14,8 +14,6 @@ public class MonteCarloBot(
     IRandomNumberGenerator[] randoms,
     int simulationCount) : IPlayerActor
 {
-    private readonly int _workerCount = innerBots.Length;
-
     public ActorType ActorType => ActorType.MonteCarlo;
 
     public async Task<CallTrumpDecisionContext> CallTrumpAsync(CallTrumpContext context)
@@ -182,28 +180,12 @@ public class MonteCarloBot(
         int totalSimulations,
         Func<IPlayerActor, IRandomNumberGenerator, Task<float>> simulateOne)
     {
-        int simsPerWorker = totalSimulations / _workerCount;
-        int remainder = totalSimulations % _workerCount;
-
-        var tasks = new Task<float>[_workerCount];
-        for (int w = 0; w < _workerCount; w++)
+        float sum = 0f;
+        for (int i = 0; i < totalSimulations; i++)
         {
-            int workerIndex = w;
-            int count = simsPerWorker + (workerIndex < remainder ? 1 : 0);
-
-            tasks[w] = Task.Run(async () =>
-            {
-                float sum = 0f;
-                for (int i = 0; i < count; i++)
-                {
-                    sum += await simulateOne(innerBots[workerIndex], randoms[workerIndex]).ConfigureAwait(false);
-                }
-
-                return sum;
-            });
+            sum += await simulateOne(innerBots[0], randoms[0]).ConfigureAwait(false);
         }
 
-        var results = await Task.WhenAll(tasks).ConfigureAwait(false);
-        return results.Sum();
+        return sum;
     }
 }

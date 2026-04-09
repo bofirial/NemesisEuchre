@@ -38,23 +38,11 @@ public class MonteCarloBotFactory(
                 "--t1m-play, --t1m-call, --t1m-discard for specific types.");
         }
 
-        int workerCount = Math.Min(Environment.ProcessorCount, 8);
-        var innerBots = new IPlayerActor[workerCount];
-        var randoms = new IRandomNumberGenerator[workerCount];
-
-        innerBots[0] = CreateInnerBot(actor, engineProvider);
-        randoms[0] = random;
-
-        for (int i = 1; i < workerCount; i++)
-        {
-            var workerProvider = new NewEngineProvider(engineProvider);
-            innerBots[i] = CreateInnerBot(actor, workerProvider);
-            randoms[i] = new RandomNumberGenerator();
-        }
+        IPlayerActor innerBot = CreateInnerBot(actor, engineProvider);
 
         int simulationCount = actor.SimulationCount > 0 ? actor.SimulationCount : DefaultSimulationCount;
 
-        return new MonteCarloBot(innerBots, dealSimulator, hiddenCardDistributor, randoms, simulationCount);
+        return new MonteCarloBot([innerBot], dealSimulator, hiddenCardDistributor, [random], simulationCount);
     }
 
     private IPlayerActor CreateInnerBot(Actor actor, IPredictionEngineProvider provider)

@@ -8,6 +8,5 @@ public enum ActorType
     Beta = 3,
     Model = 4,
     ModelTrainer = 5,
-
     MonteCarlo = 6,
 }
