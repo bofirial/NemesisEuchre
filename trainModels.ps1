@@ -1,4 +1,4 @@
-$modelNumber = 1;
+$modelNumber = 101;
 $generationDirectory = "Gen5 Training";
 
 $source = "idv5c4";
