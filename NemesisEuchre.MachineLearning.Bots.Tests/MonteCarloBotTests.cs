@@ -51,7 +51,7 @@ public class MonteCarloBotTests
                 It.IsAny<IPlayerActor>()))
             .ReturnsAsync(1.0f);
 
-        var bot = new MonteCarloBot(_innerBotMock.Object, _simulatorMock.Object, _distributorMock.Object, _randomMock.Object, 2);
+        var bot = new MonteCarloBot([_innerBotMock.Object], _simulatorMock.Object, _distributorMock.Object, [_randomMock.Object], 2);
 
         var context = CreatePlayCardContext();
         var result = await bot.PlayCardAsync(context);
@@ -70,7 +70,7 @@ public class MonteCarloBotTests
                 It.IsAny<IPlayerActor>()))
             .ReturnsAsync(1.0f);
 
-        var bot = new MonteCarloBot(_innerBotMock.Object, _simulatorMock.Object, _distributorMock.Object, _randomMock.Object, 2);
+        var bot = new MonteCarloBot([_innerBotMock.Object], _simulatorMock.Object, _distributorMock.Object, [_randomMock.Object], 2);
 
         var context = CreatePlayCardContext();
         var result = await bot.PlayCardAsync(context);
@@ -100,7 +100,7 @@ public class MonteCarloBotTests
                 It.IsAny<IPlayerActor>()))
             .ReturnsAsync(-1.0f);
 
-        var bot = new MonteCarloBot(_innerBotMock.Object, _simulatorMock.Object, _distributorMock.Object, _randomMock.Object, 3);
+        var bot = new MonteCarloBot([_innerBotMock.Object], _simulatorMock.Object, _distributorMock.Object, [_randomMock.Object], 3);
 
         var context = new PlayCardContext
         {
@@ -148,7 +148,7 @@ public class MonteCarloBotTests
                 It.IsAny<IPlayerActor>()))
             .ReturnsAsync(-1.0f);
 
-        var bot = new MonteCarloBot(_innerBotMock.Object, _simulatorMock.Object, _distributorMock.Object, _randomMock.Object, 2);
+        var bot = new MonteCarloBot([_innerBotMock.Object], _simulatorMock.Object, _distributorMock.Object, [_randomMock.Object], 2);
 
         var context = new CallTrumpContext
         {
@@ -191,7 +191,7 @@ public class MonteCarloBotTests
                 It.IsAny<IPlayerActor>()))
             .ReturnsAsync(1.0f);
 
-        var bot = new MonteCarloBot(_innerBotMock.Object, _simulatorMock.Object, _distributorMock.Object, _randomMock.Object, 2);
+        var bot = new MonteCarloBot([_innerBotMock.Object], _simulatorMock.Object, _distributorMock.Object, [_randomMock.Object], 2);
 
         var hand = new Card[]
         {
@@ -224,7 +224,7 @@ public class MonteCarloBotTests
     [Fact]
     public void ActorType_IsMonteCarlo()
     {
-        var bot = new MonteCarloBot(_innerBotMock.Object, _simulatorMock.Object, _distributorMock.Object, _randomMock.Object, 50);
+        var bot = new MonteCarloBot([_innerBotMock.Object], _simulatorMock.Object, _distributorMock.Object, [_randomMock.Object], 50);
 
         bot.ActorType.Should().Be(ActorType.MonteCarlo);
     }

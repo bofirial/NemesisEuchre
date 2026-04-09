@@ -8,12 +8,14 @@ using NemesisEuchre.MachineLearning.Bots.Simulation;
 namespace NemesisEuchre.MachineLearning.Bots;
 
 public class MonteCarloBot(
-    IPlayerActor innerBot,
+    IPlayerActor[] innerBots,
     IDealSimulator dealSimulator,
     IHiddenCardDistributor hiddenCardDistributor,
-    IRandomNumberGenerator random,
+    IRandomNumberGenerator[] randoms,
     int simulationCount) : IPlayerActor
 {
+    private readonly int _workerCount = innerBots.Length;
+
     public ActorType ActorType => ActorType.MonteCarlo;
 
     public async Task<CallTrumpDecisionContext> CallTrumpAsync(CallTrumpContext context)
@@ -26,25 +28,23 @@ public class MonteCarloBot(
 
         foreach (var decision in context.ValidCallTrumpDecisions)
         {
-            float totalScore = 0f;
+            float totalScore = await RunSimulationsAsync(
+                simulationCount,
+                (bot, rng) =>
+                {
+                    var hands = hiddenCardDistributor.DistributeHiddenCards(
+                        BuildAccountedForCallTrump(context),
+                        context.PlayerPosition,
+                        5,
+                        context.UpCard.Suit,
+                        [],
+                        sittingOutPlayer,
+                        rng);
 
-            for (int i = 0; i < simulationCount; i++)
-            {
-                var hands = hiddenCardDistributor.DistributeHiddenCards(
-                    BuildAccountedForCallTrump(context),
-                    context.PlayerPosition,
-                    5,
-                    context.UpCard.Suit,
-                    [],
-                    sittingOutPlayer,
-                    random);
-
-                float score = decision == CallTrumpDecision.Pass
-                    ? await dealSimulator.SimulateFromPassAsync(context, hands, innerBot).ConfigureAwait(false)
-                    : await dealSimulator.SimulateFromCallTrumpAsync(context, decision, hands, innerBot).ConfigureAwait(false);
-
-                totalScore += score;
-            }
+                    return decision == CallTrumpDecision.Pass
+                        ? dealSimulator.SimulateFromPassAsync(context, hands, bot)
+                        : dealSimulator.SimulateFromCallTrumpAsync(context, decision, hands, bot);
+                }).ConfigureAwait(false);
 
             float averageScore = totalScore / simulationCount;
             scores[decision] = averageScore;
@@ -75,24 +75,22 @@ public class MonteCarloBot(
 
         foreach (var candidateDiscard in context.ValidCardsToDiscard)
         {
-            float totalScore = 0f;
-            var handAfterDiscard = context.CardsInHand.Where(c => c != candidateDiscard).ToArray();
+            float totalScore = await RunSimulationsAsync(
+                simulationCount,
+                (bot, rng) =>
+                {
+                    var accountedFor = BuildAccountedForDiscard(context, candidateDiscard);
+                    var hands = hiddenCardDistributor.DistributeHiddenCards(
+                        accountedFor,
+                        context.PlayerPosition,
+                        5,
+                        context.TrumpSuit,
+                        [],
+                        sittingOutPlayer,
+                        rng);
 
-            for (int i = 0; i < simulationCount; i++)
-            {
-                var accountedFor = BuildAccountedForDiscard(context, candidateDiscard);
-                var hands = hiddenCardDistributor.DistributeHiddenCards(
-                    accountedFor,
-                    context.PlayerPosition,
-                    5,
-                    context.TrumpSuit,
-                    [],
-                    sittingOutPlayer,
-                    random);
-
-                float score = await dealSimulator.SimulateFromDiscardAsync(context, candidateDiscard, hands, innerBot).ConfigureAwait(false);
-                totalScore += score;
-            }
+                    return dealSimulator.SimulateFromDiscardAsync(context, candidateDiscard, hands, bot);
+                }).ConfigureAwait(false);
 
             float averageScore = totalScore / simulationCount;
             scores[candidateDiscard] = averageScore;
@@ -125,22 +123,21 @@ public class MonteCarloBot(
 
         foreach (var candidateCard in context.ValidCardsToPlay)
         {
-            float totalScore = 0f;
+            float totalScore = await RunSimulationsAsync(
+                simulationCount,
+                (bot, rng) =>
+                {
+                    var hands = hiddenCardDistributor.DistributeHiddenCards(
+                        context.CardsAccountedFor,
+                        context.PlayerPosition,
+                        otherPlayerCardCount,
+                        context.TrumpSuit,
+                        context.KnownPlayerSuitVoids,
+                        sittingOutPlayer,
+                        rng);
 
-            for (int i = 0; i < simulationCount; i++)
-            {
-                var hands = hiddenCardDistributor.DistributeHiddenCards(
-                    context.CardsAccountedFor,
-                    context.PlayerPosition,
-                    otherPlayerCardCount,
-                    context.TrumpSuit,
-                    context.KnownPlayerSuitVoids,
-                    sittingOutPlayer,
-                    random);
-
-                float score = await dealSimulator.SimulateFromPlayCardAsync(context, candidateCard, hands, innerBot).ConfigureAwait(false);
-                totalScore += score;
-            }
+                    return dealSimulator.SimulateFromPlayCardAsync(context, candidateCard, hands, bot);
+                }).ConfigureAwait(false);
 
             float averageScore = totalScore / simulationCount;
             scores[candidateCard] = averageScore;
@@ -179,5 +176,34 @@ public class MonteCarloBot(
     private static PlayerPosition? GetSittingOutPlayer()
     {
         return null;
+    }
+
+    private async Task<float> RunSimulationsAsync(
+        int totalSimulations,
+        Func<IPlayerActor, IRandomNumberGenerator, Task<float>> simulateOne)
+    {
+        int simsPerWorker = totalSimulations / _workerCount;
+        int remainder = totalSimulations % _workerCount;
+
+        var tasks = new Task<float>[_workerCount];
+        for (int w = 0; w < _workerCount; w++)
+        {
+            int workerIndex = w;
+            int count = simsPerWorker + (workerIndex < remainder ? 1 : 0);
+
+            tasks[w] = Task.Run(async () =>
+            {
+                float sum = 0f;
+                for (int i = 0; i < count; i++)
+                {
+                    sum += await simulateOne(innerBots[workerIndex], randoms[workerIndex]).ConfigureAwait(false);
+                }
+
+                return sum;
+            });
+        }
+
+        var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+        return results.Sum();
     }
 }

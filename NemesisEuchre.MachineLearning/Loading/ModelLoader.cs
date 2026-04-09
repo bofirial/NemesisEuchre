@@ -15,6 +15,13 @@ public interface IModelLoader
         where TData : class
         where TPrediction : class, new();
 
+    PredictionEngine<TData, TPrediction> CreateNewPredictionEngine<TData, TPrediction>(
+        string modelsDirectory,
+        string modelName,
+        string decisionType)
+        where TData : class
+        where TPrediction : class, new();
+
     void InvalidateCache(string modelPath);
 
     void InvalidateAll();
@@ -41,6 +48,22 @@ public class ModelLoader(
         LoggerMessages.LogLoadingModelWithDecisionType(logger, modelName, decisionType);
 
         return modelCache.GetOrCreatePredictionEngine<TData, TPrediction>(modelFilePath);
+    }
+
+    public PredictionEngine<TData, TPrediction> CreateNewPredictionEngine<TData, TPrediction>(
+        string modelsDirectory,
+        string modelName,
+        string decisionType)
+        where TData : class
+        where TPrediction : class, new()
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(modelsDirectory);
+        ArgumentException.ThrowIfNullOrWhiteSpace(modelName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(decisionType);
+
+        var modelFilePath = modelFileProvider.EnsureModelFile(modelsDirectory, modelName, decisionType);
+
+        return modelCache.CreateNewPredictionEngine<TData, TPrediction>(modelFilePath);
     }
 
     public void InvalidateCache(string modelPath)

@@ -14,6 +14,12 @@ public interface IPredictionEngineProvider
         string modelName)
         where TData : class
         where TPrediction : class, new();
+
+    PredictionEngine<TData, TPrediction>? TryCreateNewEngine<TData, TPrediction>(
+        string decisionType,
+        string modelName)
+        where TData : class
+        where TPrediction : class, new();
 }
 
 public class CachedPredictionEngineProvider(
@@ -45,6 +51,31 @@ public class CachedPredictionEngineProvider(
             var engine = TryLoadModel<TData, TPrediction>(decisionType, modelName);
             _cache[cacheKey] = engine;
             return engine;
+        }
+    }
+
+    public PredictionEngine<TData, TPrediction>? TryCreateNewEngine<TData, TPrediction>(
+        string decisionType,
+        string modelName)
+        where TData : class
+        where TPrediction : class, new()
+    {
+        try
+        {
+            return _modelLoader.CreateNewPredictionEngine<TData, TPrediction>(
+                _modelsDirectory,
+                modelName,
+                decisionType);
+        }
+        catch (FileNotFoundException)
+        {
+            LoggerMessages.LogModelNotFound(_logger, decisionType);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            LoggerMessages.LogModelLoadFailed(_logger, decisionType, ex);
+            return null;
         }
     }
 
