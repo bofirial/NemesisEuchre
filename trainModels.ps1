@@ -1,4 +1,4 @@
-$modelNumber = 101;
+$modelNumber = 134;
 $generationDirectory = "Gen5 Training";
 
 $source = "idv5c4";
@@ -95,10 +95,10 @@ elseif ($decisionType -eq "AdvancedPlay") {
     $modelPrefix = "can5ap";
 
     $l1Regularizations = @(0.0)
-    $l2Regularizations = @(0.1, 0.05, 0.01)
+    $l2Regularizations = @(0.05, 0.03, 0.07)
 
-    $learnRates = @(0.625, 0.75, 0.5)
-    $iterations = @(50, 25)
+    $learnRates = @(0.75, 0.625, 1.0)
+    $iterations = @(25, 15, 10)
     $numbersOfLeaves = @(127, 63)
     $minimumExampleCountsPerLeaf = @(400, 200, 600)
 }
