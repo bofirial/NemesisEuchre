@@ -1,6 +1,6 @@
 ﻿namespace NemesisEuchre.Foundation.Constants;
 
-public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames = null, float ExplorationTemperature = default, DecisionType ExplorationDecisionType = DecisionType.All, int SimulationCount = 0)
+public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames = null, float ExplorationTemperature = default, DecisionType ExplorationDecisionType = DecisionType.All, int SimulationCount = 0, bool SkipSimCallTrump = false, bool SkipSimDiscard = false, bool SkipSimPlayCard = false)
 {
     public string? ModelName => ModelNames?.GetValueOrDefault("default");
 
@@ -11,6 +11,15 @@ public record Actor(ActorType ActorType, Dictionary<string, string>? ModelNames 
         if (SimulationCount > 0)
         {
             baseName = $"{baseName}_{SimulationCount}mc";
+        }
+
+        if (SkipSimCallTrump || SkipSimDiscard || SkipSimPlayCard)
+        {
+            var skipFlags = string.Concat(
+                SkipSimCallTrump ? "c" : string.Empty,
+                SkipSimDiscard ? "d" : string.Empty,
+                SkipSimPlayCard ? "p" : string.Empty);
+            baseName = $"{baseName}_skip{skipFlags}";
         }
 
         return ExplorationTemperature > 0

@@ -71,4 +71,19 @@ public class MonteCarloBotFactoryTests
 
         act.Should().Throw<ArgumentException>();
     }
+
+    [Fact]
+    public void CreatePlayerActor_WithSkipFlags_ReturnsMonteCarloBot()
+    {
+        var actor = Actor.WithModel(ActorType.MonteCarlo, "testModel", simulationCount: 25) with
+        {
+            SkipSimCallTrump = true,
+            SkipSimDiscard = true,
+        };
+
+        var bot = _factory.CreatePlayerActor(actor);
+
+        bot.Should().BeOfType<MonteCarloBot>();
+        bot.ActorType.Should().Be(ActorType.MonteCarlo);
+    }
 }

@@ -68,4 +68,33 @@ public class TeamConfigurationTests
         config.ModelNames["CallTrump"].Should().Be("Gen2B");
         config.ModelNames["DiscardCard"].Should().Be("Gen2C");
     }
+
+    [Fact]
+    public void FromActor_WithSkipFlags_MapsAllFlags()
+    {
+        var actor = Actor.WithModel(ActorType.MonteCarlo, "Gen5", simulationCount: 50) with
+        {
+            SkipSimCallTrump = true,
+            SkipSimDiscard = false,
+            SkipSimPlayCard = true,
+        };
+
+        var config = TeamConfiguration.FromActor(actor);
+
+        config.SimulationCount.Should().Be(50);
+        config.SkipSimCallTrump.Should().BeTrue();
+        config.SkipSimDiscard.Should().BeFalse();
+        config.SkipSimPlayCard.Should().BeTrue();
+    }
+
+    [Fact]
+    public void FromActor_WithNullActor_DefaultsSkipFlagsToFalse()
+    {
+        var config = TeamConfiguration.FromActor(null);
+
+        config.SimulationCount.Should().Be(0);
+        config.SkipSimCallTrump.Should().BeFalse();
+        config.SkipSimDiscard.Should().BeFalse();
+        config.SkipSimPlayCard.Should().BeFalse();
+    }
 }

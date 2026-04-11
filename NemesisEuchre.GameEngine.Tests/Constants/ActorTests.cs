@@ -141,4 +141,61 @@ public class ActorTests
 
         actor.ModelName.Should().BeNull();
     }
+
+    [Fact]
+    public void ToFileNameComponent_WithSkipSimCallTrump_AppendsSkipC()
+    {
+        var actor = Actor.WithModel(ActorType.MonteCarlo, "Gen5", simulationCount: 50) with
+        {
+            SkipSimCallTrump = true,
+        };
+
+        actor.ToFileNameComponent().Should().Be("Gen5_50mc_skipc");
+    }
+
+    [Fact]
+    public void ToFileNameComponent_WithMultipleSkipFlags_AppendsAllFlags()
+    {
+        var actor = Actor.WithModel(ActorType.MonteCarlo, "Gen5", simulationCount: 50) with
+        {
+            SkipSimCallTrump = true,
+            SkipSimPlayCard = true,
+        };
+
+        actor.ToFileNameComponent().Should().Be("Gen5_50mc_skipcp");
+    }
+
+    [Fact]
+    public void ToFileNameComponent_WithAllSkipFlags_AppendsSkipCDP()
+    {
+        var actor = Actor.WithModel(ActorType.MonteCarlo, "Gen5", simulationCount: 50) with
+        {
+            SkipSimCallTrump = true,
+            SkipSimDiscard = true,
+            SkipSimPlayCard = true,
+        };
+
+        actor.ToFileNameComponent().Should().Be("Gen5_50mc_skipcdp");
+    }
+
+    [Fact]
+    public void ToFileNameComponent_WithNoSkipFlags_HasNoSkipSuffix()
+    {
+        var actor = Actor.WithModel(ActorType.MonteCarlo, "Gen5", simulationCount: 50);
+
+        actor.ToFileNameComponent().Should().Be("Gen5_50mc");
+    }
+
+    [Fact]
+    public void WithExpression_SetsSkipFlags()
+    {
+        var original = Actor.WithModel(ActorType.MonteCarlo, "Gen5", simulationCount: 50);
+        var modified = original with { SkipSimCallTrump = true };
+
+        modified.SkipSimCallTrump.Should().BeTrue();
+        modified.SkipSimDiscard.Should().BeFalse();
+        modified.SkipSimPlayCard.Should().BeFalse();
+        modified.SimulationCount.Should().Be(50);
+        modified.ModelName.Should().Be("Gen5");
+    }
 }

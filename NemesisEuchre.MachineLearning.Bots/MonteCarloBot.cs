@@ -12,12 +12,20 @@ public class MonteCarloBot(
     IDealSimulator dealSimulator,
     IHiddenCardDistributor hiddenCardDistributor,
     IRandomNumberGenerator[] randoms,
-    int simulationCount) : IPlayerActor
+    int simulationCount,
+    bool skipSimCallTrump = false,
+    bool skipSimDiscard = false,
+    bool skipSimPlayCard = false) : IPlayerActor
 {
     public ActorType ActorType => ActorType.MonteCarlo;
 
     public async Task<CallTrumpDecisionContext> CallTrumpAsync(CallTrumpContext context)
     {
+        if (skipSimCallTrump)
+        {
+            return await innerBots[0].CallTrumpAsync(context).ConfigureAwait(false);
+        }
+
         var scores = new Dictionary<CallTrumpDecision, float>();
         var bestDecision = context.ValidCallTrumpDecisions[0];
         var bestScore = float.MinValue;
@@ -63,6 +71,11 @@ public class MonteCarloBot(
 
     public async Task<CardDecisionContext> DiscardCardAsync(DiscardCardContext context)
     {
+        if (skipSimDiscard)
+        {
+            return await innerBots[0].DiscardCardAsync(context).ConfigureAwait(false);
+        }
+
         var scores = new Dictionary<Card, float>();
         var bestCard = context.ValidCardsToDiscard[0];
         var bestScore = float.MinValue;
@@ -109,6 +122,11 @@ public class MonteCarloBot(
 
     public async Task<CardDecisionContext> PlayCardAsync(PlayCardContext context)
     {
+        if (skipSimPlayCard)
+        {
+            return await innerBots[0].PlayCardAsync(context).ConfigureAwait(false);
+        }
+
         var scores = new Dictionary<Card, float>();
         var bestCard = context.ValidCardsToPlay[0];
         var bestScore = float.MinValue;

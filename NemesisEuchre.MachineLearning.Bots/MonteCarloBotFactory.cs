@@ -42,7 +42,15 @@ public class MonteCarloBotFactory(
 
         int simulationCount = actor.SimulationCount > 0 ? actor.SimulationCount : DefaultSimulationCount;
 
-        return new MonteCarloBot([innerBot], dealSimulator, hiddenCardDistributor, [random], simulationCount);
+        return new MonteCarloBot(
+            [innerBot],
+            dealSimulator,
+            hiddenCardDistributor,
+            [random],
+            simulationCount,
+            actor.SkipSimCallTrump,
+            actor.SkipSimDiscard,
+            actor.SkipSimPlayCard);
     }
 
     private IPlayerActor CreateInnerBot(Actor actor, IPredictionEngineProvider provider)

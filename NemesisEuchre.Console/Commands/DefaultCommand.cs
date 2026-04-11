@@ -178,9 +178,39 @@ public class DefaultCommand(
     public int Team1SimulationCount { get; set; }
 
     [CliOption(
+        Description = "Skip Monte Carlo simulation for Team1 CallTrump decisions (use model prediction directly)",
+        Alias = "t1s-skip-call")]
+    public bool Team1SkipSimCallTrump { get; set; }
+
+    [CliOption(
+        Description = "Skip Monte Carlo simulation for Team1 Discard decisions (use model prediction directly)",
+        Alias = "t1s-skip-discard")]
+    public bool Team1SkipSimDiscard { get; set; }
+
+    [CliOption(
+        Description = "Skip Monte Carlo simulation for Team1 PlayCard decisions (use model prediction directly)",
+        Alias = "t1s-skip-play")]
+    public bool Team1SkipSimPlayCard { get; set; }
+
+    [CliOption(
         Description = "SimulationCount for Team2 MonteCarloBots",
         Alias = "t2s")]
     public int Team2SimulationCount { get; set; }
+
+    [CliOption(
+        Description = "Skip Monte Carlo simulation for Team2 CallTrump decisions (use model prediction directly)",
+        Alias = "t2s-skip-call")]
+    public bool Team2SkipSimCallTrump { get; set; }
+
+    [CliOption(
+        Description = "Skip Monte Carlo simulation for Team2 Discard decisions (use model prediction directly)",
+        Alias = "t2s-skip-discard")]
+    public bool Team2SkipSimDiscard { get; set; }
+
+    [CliOption(
+        Description = "Skip Monte Carlo simulation for Team2 PlayCard decisions (use model prediction directly)",
+        Alias = "t2s-skip-play")]
+    public bool Team2SkipSimPlayCard { get; set; }
 
     [CliOption(
         Description = "Allow overwriting existing IDV files",
@@ -227,7 +257,10 @@ public class DefaultCommand(
         string? teamAdvancedPlayCardModelName,
         string? teamAdvancedCallTrumpModelName,
         string? teamAdvancedDiscardCardModelName,
-        int teamSimulationCount = 0)
+        int teamSimulationCount = 0,
+        bool skipSimCallTrump = false,
+        bool skipSimDiscard = false,
+        bool skipSimPlayCard = false)
     {
         bool hasAnyModel = !string.IsNullOrEmpty(teamModelName)
             || !string.IsNullOrEmpty(teamPlayCardModelName)
@@ -278,15 +311,25 @@ public class DefaultCommand(
                 defaultModel: teamModelName,
                 explorationTemperature: teamExplorationTemperature,
                 explorationDecisionType: teamExplorationDecisionType,
-                simulationCount: teamSimulationCount);
+                simulationCount: teamSimulationCount) with
+            {
+                SkipSimCallTrump = skipSimCallTrump,
+                SkipSimDiscard = skipSimDiscard,
+                SkipSimPlayCard = skipSimPlayCard,
+            };
         }
 
         if (!string.IsNullOrEmpty(teamModelName))
         {
-            return Actor.WithModel(teamActorType.Value, teamModelName, teamExplorationTemperature, teamExplorationDecisionType, teamSimulationCount);
+            return Actor.WithModel(teamActorType.Value, teamModelName, teamExplorationTemperature, teamExplorationDecisionType, teamSimulationCount) with
+            {
+                SkipSimCallTrump = skipSimCallTrump,
+                SkipSimDiscard = skipSimDiscard,
+                SkipSimPlayCard = skipSimPlayCard,
+            };
         }
 
-        return new Actor(teamActorType.Value, null, teamExplorationTemperature, teamExplorationDecisionType, teamSimulationCount);
+        return new Actor(teamActorType.Value, null, teamExplorationTemperature, teamExplorationDecisionType, teamSimulationCount, skipSimCallTrump, skipSimDiscard, skipSimPlayCard);
     }
 
     private static string GetModelDisplay(Actor? actor)
@@ -354,9 +397,34 @@ public class DefaultCommand(
             ActorType.Chaos or ActorType.Chad or ActorType.Beta => $"{actor.ActorType}Bots",
             ActorType.Model => $"{actor.ActorType}Bots ({GetModelDisplay(actor)})",
             ActorType.ModelTrainer => $"{actor.ActorType}Bots ({GetModelDisplay(actor)} {actor.ExplorationTemperature})",
-            ActorType.MonteCarlo => $"MonteCarloBots ({GetModelDisplay(actor)} {actor.SimulationCount}sims)",
+            ActorType.MonteCarlo => BuildMonteCarloDisplay(actor),
             _ => $"{ActorType.Chaos}Bots",
         };
+    }
+
+    private static string BuildMonteCarloDisplay(Actor actor)
+    {
+        var skipParts = new List<string>();
+        if (actor.SkipSimCallTrump)
+        {
+            skipParts.Add("call");
+        }
+
+        if (actor.SkipSimDiscard)
+        {
+            skipParts.Add("discard");
+        }
+
+        if (actor.SkipSimPlayCard)
+        {
+            skipParts.Add("play");
+        }
+
+        var skipDisplay = skipParts.Count > 0
+            ? $" skip-sim:{string.Join(",", skipParts)}"
+            : string.Empty;
+
+        return $"MonteCarloBots ({GetModelDisplay(actor)} {actor.SimulationCount}sims{skipDisplay})";
     }
 
     private Actor[]? GetTeamActors(Team team)
@@ -375,7 +443,10 @@ public class DefaultCommand(
                 Team1AdvancedPlayCardModelName,
                 Team1AdvancedCallTrumpModelName,
                 Team1AdvancedDiscardCardModelName,
-                Team1SimulationCount),
+                Team1SimulationCount,
+                Team1SkipSimCallTrump,
+                Team1SkipSimDiscard,
+                Team1SkipSimPlayCard),
             Team.Team2 => GetTeamActor(
                 Team2,
                 Team2ModelName,
@@ -388,7 +459,10 @@ public class DefaultCommand(
                 Team2AdvancedPlayCardModelName,
                 Team2AdvancedCallTrumpModelName,
                 Team2AdvancedDiscardCardModelName,
-                Team2SimulationCount),
+                Team2SimulationCount,
+                Team2SkipSimCallTrump,
+                Team2SkipSimDiscard,
+                Team2SkipSimPlayCard),
             _ => throw new ArgumentOutOfRangeException(nameof(team), team, $"Invalid Team: {team}"),
         };
         return teamActor != null ? [teamActor, teamActor] : null;
