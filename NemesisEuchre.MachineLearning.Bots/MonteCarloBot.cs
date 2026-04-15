@@ -15,7 +15,8 @@ public class MonteCarloBot(
     int simulationCount,
     bool skipSimCallTrump = false,
     bool skipSimDiscard = false,
-    bool skipSimPlayCard = false) : IPlayerActor
+    bool skipSimPlayCard = false,
+    float earlyTerminationMargin = 1.5f) : IPlayerActor
 {
     public ActorType ActorType => ActorType.MonteCarlo;
 
@@ -26,41 +27,25 @@ public class MonteCarloBot(
             return await innerBots[0].CallTrumpAsync(context).ConfigureAwait(false);
         }
 
-        var scores = new Dictionary<CallTrumpDecision, float>();
-        var bestDecision = context.ValidCallTrumpDecisions[0];
-        var bestScore = float.MinValue;
-
         var sittingOutPlayer = GetSittingOutPlayer();
 
-        foreach (var decision in context.ValidCallTrumpDecisions)
-        {
-            float totalScore = await RunSimulationsAsync(
-                simulationCount,
-                (bot, rng) =>
-                {
-                    var hands = hiddenCardDistributor.DistributeHiddenCards(
-                        BuildAccountedForCallTrump(context),
-                        context.PlayerPosition,
-                        5,
-                        context.UpCard.Suit,
-                        [],
-                        sittingOutPlayer,
-                        rng);
-
-                    return decision == CallTrumpDecision.Pass
-                        ? dealSimulator.SimulateFromPassAsync(context, hands, bot)
-                        : dealSimulator.SimulateFromCallTrumpAsync(context, decision, hands, bot);
-                }).ConfigureAwait(false);
-
-            float averageScore = totalScore / simulationCount;
-            scores[decision] = averageScore;
-
-            if (averageScore > bestScore)
+        var (bestDecision, scores) = await EvaluateOptionsAsync(
+            context.ValidCallTrumpDecisions,
+            decision => (bot, rng) =>
             {
-                bestScore = averageScore;
-                bestDecision = decision;
-            }
-        }
+                var hands = hiddenCardDistributor.DistributeHiddenCards(
+                    BuildAccountedForCallTrump(context),
+                    context.PlayerPosition,
+                    5,
+                    context.UpCard.Suit,
+                    [],
+                    sittingOutPlayer,
+                    rng);
+
+                return decision == CallTrumpDecision.Pass
+                    ? dealSimulator.SimulateFromPassAsync(context, hands, bot)
+                    : dealSimulator.SimulateFromCallTrumpAsync(context, decision, hands, bot);
+            }).ConfigureAwait(false);
 
         return new CallTrumpDecisionContext
         {
@@ -76,42 +61,26 @@ public class MonteCarloBot(
             return await innerBots[0].DiscardCardAsync(context).ConfigureAwait(false);
         }
 
-        var scores = new Dictionary<Card, float>();
-        var bestCard = context.ValidCardsToDiscard[0];
-        var bestScore = float.MinValue;
-
         var sittingOutPlayer = context.CallingPlayerGoingAlone
             ? context.CallingPlayer.GetPartnerPosition()
             : (PlayerPosition?)null;
 
-        foreach (var candidateDiscard in context.ValidCardsToDiscard)
-        {
-            float totalScore = await RunSimulationsAsync(
-                simulationCount,
-                (bot, rng) =>
-                {
-                    var accountedFor = BuildAccountedForDiscard(context, candidateDiscard);
-                    var hands = hiddenCardDistributor.DistributeHiddenCards(
-                        accountedFor,
-                        context.PlayerPosition,
-                        5,
-                        context.TrumpSuit,
-                        [],
-                        sittingOutPlayer,
-                        rng);
-
-                    return dealSimulator.SimulateFromDiscardAsync(context, candidateDiscard, hands, bot);
-                }).ConfigureAwait(false);
-
-            float averageScore = totalScore / simulationCount;
-            scores[candidateDiscard] = averageScore;
-
-            if (averageScore > bestScore)
+        var (bestCard, scores) = await EvaluateOptionsAsync(
+            context.ValidCardsToDiscard,
+            candidateDiscard => (bot, rng) =>
             {
-                bestScore = averageScore;
-                bestCard = candidateDiscard;
-            }
-        }
+                var accountedFor = BuildAccountedForDiscard(context, candidateDiscard);
+                var hands = hiddenCardDistributor.DistributeHiddenCards(
+                    accountedFor,
+                    context.PlayerPosition,
+                    5,
+                    context.TrumpSuit,
+                    [],
+                    sittingOutPlayer,
+                    rng);
+
+                return dealSimulator.SimulateFromDiscardAsync(context, candidateDiscard, hands, bot);
+            }).ConfigureAwait(false);
 
         return new CardDecisionContext
         {
@@ -127,43 +96,27 @@ public class MonteCarloBot(
             return await innerBots[0].PlayCardAsync(context).ConfigureAwait(false);
         }
 
-        var scores = new Dictionary<Card, float>();
-        var bestCard = context.ValidCardsToPlay[0];
-        var bestScore = float.MinValue;
-
         var sittingOutPlayer = context.CallingPlayerIsGoingAlone
             ? context.CallingPlayer.GetPartnerPosition()
             : (PlayerPosition?)null;
 
         int otherPlayerCardCount = CalculateOtherPlayerCardCount(context);
 
-        foreach (var candidateCard in context.ValidCardsToPlay)
-        {
-            float totalScore = await RunSimulationsAsync(
-                simulationCount,
-                (bot, rng) =>
-                {
-                    var hands = hiddenCardDistributor.DistributeHiddenCards(
-                        context.CardsAccountedFor,
-                        context.PlayerPosition,
-                        otherPlayerCardCount,
-                        context.TrumpSuit,
-                        context.KnownPlayerSuitVoids,
-                        sittingOutPlayer,
-                        rng);
-
-                    return dealSimulator.SimulateFromPlayCardAsync(context, candidateCard, hands, bot);
-                }).ConfigureAwait(false);
-
-            float averageScore = totalScore / simulationCount;
-            scores[candidateCard] = averageScore;
-
-            if (averageScore > bestScore)
+        var (bestCard, scores) = await EvaluateOptionsAsync(
+            context.ValidCardsToPlay,
+            candidateCard => (bot, rng) =>
             {
-                bestScore = averageScore;
-                bestCard = candidateCard;
-            }
-        }
+                var hands = hiddenCardDistributor.DistributeHiddenCards(
+                    context.CardsAccountedFor,
+                    context.PlayerPosition,
+                    otherPlayerCardCount,
+                    context.TrumpSuit,
+                    context.KnownPlayerSuitVoids,
+                    sittingOutPlayer,
+                    rng);
+
+                return dealSimulator.SimulateFromPlayCardAsync(context, candidateCard, hands, bot);
+            }).ConfigureAwait(false);
 
         return new CardDecisionContext
         {
@@ -192,6 +145,71 @@ public class MonteCarloBot(
     private static PlayerPosition? GetSittingOutPlayer()
     {
         return null;
+    }
+
+    private async Task<(TOption bestOption, Dictionary<TOption, float> scores)> EvaluateOptionsAsync<TOption>(
+        TOption[] options,
+        Func<TOption, Func<IPlayerActor, IRandomNumberGenerator, Task<float>>> simulationFactory)
+        where TOption : notnull
+    {
+        if (options.Length == 1)
+        {
+            return (options[0], new Dictionary<TOption, float> { [options[0]] = 0f });
+        }
+
+        int minSims = Math.Min(simulationCount, Math.Max(simulationCount / 5, 10));
+        int remainingSims = simulationCount - minSims;
+
+        var sums = new Dictionary<TOption, float>();
+        var scores = new Dictionary<TOption, float>();
+        var bestOption = options[0];
+        var bestScore = float.MinValue;
+        var secondBestScore = float.MinValue;
+
+        foreach (var option in options)
+        {
+            float sum = await RunSimulationsAsync(minSims, simulationFactory(option)).ConfigureAwait(false);
+            float average = sum / minSims;
+
+            sums[option] = sum;
+            scores[option] = average;
+
+            if (average > bestScore)
+            {
+                secondBestScore = bestScore;
+                bestScore = average;
+                bestOption = option;
+            }
+            else if (average > secondBestScore)
+            {
+                secondBestScore = average;
+            }
+        }
+
+        if (remainingSims <= 0 || bestScore - secondBestScore >= earlyTerminationMargin)
+        {
+            return (bestOption, scores);
+        }
+
+        bestOption = options[0];
+        bestScore = float.MinValue;
+
+        foreach (var option in options)
+        {
+            float additionalSum = await RunSimulationsAsync(remainingSims, simulationFactory(option)).ConfigureAwait(false);
+            float totalSum = sums[option] + additionalSum;
+            float average = totalSum / simulationCount;
+
+            scores[option] = average;
+
+            if (average > bestScore)
+            {
+                bestScore = average;
+                bestOption = option;
+            }
+        }
+
+        return (bestOption, scores);
     }
 
     private async Task<float> RunSimulationsAsync(
