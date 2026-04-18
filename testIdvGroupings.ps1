@@ -1,43 +1,43 @@
 $ErrorActionPreference = 'Stop'
 
-$modelNumber = 1;
+$modelNumber = 28;
 $csvPath = "reports/Gen5 Training/phase2-composition-results.csv";
 
 $groupings = @("idv5c1", "idv5c2", "idv5c3", "idv5c4", "idv5c5", "idv5c6", "idv5c7", "idv5c8", "idv5c9")
 
 $decisionTypes = @(
     @{
-        DecisionType  = "AdvancedCallTrump"
-        ModelPrefix   = "can5act"
-        BattleParam   = "-t2m-advanced-call"
-        LearnRate     = 0.375
-        Iterations    = 50
-        NumberOfLeaves = 255
+        DecisionType               = "AdvancedCallTrump"
+        ModelPrefix                = "can5act"
+        BattleParam                = "-t2m-advanced-call"
+        LearnRate                  = 0.375
+        Iterations                 = 50
+        NumberOfLeaves             = 255
         MinimumExampleCountPerLeaf = 500
-        L1            = 0.0
-        L2            = 0.01
+        L1                         = 0.0
+        L2                         = 0.01
     },
     @{
-        DecisionType  = "AdvancedDiscard"
-        ModelPrefix   = "can5ad"
-        BattleParam   = "-t2m-advanced-discard"
-        LearnRate     = 0.125
-        Iterations    = 75
-        NumberOfLeaves = 31
+        DecisionType               = "AdvancedDiscard"
+        ModelPrefix                = "can5ad"
+        BattleParam                = "-t2m-advanced-discard"
+        LearnRate                  = 0.125
+        Iterations                 = 75
+        NumberOfLeaves             = 31
         MinimumExampleCountPerLeaf = 300
-        L1            = 0.0
-        L2            = 0.01
+        L1                         = 0.0
+        L2                         = 0.01
     },
     @{
-        DecisionType  = "AdvancedPlay"
-        ModelPrefix   = "can5ap"
-        BattleParam   = "-t2m-advanced-play"
-        LearnRate     = 0.75
-        Iterations    = 25
-        NumberOfLeaves = 127
+        DecisionType               = "AdvancedPlay"
+        ModelPrefix                = "can5ap"
+        BattleParam                = "-t2m-advanced-play"
+        LearnRate                  = 0.75
+        Iterations                 = 25
+        NumberOfLeaves             = 127
         MinimumExampleCountPerLeaf = 400
-        L1            = 0.0
-        L2            = 0.05
+        L1                         = 0.0
+        L2                         = 0.05
     }
 )
 
@@ -45,7 +45,7 @@ $groupingIndex = 1;
 
 foreach ($grouping in $groupings) {
     foreach ($dt in $decisionTypes) {
-        $model = "$($dt.ModelPrefix).g$groupingIndex"
+        $model = "$($dt.ModelPrefix).g$groupingIndex.2"
 
         if (Test-Path $csvPath) {
             $csvData = Import-Csv -Path $csvPath
