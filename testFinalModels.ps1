@@ -8,7 +8,8 @@ $models = @(
     "gen2t",
     "gen3b",
     "gen3t",
-    "gen4b"
+    "gen4b",
+    "gen5b"
 );
 
 foreach ($model in $models) {
@@ -28,9 +29,23 @@ foreach ($model in $models) {
 
     $testOutput = Get-Content -Path $outputFile -Raw | ConvertFrom-Json
 
-    $callTrumpSidecar = Get-Content -Path "models/$($model)_calltrump.json" -Raw | ConvertFrom-Json
-    $discardSidecar = Get-Content -Path "models/$($model)_discardcard.json" -Raw | ConvertFrom-Json
+    $callTrumpSidecar = $null
+    $discardSidecar = $null
     $playSidecar = $null
+    
+    if (Test-Path -Path "models/$($model)_calltrump.json") {
+        $callTrumpSidecar = Get-Content -Path "models/$($model)_calltrump.json" -Raw | ConvertFrom-Json
+    }
+    elseif (Test-Path -Path "models/$($model)_advancedcalltrump.json") {
+        $callTrumpSidecar = Get-Content -Path "models/$($model)_advancedcalltrump.json" -Raw | ConvertFrom-Json
+    }
+    
+    if (Test-Path -Path "models/$($model)_discardcard.json") {
+        $discardSidecar = Get-Content -Path "models/$($model)_discardcard.json" -Raw | ConvertFrom-Json
+    }
+    elseif (Test-Path -Path "models/$($model)_advanceddiscardcard.json") {
+        $discardSidecar = Get-Content -Path "models/$($model)_advanceddiscardcard.json" -Raw | ConvertFrom-Json
+    }
 
     if (Test-Path -Path "models/$($model)_playcard.json") {
         $playSidecar = Get-Content -Path "models/$($model)_playcard.json" -Raw | ConvertFrom-Json
