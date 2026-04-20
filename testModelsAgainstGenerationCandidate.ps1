@@ -26,18 +26,18 @@ $playModels = @(
 );
 
 $advancedPlayModels = @(
-    "can5ap.114",  # 0.53084 - LR=0.75, Iter=25, Leaves=127, MinEx=400, L2=0.05
-    "can5ap.239",  # 0.52884 - LR=0.75, Iter=25, Leaves=63, MinEx=600, L2=0.07
-    "can5ap.155",  # 0.52516 - LR=0.75, Iter=10, Leaves=127, MinEx=400, L2=0.03
-    "can5ap.147",  # 0.52468 - LR=0.625, Iter=15, Leaves=127, MinEx=400, L2=0.03
-    "can5ap.197"   # 0.52460 - LR=0.75, Iter=15, Leaves=127, MinEx=200, L2=0.05
+    # "can5ap.114",  # 0.53084 - LR=0.75, Iter=25, Leaves=127, MinEx=400, L2=0.05
+    # "can5ap.239",  # 0.52884 - LR=0.75, Iter=25, Leaves=63, MinEx=600, L2=0.07
+    # "can5ap.155",  # 0.52516 - LR=0.75, Iter=10, Leaves=127, MinEx=400, L2=0.03
+    # "can5ap.147",  # 0.52468 - LR=0.625, Iter=15, Leaves=127, MinEx=400, L2=0.03
+    # "can5ap.197"   # 0.52460 - LR=0.75, Iter=15, Leaves=127, MinEx=200, L2=0.05
 );
 
 foreach ($model in $callTrumpModels) {
-    if (Test-Path -path "models/$($model)_calltrump.zip") {
+    if (Test-Path -path "models/$($model)_advancedcalltrump.zip") {
         $outputFile = "output.json";
 
-        $command = "dotnet run --project NemesisEuchre.Console -- -t1m $candidateModel -t2m $candidateModel -t2m-call $Model -c $numberOfGames -json $outputFile";
+        $command = "dotnet run --project NemesisEuchre.Console -- -t1m $candidateModel -t2m $candidateModel -t2m-advanced-call $Model -c $numberOfGames -json $outputFile";
 
         Write-Host $command;
 
@@ -56,10 +56,10 @@ foreach ($model in $callTrumpModels) {
 }
 
 foreach ($model in $discardModels) {
-    if (Test-Path -path "models/$($model)_discardcard.zip") {
+    if (Test-Path -path "models/$($model)_advanceddiscardcard.zip") {
         $outputFile = "output.json";
 
-        $command = "dotnet run --project NemesisEuchre.Console -- -t1m $candidateModel -t2m $candidateModel -t2m-discard $Model -c $numberOfGames -json $outputFile";
+        $command = "dotnet run --project NemesisEuchre.Console -- -t1m $candidateModel -t2m $candidateModel -t2m-advanced-discard $Model -c $numberOfGames -json $outputFile";
 
         Write-Host $command;
 
